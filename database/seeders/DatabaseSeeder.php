@@ -23,5 +23,4 @@ class DatabaseSeeder extends Seeder
             DiagnosaK3Seeder::class,
         ]);
     }
-
 }

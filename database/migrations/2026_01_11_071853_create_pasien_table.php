@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('pasien', function (Blueprint $table) {
             $table->string('id_pasien',20)->primary();
             $table->string('nama_pasien');
-            $table->enum('hub_kel',['Ybs','Istri/Suami','Anak']);
+            $table->enum('tipe_pasien',['pegawai','keluarga','pensiunan']);
+            $table->enum('hub_kel',['YBS','istri','anak']);
             $table->date('tgl_lahir');
             $table->string('jenis_kelamin');
             $table->string('nip',20);

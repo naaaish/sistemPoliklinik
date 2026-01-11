@@ -15,7 +15,6 @@ return new class extends Migration
             $table->string('id_saran',20)->primary();
             $table->text('saran');
             $table->string('id_diagnosa',20);
-            $table->string('id_pemeriksaan',20);
             $table->timestamps();
         });
 
