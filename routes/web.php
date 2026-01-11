@@ -8,13 +8,12 @@ Route::get('/', function () {
 
 
 // Pasien Routes
-Route::get('/', fn() => view('auth.login'));
-
 Route::get('/pasien', fn() => view('pasien.dashboard'));
 Route::get('/pasien/riwayat', fn() => view('pasien.riwayat'));
 Route::get('/pasien/pemeriksaan', fn() => view('pasien.pemeriksaan'));
 Route::get('/pasien/artikel', fn() => view('pasien.artikel'));
 Route::get('/pasien/artikel/detail', fn() => view('pasien.artikel-detail'));
+
 
 
 // Admin Kepegawaian Routes
