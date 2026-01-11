@@ -13,18 +13,18 @@ return new class extends Migration
     {
         Schema::create('pemeriksaan', function (Blueprint $table) {
             $table->string('id_pemeriksaan',20)->primary();
-            $table->integer('sistol');
-            $table->integer('diastol');
-            $table->integer('nadi');
-            $table->integer('gd_puasa');
-            $table->integer('gd_duajam');
-            $table->integer('gd_sewaktu');
-            $table->float('asam_urat');
-            $table->integer('chol');
-            $table->integer('tg');
-            $table->float('suhu');
-            $table->float('berat');
-            $table->float('tinggi');
+            $table->integer('sistol')->nullable();
+            $table->integer('diastol')->nullable();
+            $table->integer('nadi')->nullable();
+            $table->integer('gd_puasa')->nullable();
+            $table->integer('gd_duajam')->nullable();
+            $table->integer('gd_sewaktu')->nullable();
+            $table->float('asam_urat')->nullable();
+            $table->integer('chol')->nullable();
+            $table->integer('tg')->nullable();
+            $table->float('suhu')->nullable();
+            $table->float('berat')->nullable();
+            $table->float('tinggi')->nullable();
 
             $table->string('id_pendaftaran',20);
             $table->string('id_diagnosa',20);
