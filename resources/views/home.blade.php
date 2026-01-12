@@ -1,5 +1,12 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('pasien.layout')
+
+@section('title','Nama Halaman')
+
+@push('styles')
+
+@endpush
+
+@section('content')
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,39 +23,7 @@
             background: #f5f5f5;
         }
 
-        /* Navbar */
-        .navbar {
-            background: linear-gradient(135deg, #4a6fa5 0%, #5b7db1 100%);
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .navbar h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: opacity 0.3s;
-        }
-
-        .nav-links a:hover {
-            opacity: 0.8;
-        }
-
+      
         .logout-btn {
             background: white;
             color: #4a6fa5;
@@ -355,27 +330,6 @@
     </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar">
-        <h1>SISTEM POLIKLINIK</h1>
-        <div class="nav-links">
-            <a href="{{ route('tentang') }}">Tentang Kami</a>
-            <a href="{{ route('riwayat.index') }}">Riwayat Pemeriksaan</a>
-            <a href="{{ route('artikel.index') }}">Artikel Kesehatan</a>
-            @auth
-                <button class="logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    Logout
-                </button>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                </form>
-            @else
-                <!-- <button class="logout-btn" onclick="window.location.href='{{ route('login') }}'"> -->
-                    <!-- Login
-                </button> -->
-            @endauth
-        </div>
-    </nav>
 
     <!-- Hero Section -->
     <section class="hero">
@@ -505,4 +459,4 @@
         <p>Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica</p>
     </footer>
 </body>
-</html>
+@endsection

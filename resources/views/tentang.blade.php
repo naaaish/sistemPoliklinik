@@ -1,8 +1,12 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@extends('pasien.layout')
+
+@section('title','Nama Halaman')
+
+@push('styles')
+
+@endpush
+
+@section('content')
     <title>Tentang Kami - SISTEM POLIKLINIK</title>
     <style>
         * {
@@ -179,28 +183,7 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <h1>SISTEM POLIKLINIK</h1>
-        <div class="nav-links">
-            <a href="{{ route('home') }}">Beranda</a>
-            <a href="{{ route('tentang') }}">Tentang Kami</a>
-            <a href="{{ route('riwayat.index') }}">Riwayat Pemeriksaan</a>
-            <a href="{{ route('artikel.index') }}">Artikel Kesehatan</a>
-            @auth
-                <button class="logout-btn" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    Logout
-                </button>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                </form>
-            @else
-                <button class="logout-btn" onclick="window.location.href='{{ route('login') }}'">
-                    Login
-                </button>
-            @endauth
-        </div>
-    </nav>
-
+ 
     <div class="container">
         <div class="page-header">
             <h2>Tentang Kami</h2>
@@ -272,4 +255,4 @@
         <p>Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica</p>
     </footer>
 </body>
-</html>
+@endsection
