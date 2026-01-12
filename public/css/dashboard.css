@@ -1,0 +1,28 @@
+/* Gaya sederhana untuk meniru desain */
+.hero {
+  background: linear-gradient(135deg, #356fa3 0%, #4f7fb8 50%, #eaf4fb 100%);
+  color: #fff;
+  border-bottom-left-radius: 60% 8%;
+  border-bottom-right-radius: 60% 8%;
+  position: relative;
+}
+
+.hero .display-5 {
+  max-width: 520px;
+}
+
+.hero-image {
+  position: relative;
+  right: -20px;
+}
+
+/* Artikel card */
+.article-card img {
+  height: 160px;
+  object-fit: cover;
+}
+
+/* Responsiveness minor tweaks */
+@media (max-width: 767px) {
+  .hero-image { text-align: center; margin-top: 20px; }
+}

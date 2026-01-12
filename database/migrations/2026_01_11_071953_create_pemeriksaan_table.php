@@ -28,7 +28,7 @@ return new class extends Migration
 
             $table->string('id_pendaftaran',20);
             $table->string('id_diagnosa',20);
-            $table->string('id_saran',20);
+            $table->string('id_saran',20); 
             $table->string('id_nb',20);
 
             $table->foreign('id_pendaftaran')->references('id_pendaftaran')->on('pendaftaran');
