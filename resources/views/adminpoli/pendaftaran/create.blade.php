@@ -10,16 +10,6 @@
         <h1 class="ap-title">Input Pendaftaran Pasien</h1>
     </div>
 
-    @if($errors->any())
-        <div class="ap-alert ap-alert--error">
-            <ul>
-                @foreach($errors->all() as $e)
-                    <li>{{ $e }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="ap-card-form">
         <div class="ap-form-head">
             <div class="ap-form-head__title">Pendaftaran</div>
@@ -64,21 +54,6 @@
             </div>
 
             <div class="ap-row">
-                <div class="ap-label">Nama Pasien</div>
-                <div class="ap-colon">:</div>
-                <div class="ap-input">
-                    <div class="ap-split">
-                        <select id="mode_pasien" class="ap-select">
-                            <option value="ybs">YBS (Pegawai)</option>
-                            <option value="manual">Input Manual (Keluarga)</option>
-                        </select>
-                        <input type="text" name="nama_pasien" id="nama_pasien" value="{{ old('nama_pasien') }}"
-                               placeholder="Nama Lengkap Pasien" required>
-                    </div>
-                </div>
-            </div>
-
-            <div class="ap-row">
                 <div class="ap-label">Tipe Pasien</div>
                 <div class="ap-colon">:</div>
                 <div class="ap-input">
@@ -88,6 +63,17 @@
                         <option value="pensiunan">Pensiunan</option>
                     </select>
                 </div>
+            </div>
+
+            <div class="ap-row">
+                <div class="ap-label">Nama Pasien</div>
+                <div class="ap-colon">:</div>
+                <div class="ap-input">
+                    <input type="text" name="nama_pasien" id="nama_pasien"
+                        value="{{ old('nama_pasien') }}"
+                        placeholder="Nama Lengkap Pasien" required>
+                    <small class="ap-help" id="namaPasienHelp"></small>
+                 </div>
             </div>
 
             <div class="ap-row">
@@ -106,7 +92,7 @@
                 <div class="ap-label">Tanggal Lahir</div>
                 <div class="ap-colon">:</div>
                 <div class="ap-input">
-                    <input type="date" name="tgl_lahir" id="tgl_lahir" value="{{ old('tgl_lahir') }}" readonly required>
+                    <input type="date" name="tgl_lahir" id="tgl_lahir" value="{{ old('tgl_lahir') }}" required>
                 </div>
             </div>
 
@@ -157,52 +143,109 @@
         Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
     </footer>
 </div>
-
 <script>
 const nip = document.getElementById('nip');
 const nipHelp = document.getElementById('nipHelp');
+
 const namaPegawai = document.getElementById('nama_pegawai');
 const bidang = document.getElementById('bidang');
 const tglLahir = document.getElementById('tgl_lahir');
 
-const modePasien = document.getElementById('mode_pasien');
-const namaPasien = document.getElementById('nama_pasien');
-
 const tipePasien = document.getElementById('tipe_pasien');
+const namaPasien = document.getElementById('nama_pasien');
+const namaPasienHelp = document.getElementById('namaPasienHelp');
+
 const hubKel = document.getElementById('hub_kel');
 
-function applyRules(){
-  const isPensiunan = (bidang.value || '').trim().toLowerCase() === 'pensiunan';
-  const isYbs = (namaPegawai.value || '').trim().toLowerCase() === (namaPasien.value || '').trim().toLowerCase();
+function isPensiunanBidang(){
+  return (bidang.value || '').trim().toLowerCase() === 'pensiunan';
+}
 
-  if(isPensiunan){
-    tipePasien.value = 'pensiunan';
-  } else if(isYbs){
-    tipePasien.value = 'pegawai';
-  } else {
-    tipePasien.value = 'keluarga';
+function lockYBS(){
+  namaPasien.value = namaPegawai.value || '';
+  namaPasien.readOnly = true;
+
+  hubKel.value = 'YBS';
+  hubKel.disabled = true;
+
+  namaPasienHelp.textContent = '';
+}
+
+function unlockKeluarga(){
+  namaPasien.readOnly = false;
+
+  // hub_kel hanya pasangan/anak untuk keluarga
+  if(hubKel.value === 'YBS') hubKel.value = 'pasangan';
+  hubKel.disabled = false;
+
+  namaPasienHelp.textContent = 'Isi nama pasien keluarga, pilih hubungan (pasangan/anak).';
+  namaPasienHelp.style.color = '#5C6E9A';
+}
+
+function applyTanggalLahirByTipe(){
+  const tipe = tipePasien.value;
+
+  if(tipe === 'pegawai'){
+    // auto isi kalau belum diisi
+    if(!tglLahir.value && tglLahir.dataset.pegawaiDob){
+      tglLahir.value = tglLahir.dataset.pegawaiDob;
+    }
+    // tetap bisa diedit
+    tglLahir.readOnly = false;
+    return;
   }
 
-  if(isYbs || isPensiunan){
-    hubKel.value = 'YBS';
-    hubKel.disabled = true;
-  }else{
+  // keluarga/pensiunan: admin isi manual
+  tglLahir.readOnly = false;
+  // kalau sebelumnya auto dari pegawai dan user pindah tipe, kosongkan biar input manual
+  if(tglLahir.value === (tglLahir.dataset.pegawaiDob || '')){
+    tglLahir.value = '';
+  }
+}
+
+
+function applyRulesByTipe(){
+  const tipe = tipePasien.value;
+
+  // belum ada data pegawai dari NIP, jangan auto
+  if(!namaPegawai.value){
+    namaPasien.readOnly = false;
     hubKel.disabled = false;
-    if(hubKel.value === 'YBS') hubKel.value = 'Pasangan';
+    return;
   }
 
-  tipePasien.disabled = true; // kunci
-}
+  if(tipe === 'pegawai'){
+    // pegawai harus aktif (bukan pensiunan)
+    if(isPensiunanBidang()){
+      tipePasien.value = 'pensiunan';
+      lockYBS();
+      return;
+    }
+    lockYBS();
+    return;
+  }
 
-function setYBS(){
-  if(!namaPegawai.value) return;
-  namaPasien.value = namaPegawai.value;
-  applyRules();
-}
+  if(tipe === 'keluarga'){
+    // keluarga hanya untuk pegawai aktif
+    if(isPensiunanBidang()){
+      tipePasien.value = 'pensiunan';
+      lockYBS();
+      return;
+    }
+    unlockKeluarga();
+    return;
+  }
 
-function setManual(){
-  namaPasien.value = '';
-  applyRules();
+  if(tipe === 'pensiunan'){
+    // kalau bukan pensiunan, jangan boleh pilih pensiunan
+    if(!isPensiunanBidang()){
+      tipePasien.value = 'pegawai';
+      lockYBS();
+      return;
+    }
+    lockYBS();
+    return;
+  }
 }
 
 async function fetchPegawai(nipValue){
@@ -222,6 +265,11 @@ async function fetchPegawai(nipValue){
       tglLahir.value = '';
       nipHelp.textContent = j?.message || 'NIP tidak ditemukan';
       nipHelp.style.color = '#e74c3c';
+
+      // reset pasien input
+      namaPasien.value = '';
+      namaPasien.readOnly = false;
+      hubKel.disabled = false;
       return;
     }
 
@@ -230,13 +278,18 @@ async function fetchPegawai(nipValue){
 
     namaPegawai.value = d.nama_pegawai || '';
     bidang.value = d.bidang || '';
-    tglLahir.value = (d.tgl_lahir || '').substring(0, 10);
+    const pegawaiDob = (d.tgl_lahir || '').substring(0, 10);
+    tglLahir.dataset.pegawaiDob = pegawaiDob;
 
-    if(modePasien.value === 'ybs' || !namaPasien.value){
-      setYBS();
+    // aturan default setelah NIP ditemukan:
+    // kalau pegawai bidang pensiunan → auto set tipe pensiunan
+    if(isPensiunanBidang()){
+      tipePasien.value = 'pensiunan';
     }else{
-      applyRules();
+      tipePasien.value = 'pegawai';
     }
+
+    applyRulesByTipe();
 
     nipHelp.textContent = 'Data pegawai ditemukan.';
     nipHelp.style.color = '#3bb54a';
@@ -247,15 +300,12 @@ async function fetchPegawai(nipValue){
 }
 
 nip.addEventListener('blur', () => fetchPegawai(nip.value.trim()));
-modePasien.addEventListener('change', () => {
-  if(modePasien.value === 'ybs') setYBS();
-  else setManual();
-});
-namaPasien.addEventListener('input', applyRules);
+tipePasien.addEventListener('change', applyRulesByTipe);
 
+// sebelum submit, pastikan disabled field ikut terkirim
 document.getElementById('formPendaftaran').addEventListener('submit', () => {
-  tipePasien.disabled = false;
   hubKel.disabled = false;
 });
 </script>
+
 @endsection

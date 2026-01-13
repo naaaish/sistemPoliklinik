@@ -63,8 +63,6 @@ class PendaftaranController extends Controller
             return back()->withInput()->withErrors(['nip' => 'NIP tidak ditemukan di data pegawai.']);
         }
 
-        $jenisKelamin = $pegawai->jenis_kelamin ?? 'Tidak Diketahui';
-
         // parse petugas: dokter:ID atau pemeriksa:ID
         $petugas = explode(':', $validated['petugas']);
         if (count($petugas) !== 2) {
@@ -81,7 +79,7 @@ class PendaftaranController extends Controller
         if ($petugasType === 'pemeriksa') $idPemeriksa = $id;
 
         // insert pasien dan pendaftaran dalam transaksi
-        DB::transaction(function () use ($validated, $idDokter, $idPemeriksa, $jenisKelamin) {
+        DB::transaction(function () use ($validated, $idDokter, $idPemeriksa) {
             // cari pasien existing (nip + nama_pasien + tgl_lahir)
             $pasien = DB::table('pasien')
                 ->where('nip', $validated['nip'])
@@ -104,7 +102,6 @@ class PendaftaranController extends Controller
                     'tipe_pasien' => $validated['tipe_pasien'],
                     'hub_kel' => $validated['hub_kel'],
                     'tgl_lahir' => $validated['tgl_lahir'],
-                    'jenis_kelamin' => $jenisKelamin,
                 ]);
             }
 

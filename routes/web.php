@@ -51,11 +51,11 @@ Route::middleware(['ensurePegawai'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\AdminPoli\DashboardController;
+use App\Http\Controllers\AdminPoli\DashboardController as AdminPoliDashboardController;
 use App\Http\Controllers\AdminPoli\PendaftaranController;
 
 Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [AdminPoliDashboardController::class, 'index'])->name('dashboard');
 
     // pendaftaran
     Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
