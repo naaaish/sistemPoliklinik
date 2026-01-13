@@ -10,6 +10,10 @@ class AuthController extends Controller
     // Form login
     public function showLogin()
     {
+        // Jika sudah login, langsung lempar ke halaman sesuai role agar tidak login dua kali
+        if (Auth::check()) {
+            return $this->redirectBasedOnRole(Auth::user()->role);
+        }
         return view('auth.login');
     }
 
@@ -24,16 +28,54 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            if (Auth::user()->role === 'pasien') {
+            // ❗ HAPUS target redirect lama (ini yang bikin nyangkut ke /login)
+            $request->session()->forget('url.intended');
+
+            $user = Auth::user();
+
+            // Redirect by role
+            if ($user->role === 'pasien') {
                 return redirect()->route('pasien.riwayat');
             }
 
-            return redirect()->route('home');
+            if ($user->role === 'adminPoli') {
+                return redirect()->route('poliklinik.dashboard');
+            }
+
+            if ($user->role === 'adminKepegawaian') {
+                return redirect()->route('kepegawaian.dashboard');
+            }
+
+            // fallback
+            return redirect('/');
         }
 
         return back()->withErrors([
             'username' => 'Username atau password salah'
         ]);
+    }
+
+    /**
+     * Helper untuk mengatur arah redirect berdasarkan role
+     */
+    private function redirectBasedOnRole($role)
+    {
+        $role = strtolower($role); // Pastikan huruf kecil
+
+        if ($role === 'pasien') {
+            return redirect()->route('pasien.riwayat');
+        }
+
+        if ($role === 'adminpoli') {
+            return redirect()->route('poliklinik.dashboard');
+        }
+
+        if ($role === 'adminkepegawaian') {
+            return redirect()->route('kepegawaian.dashboard');
+        }
+
+        // fallback jika role tidak dikenali
+        return redirect('/');
     }
 
     // Logout

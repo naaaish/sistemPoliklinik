@@ -1,6 +1,6 @@
 @extends('pasien.layout')
 
-@section('title','Nama Halaman')
+@section('title','TENTANG KAMI - SISTEM POLIKLINIK')
 
 @push('styles')
 

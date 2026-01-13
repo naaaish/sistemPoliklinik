@@ -31,5 +31,6 @@ Route::post('/logout', [AuthController::class,'logout'])->name('logout');
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::get('/riwayat', [RiwayatController::class,'index'])->name('pasien.riwayat');
+    
+    Route::get('/pasien/riwayat', [RiwayatController::class, 'index'])->name('pasien.riwayat');
 });

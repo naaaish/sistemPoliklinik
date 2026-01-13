@@ -13,11 +13,8 @@ class User extends Authenticatable
         'nama_user'
     ];
 
-    protected $hidden = [
-        'password'
-    ];
+    protected $hidden = ['password'];
 
-    // Pakai username untuk login
     public function getAuthIdentifierName()
     {
         return 'username';

@@ -12,19 +12,27 @@ class EnsurePegawai
      * Handle an incoming request.
      * Pastikan user login dan role = 'pegawai'
      */
-    public function handle(Request $request, Closure $next)
+    public function handle($request, Closure $next, ...$guards)
     {
-        $user = Auth::user();
-        if (!$user) {
-            // belum login
-            return redirect()->route('login')->with('warning', 'Silakan login terlebih dahulu.');
-        }
+        if (Auth::check()) {
+            $user = Auth::user();
 
-        // Asumsi ada kolom 'role' di tabel users
-        if ($user->role !== 'pegawai') {
-            abort(403, 'Akses dibatasi untuk pegawai.');
+            if ($user->role === 'pasien') {
+                return redirect()->route('pasien.riwayat');
+            }
+
+            if ($user->role === 'adminPoli') {
+                return redirect()->route('poliklinik.dashboard');
+            }
+
+            if ($user->role === 'adminKepegawaian') {
+                return redirect()->route('kepegawaian.dashboard');
+            }
+
+            return redirect('/');
         }
 
         return $next($request);
     }
+
 }
