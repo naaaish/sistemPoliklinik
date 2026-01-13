@@ -45,3 +45,23 @@ Route::middleware(['ensurePegawai'])->group(function () {
 
 });
 
+/*
+|--------------------------------------------------------------------------
+|  ADMIN POLI ROUTES
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\AdminPoli\DashboardController;
+use App\Http\Controllers\AdminPoli\PendaftaranController;
+
+Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // pendaftaran
+    Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
+    Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
+
+    // (optional untuk autofill)
+    Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
+});
+
