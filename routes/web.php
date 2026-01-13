@@ -14,7 +14,6 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/tentang', [HomeController::class, 'tentang'])->name('tentang');
 Route::get('/artikel', [HomeController::class, 'artikelIndex'])->name('artikel.index');
 
-
 /*
 |--------------------------------------------------------------------------
 | AUTH
@@ -24,14 +23,26 @@ Route::get('/login', [AuthController::class,'showLogin'])->name('login');
 Route::post('/login', [AuthController::class,'login'])->name('login.process');
 Route::post('/logout', [AuthController::class,'logout'])->name('logout');
 
+Route::middleware(['ensurePegawai'])->group(function () {
+    Route::get('/pasien/riwayat', [RiwayatController::class, 'index'])->name('pasien.riwayat');
+});
 
 /*
 |--------------------------------------------------------------------------
-| RIWAYAT (PROTECTED)
+| PROTECTED
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->group(function () {
-    Route::get('/riwayat', [RiwayatController::class,'index'])->name('pasien.riwayat');
+Route::middleware(['ensurePegawai'])->group(function () {
+
+    Route::get('/pasien/riwayat', [RiwayatController::class, 'index'])
+        ->name('pasien.riwayat');
+
+    Route::get('/poliklinik/dashboard', [RiwayatController::class, 'dashboard'])
+        ->name('poliklinik.dashboard');
+
+    Route::get('/kepegawaian/dashboard', [RiwayatController::class, 'dashboard'])
+        ->name('kepegawaian.dashboard');
+
 });
 
 /*
@@ -53,3 +64,4 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     // (optional untuk autofill)
     Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
 });
+
