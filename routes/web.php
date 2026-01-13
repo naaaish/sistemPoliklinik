@@ -33,3 +33,19 @@ Route::post('/logout', [AuthController::class,'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::get('/riwayat', [RiwayatController::class,'index'])->name('pasien.riwayat');
 });
+
+/*
+|--------------------------------------------------------------------------
+|  ADMIN POLI ROUTES
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\AdminPoli\DashboardController;
+
+Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+});
+
+Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])
+    ->name('api.pegawai');
+
