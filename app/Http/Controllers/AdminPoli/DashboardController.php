@@ -41,22 +41,17 @@ class DashboardController extends Controller
             ->whereNull('pm.id_pendaftaran')
             ->count();
 
-        // 4) Daftar Pasien Aktif (contoh: pendaftaran hari ini yang belum diinput hasil)
-        $daftarPasienAktif = DB::table('pendaftaran as pd')
-            ->join('pasien as ps', 'ps.id_pasien', '=', 'pd.id_pasien')
-            // kalau nip ada di pasien (sesuai ERD ada relasi pasien->pegawai)
-            // ->join('pegawai as pg', 'pg.nip', '=', 'ps.nip') // kalau kamu perlu nama pegawai
-            ->leftJoin('pemeriksaan as pm', 'pm.id_pendaftaran', '=', 'pd.id_pendaftaran')
-            ->whereDate('pd.tanggal', $today)
-            ->whereNull('pm.id_pendaftaran')
-            ->select([
-                'pd.id_pendaftaran',
-                'pd.tanggal',
+        // 4) Daftar pasien aktif hari ini (buat tabel dashboard)
+        $daftarPasienAktif = DB::table('pendaftaran as p')
+            ->join('pasien as ps', 'ps.id_pasien', '=', 'p.id_pasien')
+            ->select(
+                'p.id_pendaftaran',
+                'p.tanggal',
                 'ps.nama_pasien',
-                'ps.nip', // kalau nip memang ada di tabel pasien
-            ])
-            ->orderBy('pd.tanggal', 'desc')
-            ->limit(10)
+                'ps.nip'
+            )
+            ->whereDate('p.tanggal', $today)
+            ->orderBy('p.created_at', 'desc')
             ->get();
 
         return view('adminpoli.dashboard', compact(

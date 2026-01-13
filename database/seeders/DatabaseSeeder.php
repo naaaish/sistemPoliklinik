@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             DokterSeeder::class,
             ObatSeeder::class,
             DiagnosaK3Seeder::class,
+            JadwalDokterSeeder::class,
+            PemeriksaSeeder::class,
         ]);
     }
 }

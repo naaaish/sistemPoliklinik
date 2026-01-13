@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pasien', function (Blueprint $table) {
-            $table->string('id_pasien',20)->primary();
+            $table->string('id_pasien',10)->primary();
             $table->string('nama_pasien');
             $table->enum('tipe_pasien',['pegawai','keluarga','pensiunan']);
-            $table->enum('hub_kel',['YBS','istri','anak']);
+            $table->enum('hub_kel',['YBS','pasangan','anak']);
             $table->date('tgl_lahir');
             $table->string('jenis_kelamin');
             $table->string('nip',20);

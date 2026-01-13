@@ -6,6 +6,12 @@
 <div class="ap-page">
 
     <h1 class="ap-title">Dashboard</h1>
+    @if(session('success'))
+        <div class="ap-alert ap-alert--success">
+         {{ session('success') }}
+        </div>
+    @endif 
+
 
     {{-- Cards --}}
     <div class="ap-cards">
@@ -29,7 +35,7 @@
     </div>
 
     {{-- Button input pendaftaran --}}
-    <a href="#" class="ap-banner">
+    <a href="{{ route('adminpoli.pendaftaran.create') }}" class="ap-banner">
         <img class="ap-banner__icon" src="{{ asset('assets/adminPoli/input.png') }}" alt="input">
         <div class="ap-banner__text">Input Pendaftaran Pasien</div>
     </a>
