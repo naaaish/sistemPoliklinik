@@ -62,7 +62,7 @@
                         <td>{{ \Carbon\Carbon::parse($row->tanggal)->translatedFormat('d F Y') }}</td>
                         <td class="ap-td-center">
                             <a class="ap-input-btn" href="#">
-                                <img src="{{ asset('assets/adminPoli/input.png') }}" alt="input hasil">
+                                <img src="{{ asset('assets/adminPoli/masuk.png') }}" alt="input hasil">
                             </a>
                         </td>
                     </tr>

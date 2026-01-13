@@ -137,11 +137,28 @@ body{
   margin: 0 auto;
 }
 
+.ap-page-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin: 14px 0 18px;
+}
+
+.ap-page-title{
+    margin:0;
+    display: flex;
+    font-size: 22px;
+    font-weight: 600;
+    color:#316BA1;
+    font-family: Poppins, sans-serif;
+}
+
 .ap-title{
   margin: 0 0 18px 0;
   color: var(--blue);
   font-size: 24px;
   font-weight: 600;
+  padding-top: 15px;
 }
 
 /* CARDS */
@@ -291,15 +308,16 @@ body{
 }
 
 .ap-th-center, .ap-td-center{
-  text-align: center;
+  text-align: justify;
+  vertical-align: middle;
 }
 
 .ap-input-btn{
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
   border-radius: 10px;
   text-decoration: none;
   transition: transform .12s ease, filter .12s ease;
@@ -332,23 +350,34 @@ body{
 
 .ap-topbar{
   display:flex;
-  align-items:center;
   gap:12px;
   margin-bottom: 14px;
 }
 .ap-back{
-  width:42px;height:42px;
+  width:50px;
+  height: 50px;
   border-radius: 50%;
-  background:#fff;
   display:flex;
   align-items:center;
   justify-content:center;
   text-decoration:none;
-  color:#316BA1;
   font-weight:700;
   box-shadow: 0px 2px 8px rgba(0,0,0,.10);
   transition: transform .12s ease;
 }
+
+.ap-back-inline{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ap-back-inline img{
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
 .ap-back:hover{ transform: translateY(-1px); }
 
 .ap-card-form{
