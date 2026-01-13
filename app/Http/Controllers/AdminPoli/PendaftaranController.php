@@ -63,6 +63,8 @@ class PendaftaranController extends Controller
             return back()->withInput()->withErrors(['nip' => 'NIP tidak ditemukan di data pegawai.']);
         }
 
+        $jenisKelamin = $pegawai->jenis_kelamin ?? 'Tidak Diketahui';
+
         // parse petugas: dokter:ID atau pemeriksa:ID
         $petugas = explode(':', $validated['petugas']);
         if (count($petugas) !== 2) {
@@ -71,14 +73,15 @@ class PendaftaranController extends Controller
         [$petugasType, $petugasId] = $petugas;
         $petugasId = (int) $petugasId;
 
+        [$tipe, $id] = explode(':', $request->petugas);
+
         $idDokter = null;
         $idPemeriksa = null;
-        if ($petugasType === 'dokter') $idDokter = $petugasId;
-        if ($petugasType === 'pemeriksa') $idPemeriksa = $petugasId;
+        if ($petugasType === 'dokter') $idDokter = $id;
+        if ($petugasType === 'pemeriksa') $idPemeriksa = $id;
 
         // insert pasien dan pendaftaran dalam transaksi
-        DB::transaction(function () use ($validated, $idDokter, $idPemeriksa) {
-
+        DB::transaction(function () use ($validated, $idDokter, $idPemeriksa, $jenisKelamin) {
             // cari pasien existing (nip + nama_pasien + tgl_lahir)
             $pasien = DB::table('pasien')
                 ->where('nip', $validated['nip'])
@@ -101,17 +104,18 @@ class PendaftaranController extends Controller
                     'tipe_pasien' => $validated['tipe_pasien'],
                     'hub_kel' => $validated['hub_kel'],
                     'tgl_lahir' => $validated['tgl_lahir'],
+                    'jenis_kelamin' => $jenisKelamin,
                 ]);
             }
 
+            
+            $idPendaftaran = $this->generateIdPendaftaran();
             // insert pendaftaran (hapus kolom yang tidak ada di DB kamu)
             DB::table('pendaftaran')->insert([
-                'id_pasien' => $idPasien,
+                'id_pendaftaran' => $idPendaftaran,
                 'tanggal' => $validated['tanggal'],
                 'keluhan' => $validated['keluhan'],
-                
-                // jika tabelmu tidak punya kolom ini, hapus:
-                'jenis_pemeriksaan' => $validated['jenis_pemeriksaan'],
+                'id_pasien' => $idPasien,
                 'id_dokter' => $idDokter,
                 'id_pemeriksa' => $idPemeriksa,
             ]);
@@ -137,4 +141,19 @@ class PendaftaranController extends Controller
         return 'PSN' . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
 
+    private function generateIdPendaftaran()
+    {
+        $last = DB::table('pendaftaran')
+            ->orderBy('id_pendaftaran', 'desc')
+            ->value('id_pendaftaran');
+
+        if (!$last) {
+            return 'REG0001';
+        }
+
+        $number = (int) substr($last, 3);
+        $number++;
+
+        return 'REG' . str_pad($number, 4, '0', STR_PAD_LEFT);
+    }
 }

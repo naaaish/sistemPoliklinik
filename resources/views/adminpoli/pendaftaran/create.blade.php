@@ -6,7 +6,7 @@
 <div class="ap-page">
 
     <div class="ap-topbar">
-        <a href="{{ route('adminpoli.dashboard') }}" class="ap-back">←</a>
+        <a href="{{ route('adminpoli.dashboard') }}" class="ap-back-inline"><img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="kembali"></a>
         <h1 class="ap-title">Input Pendaftaran Pasien</h1>
     </div>
 

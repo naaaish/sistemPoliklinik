@@ -14,17 +14,17 @@ return new class extends Migration
         Schema::create('pendaftaran', function (Blueprint $table) {
             $table->string('id_pendaftaran',20)->primary();
             $table->date('tanggal');
-            $table->text('keluhan');
+            $table->enum('jenis_pemeriksaan',['cek_kesehatan','berobat']);
+            $table->text('keluhan')->nullable();
             $table->string('id_pasien',20);
-            $table->string('id_dokter',20);
-            $table->string('id_pemeriksa',20);
+            $table->string('id_dokter',20)->nullable();
+            $table->string('id_pemeriksa',20)->nullable();
 
             $table->foreign('id_pasien')->references('id_pasien')->on('pasien');
-            $table->foreign('id_dokter')->references('id_dokter')->on('dokter');
-            $table->foreign('id_pemeriksa')->references('id_pemeriksa')->on('pemeriksa');
+            $table->foreign('id_dokter')->references('id_dokter')->on('dokter')->nullOnDelete();
+            $table->foreign('id_pemeriksa')->references('id_pemeriksa')->on('pemeriksa')->nullOnDelete();
             $table->timestamps();
         });
-
     }
 
     /**
