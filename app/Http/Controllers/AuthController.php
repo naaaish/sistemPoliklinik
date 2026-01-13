@@ -28,32 +28,26 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // ❗ HAPUS target redirect lama (ini yang bikin nyangkut ke /login)
-            $request->session()->forget('url.intended');
+            $role = strtolower(Auth::user()->role);
 
-            $user = Auth::user();
-
-            // Redirect by role
-            if ($user->role === 'pasien') {
+            if ($role === 'pasien') {
                 return redirect()->route('pasien.riwayat');
             }
 
-            if ($user->role === 'adminPoli') {
+            if ($role === 'adminpoli') {
                 return redirect()->route('poliklinik.dashboard');
             }
 
-            if ($user->role === 'adminKepegawaian') {
+            if ($role === 'adminkepegawaian') {
                 return redirect()->route('kepegawaian.dashboard');
             }
 
-            // fallback
             return redirect('/');
         }
 
-        return back()->withErrors([
-            'username' => 'Username atau password salah'
-        ]);
+        return back()->withErrors(['username' => 'Login gagal']);
     }
+
 
     /**
      * Helper untuk mengatur arah redirect berdasarkan role
