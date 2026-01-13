@@ -3,28 +3,30 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class EnsurePegawai
 {
-    /**
-     * Handle an incoming request.
-     * Pastikan user login dan role = 'pegawai'
-     */
-    public function handle(Request $request, Closure $next)
+    public function handle($request, Closure $next)
     {
-        $user = Auth::user();
-        if (!$user) {
-            // belum login
-            return redirect()->route('login')->with('warning', 'Silakan login terlebih dahulu.');
+        if (!Auth::check()) {
+            return redirect()->route('login');
         }
 
-        // Asumsi ada kolom 'role' di tabel users
-        if ($user->role !== 'pegawai') {
-            abort(403, 'Akses dibatasi untuk pegawai.');
+        $role = strtolower(Auth::user()->role);
+
+        if ($role === 'pasien') {
+            return $next($request);
         }
 
-        return $next($request);
+        if ($role === 'adminpoli') {
+            return redirect()->route('poliklinik.dashboard');
+        }
+
+        if ($role === 'adminkepegawaian') {
+            return redirect()->route('kepegawaian.dashboard');
+        }
+
+        return redirect()->route('login');
     }
 }
