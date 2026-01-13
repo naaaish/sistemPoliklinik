@@ -9,21 +9,37 @@ class RiwayatController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
+        $userId = Auth::id();
 
-        // Cari pasien berdasarkan NIP yang dipakai login
-        $idPasien = DB::table('pasien')
-            ->where('nip', $user->username)
-            ->value('id_pasien');
+        // Ambil data pasien dari user login
+        $pasien = DB::table('pasien')
+            ->join('pendaftaran','pasien.id_pasien','=','pendaftaran.id_pasien')
+            ->where('pendaftaran.id_pasien', $userId)
+            ->select('pasien.*')
+            ->first();
 
+        // Kalau pasien belum terdaftar
+        if (!$pasien) {
+            return view('pasien.riwayat', [
+                'pasien' => null,
+                'riwayat' => collect()
+            ]);
+        }
+
+        // Ambil riwayat pemeriksaan pasien
         $riwayat = DB::table('pemeriksaan')
-            ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-            ->where('pendaftaran.id_pasien', $idPasien)
-            ->orderBy('pemeriksaan.created_at', 'desc')
-            ->select('pemeriksaan.*', 'pendaftaran.tanggal', 'pendaftaran.keluhan')
+            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+            ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
+            ->where('pendaftaran.id_pasien', $pasien->id_pasien)
+            ->orderBy('pemeriksaan.created_at','desc')
+            ->select(
+                'pemeriksaan.*',
+                'pendaftaran.keluhan',
+                'dokter.nama as dokter'
+            )
             ->get();
 
-        return view('pasien.riwayat', compact('riwayat'));
+        return view('pasien.riwayat', compact('pasien','riwayat'));
     }
 
 
