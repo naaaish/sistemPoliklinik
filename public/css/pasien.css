@@ -1,0 +1,352 @@
+:root{
+    --blue-main: #316BA1;
+    --blue-soft: #3f7fbf;
+    --blue-light: #eaf3fb;
+    --white: #ffffff;
+}
+
+
+body{
+    margin:0;
+    font-family:'Poppins','Segoe UI',sans-serif;
+    background:#eef5fb;
+}
+
+/* ================= NAVBAR PASIEN ================= */
+
+.navbar-pasien{
+    background: linear-gradient(90deg, #316BA1, #3f7fbf);
+    padding: 18px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    transition: all .3s ease;
+}
+
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    text-decoration:none;
+    color:white;
+}
+
+.brand img{
+    width:34px;
+}
+
+.brand span{
+    font-size:24px;
+    font-weight:700;
+    letter-spacing:.6px;
+}
+
+.nav-menu{
+    display:flex;
+    align-items:center;
+    gap:32px;
+}
+
+.nav-menu a{
+    color:white;
+    text-decoration:none;
+    font-weight:500;
+    font-size:16px;
+    opacity:.9;
+
+    padding:10px 16px;
+    border-radius:12px;
+    transition: all .25s ease;
+}
+
+.nav-menu a:hover{
+    background: rgba(255,255,255,.12);
+    box-shadow: 0 4px 10px rgba(0,0,0,.15);
+    opacity:1;
+    transform: translateY(-1px);
+}
+
+.nav-menu a.active{
+    background: rgba(255,255,255,.18);
+    box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    font-weight:600;
+}
+
+
+.nav-menu a:hover::after{
+    width:100%;
+}
+
+
+
+.logout-btn{
+    background:white;
+    color:#316BA1;
+    border:none;
+    padding:8px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    transition:.2s;
+}
+
+.logout-btn:hover{
+    background:#e8f1ff;
+}
+
+/* HERO */
+.hero{
+    background:
+        url("/images/bg4.png") top center no-repeat,
+        linear-gradient(135deg, #316BA1 0%, #3f7fbf 100%);
+    background-size: 100% auto;
+    padding:100px 80px 140px;
+    color:white;
+}
+
+
+.hero-left h4{
+    color:#B4F2F4;
+    margin-bottom:10px;
+}
+
+.hero-left h1{
+    font-size:42px;
+    line-height:1.2;
+    margin-bottom:30px;
+}
+
+.btn-konsultasi{
+    background:white;
+    color:#316BA1;
+    padding:14px 28px;
+    border-radius:30px;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.hero-right img{
+    width:380px;
+    border-radius:50%;
+    border:6px solid rgba(255,255,255,.4);
+}
+
+
+/* CONTAINER */
+.page-container{
+    width:1200px;
+    margin:auto;
+    padding:60px 0;
+}
+
+.section{
+    margin-bottom:70px;
+}
+
+.section h2{
+    font-size:32px;
+    margin-bottom:30px;
+}
+
+/* DOCTOR */
+.doctor-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:30px;
+}
+
+.doctor-card{
+    background:white;
+    border-radius:12px;
+    display:flex;
+    padding:20px;
+    align-items:center;
+    box-shadow:0 4px 10px rgba(0,0,0,.1);
+}
+
+.doctor-img{
+    width:80px;
+    height:80px;
+    border-radius:10px;
+    margin-right:20px;
+}
+
+.doctor-info h3{
+    color:#0319A7;
+}
+
+.doctor-time{
+    margin-left:auto;
+    text-align:right;
+    color:#555;
+}
+
+/* ARTICLE */
+.section-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.article-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:25px;
+}
+
+.article-card{
+    background:white;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 3px 8px rgba(0,0,0,.1);
+}
+
+.article-card img{
+    width:100%;
+    height:170px;
+    object-fit:cover;
+}
+
+.article-card h4{
+    padding:15px;
+    font-size:16px;
+}
+
+.article-card small{
+    padding:0 15px 15px;
+    display:block;
+    color:#777;
+}
+
+/* ABOUT */
+.about{
+    background:#e9f3fb;
+    padding:40px;
+    border-radius:20px;
+}
+
+.about-grid{
+    margin-top:20px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+/* ================= RIWAYAT ================= */
+.riwayat .pasien-hero{
+    background:
+        url("/images/bg4.png") top center no-repeat,
+        linear-gradient(135deg, rgba(49,107,161,.95), rgba(63,127,191,.95));
+    background-size:100% auto;
+    padding:90px 80px 150px;
+    color:white;
+}
+
+
+.riwayat .kembali{
+    background:white;
+    color:#316BA1;
+    padding:10px 20px;
+    border-radius:40px;
+    width:fit-content;
+    cursor:pointer;
+    font-weight:600;
+    box-shadow:0 4px 12px rgba(0,0,0,.2);
+}
+
+.riwayat .pasien-container{
+    width:1200px;
+    margin:-120px auto 60px;
+}
+
+.profile-section{
+    text-align:center;
+    margin-bottom:50px;
+}
+
+.profile-box{
+    background:white;
+    border-radius:20px;
+    padding:40px 60px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:60px;
+    box-shadow:0 10px 40px rgba(0,0,0,.15);
+}
+
+.profile-box p{
+    font-size:16px;
+    margin:15px 0;
+}
+
+.profile-box b{
+    width:200px;
+    display:inline-block;
+    color:#316BA1;
+}
+
+/* Riwayat card */
+
+.riwayat-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:40px;
+}
+
+.riwayat-card{
+    background:white;
+    border-radius:16px;
+    box-shadow:0 8px 30px rgba(0,0,0,.12);
+    overflow:hidden;
+}
+
+.riwayat-header{
+    background:#316BA1;
+    color:white;
+    padding:18px 30px;
+    display:flex;
+    justify-content:space-between;
+    font-weight:600;
+}
+
+.riwayat-body{
+    padding:30px;
+}
+
+.detail-btn{
+    display:inline-block;
+    margin-top:20px;
+    background:#316BA1;
+    color:white;
+    padding:12px 28px;
+    border-radius:10px;
+    text-decoration:none;
+}
+
+/* EMPTY STATE RIWAYAT */
+.riwayat-empty{
+    grid-column:1 / -1;
+    background:white;
+    padding:60px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 10px 40px rgba(0,0,0,.1);
+}
+
+.riwayat-empty img{
+    width:180px;
+    margin-bottom:20px;
+}
+
+.riwayat-empty h3{
+    color:#316BA1;
+    margin-bottom:10px;
+}

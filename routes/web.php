@@ -4,6 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RiwayatController;
+use App\Http\Controllers\Kepegawaian\KDashboardController;
+use App\Http\Controllers\Kepegawaian\PegawaiController;
+use App\Http\Controllers\Kepegawaian\KRiwayatController;
+use App\Http\Controllers\Kepegawaian\LaporanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -65,3 +69,33 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
 });
 
+
+/*
+|--------------------------------------------------------------------------
+|  ADMIN KEPEGAWAIAN ROUTES
+|--------------------------------------------------------------------------
+*/
+
+
+Route::middleware(['auth', 'ensureKepegawaian'])->prefix('kepegawaian')->group(function () {
+
+
+        Route::get('/dashboard', [KDashboardController::class, 'index'])
+            ->name('dashboard');
+    // Dashboard
+    Route::get('/dashboard', [KDashboardController::class, 'index'])
+        ->name('kepegawaian.dashboard');
+
+    // Data Pegawai
+    Route::get('/pegawai', [PegawaiController::class, 'index'])
+        ->name('kepegawaian.pegawai');
+
+    // Riwayat Pemeriksaan
+    Route::get('/riwayat', [KRiwayatController::class, 'index'])
+        ->name('kepegawaian.riwayat');
+
+    // Laporan
+    Route::get('/laporan', [LaporanController::class, 'index'])
+        ->name('kepegawaian.laporan');
+
+});
