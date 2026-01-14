@@ -53,6 +53,7 @@ Route::middleware(['ensurePegawai'])->group(function () {
 
 use App\Http\Controllers\AdminPoli\DashboardController as AdminPoliDashboardController;
 use App\Http\Controllers\AdminPoli\PendaftaranController;
+use App\Http\Controllers\AdminPoli\PemeriksaanController;
 
 Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::get('/dashboard', [AdminPoliDashboardController::class, 'index'])->name('dashboard');
@@ -60,6 +61,12 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     // pendaftaran
     Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
     Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
+    // pemeriksaan (HARUS bawa id pendaftaran)
+    Route::get('/pemeriksaan/{pendaftaranId}/create', [PemeriksaanController::class, 'create'])
+        ->name('pemeriksaan.create');
+
+    Route::post('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'store'])
+        ->name('pemeriksaan.store');
 
     // (optional untuk autofill)
     Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');

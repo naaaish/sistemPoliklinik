@@ -54,7 +54,7 @@
                         <td>{{ $row->nip ?? '-' }}</td>
                         <td>{{ \Carbon\Carbon::parse($row->tanggal)->translatedFormat('d F Y') }}</td>
                         <td class="ap-td-center">
-                            <a class="ap-input-btn" href="#">
+                            <a class="ap-input-btn" href="{{ route('adminpoli.pemeriksaan.create', $row->id_pendaftaran) }}">
                                 <img src="{{ asset('assets/adminPoli/masuk.png') }}" alt="input hasil">
                             </a>
                         </td>

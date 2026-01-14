@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Artikel;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -23,6 +24,15 @@ class DatabaseSeeder extends Seeder
             DiagnosaK3Seeder::class,
             JadwalDokterSeeder::class,
             PemeriksaSeeder::class,
+            SaranSeeder::class,
+            DiagnosaSeeder::class,
+            DiagnosaK3Seeder::class,
+            PasienSeeder::class,
+            PendaftaranSeeder::class,
+            PemeriksaanSeeder::class,
+            ResepSeeder::class,
+            detailResepSeeder::class,
+            ArtikelSeeder::class,
         ]);
     }
 }
