@@ -6,13 +6,6 @@
 <div class="ap-page">
 
     <h1 class="ap-title">Dashboard</h1>
-    @if(session('success'))
-        <div class="ap-alert ap-alert--success">
-         {{ session('success') }}
-        </div>
-    @endif 
-
-
     {{-- Cards --}}
     <div class="ap-cards">
         <div class="ap-card">

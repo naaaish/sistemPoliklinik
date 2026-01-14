@@ -17,7 +17,6 @@ return new class extends Migration
             $table->enum('tipe_pasien',['pegawai','keluarga','pensiunan']);
             $table->enum('hub_kel',['YBS','pasangan','anak']);
             $table->date('tgl_lahir');
-            $table->string('jenis_kelamin');
             $table->string('nip',20);
 
             $table->foreign('nip')->references('nip')->on('pegawai');
