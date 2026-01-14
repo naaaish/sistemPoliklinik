@@ -34,11 +34,17 @@
         <div class="doctor-grid">
             @forelse($jadwalDokter as $jadwal)
             <div class="doctor-card">
-                <img src="{{ asset('images/doctors/'.$jadwal->dokter->foto) }}" class="doctor-img">
+                <img src="{{ $jadwal->dokter && $jadwal->dokter->foto 
+                        ? asset('images/doctors/' . $jadwal->dokter->foto) 
+                        : asset('images/doctors/default.png') 
+                    }}" 
+                    class="doctor-img">
+>
 
                 <div class="doctor-info">
-                    <h4>{{ $jadwal->dokter->nama }}</h4>
-                    <span>{{ $jadwal->dokter->spesialisasi }}</span>
+                    <h4>{{ $jadwal->dokter->nama ?? 'Dokter belum ditentukan' }}</h4>
+                    <span>{{ $jadwal->dokter->spesialisasi ?? '-' }}</span>
+
                 </div>
 
                 <div class="doctor-time">
