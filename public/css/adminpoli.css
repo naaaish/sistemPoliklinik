@@ -405,12 +405,17 @@ body{
 }
 
 .ap-row{
-  display:grid;
-  grid-template-columns: 220px 20px 1fr;
-  align-items:center;
-  gap: 10px;
-  padding: 10px 0;
+  display: grid;
+  grid-template-columns: 200px 12px 1fr;  /* lebih ramping */
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 6px;
+  padding: 6px 0;                        /* biar rapet, muat banyak baris */
 }
+.ap-row--textarea{
+  align-items: start;
+}
+
 .ap-row--textarea{ align-items:start; }
 
 .ap-label{
@@ -426,17 +431,30 @@ body{
 }
 
 .ap-input input,
-.ap-input select,
-.ap-input textarea{
-  width:100%;
+.ap-input select{
+  width: 100%;
+  height: 40px;                /* tinggi stabil */
   border: 1.3px solid #979797;
-  border-radius:8px;
-  padding: 10px 12px;
-  font-size:12px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
   font-family: Poppins, sans-serif;
-  outline:none;
-  transition: box-shadow .12s ease, border-color .12s ease;
+  outline: none;
+  transition: box-shadow .12s ease, border-color .12s ease, transform .12s ease;
 }
+
+.ap-input textarea{
+  width: 100%;
+  min-height: 90px;            /* textarea agak besar sesuai UI */
+  border: 1.3px solid #979797;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-family: Poppins, sans-serif;
+  outline: none;
+  resize: vertical;
+}
+
 .ap-input textarea{ resize: vertical; }
 
 .ap-input input:focus,
@@ -489,6 +507,24 @@ body{
 .ap-alert--success{ border-left: 5px solid #3bb54a; }
 .ap-alert--error{ border-left: 5px solid #e74c3c; }
 
+.ap-btn-small{
+  height: 34px;
+  width: auto;
+  padding: 6px 12px;
+  margin-top: 8px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #316BA1;
+  color: #316BA1;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.ap-btn-small:hover{
+  filter: brightness(0.98);
+}
+
 @media (max-width: 980px){
   .ap-row{ grid-template-columns: 1fr; }
   .ap-colon{ display:none; }
@@ -497,4 +533,397 @@ body{
   .ap-form-head__title{ font-size: 28px; }
   .ap-cards{ grid-template-columns: 1fr; }
   .ap-card--center{ grid-column: auto; }
+}
+/* ===== DATA PEMERIKSAAN KESEHATAN ===== */
+.ap-vitals-grid{
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr)); /* 6 kolom, melebar sesuai card */
+  gap: 18px 24px;
+  margin-top: 12px;
+  width: 100%;
+  justify-items: center; /* tiap kolom itemnya ketengah */
+}
+
+.ap-vital-item{
+  width: 100%;
+  max-width: 140px; /* biar kotaknya ga kegedean, tapi tetep ikut lebar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ap-vital-label{
+  height: 32px;              /* kunci tinggi label biar sejajar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  color: #000;
+  font-size: 13px;
+  font-family: Poppins;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.ap-vital-input{
+  width: 100%;
+  height: 43px;
+  border-radius: 8px;
+  border: 1.3px solid #979797;
+  background: #FFF;
+  text-align: center;
+
+  font-size: 13px;
+  font-family: Poppins;
+  font-weight: 400;
+}
+
+.ap-card-form{
+  width: 100%;
+}
+
+.ap-vital-input:focus{
+  outline: none;
+  border-color: #316BA1;
+  box-shadow: 0 0 0 3px rgba(49,107,161,.2);
+}
+
+/* responsive (biar aman) */
+@media (max-width: 1200px){
+  .ap-vitals-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 700px){
+  .ap-vitals-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* =========================
+   OBAT PAGE
+========================= */
+*{ box-sizing: border-box; }
+body{ margin:0; }
+
+.obat-page{
+  font-family: Poppins, sans-serif;
+}
+
+/* topbar */
+.obat-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 14px;
+}
+
+.obat-left{
+  display:flex;
+  align-items:center;
+  gap: 14px;
+}
+
+.obat-back{
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid #3B5E8C;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  color:#3B5E8C;
+  font-weight:700;
+}
+
+.obat-heading{
+  font-size: 22px;
+  font-weight: 700;
+  color:#3B5E8C;
+}
+
+/* icons */
+.obat-ic{
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+.obat-ic-sm{
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+/* buttons */
+.obat-btn-add{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  background:#3B5E8C;
+  color:#fff;
+  text-decoration:none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.obat-btn-soft{
+  height: 38px;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  background:#E7F0FF;
+  color:#3B5E8C;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-weight: 600;
+  cursor:pointer;
+}
+.obat-btn-soft[disabled]{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+/* card */
+.obat-card{
+  width: 100%;
+  max-width: 100%;   /* batas aman biar tetap rapi */
+  margin: 0 auto;
+  background:#fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  padding: 20px 22px;
+}
+
+/* search */
+.obat-search{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  margin-bottom: 12px;
+}
+
+.obat-search-input{
+  flex: 1;
+  height: 42px;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 14px;
+  outline:none;
+}
+
+.obat-search-btn{
+  height: 42px;
+  border:none;
+  border-radius: 10px;
+  padding: 0 14px;
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  background:#7FA6D9;
+  color:#fff;
+  font-weight: 600;
+  cursor:pointer;
+}
+
+/* tools row: upload + download */
+.obat-tools-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+/* upload */
+.obat-upload{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.obat-file{
+  height: 38px;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 12px;
+  display:flex;
+  align-items:center;
+  background:#fff;
+  color:#3B5E8C;
+  font-weight: 600;
+  cursor:pointer;
+  user-select:none;
+}
+
+.obat-file input{
+  display:none;
+}
+
+/* download */
+.obat-download{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.obat-date{
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #CFE0FF;
+  padding: 0 10px;
+  outline:none;
+  background:#fff;
+}
+
+.obat-sep{
+  font-weight: 700;
+  color:#3B5E8C;
+}
+
+.obat-disabled{
+  opacity: .65;
+}
+
+/* table: grid */
+.obat-table-head,
+.obat-row{
+  display:grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.obat-table-head{
+  padding: 6px 4px 10px;
+  color:#7B8DA8;
+  font-weight: 700;
+  font-size: 16px;
+  text-align:center;
+}
+
+.obat-table-body{
+  border-top: 1px solid #EEF4FF;
+  padding-top: 12px;
+}
+
+.obat-row{
+  padding: 8px 4px;
+  border-bottom: 1px solid #EEF4FF;
+}
+
+.obat-cell{
+  height: 34px;
+  border: 1px solid #D6D6D6;
+  border-radius: 8px;
+  display:flex;
+  align-items:center;
+  padding: 0 12px;
+  color:#666;
+  background:#fff;
+  font-size: 13px;
+}
+
+.obat-center{ justify-content:center; }
+
+/* actions */
+.obat-actions{
+  display:flex;
+  justify-content:center;
+  gap: 14px;
+  align-items:center;
+}
+
+.obat-act{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  border:none;
+  background:transparent;
+  font-weight: 700;
+  cursor:pointer;
+  text-decoration:none;
+  padding: 6px 6px;
+}
+
+.obat-edit{ color:#E58A1F; }
+.obat-del{ color:#E04A4A; }
+
+.obat-del-form{ margin:0; }
+
+.obat-empty{
+  padding: 22px 10px;
+  text-align:center;
+  color:#7B8DA8;
+  font-weight:600;
+}
+
+.obat-foot{
+  margin-top: 18px;
+  text-align:center;
+  color: rgba(0,0,0,0.55);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ===== MODAL ===== */
+.modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-card{
+  background: #fff;
+  width: 380px;
+  border-radius: 14px;
+  padding: 22px 24px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  animation: pop .2s ease;
+}
+
+@keyframes pop{
+  from{ transform: scale(.9); opacity:0 }
+  to{ transform: scale(1); opacity:1 }
+}
+
+.modal-card h3{
+  text-align: center;
+  margin-bottom: 16px;
+  color: #3B5E8C;
+}
+
+.modal-group{
+  margin-bottom: 12px;
+}
+
+.modal-group label{
+  font-size: 13px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.modal-group input{
+  width: 100%;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #CFE0FF;
+  padding: 0 12px;
+}
+
+.modal-btn{
+  width: 100%;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: #3B5E8C;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
 }

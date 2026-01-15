@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
     {{-- CSS khusus AdminPoli --}}
-    <link rel="stylesheet" href="{{ asset('css/adminpoli.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli.css') }}?v={{ filemtime(public_path('css/adminpoli.css')) }}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -28,12 +28,14 @@
         <div class="ap-menu-title">Menu</div>
 
         <nav class="ap-nav">
-            <a class="ap-nav-item active" href="{{ route('adminpoli.dashboard') }}">
+           <a class="ap-nav-item {{ request()->routeIs('adminpoli.dashboard') ? 'active' : '' }}"
+            href="{{ route('adminpoli.dashboard') }}">
                 <img src="{{ asset('assets/adminPoli/dashboard.png') }}" alt="dashboard">
                 <span>Dashboard</span>
             </a>
 
-            <a class="ap-nav-item" href="#">
+            <a class="ap-nav-item {{ request()->routeIs('adminpoli.obat.*') ? 'active' : '' }}"
+            href="{{ route('adminpoli.obat.index') }}">
                 <img src="{{ asset('assets/adminPoli/obat.png') }}" alt="obat">
                 <span>Obat</span>
             </a>

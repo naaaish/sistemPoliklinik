@@ -4,6 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RiwayatController;
+use App\Http\Controllers\AdminPoli\ObatController;
+use App\Http\Controllers\AdminPoli\DashboardController as AdminPoliDashboardController;
+use App\Http\Controllers\AdminPoli\PendaftaranController;
+use App\Http\Controllers\AdminPoli\PemeriksaanController;
+
 use App\Http\Controllers\Kepegawaian\KDashboardController;
 use App\Http\Controllers\Kepegawaian\PegawaiController;
 use App\Http\Controllers\Kepegawaian\KRiwayatController;
@@ -55,10 +60,6 @@ Route::middleware(['ensurePegawai'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\AdminPoli\DashboardController as AdminPoliDashboardController;
-use App\Http\Controllers\AdminPoli\PendaftaranController;
-use App\Http\Controllers\AdminPoli\PemeriksaanController;
-
 Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::get('/dashboard', [AdminPoliDashboardController::class, 'index'])->name('dashboard');
 
@@ -71,6 +72,10 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
 
     Route::post('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'store'])
         ->name('pemeriksaan.store');
+
+    Route::resource('obat', ObatController::class);
+    Route::post('obat/import', [\App\Http\Controllers\AdminPoli\ObatController::class, 'import'])->name('obat.import');
+    Route::get('obat/export', [\App\Http\Controllers\AdminPoli\ObatController::class, 'export'])->name('obat.export');
 
     // (optional untuk autofill)
     Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
