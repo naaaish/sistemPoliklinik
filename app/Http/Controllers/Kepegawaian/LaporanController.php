@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Kepegawaian;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Barryvdh\DomPDF\Facade\Pdf;
-
 
 class LaporanController extends Controller
 {
@@ -17,108 +15,89 @@ class LaporanController extends Controller
             'keluarga' => 'Rekapan Pemeriksaan Keluarga',
             'pensiun'  => 'Rekapan Pemeriksaan Pensiunan',
             'dokter'   => 'Rekapan Biaya Dokter',
-            'obat'     => 'Rekapan Biaya Obat',
-            'alat'     => 'Rekapan Alat Kesehatan',
+            'obat'     => 'Rekapan Penggunaan Obat',
             'total'    => 'Rekapan Total Operasional',
+            'global'   => 'Rekapan Seluruh Pemeriksaan',
         ];
 
-        $preview = DB::table('pemeriksaan')
-            ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-            ->join('pasien', 'pendaftaran.id_pasien', '=', 'pasien.id_pasien')
-            ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
+        /* ================= PEGawai / KELUARGA / PENSIUN ================= */
+        foreach (['pegawai','keluarga','pensiun'] as $tipe) {
+            $preview[$tipe] = DB::table('pemeriksaan')
+                ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+                ->join('pasien','pendaftaran.id_pasien','=','pasien.id_pasien')
+                ->where('pasien.tipe_pasien',$tipe)
+                ->select(
+                    'pasien.nama_pasien',
+                    'pemeriksaan.created_at as tanggal'
+                )
+                ->latest('pemeriksaan.created_at')
+                ->limit(5)
+                ->get();
+        }
+
+        /* ================= DOKTER =================
+           SESUAI ERD: TIDAK ADA GAJI
+           - dokter perusahaan → dihitung per pemeriksaan
+           - dokter poli → hanya ditampilkan (tanpa nominal tetap)
+        ================================================= */
+        $preview['dokter'] = DB::table('dokter')
+            ->leftJoin('pendaftaran','dokter.id_dokter','=','pendaftaran.id_dokter')
+            ->leftJoin('pemeriksaan','pendaftaran.id_pendaftaran','=','pemeriksaan.id_pendaftaran')
             ->select(
-                'pasien.nama_pasien',
-                'dokter.nama',
-                'pemeriksaan.created_at as tanggal'
+                'dokter.nama as nama_dokter',
+                'dokter.jenis_dokter',
+                DB::raw('COUNT(pemeriksaan.id_pemeriksaan) as total_pasien')
             )
-            ->orderBy('pemeriksaan.created_at', 'desc')
+            ->groupBy('dokter.id_dokter','dokter.nama','dokter.jenis_dokter')
             ->limit(5)
             ->get();
 
-        return view('kepegawaian.laporan.index', compact('rekapan', 'preview'));
-    }
-
-    // ===============================
-    // DETAIL LAPORAN + FILTER TANGGAL
-    // ===============================
-    public function detail(Request $request, $jenis)
-    {
-        $judul = $this->getJudul($jenis);
-
-        $query = DB::table('pemeriksaan')
-            ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-            ->join('pasien', 'pendaftaran.id_pasien', '=', 'pasien.id_pasien')
-            ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
+        /* ================= OBAT ================= */
+        $preview['obat'] = DB::table('detail_resep')
+            ->join('obat','detail_resep.id_obat','=','obat.id_obat')
+            ->join('resep','detail_resep.id_resep','=','resep.id_resep')
+            ->join('pemeriksaan','resep.id_pemeriksaan','=','pemeriksaan.id_pemeriksaan')
+            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+            ->join('pasien','pendaftaran.id_pasien','=','pasien.id_pasien')
+            ->leftJoin('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
             ->select(
+                'obat.nama_obat',
+                'detail_resep.jumlah',
+                'obat.harga',
+                DB::raw('(detail_resep.jumlah * obat.harga) as total'),
                 'pasien.nama_pasien',
-                'dokter.nama',
-                'pendaftaran.keluhan',
-                'pemeriksaan.created_at as tanggal'
-            );
-
-        // filter jenis pasien (ERD: pasien.tipe_pasien)
-        if (in_array($jenis, ['pegawai', 'keluarga', 'pensiun'])) {
-            $query->where('pasien.tipe_pasien', $jenis);
-        }
-
-        // filter rentang tanggal
-        if ($request->filled('from') && $request->filled('to')) {
-            $query->whereBetween('pemeriksaan.created_at', [
-                $request->from . ' 00:00:00',
-                $request->to . ' 23:59:59'
-            ]);
-        }
-
-        $data = $query
-            ->orderBy('pemeriksaan.created_at', 'desc')
-            ->get();
-
-        return view('kepegawaian.laporan.detail', compact(
-            'judul',
-            'jenis',
-            'data'
-        ));
-    }
-
-    // ===============================
-    // DOWNLOAD PDF
-    // ===============================
-    public function downloadPdf(Request $request, $jenis)
-    {
-        $judul = $this->getJudul($jenis);
-
-        $data = DB::table('pemeriksaan')
-            ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-            ->join('pasien', 'pendaftaran.id_pasien', '=', 'pasien.id_pasien')
-            ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
-            ->select(
-                'pasien.nama_pasien',
-                'dokter.nama',
-                'pendaftaran.keluhan',
+                'dokter.nama as nama_dokter',
                 'pemeriksaan.created_at as tanggal'
             )
-            ->when(in_array($jenis, ['pegawai','keluarga','pensiun']), function ($q) use ($jenis) {
-                $q->where('pasien.tipe_pasien', $jenis);
-            })
-            ->orderBy('pemeriksaan.created_at', 'desc')
+            ->latest('pemeriksaan.created_at')
+            ->limit(5)
             ->get();
 
-        $pdf = Pdf::loadView('kepegawaian.laporan.pdf', compact('judul', 'data'));
+        /* ================= TOTAL OPERASIONAL ================= */
+        $total_obat = DB::table('detail_resep')
+            ->join('obat','detail_resep.id_obat','=','obat.id_obat')
+            ->select(DB::raw('SUM(detail_resep.jumlah * obat.harga) as total'))
+            ->value('total');
 
-        return $pdf->download("laporan-$jenis.pdf");
-    }
+        $preview['total'] = [
+            'total_dokter' => 0, // SESUAI ERD (tidak ada field gaji)
+            'total_obat'   => $total_obat ?? 0,
+            'grand_total'  => $total_obat ?? 0,
+        ];
 
-    private function getJudul($jenis)
-    {
-        return match ($jenis) {
-            'pegawai'  => 'Rekapan Pemeriksaan Pegawai',
-            'keluarga' => 'Rekapan Pemeriksaan Keluarga',
-            'pensiun'  => 'Rekapan Pemeriksaan Pensiunan',
-            'dokter'   => 'Rekapan Biaya Dokter',
-            'obat'     => 'Rekapan Biaya Obat',
-            'alat'     => 'Rekapan Alat Kesehatan',
-            'total'    => 'Rekapan Total Operasional',
-            default    => 'Rekapan Laporan',
-        };
+        /* ================= GLOBAL ================= */
+        $preview['global'] = DB::table('pemeriksaan')
+            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+            ->join('pasien','pendaftaran.id_pasien','=','pasien.id_pasien')
+            ->select(
+                'pasien.nama_pasien',
+                'pasien.tipe_pasien',
+                'pemeriksaan.created_at as tanggal'
+            )
+            ->latest('pemeriksaan.created_at')
+            ->limit(5)
+            ->get();
+
+        return view('kepegawaian.laporan.index', compact('rekapan','preview'));
     }
 }
