@@ -13,14 +13,14 @@ class ObatController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DB::table('obat');
+        $query = DB::table('obat')->where('is_active', '1');
 
         if ($request->filled('q')) {
             $query->where('nama_obat', 'like', '%' . $request->q . '%');
         }
 
         $obat = $query
-            ->select('id_obat', 'nama_obat', 'harga', 'exp_date')
+            ->select('id_obat', 'nama_obat', 'harga', 'exp_date', 'is_active')
             ->orderBy('nama_obat')
             ->get();
 
@@ -116,11 +116,17 @@ class ObatController extends Controller
 
     public function destroy($id)
     {
-        DB::table('obat')->where('id_obat', $id)->delete();
+        DB::table('obat')
+            ->where('id_obat', $id)
+            ->update([
+                'is_active' => '0',
+                'updated_at' => now(),
+            ]);
 
         return redirect()->route('adminpoli.obat.index')
             ->with('success', 'Obat berhasil dihapus');
     }
+
 
     // Placeholder (biar route ada & UI upload/download gak error)
     public function import(Request $request)
@@ -135,22 +141,35 @@ class ObatController extends Controller
             'from'   => ['required', 'date'],
             'to'     => ['required', 'date', 'after_or_equal:from'],
             'format' => ['required', 'in:csv,excel,pdf'],
+            'action' => ['required', 'in:preview,download'],
         ], [
             'from.required' => 'Tanggal awal wajib diisi.',
             'to.required'   => 'Tanggal akhir wajib diisi.',
-            'format.required' => 'Format download wajib dipilih.',
+            'format.required' => 'Format wajib dipilih.',
         ]);
 
         $from = $request->from . ' 00:00:00';
         $to   = $request->to   . ' 23:59:59';
 
-        // Filter rentang: pakai created_at (karena ini yang paling masuk akal untuk "rentang data")
+        // Filter rentang berdasarkan created_at (data masuk pada rentang tsb)
         $data = DB::table('obat')
-            ->select('id_obat', 'nama_obat', 'harga', 'exp_date', 'created_at')
+            ->select('id_obat', 'nama_obat', 'harga', 'exp_date', 'created_at', 'is_active')
             ->whereBetween('created_at', [$from, $to])
             ->orderBy('nama_obat')
             ->get();
 
+        // ====== PREVIEW ======
+        if ($request->action === 'preview') {
+            return view('adminpoli.obat.preview', [
+                'data'   => $data,
+                'from'   => $request->from,
+                'to'     => $request->to,
+                'format' => $request->format,
+                'count'  => $data->count(),
+            ]);
+        }
+
+        // ====== DOWNLOAD ======
         $fileBase = 'data-obat_' . $request->from . '_sd_' . $request->to;
 
         if ($request->format === 'csv') {
@@ -158,30 +177,19 @@ class ObatController extends Controller
 
             return response()->streamDownload(function () use ($data) {
                 $out = fopen('php://output', 'w');
+                fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM UTF-8
 
-                // BOM biar Excel kebaca UTF-8
-                fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
-
-                fputcsv($out, ['ID Obat', 'Nama Obat', 'Harga', 'Exp Date', 'Created At']);
+                fputcsv($out, ['ID Obat', 'Nama Obat', 'Harga', 'Exp Date']);
 
                 foreach ($data as $row) {
-                    fputcsv($out, [
-                        $row->id_obat,
-                        $row->nama_obat,
-                        $row->harga,
-                        $row->exp_date,
-                        $row->created_at,
-                    ]);
+                    fputcsv($out, [$row->id_obat, $row->nama_obat, $row->harga, $row->exp_date]);
                 }
 
                 fclose($out);
-            }, $filename, [
-                'Content-Type' => 'text/csv; charset=UTF-8',
-            ]);
+            }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
         }
 
         if ($request->format === 'excel') {
-            // Tanpa library tambahan: export "Excel" berupa HTML table .xls (Excel bisa buka)
             $filename = $fileBase . '.xls';
 
             $html = view('adminpoli.obat.export_excel', [
@@ -196,19 +204,14 @@ class ObatController extends Controller
             ]);
         }
 
-        // PDF: butuh dompdf (barryvdh/laravel-dompdf). Kita buat cek agar tidak error.
+        // PDF (butuh dompdf)
         if ($request->format === 'pdf') {
-            if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class) && !class_exists(\Barryvdh\DomPDF\Facade\PDF::class)) {
+            if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
                 return redirect()->route('adminpoli.obat.index')
                     ->with('error', 'Export PDF belum aktif (Dompdf belum terpasang).');
             }
 
-            // Support dua alias facade: Pdf / PDF
-            $pdfFacade = class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)
-                ? \Barryvdh\DomPDF\Facade\Pdf::class
-                : \Barryvdh\DomPDF\Facade\PDF::class;
-
-            $pdf = $pdfFacade::loadView('adminpoli.obat.export_pdf', [
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('adminpoli.obat.export_pdf', [
                 'data' => $data,
                 'from' => $request->from,
                 'to'   => $request->to,

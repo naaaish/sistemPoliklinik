@@ -38,7 +38,6 @@
         {{-- Row 2: Upload + Download (sesuai desain: baris kecil rapi) --}}
         <div class="obat-tools-row">
 
-            {{-- Upload (tetap ada) --}}
             @if(\Illuminate\Support\Facades\Route::has('adminpoli.obat.import'))
                 <form action="{{ route('adminpoli.obat.import') }}" method="POST" enctype="multipart/form-data" class="obat-upload">
                     @csrf
@@ -52,7 +51,6 @@
                     </button>
                 </form>
             @else
-                {{-- kalau route belum dibuat, tetap tampil tapi nonaktif (biar nggak error) --}}
                 <div class="obat-upload obat-disabled">
                     <div class="obat-file"><span>Pilih File</span></div>
                     <button type="button" class="obat-btn-soft" disabled>Upload</button>
@@ -66,17 +64,24 @@
                 <input type="date" name="to" value="{{ request('to') }}" class="obat-date" required>
 
                 <select name="format" class="obat-select" required>
-                    <option value="" disabled {{ request('format') ? '' : 'selected' }}>Pilih Format</option>
-                    <option value="csv"  {{ request('format')=='csv' ? 'selected' : '' }}>CSV</option>
-                    <option value="excel"{{ request('format')=='excel' ? 'selected' : '' }}>Excel</option>
-                    <option value="pdf"  {{ request('format')=='pdf' ? 'selected' : '' }}>PDF</option>
+                    <option value="" disabled selected>Pilih Format</option>
+                    <option value="csv">CSV</option>
+                    <option value="excel">Excel</option>
+                    <option value="pdf">PDF</option>
                 </select>
 
-                <button type="submit" class="obat-btn-soft">
+                {{-- Preview --}}
+                <button type="submit" name="action" value="preview" class="obat-btn-soft">
+                    <span>Preview</span>
+                </button>
+
+                {{-- Download --}}
+                <button type="submit" name="action" value="download" class="obat-btn-soft">
                     <img src="{{ asset('assets/adminPoli/download.png') }}" alt="download" class="obat-ic">
                     <span>Download</span>
                 </button>
             </form>
+
         </div>
 
         @if(request('from') && request('to'))
@@ -119,9 +124,7 @@
                             <img src="{{ asset('assets/adminPoli/edit.png') }}" alt="edit" class="obat-ic-sm">
                                 Edit
                             </button>
-
-                            <form method="POST" action="{{ route('adminpoli.obat.destroy', $pk) }}" class="obat-del-form"
-                                  onsubmit="return confirm('Yakin hapus obat ini?');">
+                            <form method="POST" action="{{ route('adminpoli.obat.destroy', $pk) }}" class="obat-del-form js-obat-delete">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="obat-act obat-del">
@@ -129,6 +132,7 @@
                                     <img src="{{ asset('assets/adminPoli/sampah.png') }}" alt="hapus" class="obat-ic-sm">
                                 </button>
                             </form>
+
                         </div>
                     </div>
                 @empty
@@ -205,6 +209,8 @@
     </div>
 
 </div>
+
+
 @endsection
 
 <script>
