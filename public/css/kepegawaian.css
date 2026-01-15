@@ -1,0 +1,251 @@
+/* ============================= */
+/* GLOBAL */
+/* ============================= */
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background:#F4F8FC;
+    font-size:14px;
+    color:#1f2d3d;
+}
+
+/* ============================= */
+/* SIDEBAR */
+/* ============================= */
+.sidebar{
+    width:240px;
+    height:100vh;
+    position:fixed;
+    left:0;
+    top:0;
+    background:#316BA1;
+    padding:24px 18px;
+    color:white;
+    display:flex;
+    flex-direction:column;
+}
+
+.sidebar h2{
+    font-size:20px;
+    color:#B4F2F4;
+    margin-bottom:6px;
+}
+
+.sidebar small{
+    font-size:12px;
+    opacity:.85;
+}
+
+.menu{
+    margin-top:40px;
+    flex:1;
+}
+
+.menu a{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 18px;
+    border-radius:12px;
+    color:white;
+    text-decoration:none;
+    margin-bottom:12px;
+    font-size:14px;
+    transition:.2s;
+}
+
+.menu a:hover{
+    background:rgba(255,255,255,.15);
+}
+
+.menu a.active{
+    background:rgba(255,255,255,.3);
+}
+
+/* LOGOUT */
+.logout-form{
+    padding:0 4px;
+}
+
+.logout-btn{
+    width:100%;
+    background:rgba(255,255,255,0.15);
+    border:none;
+    color:#FFD6D6;
+    padding:12px;
+    border-radius:12px;
+    font-size:14px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.logout-btn:hover{
+    background:#ff6b6b;
+    color:white;
+}
+/* ============================= */
+/* CARD TENGAH (HIGHLIGHT) */
+/* ============================= */
+
+.card-grid{
+    align-items:stretch;
+}
+
+.card{
+    transition:.25s ease;
+}
+
+/* default card agak kecil */
+.card:not(.highlight){
+    transform:scale(.94);
+    opacity:.85;
+}
+
+/* CARD TENGAH */
+.card.highlight{
+    transform:scale(1.05);
+    border:2px solid #316BA1;
+    box-shadow:0 14px 35px rgba(49,107,161,.25);
+    z-index:2;
+}
+
+/* ============================= */
+/* MAIN */
+/* ============================= */
+.main{
+    margin-left:260px;
+    padding:32px 36px;
+}
+
+/* ============================= */
+/* HEADER */
+/* ============================= */
+.header{
+    background:linear-gradient(90deg,#B4F2F4,#7DEAEE);
+    padding:24px 32px;
+    border-radius:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.header h3{
+    font-size:20px;
+    font-weight:600;
+    color:#0319A7;
+}
+
+/* ============================= */
+/* DASHBOARD CARDS */
+/* ============================= */
+.card-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+    margin-bottom:30px;
+}
+
+.card{
+    background:white;
+    padding:24px;
+    border-radius:14px;
+    box-shadow:0 6px 16px rgba(0,0,0,.06);
+    text-align:center;
+}
+
+.card.active{
+    border:2px solid #316BA1;
+}
+
+.card h1{
+    font-size:30px;
+    color:#70BACD;
+    margin-bottom:8px;
+}
+
+/* ============================= */
+/* TABLE CARD (SEMUA HALAMAN) */
+/* ============================= */
+.table-box{
+    background:white;
+    border-radius:16px;
+    padding:20px 22px;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);
+}
+
+.table-box h3{
+    font-size:18px;
+    color:#316BA1;
+    margin-bottom:16px;
+}
+
+/* ============================= */
+/* TABLE GLOBAL */
+/* ============================= */
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead{
+    background:#E8FAFF;
+}
+
+th{
+    font-size:14px;
+    color:#5C6E9A;
+    font-weight:600;
+    padding:12px 14px;
+    text-align:left;
+}
+
+td{
+    padding:12px 14px;
+    font-size:14px;
+    color:#5C6E9A;
+}
+
+tbody tr{
+    border-bottom:1px solid #EEF2F7;
+}
+
+tbody tr:hover{
+    background:#F6FAFF;
+}
+
+/* ============================= */
+/* BUTTON */
+/* ============================= */
+.view-btn{
+    width:28px;
+    height:28px;
+    background:#316BA1;
+    color:white;
+    border-radius:8px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:600;
+    text-decoration:none;
+    transition:.2s;
+}
+
+.view-btn:hover{
+    background:#28598A;
+}
+
+/* ============================= */
+/* FOOTER */
+/* ============================= */
+.page-footer{
+    margin-top:30px;
+    text-align:center;
+    font-size:12px;
+    color:#6B7DA3;
+}
