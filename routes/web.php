@@ -107,11 +107,14 @@ Route::middleware(['auth', 'ensureKepegawaian'])->prefix('kepegawaian')->group(f
         ->name('kepegawaian.riwayat');
 
     // Laporan
-    Route::get('/laporan', [LaporanController::class, 'index'])
-        ->name('kepegawaian.laporan');
+    Route::prefix('kepegawaian')->group(function () {
+        Route::get('/laporan', [LaporanController::class, 'index'])
+            ->name('kepegawaian.laporan');
 
-    Route::get('/laporan/{jenis}', [LaporanController::class, 'detail'])
-        ->name('kepegawaian.laporan.detail');
+        Route::get('/laporan/{jenis}', [LaporanController::class, 'detail'])
+            ->name('kepegawaian.laporan.detail');
+    });
+
 
     Route::get('/laporan/{jenis}/download', [LaporanController::class, 'downloadPdf'])
         ->name('kepegawaian.laporan.download');
