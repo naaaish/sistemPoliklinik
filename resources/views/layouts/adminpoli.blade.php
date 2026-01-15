@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
     {{-- CSS khusus AdminPoli --}}
-    <link rel="stylesheet" href="{{ asset('css/adminpoli.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli.css') }}?v={{ filemtime(public_path('css/adminpoli.css')) }}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>

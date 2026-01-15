@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\AdminPoli;
+
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ObatController extends Controller
 {
@@ -11,34 +12,41 @@ class ObatController extends Controller
     {
         $query = DB::table('obat');
 
-        if ($request->q) {
+        if ($request->filled('q')) {
             $query->where('nama_obat', 'like', '%' . $request->q . '%');
         }
 
-        $obat = $query->orderBy('nama_obat')->get();
+        $obat = $query->select('id_obat', 'nama_obat', 'harga', 'exp_date')
+            ->orderBy('nama_obat')
+            ->get();
 
         return view('adminpoli.obat.index', compact('obat'));
     }
 
     public function create()
     {
+        // Kalau kamu pakai modal, method ini boleh diabaikan.
         return view('adminpoli.obat.create');
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'nama_obat' => 'required',
+            'nama_obat' => 'required|string|max:255',
             'harga'     => 'required|numeric',
             'exp_date'  => 'required|date',
         ]);
 
+        $last = DB::table('obat')->max('id_obat');
+        $newId = $last ? $last + 1 : 1;
+
         DB::table('obat')->insert([
-            'nama_obat' => $request->nama_obat,
-            'harga'     => $request->harga,
-            'exp_date'  => $request->exp_date,
-            'created_at'=> now(),
-            'updated_at'=> now(),
+            'id_obat'   => $newId,
+            'nama_obat'  => $request->nama_obat,
+            'harga'      => $request->harga,
+            'exp_date'   => $request->exp_date,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return redirect()->route('adminpoli.obat.index')
@@ -47,7 +55,13 @@ class ObatController extends Controller
 
     public function edit($id)
     {
-        $obat = DB::table('obat')->where('id', $id)->first();
+        // PK tabelmu: id_obat
+        $obat = DB::table('obat')->where('id_obat', $id)->first();
+
+        if (!$obat) {
+            return redirect()->route('adminpoli.obat.index')
+                ->with('error', 'Data obat tidak ditemukan');
+        }
 
         return view('adminpoli.obat.edit', compact('obat'));
     }
@@ -55,17 +69,19 @@ class ObatController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'nama_obat' => 'required',
+            'nama_obat' => 'required|string|max:255',
             'harga'     => 'required|numeric',
             'exp_date'  => 'required|date',
         ]);
 
-        DB::table('obat')->where('id', $id)->update([
-            'nama_obat' => $request->nama_obat,
-            'harga'     => $request->harga,
-            'exp_date'  => $request->exp_date,
-            'updated_at'=> now(),
-        ]);
+        DB::table('obat')
+            ->where('id_obat', $id)
+            ->update([
+                'nama_obat'  => $request->nama_obat,
+                'harga'      => $request->harga,
+                'exp_date'   => $request->exp_date,
+                'updated_at' => now(),
+            ]);
 
         return redirect()->route('adminpoli.obat.index')
             ->with('success', 'Obat berhasil diperbarui');
@@ -73,9 +89,22 @@ class ObatController extends Controller
 
     public function destroy($id)
     {
-        DB::table('obat')->where('id', $id)->delete();
+        DB::table('obat')->where('id_obat', $id)->delete();
 
         return redirect()->route('adminpoli.obat.index')
             ->with('success', 'Obat berhasil dihapus');
+    }
+
+    // Placeholder (biar route ada & UI upload/download gak error)
+    public function import(Request $request)
+    {
+        return redirect()->route('adminpoli.obat.index')
+            ->with('error', 'Fitur import belum diaktifkan.');
+    }
+
+    public function export(Request $request)
+    {
+        return redirect()->route('adminpoli.obat.index')
+            ->with('error', 'Fitur export belum diaktifkan.');
     }
 }

@@ -70,6 +70,8 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
         ->name('pemeriksaan.store');
 
     Route::resource('obat', ObatController::class);
+    Route::post('obat/import', [\App\Http\Controllers\AdminPoli\ObatController::class, 'import'])->name('obat.import');
+    Route::get('obat/export', [\App\Http\Controllers\AdminPoli\ObatController::class, 'export'])->name('obat.export');
 
     // (optional untuk autofill)
     Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
