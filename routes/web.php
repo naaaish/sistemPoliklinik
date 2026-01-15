@@ -9,6 +9,10 @@ use App\Http\Controllers\AdminPoli\DashboardController as AdminPoliDashboardCont
 use App\Http\Controllers\AdminPoli\PendaftaranController;
 use App\Http\Controllers\AdminPoli\PemeriksaanController;
 
+use App\Http\Controllers\Kepegawaian\KDashboardController;
+use App\Http\Controllers\Kepegawaian\PegawaiController;
+use App\Http\Controllers\Kepegawaian\KRiwayatController;
+use App\Http\Controllers\Kepegawaian\LaporanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,4 +80,76 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
 
     // (optional untuk autofill)
     Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
+});
+});
+
+
+/*
+|--------------------------------------------------------------------------
+|  ADMIN KEPEGAWAIAN ROUTES
+|--------------------------------------------------------------------------
+*/
+
+
+Route::middleware(['auth', 'ensureKepegawaian'])->prefix('kepegawaian')->group(function () {
+
+
+        Route::get('/dashboard', [KDashboardController::class, 'index'])
+            ->name('dashboard');
+    // Dashboard
+    Route::get('/dashboard', [KDashboardController::class, 'index'])
+        ->name('kepegawaian.dashboard');
+
+    // Data Pegawai
+    Route::get('/pegawai', [PegawaiController::class, 'index'])
+        ->name('kepegawaian.pegawai');
+
+    // Riwayat Pemeriksaan
+    Route::get('/riwayat', [KRiwayatController::class, 'index'])
+        ->name('kepegawaian.riwayat');
+
+    // Laporan
+    Route::prefix('kepegawaian')->group(function () {
+        Route::get('/laporan', [LaporanController::class, 'index'])
+            ->name('kepegawaian.laporan');
+
+        Route::get('/laporan/{jenis}', [LaporanController::class, 'detail'])
+            ->name('kepegawaian.laporan.detail');
+    });
+
+
+    Route::get('/laporan/{jenis}/download', [LaporanController::class, 'downloadPdf'])
+        ->name('kepegawaian.laporan.download');
+});
+
+// Route::get('/pasien/riwayat', [RiwayatController::class, 'index'])
+//     ->name('pasien.riwayat');
+use App\Http\Controllers\Pasien\ArtikelController;
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/pasien/artikel', 
+        [ArtikelController::class, 'index']
+    )->name('pasien.artikel');
+
+    Route::get('/pasien/artikel/{id}', 
+        [ArtikelController::class, 'show']
+    )->name('pasien.artikel.detail');
+
+});
+
+
+// LAPORAN
+
+Route::prefix('kepegawaian')->middleware('auth')->group(function () {
+
+    Route::get('/laporan', [LaporanController::class, 'index'])
+        ->name('kepegawaian.laporan');
+
+    Route::get('/laporan/{jenis}', [LaporanController::class, 'detail'])
+        ->name('kepegawaian.laporan.detail');
+
+    Route::get('/laporan/{jenis}/download', [LaporanController::class, 'download'])
+        ->name('kepegawaian.laporan.download');
+
 });
