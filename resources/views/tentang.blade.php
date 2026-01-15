@@ -1,4 +1,4 @@
-@extends('pasien.layout')
+@extends('layouts.pasien')
 
 @section('title','TENTANG KAMI - SISTEM POLIKLINIK')
 

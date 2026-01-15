@@ -1,4 +1,4 @@
-@extends('pasien.layout')
+@extends('layouts.pasien')
 
 @section('title','Artikel Kesehatan')
 
@@ -6,13 +6,13 @@
 <style>
 
 /* ===== HERO ===== */
-.hero-riwayat {
-    position: relative;
-    height: 350px;
-    background: url("/images/bg2.png") center / cover no-repeat;
-    display: flex;
-    align-items: center;
-    padding: 0 60px;
+.pasien-hero{
+    background:
+        url("/images/bg2.png") top center no-repeat,
+        linear-gradient(135deg, rgba(49,107,161,.95), rgba(63,127,191,.95));
+    background-size:100% auto;
+    padding:90px 80px 150px;
+    color:white;
 }
 
 /* .hero-overlay {
@@ -32,15 +32,15 @@
 }
 
 .hero-content h2 {
-    font-size: 38px;
+    font-size: 40px;
     font-weight: 700;
-    color: #1f2d3d;
+    color: #f4f6f8;
 }
 
 .hero-content p {
-    margin-top: 10px;
-    font-size: 15px;
-    color: #3b4b63;
+    margin-top: 5px;
+    font-size: 18px;
+    color: #f9fafb;
     max-width: 520px;
 }
 
@@ -126,7 +126,7 @@
 @section('content')
 
 <!-- HERO -->
-<div class="hero-riwayat">
+    <div class="pasien-hero">
     <div class="hero-overlay"></div>
     <div class="hero-content">
         <h2>Artikel Kesehatan</h2>
