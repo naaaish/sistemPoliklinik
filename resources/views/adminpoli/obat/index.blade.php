@@ -60,29 +60,33 @@
             @endif
 
             {{-- Download + rentang tanggal --}}
-            @if(\Illuminate\Support\Facades\Route::has('adminpoli.obat.export'))
-                <form action="{{ route('adminpoli.obat.export') }}" method="GET" class="obat-download">
-                    <input type="date" name="from" value="{{ request('from') }}" class="obat-date">
-                    <span class="obat-sep">s/d</span>
-                    <input type="date" name="to" value="{{ request('to') }}" class="obat-date">
+            <form action="{{ route('adminpoli.obat.export') }}" method="GET" class="obat-download">
+                <input type="date" name="from" value="{{ request('from') }}" class="obat-date" required>
+                <span class="obat-sep">s/d</span>
+                <input type="date" name="to" value="{{ request('to') }}" class="obat-date" required>
 
-                    <button type="submit" class="obat-btn-soft">
-                        <img src="{{ asset('assets/adminPoli/download.png') }}" alt="download" class="obat-ic">
-                        <span>Download</span>
-                    </button>
-                </form>
-            @else
-                <div class="obat-download obat-disabled">
-                    <input type="date" class="obat-date" disabled>
-                    <span class="obat-sep">s/d</span>
-                    <input type="date" class="obat-date" disabled>
-                    <button type="button" class="obat-btn-soft" disabled>
-                        <span>Download</span>
-                    </button>
-                </div>
-            @endif
+                <select name="format" class="obat-select" required>
+                    <option value="" disabled {{ request('format') ? '' : 'selected' }}>Pilih Format</option>
+                    <option value="csv"  {{ request('format')=='csv' ? 'selected' : '' }}>CSV</option>
+                    <option value="excel"{{ request('format')=='excel' ? 'selected' : '' }}>Excel</option>
+                    <option value="pdf"  {{ request('format')=='pdf' ? 'selected' : '' }}>PDF</option>
+                </select>
 
+                <button type="submit" class="obat-btn-soft">
+                    <img src="{{ asset('assets/adminPoli/download.png') }}" alt="download" class="obat-ic">
+                    <span>Download</span>
+                </button>
+            </form>
         </div>
+
+        @if(request('from') && request('to'))
+            <div class="obat-preview">
+                <span>
+                    {{ $previewCount ?? 0 }} data obat ditemukan
+                    ({{ request('from') }} s/d {{ request('to') }})
+                </span>
+            </div>
+        @endif
 
         {{-- Table --}}
         <div class="obat-table">
@@ -128,8 +132,13 @@
                         </div>
                     </div>
                 @empty
-                    <div class="obat-empty">Data obat belum ada.</div>
+                <div class="obat-row obat-row-empty">
+                    <div class="obat-empty-span">
+                        {{ request('q') ? 'Tidak ada obat ditemukan' : 'Belum ada data obat' }}
+                    </div>
+                </div>
                 @endforelse
+
             </div>
         </div>
 
@@ -148,12 +157,12 @@
 
                     <div class="modal-group">
                         <label>Harga Satuan</label>
-                        <input type="number" name="harga" required>
+                        <input type="number" name="harga" min="1" step="1" required>
                     </div>
 
                     <div class="modal-group">
                         <label>Expired Date</label>
-                        <input type="date" name="exp_date" required>
+                        <input type="date" name="exp_date" id="editExp" min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
                     </div>
 
                     <button type="submit" class="modal-btn">Simpan</button>
@@ -182,7 +191,7 @@
 
                     <div class="modal-group">
                         <label>Expired Date</label>
-                        <input type="date" name="exp_date" id="editExp" required>
+                        <input type="date" name="exp_date" id="editExp" min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
                     </div>
 
                     <button type="submit" class="modal-btn">Simpan</button>
