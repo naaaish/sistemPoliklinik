@@ -140,17 +140,28 @@ class PendaftaranController extends Controller
 
     private function generateIdPendaftaran()
     {
-        $last = DB::table('pendaftaran')
-            ->orderBy('id_pendaftaran', 'desc')
-            ->value('id_pendaftaran');
+        // ambil semua id, cari angka terbesar di belakang (aman meski formatnya REG-26011403 / REG0007 / dll)
+        $ids = DB::table('pendaftaran')->pluck('id_pendaftaran');
 
-        if (!$last) {
-            return 'REG0001';
+        $max = 0;
+        foreach ($ids as $id) {
+            // ambil digit terakhir berurutan (contoh REG-26011403 => 26011403, REG0007 => 0007)
+            if (preg_match('/(\d+)$/', $id, $m)) {
+                $num = (int) $m[1];
+                if ($num > $max) $max = $num;
+            }
         }
 
-        $number = (int) substr($last, 3);
-        $number++;
+        $next = $max + 1;
 
-        return 'REG' . str_pad($number, 4, '0', STR_PAD_LEFT);
+        // opsi B: format REG0001 dst
+        // kalau next besar (misal 26011404), ini bakal jadi REG26011404 (tetap unik).
+        // kalau kamu mau dipaksa 4 digit doang, bilang ya.
+        if ($next <= 9999) {
+            return 'REG' . str_pad($next, 4, '0', STR_PAD_LEFT);
+        }
+
+        return 'REG' . $next;
     }
+
 }

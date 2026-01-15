@@ -20,103 +20,94 @@
 
     <form method="POST" action="{{ route('adminpoli.pemeriksaan.store', $pendaftaran->id_pendaftaran) }}" id="formPemeriksaan">
 
-      {{-- ===== DATA PEMERIKSAAN KESEHATAN ===== --}}
-      <div style="color:#316BA1;font-size:19px;margin:18px 0 10px;">Data Pemeriksaan Kesehatan</div>
+    <div style="color:#316BA1;font-size:19px;margin:18px 0 10px;">
+  Data Pemeriksaan Kesehatan
+</div>
 
-      <div class="ap-row">
-        <div class="ap-label">Sistol</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="sistol" placeholder="Sistol"></div>
-      </div>
+<div class="ap-vitals-grid">
+  {{-- BARIS 1 --}}
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Sistol</div>
+    <input class="ap-vital-input" name="sistol">
+  </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Diastol</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="diastol" placeholder="Diastol"></div>
-      </div>
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Diastol</div>
+    <input class="ap-vital-input" name="diastol">
+  </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Denyut Nadi</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="nadi" placeholder="Denyut Nadi"></div>
-      </div>
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Denyut Nadi</div>
+    <input class="ap-vital-input" name="nadi">
+  </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Gula Darah Puasa</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="gula_puasa" placeholder="Gula Darah Puasa"></div>
-      </div>
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Gula Darah<br>Puasa</div>
+    <input class="ap-vital-input" name="gula_puasa">
+  </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Gula Darah 2 jam PP</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="gula_2jam_pp" placeholder="Gula Darah 2 jam PP"></div>
-      </div>
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Gula Darah<br>2 jam PP</div>
+    <input class="ap-vital-input" name="gula_2jam_pp">
+  </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Gula Darah Sewaktu</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="gula_sewaktu" placeholder="Gula Darah Sewaktu"></div>
-      </div>
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Gula Darah<br>Sewaktu</div>
+    <input class="ap-vital-input" name="gula_sewaktu">
+  </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Asam Urat</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="asam_urat" placeholder="Asam Urat"></div>
-      </div>
+  {{-- BARIS 2 --}}
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Asam Urat</div>
+    <input class="ap-vital-input" name="asam_urat">
+  </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Cholesterol</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="cholesterol" placeholder="Cholesterol"></div>
-      </div>
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Cholesterol</div>
+    <input class="ap-vital-input" name="cholesterol">
+  </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Trigliseride</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="trigliseride" placeholder="Trigliseride"></div>
-      </div>
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Trigliseride</div>
+    <input class="ap-vital-input" name="trigliseride">
+  </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Suhu</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="suhu" placeholder="Suhu"></div>
-      </div>
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Suhu</div>
+    <input class="ap-vital-input" name="suhu">
+  </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Berat Badan</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="berat_badan" placeholder="Berat Badan"></div>
-      </div>
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Berat Badan</div>
+    <input class="ap-vital-input" name="berat_badan">
+  </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Tinggi Badan</div><div class="ap-colon">:</div>
-        <div class="ap-input"><input type="number" step="0.01" name="tinggi_badan" placeholder="Tinggi Badan"></div>
-      </div>
+  <div class="ap-vital-item">
+    <div class="ap-vital-label">Tinggi Badan</div>
+    <input class="ap-vital-input" name="tinggi_badan">
+  </div>
+</div>
+
+
 
       {{-- ===== DIAGNOSA ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Diagnosa</div>
-
-      <div class="ap-row">
+        <div class="ap-row">
         <div class="ap-label">Penyakit</div><div class="ap-colon">:</div>
         <div class="ap-input">
-          <input type="text" id="inpPenyakit" placeholder="Penyakit Pasien">
-          <button type="button" id="btnAddPenyakit" class="ap-register" style="width:auto;padding:8px 12px;margin-top:8px;">
-            Tambah Penyakit
-          </button>
-
-          <div id="chipPenyakit" style="margin-top:10px;"></div>
-          <div id="hiddenPenyakit"></div>
-        </div>
-      </div>
-
-      <div class="ap-row">
-        <div class="ap-label">Penyakit</div><div class="ap-colon">:</div>
-        <div class="ap-input">
-          <select id="inpPenyakit" class="ap-select">
+            <select id="inpPenyakit" class="ap-select">
             <option value="">-- pilih (boleh kosong) --</option>
             @foreach($penyakit as $p)
-              <option value="{{ $p->id_penyakit }}">{{ $p->nama_penyakit }}</option>
+                <option value="{{ $p->id_diagnosa }}">{{ $p->diagnosa }}</option>
             @endforeach
-          </select>
+            </select>
 
-          <button type="button" id="btnAddPenyakit" class="ap-register" style="width:auto;padding:8px 12px;margin-top:8px;">
-            Tambah Penyakit
-          </button>
+            <button type="button" id="btnAddPenyakit" class="ap-btn-small">Tambah Penyakit</button>
 
-          <div id="chipPenyakit" style="margin-top:10px;"></div>
-          <div id="hiddenPenyakit"></div>
+            <div id="chipPenyakit" style="margin-top:10px;"></div>
+            <div id="hiddenPenyakit"></div>
         </div>
-      </div>
+        </div>
 
       <div class="ap-row">
         <div class="ap-label">Diagnosa</div><div class="ap-colon">:</div>
@@ -128,7 +119,7 @@
             @endforeach
           </select>
 
-          <button type="button" id="btnAddDiagnosa" class="ap-register" style="width:auto;padding:8px 12px;margin-top:8px;">
+          <button type="button" class="ap-btn-small" id="btnAddDiagnosa" style="width:auto;padding:8px 12px;margin-top:8px;">
             Tambah Diagnosa
           </button>
 
@@ -147,9 +138,7 @@
             @endforeach
           </select>
 
-          <button type="button" id="btnAddSaran" class="ap-register" style="width:auto;padding:8px 12px;margin-top:8px;">
-            Tambah Saran
-          </button>
+          <button type="button" id="btnAddSaran" class="ap-btn-small">Tambah Saran</button>
 
           <div id="chipSaran" style="margin-top:10px;"></div>
           <div id="hiddenSaran"></div>
@@ -159,7 +148,7 @@
       {{-- ===== OBAT & HARGA ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Obat & Harga</div>
 
-      {{-- TEMPLATE ROW OBAT (hidden) - TANPA JSON --}}
+      {{-- TEMPLATE ROW OBAT (hidden) --}}
       <div id="obatTemplate" style="display:none;">
         <div class="obat-row" style="display:flex;gap:10px;align-items:center;margin:10px 0;flex-wrap:wrap;">
           <select name="obat_id[]" class="ap-select obat-select" style="min-width:180px;">
@@ -187,9 +176,7 @@
 
       <div id="obatWrap"></div>
 
-      <button type="button" id="btnAddObat" class="ap-register" style="width:auto;padding:8px 12px;">
-        Tambah Obat/Alkes
-      </button>
+      <button type="button" id="btnAddObat" class="ap-btn-small">Tambah Obat/Alkes</button>
 
       <div style="text-align:right;margin-top:10px;font-weight:600;color:#787676;">
         Total : <span id="totalText">Rp0</span>
@@ -243,16 +230,18 @@
 
   // Penyakit (text)
   document.getElementById('btnAddPenyakit').addEventListener('click', () => {
-    const inp = document.getElementById('inpPenyakit');
-    const v = (inp.value || '').trim();
+    const sel = document.getElementById('inpPenyakit');
+    if(!sel.value) return;
+
     addChip({
-      value: v,
-      label: v,
-      chipContainer: document.getElementById('chipPenyakit'),
-      hiddenContainer: document.getElementById('hiddenPenyakit'),
-      inputName: 'penyakit'
+        value: sel.value,
+        label: sel.options[sel.selectedIndex].text,
+        chipContainer: document.getElementById('chipPenyakit'),
+        hiddenContainer: document.getElementById('hiddenPenyakit'),
+        inputName: 'penyakit_id'
     });
-    inp.value = '';
+
+    sel.value = '';
   });
 
   // Diagnosa K3 (select)

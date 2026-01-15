@@ -10,6 +10,7 @@ use App\Models\Pemeriksaan;
 use App\Models\Obat;
 use App\Models\DiagnosaK3;
 use App\Models\Saran;
+use App\Models\Diagnosa;
 
 // kalau kamu punya tabel detail resep:
 use App\Models\DetailResep; // <-- sesuaikan nama model kamu
@@ -28,6 +29,7 @@ class PemeriksaanController extends Controller
         $pendaftaran = Pendaftaran::findOrFail($pendaftaranId);
 
         // kolom sesuai migration: obat.nama_obat, diagnosa_k3.nama_penyakit, saran.isi
+        $penyakit   = Diagnosa::orderBy('diagnosa')->get();
         $obat = Obat::orderBy('nama_obat', 'asc')->get();
         $diagnosaK3 = DiagnosaK3::orderBy('nama_penyakit', 'asc')->get();
         $saran = Saran::orderBy('saran', 'asc')->get();
@@ -36,7 +38,8 @@ class PemeriksaanController extends Controller
             'pendaftaran',
             'obat',
             'diagnosaK3',
-            'saran'
+            'saran',
+            'penyakit',
         ));
     }
 
@@ -66,6 +69,8 @@ class PemeriksaanController extends Controller
             // ubah name input blade jadi penyakit_id[] dan diagnosa_id[] kalau memang tabelnya beda
             'penyakit_id'     => 'nullable|array',
             'penyakit_id.*'   => 'nullable|string',
+            'penyakit_json' => array_values(array_filter($validated['penyakit_id'] ?? [])),
+
 
             'diagnosa_id'     => 'nullable|array',
             'diagnosa_id.*'   => 'nullable|string',
@@ -97,7 +102,7 @@ class PemeriksaanController extends Controller
         // kalau kolomnya id_pendaftaran → pakai 'id_pendaftaran'
         // kalau kolomnya pendaftaran_id → pakai 'pendaftaran_id'
         $pemeriksaan = Pemeriksaan::create([
-            'id_pendaftaran' => $pendaftaranId, // <-- sesuaikan kalau beda
+            'id_pendaftaran' => $pendaftaranId,
 
             'sistol'       => $validated['sistol'] ?? null,
             'diastol'      => $validated['diastol'] ?? null,

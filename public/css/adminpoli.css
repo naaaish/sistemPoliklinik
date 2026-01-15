@@ -405,12 +405,17 @@ body{
 }
 
 .ap-row{
-  display:grid;
-  grid-template-columns: 220px 20px 1fr;
-  align-items:center;
-  gap: 10px;
-  padding: 10px 0;
+  display: grid;
+  grid-template-columns: 200px 12px 1fr;  /* lebih ramping */
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 6px;
+  padding: 6px 0;                        /* biar rapet, muat banyak baris */
 }
+.ap-row--textarea{
+  align-items: start;
+}
+
 .ap-row--textarea{ align-items:start; }
 
 .ap-label{
@@ -426,17 +431,30 @@ body{
 }
 
 .ap-input input,
-.ap-input select,
-.ap-input textarea{
-  width:100%;
+.ap-input select{
+  width: 100%;
+  height: 40px;                /* tinggi stabil */
   border: 1.3px solid #979797;
-  border-radius:8px;
-  padding: 10px 12px;
-  font-size:12px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
   font-family: Poppins, sans-serif;
-  outline:none;
-  transition: box-shadow .12s ease, border-color .12s ease;
+  outline: none;
+  transition: box-shadow .12s ease, border-color .12s ease, transform .12s ease;
 }
+
+.ap-input textarea{
+  width: 100%;
+  min-height: 90px;            /* textarea agak besar sesuai UI */
+  border: 1.3px solid #979797;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-family: Poppins, sans-serif;
+  outline: none;
+  resize: vertical;
+}
+
 .ap-input textarea{ resize: vertical; }
 
 .ap-input input:focus,
@@ -489,6 +507,24 @@ body{
 .ap-alert--success{ border-left: 5px solid #3bb54a; }
 .ap-alert--error{ border-left: 5px solid #e74c3c; }
 
+.ap-btn-small{
+  height: 34px;
+  width: auto;
+  padding: 6px 12px;
+  margin-top: 8px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #316BA1;
+  color: #316BA1;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.ap-btn-small:hover{
+  filter: brightness(0.98);
+}
+
 @media (max-width: 980px){
   .ap-row{ grid-template-columns: 1fr; }
   .ap-colon{ display:none; }
@@ -498,3 +534,67 @@ body{
   .ap-cards{ grid-template-columns: 1fr; }
   .ap-card--center{ grid-column: auto; }
 }
+/* ===== DATA PEMERIKSAAN KESEHATAN ===== */
+.ap-vitals-grid{
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr)); /* 6 kolom, melebar sesuai card */
+  gap: 18px 24px;
+  margin-top: 12px;
+  width: 100%;
+  justify-items: center; /* tiap kolom itemnya ketengah */
+}
+
+.ap-vital-item{
+  width: 100%;
+  max-width: 140px; /* biar kotaknya ga kegedean, tapi tetep ikut lebar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ap-vital-label{
+  height: 32px;              /* kunci tinggi label biar sejajar */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  color: #000;
+  font-size: 13px;
+  font-family: Poppins;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.ap-vital-input{
+  width: 100%;
+  height: 43px;
+  border-radius: 8px;
+  border: 1.3px solid #979797;
+  background: #FFF;
+  text-align: center;
+
+  font-size: 13px;
+  font-family: Poppins;
+  font-weight: 400;
+}
+
+.ap-card-form{
+  width: 100%;
+}
+
+.ap-vital-input:focus{
+  outline: none;
+  border-color: #316BA1;
+  box-shadow: 0 0 0 3px rgba(49,107,161,.2);
+}
+
+/* responsive (biar aman) */
+@media (max-width: 1200px){
+  .ap-vitals-grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 700px){
+  .ap-vitals-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+

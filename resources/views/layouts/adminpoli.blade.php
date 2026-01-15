@@ -28,12 +28,14 @@
         <div class="ap-menu-title">Menu</div>
 
         <nav class="ap-nav">
-            <a class="ap-nav-item active" href="{{ route('adminpoli.dashboard') }}">
+           <a class="ap-nav-item {{ request()->routeIs('adminpoli.dashboard') ? 'active' : '' }}"
+            href="{{ route('adminpoli.dashboard') }}">
                 <img src="{{ asset('assets/adminPoli/dashboard.png') }}" alt="dashboard">
                 <span>Dashboard</span>
             </a>
 
-            <a class="ap-nav-item" href="#">
+            <a class="ap-nav-item {{ request()->routeIs('adminpoli.obat.*') ? 'active' : '' }}"
+            href="{{ route('adminpoli.obat.index') }}">
                 <img src="{{ asset('assets/adminPoli/obat.png') }}" alt="obat">
                 <span>Obat</span>
             </a>
