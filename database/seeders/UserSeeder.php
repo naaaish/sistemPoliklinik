@@ -25,10 +25,10 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'username'  => 'pasien',
+            'username'  => '198765432001',
             'password'  => Hash::make('pasien123'),
             'role'      => 'pasien',
-            'nama_user' => 'Pasien 1',
+            'nama_user' => 'Dr. Ahmad Pratama',
         ]);
     }
 }
