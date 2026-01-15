@@ -81,7 +81,7 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     // (optional untuk autofill)
     Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
 });
-});
+
 
 
 /*
