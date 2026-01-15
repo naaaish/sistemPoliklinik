@@ -37,16 +37,26 @@ class ObatController extends Controller
             'exp_date'  => 'required|date',
         ]);
 
-        $last = DB::table('obat')->max('id_obat');
-        $newId = $last ? $last + 1 : 1;
+        // Ambil id_obat terakhir berdasarkan urutan terbesar (OBT-xxx)
+        $lastId = DB::table('obat')
+            ->where('id_obat', 'like', 'OBT-%')
+            ->orderByRaw("CAST(SUBSTRING(id_obat, 5) AS UNSIGNED) DESC")
+            ->value('id_obat');
+
+        $nextNumber = 1;
+        if ($lastId) {
+            $nextNumber = (int) substr($lastId, 4) + 1; // "OBT-" = 4 char
+        }
+
+        $newId = 'OBT-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
 
         DB::table('obat')->insert([
             'id_obat'   => $newId,
-            'nama_obat'  => $request->nama_obat,
-            'harga'      => $request->harga,
-            'exp_date'   => $request->exp_date,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'nama_obat' => $request->nama_obat,
+            'harga'     => $request->harga,
+            'exp_date'  => $request->exp_date,
+            'created_at'=> now(),
+            'updated_at'=> now(),
         ]);
 
         return redirect()->route('adminpoli.obat.index')
@@ -55,7 +65,6 @@ class ObatController extends Controller
 
     public function edit($id)
     {
-        // PK tabelmu: id_obat
         $obat = DB::table('obat')->where('id_obat', $id)->first();
 
         if (!$obat) {
