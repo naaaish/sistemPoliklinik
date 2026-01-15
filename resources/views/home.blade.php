@@ -1,4 +1,4 @@
-@extends('pasien.layout')
+@extends('layouts.pasien')
 
 @section('title','Dashboard Pasien')
 
@@ -14,9 +14,16 @@
         <h4>Selamat Datang, {{ Auth::user()->nama ?? 'User' }}!</h4>
         <h1>Pantau riwayat kesehatanmu<br>dengan lebih mudah</h1>
 
+    <div class="hero-buttons">
+        <a href="{{ route('login') }}" class="btn-login">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+
         <a href="#" class="btn-konsultasi">
             <i class="fas fa-phone"></i> Konsultasi Online
         </a>
+    </div>
+
     </div>
 
     <div class="hero-right">

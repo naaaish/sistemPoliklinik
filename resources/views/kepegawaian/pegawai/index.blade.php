@@ -1,4 +1,4 @@
-@extends('kepegawaian.layout')
+@extends('layouts.kepegawaian')
 
 @section('content')
 <h2>Data Pegawai</h2>

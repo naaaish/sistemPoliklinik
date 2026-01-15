@@ -1,79 +1,95 @@
-@extends('pasien.layout')
+@extends('layouts.pasien')
+
 @section('title','Riwayat Pemeriksaan')
 
 @section('content')
 
-<div class="pasien riwayat">
+<div class="riwayat">
 
-    {{-- HERO --}}
-    <div class="pasien-hero">
-        <div class="kembali" onclick="window.history.back()">
-            ← Kembali
-        </div>
-        <h1>Riwayat<br>Pemeriksaan</h1>
-    </div>
+    {{-- HERO RIWAYAT --}}
+    <section class="pasien-hero">
+        {{-- <a href="{{ url()->previous() }}" class="kembali">← Kembali</a> --}}
+        <h1>Riwayat Pemeriksaan</h1>
+    </section>
 
     <div class="pasien-container">
 
-        {{-- PROFIL PASIEN --}}
+        {{-- PROFIL --}}
+        {{-- <form method="GET" action="{{ route('pasien.riwayat') }}">
+            <select name="pasien_id" onchange="this.form.submit()">
+                @foreach($daftarPasien as $p)
+                    <option value="{{ $p->id_pasien }}"
+                        {{ $pasien && $pasien->id_pasien == $p->id_pasien ? 'selected' : '' }}>
+                        {{ $p->nama_pasien }} ({{ ucfirst($p->hub_kel) }})
+                    </option>
+                @endforeach
+            </select>
+        </form> --}}
+
+
         <div class="profile-section">
             <h2>Profil Pasien</h2>
 
             <div class="profile-box">
-                <div class="col">
-                    <p><b>Nama Pasien :</b> {{ data_get($pasien,'nama_pasien','-') }}</p>
-                    <p><b>NIP :</b> {{ data_get($pasien,'nip','-') }}</p>
-                    <p><b>Nama Pegawai :</b> {{ data_get($pasien,'pegawai.nama','-') }}</p>
-                    <p><b>Bidang :</b> {{ data_get($pasien,'pegawai.bidang','-') }}</p>
+
+            @if($pasien)
+                <div>
+                    <p><b>Nama Pasien</b>: {{ $pasien->nama_pasien }}</p>
+                    <p><b>NIP</b>: {{ $pegawai->nip ?? '-' }}</p>
+                    <p><b>Nama Pegawai</b>: {{ $pegawai->nama_pegawai ?? '-' }}</p>
+                    <p><b>Bidang</b>: {{ $pegawai->bidang ?? '-' }}</p>
                 </div>
 
-                <div class="col">
-                    <p><b>Hubungan Keluarga :</b> {{ data_get($pasien,'hub_kel','-') }}</p>
-                    <p><b>Tanggal Lahir :</b> {{ data_get($pasien,'tgl_lahir','-') }}</p>
-                    <p><b>Jenis Kelamin :</b> {{ data_get($pasien,'jenis_kelamin','-') }}</p>
-                    <p><b>Umur :</b> {{ data_get($pasien,'umur','-') }}</p>
+                <div>
+                    <p><b>Hubungan Keluarga</b>: {{ ucfirst($pasien->hub_kel) }}</p>
+                    <p><b>Tanggal Lahir</b>: 
+                        {{ \Carbon\Carbon::parse($pasien->tgl_lahir)->translatedFormat('d F Y') }}
+                    </p>
+                    <p><b>Jenis Kelamin</b>: {{ $pasien->jenis_kelamin }}</p>
                 </div>
+            @else
+                <div class="riwayat-empty">
+                    <h3>Data Pasien Belum Ada</h3>
+                    <p>Silakan lengkapi data pasien terlebih dahulu.</p>
+                </div>
+            @endif
+
             </div>
         </div>
 
         {{-- RIWAYAT --}}
         <div class="riwayat-grid">
 
-            @forelse($riwayat as $item)
-
-                <div class="riwayat-card">
-                    <div class="riwayat-header">
-                        <span>RIWAYAT</span>
-                        <span>{{ $item->tanggal }}</span>
-                    </div>
-
-                    <div class="riwayat-body">
-                        <h4>{{ $item->dokter_nama }}</h4>
-
-                        <p><b>Keluhan:</b> {{ $item->keluhan }}</p>
-                        <p><b>Diagnosa:</b> {{ $item->diagnosa }}</p>
-                        <p><b>Resep:</b> {{ $item->resep }}</p>
-
-                        <a href="#" class="detail-btn">
-                            Lihat Detail Lengkap →
-                        </a>
-                    </div>
+            @forelse($riwayat as $i => $r)
+            <div class="riwayat-card">
+                <div class="riwayat-header">
+                    <span>RIWAYAT {{ $i+1 }}</span>
+                    <span>{{ $r->created_at->translatedFormat('l, d M Y, H:i') }}</span>
                 </div>
 
+                <div class="riwayat-body">
+                    <p><b>Dokter</b>: {{ $r->dokter }}</p>
+                    <p><b>Keluhan</b>: {{ $r->keluhan }}</p>
+                    <p><b>Diagnosa</b>: {{ $r->diagnosa }}</p>
+                    <p><b>Resep</b>:
+                        @foreach($r->resep as $d)
+                            {{ $d->obat }} {{ $d->satuan }},
+                        @endforeach
+                    </p>
+
+                    <a href="{{ route('pasien.riwayat.detail',$r->id_pemeriksaan) }}"
+                    class="detail-btn">
+                    Lihat Detail Lengkap →
+                    </a>
+                </div>
+            </div>
             @empty
-
-                {{-- EMPTY STATE --}}
                 <div class="riwayat-empty">
-                    <img src="{{ asset('images/empty.png') }}" alt="Kosong">
-                    <h3>Belum ada riwayat pemeriksaan</h3>
-                    <p>Riwayat akan muncul setelah Anda melakukan pemeriksaan di poliklinik.</p>
+                    <h3>Tidak ada riwayat pemeriksaan</h3>
                 </div>
-
             @endforelse
 
         </div>
-
-    </div>
 </div>
 
 @endsection

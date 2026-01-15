@@ -105,4 +105,41 @@ Route::middleware(['auth', 'ensureKepegawaian'])->prefix('kepegawaian')->group(f
     Route::get('/laporan', [LaporanController::class, 'index'])
         ->name('kepegawaian.laporan');
 
+    Route::get('/laporan/{jenis}', [LaporanController::class, 'detail'])
+        ->name('kepegawaian.laporan.detail');
+
+    Route::get('/laporan/{jenis}/download', [LaporanController::class, 'downloadPdf'])
+        ->name('kepegawaian.laporan.download');
+});
+
+// Route::get('/pasien/riwayat', [RiwayatController::class, 'index'])
+//     ->name('pasien.riwayat');
+use App\Http\Controllers\Pasien\ArtikelController;
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/pasien/artikel', 
+        [ArtikelController::class, 'index']
+    )->name('pasien.artikel');
+
+    Route::get('/pasien/artikel/{id}', 
+        [ArtikelController::class, 'show']
+    )->name('pasien.artikel.detail');
+
+});
+
+
+// LAPORAN
+
+Route::prefix('kepegawaian')->middleware('auth')->group(function () {
+
+    Route::get('/laporan', [LaporanController::class, 'index'])
+        ->name('kepegawaian.laporan');
+
+    Route::get('/laporan/{jenis}', [LaporanController::class, 'detail'])
+        ->name('kepegawaian.laporan.detail');
+
+    Route::get('/laporan/{jenis}/download', [LaporanController::class, 'download'])
+        ->name('kepegawaian.laporan.download');
+
 });
