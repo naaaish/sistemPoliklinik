@@ -33,7 +33,7 @@ class ObatController extends Controller
     {
         $request->validate([
             'nama_obat' => 'required|string|max:255',
-            'harga'     => 'required|numeric',
+            'harga'     => 'required|numeric|min:1',
             'exp_date'  => 'required|date',
         ]);
 
@@ -79,7 +79,7 @@ class ObatController extends Controller
     {
         $request->validate([
             'nama_obat' => 'required|string|max:255',
-            'harga'     => 'required|numeric',
+            'harga'     => 'required|numeric|min:1',
             'exp_date'  => 'required|date',
         ]);
 
