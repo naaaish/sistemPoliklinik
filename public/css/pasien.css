@@ -5,11 +5,10 @@
     --white: #ffffff;
 }
 
-
-body{
+body {
     margin:0;
-    font-family:'Poppins','Segoe UI',sans-serif;
-    background:#eef5fb;
+    font-family: 'Poppins','Segoe UI',sans-serif;
+    background: #eef5fb;
 }
 
 /* ================= NAVBAR PASIEN ================= */
