@@ -15,6 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 @stack('scripts')
+
 <body>
 <div class="ap-wrap">
 
@@ -46,8 +47,15 @@
                 <span>Saran</span>
             </a>
 
+            <a class="ap-nav-item {{ request()->routeIs('adminpoli.diagnosa.*') ? 'active' : '' }}"
+            href="{{ route('adminpoli.diagnosa.index') }}">
+            <img src="{{ asset('assets/adminPoli/diagnosa.png') }}" alt="Diagnosa">
+            <span>Diagnosa</span>
+            </a>
+
+
             <a class="ap-nav-item" href="#">
-                <img src="{{ asset('assets/adminPoli/diagnosa.png') }}" alt="diagnosa">
+                <img src="{{ asset('assets/adminPoli/diagnosak3.png') }}" alt="diagnosa">
                 <span>Diagnosa K3</span>
             </a>
 

@@ -13,6 +13,7 @@ use App\Http\Controllers\Kepegawaian\KDashboardController;
 use App\Http\Controllers\Kepegawaian\PegawaiController;
 use App\Http\Controllers\Kepegawaian\KRiwayatController;
 use App\Http\Controllers\Kepegawaian\LaporanController;
+use App\Http\Controllers\AdminPoli\DiagnosaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,13 +74,19 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::post('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'store'])
         ->name('pemeriksaan.store');
 
+    // (optional untuk autofill)
+    Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
+
     Route::resource('obat', ObatController::class)->except(['show']);
     Route::post('obat/import', [\App\Http\Controllers\AdminPoli\ObatController::class, 'import'])->name('obat.import');
     Route::get('obat/export', [\App\Http\Controllers\AdminPoli\ObatController::class, 'export'])->name('obat.export');
 
+    // Diagnosa: import/export
+    Route::post('diagnosa/import', [DiagnosaController::class, 'import'])->name('diagnosa.import');
+    Route::get('diagnosa/export', [DiagnosaController::class, 'export'])->name('diagnosa.export');
 
-    // (optional untuk autofill)
-    Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
+    // Diagnosa CRUD (tanpa show)
+    Route::resource('diagnosa', DiagnosaController::class)->except(['show']);
 });
 
 /*
