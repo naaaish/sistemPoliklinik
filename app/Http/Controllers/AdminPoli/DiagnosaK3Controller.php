@@ -13,62 +13,58 @@ class DiagnosaK3Controller extends Controller
 {
     public function index(Request $request)
     {
-        $query = DB::table('diagnosa_k3');
+        $q = $request->q;
 
-        // search: cari di id_nb / nama_penyakit / kategori
-        if ($request->filled('q')) {
-            $q = $request->q;
-            $query->where(function($w) use ($q){
-                $w->where('id_nb', 'like', "%$q%")
-                  ->orWhere('nama_penyakit', 'like', "%$q%")
-                  ->orWhere('kategori_penyakit', 'like', "%$q%");
-            });
-        }
-
-        // order id_nb biar 1.1, 1.2, 2.1.. rapih (numeric)
-        $data = $query
+        $rows = DB::table('diagnosa_k3')
             ->select('id_nb','nama_penyakit','kategori_penyakit','created_at')
+            ->when($q, function($query) use ($q){
+                $query->where(function($w) use ($q){
+                    $w->where('id_nb','like',"%$q%")
+                    ->orWhere('nama_penyakit','like',"%$q%")
+                    ->orWhere('kategori_penyakit','like',"%$q%");
+                });
+            })
+            ->orderBy('kategori_penyakit')
             ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',1) AS DECIMAL(10,2)) ASC")
             ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',-1) AS DECIMAL(10,2)) ASC")
-            ->get();
+            ->get()
+            ->groupBy('kategori_penyakit');
 
-        $previewCount = null;
-        if ($request->filled('from') && $request->filled('to')) {
-            $previewCount = DB::table('diagnosa_k3')
-                ->whereBetween('created_at', [
-                    $request->from.' 00:00:00',
-                    $request->to.' 23:59:59'
-                ])->count();
-        }
+        $kategoriList = DB::table('diagnosa_k3')
+            ->select('kategori_penyakit')
+            ->distinct()
+            ->orderBy('kategori_penyakit')
+            ->pluck('kategori_penyakit');
 
         return view('adminpoli.diagnosak3.index', [
-            'data' => $data,
-            'previewCount' => $previewCount,
+            'groups' => $rows,
+            'kategoriList' => $kategoriList,
         ]);
     }
+
 
     public function store(Request $request)
     {
         $request->validate([
-            'id_nb'            => ['required','string','max:10'],
-            'nama_penyakit'    => ['required','string'],
-            'kategori_penyakit'=> ['required','string','max:255'],
+            'id_nb' => ['required','string','max:10'],
+            'nama_penyakit' => ['required','string'],
+            'kategori_penyakit' => ['required','string','max:255'],
         ]);
 
-        // id_nb harus unik (primary)
-        $existsId = DB::table('diagnosa_k3')->where('id_nb', $request->id_nb)->exists();
-        if ($existsId) {
-            return redirect()->route('adminpoli.diagnosak3.index')
-                ->withInput()
-                ->with('error', 'Nomor (ID NB) sudah digunakan.');
+        // id_nb unik (PK)
+        if (DB::table('diagnosa_k3')->where('id_nb', $request->id_nb)->exists()) {
+            return back()->with('error', 'Nomor (ID NB) sudah digunakan.');
         }
 
-        // boleh duplicate nama? kalau mau dilarang per kategori, aktifkan cek ini:
-        // $existsNama = DB::table('diagnosa_k3')
-        //     ->whereRaw('LOWER(nama_penyakit)=?', [mb_strtolower(trim($request->nama_penyakit))])
-        //     ->whereRaw('LOWER(kategori_penyakit)=?', [mb_strtolower(trim($request->kategori_penyakit))])
-        //     ->exists();
-        // if ($existsNama) { ... }
+        // nama penyakit tidak boleh duplikat (case-insensitive)
+        $nama = mb_strtolower(trim($request->nama_penyakit));
+        $existsNama = DB::table('diagnosa_k3')
+            ->whereRaw('LOWER(nama_penyakit) = ?', [$nama])
+            ->exists();
+
+        if ($existsNama) {
+            return back()->with('error', 'Nama penyakit sudah ada (duplikat).');
+        }
 
         DB::table('diagnosa_k3')->insert([
             'id_nb' => trim($request->id_nb),
@@ -78,26 +74,82 @@ class DiagnosaK3Controller extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('adminpoli.diagnosak3.index')
-            ->with('success','Diagnosa K3 berhasil ditambahkan');
+        return redirect()->route('adminpoli.diagnosak3.index')->with('success','Penyakit berhasil ditambahkan');
     }
+
+    public function storeKategori(Request $request)
+    {
+        $request->validate([
+            'kategori_penyakit' => ['required','string','max:255'],
+        ]);
+
+        $kat = mb_strtolower(trim($request->kategori_penyakit));
+
+        $existsKat = DB::table('diagnosa_k3')
+            ->whereRaw('LOWER(kategori_penyakit) = ?', [$kat])
+            ->exists();
+
+        if ($existsKat) {
+            return back()->with('error', 'Kategori sudah ada (duplikat).');
+        }
+
+        // Karena kategori belum punya tabel sendiri,
+        // kita "buat kategori" dengan membuat 1 record placeholder? -> TIDAK ENAK.
+        // Lebih rapi: kategori dibuat saat menambah penyakit.
+        // Jadi untuk tombol "Tambah Kategori", kita cuma simpan ke session? -> ribet.
+        // Solusi simpel: buat kategori via modal penyakit (kategori baru).
+        return back()->with('success', 'Kategori siap dipakai. Silakan tambah penyakit pada kategori tersebut.');
+    }
+
 
     public function update(Request $request, $id)
     {
-        // $id = id_nb (PK)
         $request->validate([
-            'nama_penyakit'    => ['required','string'],
-            'kategori_penyakit'=> ['required','string','max:255'],
+            'nama_penyakit' => ['required','string'],
+            'kategori_penyakit' => ['required','string','max:255'],
         ]);
 
-        DB::table('diagnosa_k3')->where('id_nb', $id)->update([
+        $nama = mb_strtolower(trim($request->nama_penyakit));
+
+        $existsNama = DB::table('diagnosa_k3')
+            ->whereRaw('LOWER(nama_penyakit) = ?', [$nama])
+            ->where('id_nb', '!=', $id)
+            ->exists();
+
+        if ($existsNama) {
+            return back()->with('error', 'Nama penyakit sudah ada (duplikat).');
+        }
+
+        DB::table('diagnosa_k3')->where('id_nb',$id)->update([
             'nama_penyakit' => trim($request->nama_penyakit),
             'kategori_penyakit' => trim($request->kategori_penyakit),
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('adminpoli.diagnosak3.index')
-            ->with('success','Diagnosa K3 berhasil diperbarui');
+        return redirect()->route('adminpoli.diagnosak3.index')->with('success','Data penyakit berhasil diperbarui');
+    }
+
+    public function updateKategori(Request $request, $kategori)
+    {
+        $request->validate(['kategori_baru' => ['required','string','max:255']]);
+
+        $old = urldecode($kategori);
+        $new = trim($request->kategori_baru);
+
+        $existsNew = DB::table('diagnosa_k3')
+            ->whereRaw('LOWER(kategori_penyakit)=?', [mb_strtolower($new)])
+            ->exists();
+
+        if ($existsNew) {
+            return back()->with('error','Nama kategori sudah ada (duplikat).');
+        }
+
+        DB::table('diagnosa_k3')->where('kategori_penyakit',$old)->update([
+            'kategori_penyakit' => $new,
+            'updated_at' => now(),
+        ]);
+
+        return back()->with('success','Kategori berhasil diubah.');
     }
 
     public function destroy($id)
@@ -107,6 +159,16 @@ class DiagnosaK3Controller extends Controller
         return redirect()->route('adminpoli.diagnosak3.index')
             ->with('success','Diagnosa K3 berhasil dihapus');
     }
+
+    public function destroyKategori($kategori)
+    {
+        $kat = urldecode($kategori);
+
+        DB::table('diagnosa_k3')->where('kategori_penyakit',$kat)->delete();
+
+        return back()->with('success','Kategori dan seluruh isinya berhasil dihapus.');
+    }
+
 
     public function import(Request $request)
     {
