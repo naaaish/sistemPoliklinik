@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class ObatController extends Controller
@@ -50,6 +51,20 @@ class ObatController extends Controller
             'exp_date.after' => 'Tanggal kadaluarsa harus lebih dari hari ini.',
             'harga.min'      => 'Harga tidak boleh kurang dari 1.',
         ]);
+
+        $nama = trim($request->nama_obat);
+
+        // cek duplikat NAMA yang masih aktif (is_active = '1')
+        $existsAktif = DB::table('obat')
+            ->whereRaw('LOWER(nama_obat) = ?', [mb_strtolower($nama)])
+            ->where('is_active', '1')
+            ->exists();
+
+        if ($existsAktif) {
+            return redirect()->route('adminpoli.obat.index')
+                ->withInput()
+                ->with('error', 'Nama obat sudah ada. Gunakan nama lain.');
+        }
 
         // Ambil id_obat terakhir berdasarkan urutan terbesar (OBT-xxx)
         $lastId = DB::table('obat')
@@ -101,6 +116,20 @@ class ObatController extends Controller
             'harga.min'      => 'Harga tidak boleh kurang dari 1.',
         ]);
 
+        $nama = trim($request->nama_obat);
+
+        $existsAktif = DB::table('obat')
+            ->whereRaw('LOWER(nama_obat) = ?', [mb_strtolower($nama)])
+            ->where('is_active', '1')
+            ->where('id_obat', '!=', $id) // biar dia boleh sama dengan dirinya sendiri
+            ->exists();
+
+        if ($existsAktif) {
+            return redirect()->route('adminpoli.obat.index')
+                ->withInput()
+                ->with('error', 'Nama obat sudah ada.');
+        }
+
         DB::table('obat')
             ->where('id_obat', $id)
             ->update([
@@ -127,13 +156,99 @@ class ObatController extends Controller
             ->with('success', 'Obat berhasil dihapus');
     }
 
-
-    // Placeholder (biar route ada & UI upload/download gak error)
     public function import(Request $request)
     {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,xlsx,xls|max:5120', // max 5MB
+        ]);
+
+        // baca file jadi array (1 sheet)
+        $rows = Excel::toArray([], $request->file('file'))[0] ?? [];
+
+        if (count($rows) <= 1) {
+            return redirect()->route('adminpoli.obat.index')
+                ->with('error', 'File kosong / format tidak sesuai.');
+        }
+
+        // anggap baris pertama header
+        $header = array_map(fn($h) => Str::slug((string)$h, '_'), $rows[0]);
+
+        // mapping nama kolom yang kita butuhin
+        // contoh header yang diterima:
+        // nama_obat | harga | exp_date
+        $idxNama = array_search('nama_obat', $header);
+        $idxHarga = array_search('harga', $header);
+        $idxExp = array_search('exp_date', $header);
+
+        if ($idxNama === false || $idxHarga === false || $idxExp === false) {
+            return redirect()->route('adminpoli.obat.index')
+                ->with('error', 'Header harus mengandung: nama_obat, harga, exp_date');
+        }
+
+        $inserted = 0;
+        $skipped = 0;
+
+        foreach (array_slice($rows, 1) as $r) {
+            $nama = trim((string)($r[$idxNama] ?? ''));
+            $harga = $r[$idxHarga] ?? null;
+            $exp = $r[$idxExp] ?? null;
+
+            if ($nama === '' || $harga === null || $exp === null) {
+                $skipped++;
+                continue;
+            }
+
+            // normalisasi harga (kalau ada "Rp", titik, koma)
+            $hargaNum = (int) preg_replace('/[^0-9]/', '', (string)$harga);
+            if ($hargaNum <= 0) {
+                $skipped++;
+                continue;
+            }
+
+            // exp_date harus lebih dari hari ini
+            $expDate = date('Y-m-d', strtotime((string)$exp));
+            if (!$expDate || $expDate <= date('Y-m-d')) {
+                $skipped++;
+                continue;
+            }
+
+            // aturan kamu: nama sama yang masih aktif = tidak boleh
+            $existsAktif = DB::table('obat')
+                ->whereRaw('LOWER(nama_obat) = ?', [mb_strtolower($nama)])
+                ->where('is_active', '1') // enum '0'/'1'
+                ->exists();
+
+            if ($existsAktif) {
+                $skipped++;
+                continue;
+            }
+
+            // generate id_obat OBT-XXX (lanjut dari terbesar)
+            $last = DB::table('obat')
+                ->select('id_obat')
+                ->orderByRaw("CAST(SUBSTRING(id_obat, 5) AS UNSIGNED) DESC")
+                ->value('id_obat');
+
+            $nextNum = $last ? ((int)substr($last, 4) + 1) : 1;
+            $newId = 'OBT-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+
+            DB::table('obat')->insert([
+                'id_obat' => $newId,
+                'nama_obat' => $nama,
+                'harga' => $hargaNum,
+                'exp_date' => $expDate,
+                'is_active' => '1',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $inserted++;
+        }
+
         return redirect()->route('adminpoli.obat.index')
-            ->with('error', 'Fitur import belum diaktifkan.');
+            ->with('success', "Import selesai. Berhasil: $inserted, Dilewati: $skipped");
     }
+
 
     public function export(Request $request)
     {

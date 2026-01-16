@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ asset('css/adminpoli.css') }}?v={{ filemtime(public_path('css/adminpoli.css')) }}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+@stack('scripts')
 <body>
 <div class="ap-wrap">
 

@@ -5,12 +5,13 @@
 @section('content')
 <div class="obat-page">
 
-  <div class="obat-topbar">
-    <div class="obat-left">
-      <a href="{{ route('adminpoli.obat.index') }}" class="obat-back" title="Kembali">←</a>
-      <div class="obat-heading">Preview Export Obat</div>
+    <div class="obat-topbar">
+        <div class="obat-left">
+            <a href="{{ route('adminpoli.dashboard') }}" class="obat-back-img" title="Kembali">
+                <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
+            </a>
+        <div class="obat-heading">Preview Export Obat</div>
     </div>
-
     <form action="{{ route('adminpoli.obat.export') }}" method="GET" style="display:flex; gap:10px; align-items:center;">
       <input type="hidden" name="from" value="{{ $from }}">
       <input type="hidden" name="to" value="{{ $to }}">
