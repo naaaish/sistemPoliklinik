@@ -1098,3 +1098,7 @@ body{ margin:0; }
 .diag-row{
   grid-template-columns: 3fr 1fr !important;
 }
+
+.k3-head, .k3-row{
+  grid-template-columns: 0.7fr 2.2fr 1.2fr 1fr !important;
+}

@@ -54,7 +54,8 @@
             </a>
 
 
-            <a class="ap-nav-item" href="#">
+             <a class="ap-nav-item {{ request()->routeIs('adminpoli.diagnosak3.*') ? 'active' : '' }}"
+            href="{{ route('adminpoli.diagnosak3.index') }}">
                 <img src="{{ asset('assets/adminPoli/diagnosak3.png') }}" alt="diagnosa">
                 <span>Diagnosa K3</span>
             </a>
