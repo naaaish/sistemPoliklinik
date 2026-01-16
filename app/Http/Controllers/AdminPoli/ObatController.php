@@ -7,20 +7,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class ObatController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DB::table('obat');
+        $query = DB::table('obat')->where('is_active', '1');
 
         if ($request->filled('q')) {
             $query->where('nama_obat', 'like', '%' . $request->q . '%');
         }
 
         $obat = $query
-            ->select('id_obat', 'nama_obat', 'harga', 'exp_date')
+            ->select('id_obat', 'nama_obat', 'harga', 'exp_date', 'is_active')
             ->orderBy('nama_obat')
             ->get();
 
@@ -50,6 +51,20 @@ class ObatController extends Controller
             'exp_date.after' => 'Tanggal kadaluarsa harus lebih dari hari ini.',
             'harga.min'      => 'Harga tidak boleh kurang dari 1.',
         ]);
+
+        $nama = trim($request->nama_obat);
+
+        // cek duplikat NAMA yang masih aktif (is_active = '1')
+        $existsAktif = DB::table('obat')
+            ->whereRaw('LOWER(nama_obat) = ?', [mb_strtolower($nama)])
+            ->where('is_active', '1')
+            ->exists();
+
+        if ($existsAktif) {
+            return redirect()->route('adminpoli.obat.index')
+                ->withInput()
+                ->with('error', 'Nama obat sudah ada. Gunakan nama lain.');
+        }
 
         // Ambil id_obat terakhir berdasarkan urutan terbesar (OBT-xxx)
         $lastId = DB::table('obat')
@@ -101,6 +116,20 @@ class ObatController extends Controller
             'harga.min'      => 'Harga tidak boleh kurang dari 1.',
         ]);
 
+        $nama = trim($request->nama_obat);
+
+        $existsAktif = DB::table('obat')
+            ->whereRaw('LOWER(nama_obat) = ?', [mb_strtolower($nama)])
+            ->where('is_active', '1')
+            ->where('id_obat', '!=', $id) // biar dia boleh sama dengan dirinya sendiri
+            ->exists();
+
+        if ($existsAktif) {
+            return redirect()->route('adminpoli.obat.index')
+                ->withInput()
+                ->with('error', 'Nama obat sudah ada.');
+        }
+
         DB::table('obat')
             ->where('id_obat', $id)
             ->update([
@@ -116,18 +145,110 @@ class ObatController extends Controller
 
     public function destroy($id)
     {
-        DB::table('obat')->where('id_obat', $id)->delete();
+        DB::table('obat')
+            ->where('id_obat', $id)
+            ->update([
+                'is_active' => '0',
+                'updated_at' => now(),
+            ]);
 
         return redirect()->route('adminpoli.obat.index')
             ->with('success', 'Obat berhasil dihapus');
     }
 
-    // Placeholder (biar route ada & UI upload/download gak error)
     public function import(Request $request)
     {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,xlsx,xls|max:5120', // max 5MB
+        ]);
+
+        // baca file jadi array (1 sheet)
+        $rows = Excel::toArray([], $request->file('file'))[0] ?? [];
+
+        if (count($rows) <= 1) {
+            return redirect()->route('adminpoli.obat.index')
+                ->with('error', 'File kosong / format tidak sesuai.');
+        }
+
+        // anggap baris pertama header
+        $header = array_map(fn($h) => Str::slug((string)$h, '_'), $rows[0]);
+
+        // mapping nama kolom yang kita butuhin
+        // contoh header yang diterima:
+        // nama_obat | harga | exp_date
+        $idxNama = array_search('nama_obat', $header);
+        $idxHarga = array_search('harga', $header);
+        $idxExp = array_search('exp_date', $header);
+
+        if ($idxNama === false || $idxHarga === false || $idxExp === false) {
+            return redirect()->route('adminpoli.obat.index')
+                ->with('error', 'Header harus mengandung: nama_obat, harga, exp_date');
+        }
+
+        $inserted = 0;
+        $skipped = 0;
+
+        foreach (array_slice($rows, 1) as $r) {
+            $nama = trim((string)($r[$idxNama] ?? ''));
+            $harga = $r[$idxHarga] ?? null;
+            $exp = $r[$idxExp] ?? null;
+
+            if ($nama === '' || $harga === null || $exp === null) {
+                $skipped++;
+                continue;
+            }
+
+            // normalisasi harga (kalau ada "Rp", titik, koma)
+            $hargaNum = (int) preg_replace('/[^0-9]/', '', (string)$harga);
+            if ($hargaNum <= 0) {
+                $skipped++;
+                continue;
+            }
+
+            // exp_date harus lebih dari hari ini
+            $expDate = date('Y-m-d', strtotime((string)$exp));
+            if (!$expDate || $expDate <= date('Y-m-d')) {
+                $skipped++;
+                continue;
+            }
+
+            // aturan kamu: nama sama yang masih aktif = tidak boleh
+            $existsAktif = DB::table('obat')
+                ->whereRaw('LOWER(nama_obat) = ?', [mb_strtolower($nama)])
+                ->where('is_active', '1') // enum '0'/'1'
+                ->exists();
+
+            if ($existsAktif) {
+                $skipped++;
+                continue;
+            }
+
+            // generate id_obat OBT-XXX (lanjut dari terbesar)
+            $last = DB::table('obat')
+                ->select('id_obat')
+                ->orderByRaw("CAST(SUBSTRING(id_obat, 5) AS UNSIGNED) DESC")
+                ->value('id_obat');
+
+            $nextNum = $last ? ((int)substr($last, 4) + 1) : 1;
+            $newId = 'OBT-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+
+            DB::table('obat')->insert([
+                'id_obat' => $newId,
+                'nama_obat' => $nama,
+                'harga' => $hargaNum,
+                'exp_date' => $expDate,
+                'is_active' => '1',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $inserted++;
+        }
+
         return redirect()->route('adminpoli.obat.index')
-            ->with('error', 'Fitur import belum diaktifkan.');
+            ->with('success', "Import selesai. Berhasil: $inserted, Dilewati: $skipped");
     }
+
 
     public function export(Request $request)
     {
@@ -135,22 +256,35 @@ class ObatController extends Controller
             'from'   => ['required', 'date'],
             'to'     => ['required', 'date', 'after_or_equal:from'],
             'format' => ['required', 'in:csv,excel,pdf'],
+            'action' => ['required', 'in:preview,download'],
         ], [
             'from.required' => 'Tanggal awal wajib diisi.',
             'to.required'   => 'Tanggal akhir wajib diisi.',
-            'format.required' => 'Format download wajib dipilih.',
+            'format.required' => 'Format wajib dipilih.',
         ]);
 
         $from = $request->from . ' 00:00:00';
         $to   = $request->to   . ' 23:59:59';
 
-        // Filter rentang: pakai created_at (karena ini yang paling masuk akal untuk "rentang data")
+        // Filter rentang berdasarkan created_at (data masuk pada rentang tsb)
         $data = DB::table('obat')
-            ->select('id_obat', 'nama_obat', 'harga', 'exp_date', 'created_at')
+            ->select('id_obat', 'nama_obat', 'harga', 'exp_date', 'created_at', 'is_active')
             ->whereBetween('created_at', [$from, $to])
             ->orderBy('nama_obat')
             ->get();
 
+        // ====== PREVIEW ======
+        if ($request->action === 'preview') {
+            return view('adminpoli.obat.preview', [
+                'data'   => $data,
+                'from'   => $request->from,
+                'to'     => $request->to,
+                'format' => $request->format,
+                'count'  => $data->count(),
+            ]);
+        }
+
+        // ====== DOWNLOAD ======
         $fileBase = 'data-obat_' . $request->from . '_sd_' . $request->to;
 
         if ($request->format === 'csv') {
@@ -158,30 +292,19 @@ class ObatController extends Controller
 
             return response()->streamDownload(function () use ($data) {
                 $out = fopen('php://output', 'w');
+                fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM UTF-8
 
-                // BOM biar Excel kebaca UTF-8
-                fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
-
-                fputcsv($out, ['ID Obat', 'Nama Obat', 'Harga', 'Exp Date', 'Created At']);
+                fputcsv($out, ['ID Obat', 'Nama Obat', 'Harga', 'Exp Date']);
 
                 foreach ($data as $row) {
-                    fputcsv($out, [
-                        $row->id_obat,
-                        $row->nama_obat,
-                        $row->harga,
-                        $row->exp_date,
-                        $row->created_at,
-                    ]);
+                    fputcsv($out, [$row->id_obat, $row->nama_obat, $row->harga, $row->exp_date]);
                 }
 
                 fclose($out);
-            }, $filename, [
-                'Content-Type' => 'text/csv; charset=UTF-8',
-            ]);
+            }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
         }
 
         if ($request->format === 'excel') {
-            // Tanpa library tambahan: export "Excel" berupa HTML table .xls (Excel bisa buka)
             $filename = $fileBase . '.xls';
 
             $html = view('adminpoli.obat.export_excel', [
@@ -196,19 +319,14 @@ class ObatController extends Controller
             ]);
         }
 
-        // PDF: butuh dompdf (barryvdh/laravel-dompdf). Kita buat cek agar tidak error.
+        // PDF (butuh dompdf)
         if ($request->format === 'pdf') {
-            if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class) && !class_exists(\Barryvdh\DomPDF\Facade\PDF::class)) {
+            if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
                 return redirect()->route('adminpoli.obat.index')
                     ->with('error', 'Export PDF belum aktif (Dompdf belum terpasang).');
             }
 
-            // Support dua alias facade: Pdf / PDF
-            $pdfFacade = class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)
-                ? \Barryvdh\DomPDF\Facade\Pdf::class
-                : \Barryvdh\DomPDF\Facade\PDF::class;
-
-            $pdf = $pdfFacade::loadView('adminpoli.obat.export_pdf', [
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('adminpoli.obat.export_pdf', [
                 'data' => $data,
                 'from' => $request->from,
                 'to'   => $request->to,

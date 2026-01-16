@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ asset('css/adminpoli.css') }}?v={{ filemtime(public_path('css/adminpoli.css')) }}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+@stack('scripts')
 <body>
 <div class="ap-wrap">
 
@@ -113,21 +114,7 @@
     </script>
     @endif
 </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@if(session('success'))
-<script>
-  Swal.fire({
-    toast: true,
-    position: 'top-end',
-    icon: 'success',
-    // title: @json(session('success')),
-    showConfirmButton: false,
-    timer: 1600,
-    timerProgressBar: true,
-  });
-</script>
-@endif
 
 </body>
 </html>

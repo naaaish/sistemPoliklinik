@@ -619,21 +619,38 @@ body{ margin:0; }
 .obat-left{
   display:flex;
   align-items:center;
-  gap: 14px;
+  gap: 12px;
 }
 
-.obat-back{
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 2px solid #3B5E8C;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-decoration:none;
-  color:#3B5E8C;
-  font-weight:700;
+/* back arrow pakai gambar */
+.obat-back-img{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+
+  width: 40px;
+  height: 40px;
+
+  transition: transform .15s ease, filter .15s ease;
 }
+
+.obat-back-img img{
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.obat-back-img:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.obat-back-img:active{
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
 
 .obat-heading{
   font-size: 22px;
@@ -662,9 +679,13 @@ body{ margin:0; }
   color:#fff;
   text-decoration:none;
   padding: 10px 16px;
+  border: none;
   border-radius: 10px;
   font-weight: 600;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  box-shadow:
+    0 6px 16px rgba(74, 111, 165, 0.25),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: all .25s ease;
 }
 
 .obat-btn-soft{
@@ -684,6 +705,50 @@ body{ margin:0; }
 .obat-btn-soft[disabled]{
   opacity:.55;
   cursor:not-allowed;
+}
+
+/* ===== Hover System (Obat) ===== */
+.obat-btn-add,
+.obat-btn-soft,
+.obat-search-btn{
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+}
+
+.obat-btn-add:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow:
+    0 10px 22px rgba(74, 111, 165, 0.30),
+    0 4px 10px rgba(0, 0, 0, 0.14);
+}
+
+.obat-btn-add:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+/* tombol soft (Pilih File / Upload / Preview / Download) */
+.obat-btn-soft:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 8px 18px rgba(0,0,0,.10);
+}
+
+.obat-btn-soft:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+/* tombol cari */
+.obat-search-btn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+
+.obat-search-btn:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
 }
 
 .obat-card{
@@ -758,11 +823,24 @@ body{ margin:0; }
   font-weight: 600;
   cursor:pointer;
   user-select:none;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
 }
 
 .obat-file input{
   display:none;
 }
+
+.obat-file:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.01);
+  box-shadow: 0 8px 18px rgba(0,0,0,.10);
+}
+
+.obat-file:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
 
 /* download */
 .obat-download{
@@ -967,4 +1045,50 @@ body{ margin:0; }
   padding: 8px 12px;
   border-radius: 8px;
   display:inline-block;
+}
+
+.obat-search-input,
+.obat-date,
+.obat-select{
+  transition: box-shadow .12s ease, border-color .12s ease, transform .12s ease;
+}
+
+.obat-search-input:focus,
+.obat-date:focus,
+.obat-select:focus{
+  border-color:#89B2D9;
+  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
+}
+
+.obat-act{
+  transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+}
+
+.obat-act:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.obat-act:active{
+  transform: translateY(0);
+  opacity: .85;
+}
+
+
+.obat-file-name{
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0,0,0,.55);
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.obat-file-hint{
+  display:block;
+  margin-left: 2px;
+  font-size: 11px;
+  color: rgba(0,0,0,.5);
+  font-weight: 600;
 }

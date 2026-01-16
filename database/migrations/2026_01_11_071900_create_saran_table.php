@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('id_saran',20)->primary();
             $table->text('saran');
             $table->string('id_diagnosa',20);
+            $table->enum('is_active', ['0', '1'])->default('1');
             $table->timestamps();
         });
 

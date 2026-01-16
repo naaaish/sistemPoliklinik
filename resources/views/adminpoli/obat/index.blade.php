@@ -8,7 +8,9 @@
     {{-- Header: Back + Title + Tambah --}}
     <div class="obat-topbar">
         <div class="obat-left">
-            <a href="{{ route('adminpoli.dashboard') }}" class="obat-back" title="Kembali">←</a>
+            <a href="{{ route('adminpoli.dashboard') }}" class="obat-back-img" title="Kembali">
+                <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
+            </a>
             <div class="obat-heading">Obat</div>
         </div>
         
@@ -38,26 +40,29 @@
         {{-- Row 2: Upload + Download (sesuai desain: baris kecil rapi) --}}
         <div class="obat-tools-row">
 
-            {{-- Upload (tetap ada) --}}
-            @if(\Illuminate\Support\Facades\Route::has('adminpoli.obat.import'))
-                <form action="{{ route('adminpoli.obat.import') }}" method="POST" enctype="multipart/form-data" class="obat-upload">
-                    @csrf
-                    <label class="obat-file">
-                        <input type="file" name="file" accept=".csv,.xlsx,.xls">
-                        <span>Pilih File</span>
-                    </label>
+            <form action="{{ route('adminpoli.obat.import') }}"
+                method="POST"
+                enctype="multipart/form-data"
+                class="obat-upload"
+                id="obatUploadForm">
+            @csrf
 
-                    <button type="submit" class="obat-btn-soft">
-                        <span>Upload</span>
-                    </button>
-                </form>
-            @else
-                {{-- kalau route belum dibuat, tetap tampil tapi nonaktif (biar nggak error) --}}
-                <div class="obat-upload obat-disabled">
-                    <div class="obat-file"><span>Pilih File</span></div>
-                    <button type="button" class="obat-btn-soft" disabled>Upload</button>
-                </div>
-            @endif
+            <label class="obat-file" for="obatFileInput">
+                <input type="file" id="obatFileInput" name="file" accept=".csv,.xlsx,.xls">
+                <span id="obatFileLabel">Pilih File</span>
+            </label>
+
+            <span class="obat-file-name" id="obatFileName">Belum ada file dipilih</span>
+
+            <button type="submit" class="obat-btn-soft" id="obatUploadBtn" disabled>
+                <span>Upload</span>
+            </button>
+
+            <small class="obat-file-hint">
+                Max 5MB • Format: CSV / XLSX / XLS
+            </small>
+            </form>
+
 
             {{-- Download + rentang tanggal --}}
             <form action="{{ route('adminpoli.obat.export') }}" method="GET" class="obat-download">
@@ -66,17 +71,24 @@
                 <input type="date" name="to" value="{{ request('to') }}" class="obat-date" required>
 
                 <select name="format" class="obat-select" required>
-                    <option value="" disabled {{ request('format') ? '' : 'selected' }}>Pilih Format</option>
-                    <option value="csv"  {{ request('format')=='csv' ? 'selected' : '' }}>CSV</option>
-                    <option value="excel"{{ request('format')=='excel' ? 'selected' : '' }}>Excel</option>
-                    <option value="pdf"  {{ request('format')=='pdf' ? 'selected' : '' }}>PDF</option>
+                    <option value="" disabled selected>Pilih Format</option>
+                    <option value="csv">CSV</option>
+                    <option value="excel">Excel</option>
+                    <option value="pdf">PDF</option>
                 </select>
 
-                <button type="submit" class="obat-btn-soft">
+                {{-- Preview --}}
+                <button type="submit" name="action" value="preview" class="obat-btn-soft">
+                    <span>Preview</span>
+                </button>
+
+                {{-- Download --}}
+                <button type="submit" name="action" value="download" class="obat-btn-soft">
                     <img src="{{ asset('assets/adminPoli/download.png') }}" alt="download" class="obat-ic">
                     <span>Download</span>
                 </button>
             </form>
+
         </div>
 
         @if(request('from') && request('to'))
@@ -113,15 +125,18 @@
 
                         <div class="obat-actions">
                             <button
-                            type="button"
-                            class="obat-act obat-edit"
-                            onclick="openEdit('{{ $pk }}','{{ $nama }}','{{ $harga }}','{{ $exp }}')"> 
-                            <img src="{{ asset('assets/adminPoli/edit.png') }}" alt="edit" class="obat-ic-sm">
+                                type="button"
+                                class="obat-act obat-edit js-edit"
+                                data-id="{{ $pk }}"
+                                data-nama="{{ $nama }}"
+                                data-harga="{{ $harga }}"
+                                data-exp="{{ $row->exp_date }}"
+                            >
+                                <img src="{{ asset('assets/adminPoli/edit.png') }}" class="obat-ic-sm" alt="">
                                 Edit
                             </button>
 
-                            <form method="POST" action="{{ route('adminpoli.obat.destroy', $pk) }}" class="obat-del-form"
-                                  onsubmit="return confirm('Yakin hapus obat ini?');">
+                            <form method="POST" action="{{ route('adminpoli.obat.destroy', $pk) }}" class="obat-del-form js-obat-delete">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="obat-act obat-del">
@@ -129,6 +144,7 @@
                                     <img src="{{ asset('assets/adminPoli/sampah.png') }}" alt="hapus" class="obat-ic-sm">
                                 </button>
                             </form>
+
                         </div>
                     </div>
                 @empty
@@ -162,7 +178,7 @@
 
                     <div class="modal-group">
                         <label>Expired Date</label>
-                        <input type="date" name="exp_date" id="editExp" min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
+                        <input type="date" name="exp_date" id="tambahExp" min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
                     </div>
 
                     <button type="submit" class="modal-btn">Simpan</button>
@@ -207,20 +223,134 @@
 </div>
 @endsection
 
+@push('scripts')
+<script>
+// Upload file
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('obatFileInput');
+  const nameEl = document.getElementById('obatFileName');
+  const labelEl = document.getElementById('obatFileLabel');
+  const btn = document.getElementById('obatUploadBtn');
+  const form = document.getElementById('obatUploadForm');
+
+  const MAX_MB = 5;
+  const MAX_BYTES = MAX_MB * 1024 * 1024;
+  const allowedExt = ['csv','xlsx','xls'];
+
+  function toastError(msg){
+    if (window.AdminPoliToast) {
+      AdminPoliToast.fire({ icon:'error', title: msg });
+    } else {
+      Swal.fire({ icon:'error', title: msg });
+    }
+  }
+
+  if (!input) return;
+
+  input.addEventListener('change', () => {
+    const file = input.files && input.files[0];
+    if (!file){
+      nameEl.textContent = 'Belum ada file dipilih';
+      labelEl.textContent = 'Pilih File';
+      btn.disabled = true;
+      return;
+    }
+
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+
+    // validasi ekstensi
+    if (!allowedExt.includes(ext)) {
+      input.value = '';
+      nameEl.textContent = 'Belum ada file dipilih';
+      labelEl.textContent = 'Pilih File';
+      btn.disabled = true;
+      toastError('Format file harus CSV / XLSX / XLS');
+      return;
+    }
+
+    // validasi ukuran
+    if (file.size > MAX_BYTES) {
+      input.value = '';
+      nameEl.textContent = 'Belum ada file dipilih';
+      labelEl.textContent = 'Pilih File';
+      btn.disabled = true;
+      toastError(`Ukuran file maksimal ${MAX_MB}MB`);
+      return;
+    }
+
+    // tampilkan nama file
+    nameEl.textContent = file.name;
+    labelEl.textContent = 'Ganti File';
+    btn.disabled = false;
+  });
+
+  // guard sebelum submit (kalau user klik Upload tanpa file)
+  form?.addEventListener('submit', (e) => {
+    const file = input.files && input.files[0];
+    if (!file){
+      e.preventDefault();
+      toastError('Pilih file terlebih dahulu sebelum upload.');
+    }
+  });
+});
+
+// Hapus dengan konfirmasi
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('form.js-obat-delete').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      Swal.fire({
+        title: 'Hapus data obat ini?',
+        text: 'Obat akan dihapus dari daftar',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, hapus',
+        cancelButtonText: 'Batal',
+        reverseButtons: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          form.submit();
+        }
+      });
+    });
+  });
+});
+
+// Edit isi data
+function toDateInputValue(v){
+  if(!v) return '';
+  // ambil YYYY-MM-DD saja
+  if (typeof v === 'string' && v.length >= 10) {
+    return v.substring(0, 10);
+  }
+  return v;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.js-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id    = btn.dataset.id;
+      const nama  = btn.dataset.nama;
+      const harga = btn.dataset.harga;
+      const exp   = toDateInputValue(btn.dataset.exp);
+
+      document.getElementById('modalEdit').style.display = 'flex';
+      document.getElementById('editNama').value  = nama ?? '';
+      document.getElementById('editHarga').value = harga ?? '';
+      document.getElementById('editExp').value   = exp ?? '';
+
+      document.getElementById('formEdit').action =
+        "{{ url('adminpoli/obat') }}/" + id;
+    });
+  });
+});
+</script>
+@endpush
+
 <script>
     function openTambah(){
         document.getElementById('modalTambah').style.display = 'flex';
-    }
-
-    function openEdit(id, nama, harga, exp){
-        document.getElementById('modalEdit').style.display = 'flex';
-
-        document.getElementById('editNama').value = nama;
-        document.getElementById('editHarga').value = harga;
-        document.getElementById('editExp').value = exp;
-
-        document.getElementById('formEdit').action =
-            "{{ url('adminpoli/obat') }}/" + id;
     }
 
     window.onclick = function(e){
