@@ -93,6 +93,9 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
 
     Route::resource('diagnosa-k3', DiagnosaK3Controller::class)->except(['show'])
         ->names('diagnosak3');
+    Route::post('diagnosa-k3/kategori', [\App\Http\Controllers\AdminPoli\DiagnosaK3Controller::class, 'storeKategori'])->name('diagnosak3.kategori.store');
+    Route::put('diagnosa-k3/kategori/{kategori}', [\App\Http\Controllers\AdminPoli\DiagnosaK3Controller::class, 'updateKategori'])->name('diagnosak3.kategori.update');
+    Route::delete('diagnosa-k3/kategori/{kategori}', [\App\Http\Controllers\AdminPoli\DiagnosaK3Controller::class, 'destroyKategori'])->name('diagnosak3.kategori.destroy');
 });
 
 /*

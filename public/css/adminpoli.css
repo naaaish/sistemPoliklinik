@@ -1102,3 +1102,83 @@ body{ margin:0; }
 .k3-head, .k3-row{
   grid-template-columns: 0.7fr 2.2fr 1.2fr 1fr !important;
 }
+
+/* Kategori row (parent) */
+.k3-cat-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding: 10px 6px;
+  border-bottom: 1px solid #EEF4FF;
+}
+
+.k3-cat-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width: 0;
+}
+
+.k3-toggle{
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid #CFE0FF;
+  background:#E7F0FF;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:#3B5E8C;
+}
+
+.k3-cat-title{
+  font-weight:700;
+  color:#3B5E8C;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.k3-cat-actions{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex: 0 0 auto;
+}
+
+/* Children wrapper */
+.k3-children{
+  padding: 8px 0 12px 34px; /* indent */
+  border-bottom: 1px solid #EEF4FF;
+}
+
+/* Child row: kolom auto & wrap */
+.k3-child-row{
+  display:grid;
+  grid-template-columns: max-content 1fr max-content; /* id_nb | penyakit | aksi */
+  gap: 12px;
+  align-items:start;
+  padding: 8px 0;
+}
+
+.k3-id{
+  font-weight:700;
+  color:#7B8DA8;
+  white-space: nowrap;
+}
+
+.k3-name{
+  color:#666;
+  white-space: normal;
+  word-break: break-word; /* panjang tidak kepotong */
+  line-height: 1.3;
+}
+
+.k3-child-actions{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  white-space:nowrap;
+}
