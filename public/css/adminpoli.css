@@ -1092,3 +1092,13 @@ body{ margin:0; }
   color: rgba(0,0,0,.5);
   font-weight: 600;
 }
+
+/* Diagnosa table: 2 kolom */
+.diag-head,
+.diag-row{
+  grid-template-columns: 3fr 1fr !important;
+}
+
+.k3-head, .k3-row{
+  grid-template-columns: 0.7fr 2.2fr 1.2fr 1fr !important;
+}

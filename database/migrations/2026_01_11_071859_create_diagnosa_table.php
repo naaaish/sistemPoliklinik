@@ -16,7 +16,6 @@ return new class extends Migration
             $table->text('diagnosa');
             $table->timestamps();
         });
-
     }
 
     /**
