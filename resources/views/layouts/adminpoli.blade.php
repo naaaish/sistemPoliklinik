@@ -11,7 +11,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
     {{-- CSS khusus AdminPoli --}}
-    <link rel="stylesheet" href="{{ asset('css/adminpoli.css') }}?v={{ filemtime(public_path('css/adminpoli.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/base.css') }}?v={{ filemtime(public_path('css/adminpoli/base.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/obat.css') }}?v={{ filemtime(public_path('css/adminpoli/obat.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/modal.css') }}?v={{ filemtime(public_path('css/adminpoli/modal.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/diagnosa.css') }}?v={{ filemtime(public_path('css/adminpoli/diagnosa.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/diagnosak3.css') }}?v={{ filemtime(public_path('css/adminpoli/diagnosak3.css')) }}">
+    {{-- Sweet Alert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 @stack('scripts')
@@ -54,13 +59,14 @@
             </a>
 
 
-             <a class="ap-nav-item {{ request()->routeIs('adminpoli.diagnosak3.*') ? 'active' : '' }}"
+            <a class="ap-nav-item {{ request()->routeIs('adminpoli.diagnosak3.*') ? 'active' : '' }}"
             href="{{ route('adminpoli.diagnosak3.index') }}">
                 <img src="{{ asset('assets/adminPoli/diagnosak3.png') }}" alt="diagnosa">
                 <span>Diagnosa K3</span>
             </a>
 
-            <a class="ap-nav-item" href="#">
+            <a class="ap-nav-item {{ request()->routeIs('adminpoli.pemeriksaan.*') ? 'active' : '' }}"
+            href="{{ route('adminpoli.pemeriksaan.index') }}">
                 <img src="{{ asset('assets/adminPoli/pemeriksaan.png') }}" alt="pemeriksaan">
                 <span>Pemeriksaan Pasien</span>
             </a>
@@ -81,10 +87,14 @@
             </a>
         </nav>
 
-        <div class="ap-logout">
-            <img src="{{ asset('assets/adminPoli/masuk.png') }}" alt="logout">
-            <a href="#" class="ap-logout-link">Logout</a>
-        </div>
+        {{-- LOGOUT --}}
+        <form action="{{ route('logout') }}" method="POST" class="logout-form">
+        @csrf
+        <button type="submit" class="logout-btn">
+            <img src="{{ asset('assets/adminPoli/logout.png') }}" alt="Logout">
+            Logout
+        </button>
+    </form>
     </aside>
 
     {{-- Main --}}

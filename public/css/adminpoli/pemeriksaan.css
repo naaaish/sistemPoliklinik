@@ -1,0 +1,235 @@
+/* =========================
+   PEMERIKSAAN PASIEN PAGE
+   (UI ngikut diagnosa, class beda)
+========================= */
+*{ box-sizing: border-box; }
+body{ margin:0; }
+
+.periksa-page{
+  font-family: Poppins, sans-serif;
+}
+
+/* topbar */
+.periksa-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 14px;
+}
+
+.periksa-left{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+/* back arrow */
+.periksa-back-img{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+
+  width: 40px;
+  height: 40px;
+
+  transition: transform .15s ease, filter .15s ease;
+}
+
+.periksa-back-img img{
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.periksa-back-img:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.periksa-back-img:active{
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+.periksa-heading{
+  font-size: 22px;
+  font-weight: 700;
+  color:#3B5E8C;
+}
+
+/* icons */
+.periksa-ic{
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+.periksa-ic-sm{
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+/* card */
+.periksa-card{
+  width: 920px;
+  max-width: 920px;
+  flex: 0 0 920px;
+  margin: 0 auto;
+  background:#fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  padding: 20px 22px;
+}
+
+/* search */
+.periksa-search{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  margin-bottom: 12px;
+}
+
+.periksa-search-input{
+  flex: 1;
+  height: 42px;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 14px;
+  outline:none;
+  transition: box-shadow .12s ease, border-color .12s ease, transform .12s ease;
+}
+
+.periksa-search-input:focus{
+  border-color:#89B2D9;
+  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
+}
+
+.periksa-search-btn{
+  height: 42px;
+  border:none;
+  border-radius: 10px;
+  padding: 0 14px;
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  background:#7FA6D9;
+  color:#fff;
+  font-weight: 600;
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+}
+
+.periksa-search-btn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+.periksa-search-btn:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+/* table: grid (Pemeriksaan = 5 kolom) */
+.periksa-table-head,
+.periksa-row{
+  display:grid;
+  grid-template-columns: .8fr 2fr 2fr 2fr 1.1fr;
+  gap: 16px;
+}
+
+.periksa-table-head{
+  padding: 6px 4px 10px;
+  color:#7B8DA8;
+  font-weight: 700;
+  font-size: 16px;
+  text-align:center;
+}
+
+.periksa-table-body{
+  border-top: 1px solid #EEF4FF;
+  padding-top: 12px;
+}
+
+.periksa-row{
+  min-height: 50px;
+  align-items: center;
+}
+
+.periksa-cell{
+  height: 34px;
+  border: 1px solid #D6D6D6;
+  border-radius: 8px;
+  display:flex;
+  align-items:center;
+  padding: 0 12px;
+  color:#666;
+  background:#fff;
+  font-size: 13px;
+}
+
+.periksa-center{ justify-content:center; }
+
+/* actions */
+.periksa-actions{
+  display:flex;
+  justify-content:center;
+  gap: 14px;
+  align-items:center;
+}
+
+.periksa-act{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  border:none;
+  background:transparent;
+  font-weight: 700;
+  cursor:pointer;
+  text-decoration:none;
+  padding: 6px 6px;
+  transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+}
+
+.periksa-view{ color:#3B5E8C; }
+
+.periksa-act:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+.periksa-act:active{
+  transform: translateY(0);
+  opacity: .85;
+}
+
+/* Empty row */
+.periksa-row-empty{
+  padding: 8px 4px;
+  border-bottom: 1px solid #EEF4FF;
+  min-height: 50px;
+}
+
+.periksa-empty-span{
+  grid-column: 1 / -1;
+
+  height: 34px;
+  border-radius: 8px;
+  background:#fff;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding: 0 12px;
+  font-size: 13px;
+  color:#7B8DA8;
+  font-weight:700;
+}
+
+.periksa-foot{
+  margin-top: 18px;
+  text-align:center;
+  color: rgba(0,0,0,0.55);
+  font-size: 13px;
+  font-weight: 600;
+}

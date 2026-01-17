@@ -11,210 +11,456 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class DiagnosaK3Controller extends Controller
 {
+    private function nextKategoriId(): string
+    {
+        $max = DB::table('diagnosa_k3')
+            ->where('tipe', 'kategori')
+            ->selectRaw("MAX(CAST(id_nb AS UNSIGNED)) as m")
+            ->value('m');
+
+        $next = ((int)$max) + 1;
+        return (string)$next; // "1", "2", dst
+    }
+
+    private function nextPenyakitId(string $parentId): string
+    {
+        $max = DB::table('diagnosa_k3')
+            ->where('tipe', 'penyakit')
+            ->where('parent_id', $parentId)
+            ->selectRaw("MAX(CAST(SUBSTRING_INDEX(id_nb,'.',-1) AS UNSIGNED)) as m")
+            ->value('m');
+
+        $next = ((int)$max) + 1;
+        return $parentId . '.' . $next; // "1.1", "1.2", dst
+    }
+
     public function index(Request $request)
     {
-        $q = $request->q;
+        $q = trim((string)$request->q);
 
-        $rows = DB::table('diagnosa_k3')
-            ->select('id_nb','nama_penyakit','kategori_penyakit','created_at')
+        // Ambil kategori
+        $cats = DB::table('diagnosa_k3')
+            ->where('tipe', 'kategori')
+            ->when($q, function($query) use ($q){
+                // search bisa kena kategori juga
+                $query->where(function($w) use ($q){
+                    $w->where('id_nb','like',"%$q%")
+                      ->orWhere('nama_penyakit','like',"%$q%")
+                      ->orWhere('kategori_penyakit','like',"%$q%");
+                });
+            })
+            ->orderByRaw("CAST(id_nb AS UNSIGNED) ASC")
+            ->get();
+
+        // Ambil semua penyakit (filter search: kalau q ada, filter juga)
+        $children = DB::table('diagnosa_k3')
+            ->where('tipe', 'penyakit')
             ->when($q, function($query) use ($q){
                 $query->where(function($w) use ($q){
                     $w->where('id_nb','like',"%$q%")
-                    ->orWhere('nama_penyakit','like',"%$q%")
-                    ->orWhere('kategori_penyakit','like',"%$q%");
+                      ->orWhere('nama_penyakit','like',"%$q%")
+                      ->orWhere('kategori_penyakit','like',"%$q%");
                 });
             })
-            ->orderBy('kategori_penyakit')
-            ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',1) AS DECIMAL(10,2)) ASC")
-            ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',-1) AS DECIMAL(10,2)) ASC")
+            ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',1) AS UNSIGNED) ASC")
+            ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',-1) AS UNSIGNED) ASC")
             ->get()
-            ->groupBy('kategori_penyakit');
+            ->groupBy('parent_id');
 
-        $kategoriList = DB::table('diagnosa_k3')
-            ->select('kategori_penyakit')
-            ->distinct()
-            ->orderBy('kategori_penyakit')
-            ->pluck('kategori_penyakit');
+        // Kalau search: kategori yang tidak match tapi punya anak match, tetap tampilkan.
+        if ($q) {
+            $catIdsFromChild = collect($children)->keys()->filter()->values();
+            $extraCats = DB::table('diagnosa_k3')
+                ->where('tipe','kategori')
+                ->whereIn('id_nb', $catIdsFromChild)
+                ->orderByRaw("CAST(id_nb AS UNSIGNED) ASC")
+                ->get();
+
+            $cats = $cats->concat($extraCats)->unique('id_nb')->values()
+                ->sortBy(fn($c)=>(int)$c->id_nb)
+                ->values();
+        }
 
         return view('adminpoli.diagnosak3.index', [
-            'groups' => $rows,
-            'kategoriList' => $kategoriList,
+            'categories' => $cats,
+            'children'   => $children,
         ]);
     }
 
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'id_nb' => ['required','string','max:10'],
-            'nama_penyakit' => ['required','string'],
-            'kategori_penyakit' => ['required','string','max:255'],
-        ]);
-
-        // id_nb unik (PK)
-        if (DB::table('diagnosa_k3')->where('id_nb', $request->id_nb)->exists()) {
-            return back()->with('error', 'Nomor (ID NB) sudah digunakan.');
-        }
-
-        // nama penyakit tidak boleh duplikat (case-insensitive)
-        $nama = mb_strtolower(trim($request->nama_penyakit));
-        $existsNama = DB::table('diagnosa_k3')
-            ->whereRaw('LOWER(nama_penyakit) = ?', [$nama])
-            ->exists();
-
-        if ($existsNama) {
-            return back()->with('error', 'Nama penyakit sudah ada (duplikat).');
-        }
-
-        DB::table('diagnosa_k3')->insert([
-            'id_nb' => trim($request->id_nb),
-            'nama_penyakit' => trim($request->nama_penyakit),
-            'kategori_penyakit' => trim($request->kategori_penyakit),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        return redirect()->route('adminpoli.diagnosak3.index')->with('success','Penyakit berhasil ditambahkan');
-    }
+    // ================= KATEGORI =================
 
     public function storeKategori(Request $request)
     {
         $request->validate([
-            'kategori_penyakit' => ['required','string','max:255'],
+            'nama_kategori' => ['required','string','max:255'],
         ]);
 
-        $kat = mb_strtolower(trim($request->kategori_penyakit));
+        $nama = trim($request->nama_kategori);
 
-        $existsKat = DB::table('diagnosa_k3')
-            ->whereRaw('LOWER(kategori_penyakit) = ?', [$kat])
+        $dup = DB::table('diagnosa_k3')
+            ->where('tipe','kategori')
+            ->whereRaw('LOWER(nama_penyakit)=?', [mb_strtolower($nama)])
             ->exists();
 
-        if ($existsKat) {
-            return back()->with('error', 'Kategori sudah ada (duplikat).');
-        }
+        if ($dup) return back()->with('error','Kategori sudah ada (duplikat).');
 
-        // Karena kategori belum punya tabel sendiri,
-        // kita "buat kategori" dengan membuat 1 record placeholder? -> TIDAK ENAK.
-        // Lebih rapi: kategori dibuat saat menambah penyakit.
-        // Jadi untuk tombol "Tambah Kategori", kita cuma simpan ke session? -> ribet.
-        // Solusi simpel: buat kategori via modal penyakit (kategori baru).
-        return back()->with('success', 'Kategori siap dipakai. Silakan tambah penyakit pada kategori tersebut.');
+        $id = $this->nextKategoriId();
+
+        DB::table('diagnosa_k3')->insert([
+            'id_nb'           => $id,
+            'tipe'            => 'kategori',
+            'parent_id'       => null,
+            'nama_penyakit'   => $nama, // dipakai sebagai nama kategori
+            'kategori_penyakit'=> $nama, // biar konsisten
+            'created_at'      => now(),
+            'updated_at'      => now(),
+        ]);
+
+        return back()->with('success','Kategori berhasil ditambahkan.');
     }
 
-
-    public function update(Request $request, $id)
+    public function updateKategori(Request $request, $id_nb)
     {
         $request->validate([
-            'nama_penyakit' => ['required','string'],
-            'kategori_penyakit' => ['required','string','max:255'],
+            'nama_kategori' => ['required','string','max:255'],
         ]);
 
-        $nama = mb_strtolower(trim($request->nama_penyakit));
+        $id_nb = trim($id_nb);
+        $nama  = trim($request->nama_kategori);
 
-        $existsNama = DB::table('diagnosa_k3')
-            ->whereRaw('LOWER(nama_penyakit) = ?', [$nama])
-            ->where('id_nb', '!=', $id)
+        $cat = DB::table('diagnosa_k3')->where('id_nb',$id_nb)->where('tipe','kategori')->first();
+        if (!$cat) return back()->with('error','Kategori tidak ditemukan.');
+
+        $dup = DB::table('diagnosa_k3')
+            ->where('tipe','kategori')
+            ->whereRaw('LOWER(nama_penyakit)=?', [mb_strtolower($nama)])
+            ->where('id_nb','!=',$id_nb)
             ->exists();
 
-        if ($existsNama) {
-            return back()->with('error', 'Nama penyakit sudah ada (duplikat).');
-        }
+        if ($dup) return back()->with('error','Nama kategori sudah ada (duplikat).');
 
-        DB::table('diagnosa_k3')->where('id_nb',$id)->update([
-            'nama_penyakit' => trim($request->nama_penyakit),
-            'kategori_penyakit' => trim($request->kategori_penyakit),
-            'updated_at' => now(),
-        ]);
+        DB::transaction(function() use ($id_nb, $nama){
+            // update row kategori
+            DB::table('diagnosa_k3')->where('id_nb',$id_nb)->update([
+                'nama_penyakit' => $nama,
+                'kategori_penyakit' => $nama,
+                'updated_at' => now(),
+            ]);
 
-        return redirect()->route('adminpoli.diagnosak3.index')->with('success','Data penyakit berhasil diperbarui');
-    }
-
-    public function updateKategori(Request $request, $kategori)
-    {
-        $request->validate(['kategori_baru' => ['required','string','max:255']]);
-
-        $old = urldecode($kategori);
-        $new = trim($request->kategori_baru);
-
-        $existsNew = DB::table('diagnosa_k3')
-            ->whereRaw('LOWER(kategori_penyakit)=?', [mb_strtolower($new)])
-            ->exists();
-
-        if ($existsNew) {
-            return back()->with('error','Nama kategori sudah ada (duplikat).');
-        }
-
-        DB::table('diagnosa_k3')->where('kategori_penyakit',$old)->update([
-            'kategori_penyakit' => $new,
-            'updated_at' => now(),
-        ]);
+            // update semua anak: kategori_penyakit ikut berubah
+            DB::table('diagnosa_k3')
+                ->where('tipe','penyakit')
+                ->where('parent_id',$id_nb)
+                ->update([
+                    'kategori_penyakit' => $nama,
+                    'updated_at' => now(),
+                ]);
+        });
 
         return back()->with('success','Kategori berhasil diubah.');
     }
 
-    public function destroy($id)
+    public function destroyKategori($id_nb)
     {
-        DB::table('diagnosa_k3')->where('id_nb', $id)->delete();
+        $id_nb = trim($id_nb);
 
-        return redirect()->route('adminpoli.diagnosak3.index')
-            ->with('success','Diagnosa K3 berhasil dihapus');
-    }
-
-    public function destroyKategori($kategori)
-    {
-        $kat = urldecode($kategori);
-
-        DB::table('diagnosa_k3')->where('kategori_penyakit',$kat)->delete();
+        DB::transaction(function() use ($id_nb){
+            DB::table('diagnosa_k3')->where('tipe','penyakit')->where('parent_id',$id_nb)->delete();
+            DB::table('diagnosa_k3')->where('tipe','kategori')->where('id_nb',$id_nb)->delete();
+        });
 
         return back()->with('success','Kategori dan seluruh isinya berhasil dihapus.');
     }
 
+    // ================= PENYAKIT =================
 
+    public function storePenyakit(Request $request)
+    {
+        $request->validate([
+            'parent_id'     => ['required','string','max:10'],
+            'nama_penyakit' => ['required','string'],
+        ]);
+
+        $parent = trim($request->parent_id);
+        $nama   = trim($request->nama_penyakit);
+
+        $cat = DB::table('diagnosa_k3')->where('id_nb',$parent)->where('tipe','kategori')->first();
+        if (!$cat) return back()->with('error','Kategori tidak valid.');
+
+        $dup = DB::table('diagnosa_k3')
+            ->where('tipe','penyakit')
+            ->where('parent_id',$parent)
+            ->whereRaw('LOWER(nama_penyakit)=?', [mb_strtolower($nama)])
+            ->exists();
+
+        if ($dup) return back()->with('error','Nama penyakit sudah ada di kategori ini (duplikat).');
+
+        $id = $this->nextPenyakitId($parent);
+
+        DB::table('diagnosa_k3')->insert([
+            'id_nb'            => $id,
+            'tipe'             => 'penyakit',
+            'parent_id'        => $parent,
+            'nama_penyakit'    => $nama,
+            'kategori_penyakit'=> $cat->nama_penyakit, // nama kategori terbaru
+            'created_at'       => now(),
+            'updated_at'       => now(),
+        ]);
+
+        return back()->with('success','Penyakit berhasil ditambahkan.');
+    }
+
+    public function updatePenyakit(Request $request, $id_nb)
+    {
+        $request->validate([
+            'parent_id'     => ['required','string','max:10'],
+            'nama_penyakit' => ['required','string'],
+        ]);
+
+        $id_nb  = trim($id_nb);
+        $parent = trim($request->parent_id);
+        $nama   = trim($request->nama_penyakit);
+
+        $row = DB::table('diagnosa_k3')->where('id_nb',$id_nb)->where('tipe','penyakit')->first();
+        if (!$row) return back()->with('error','Penyakit tidak ditemukan.');
+
+        $cat = DB::table('diagnosa_k3')->where('id_nb',$parent)->where('tipe','kategori')->first();
+        if (!$cat) return back()->with('error','Kategori tidak valid.');
+
+        // cek duplikat di kategori target
+        $dup = DB::table('diagnosa_k3')
+            ->where('tipe','penyakit')
+            ->where('parent_id',$parent)
+            ->whereRaw('LOWER(nama_penyakit)=?', [mb_strtolower($nama)])
+            ->where('id_nb','!=',$id_nb)
+            ->exists();
+
+        if ($dup) return back()->with('error','Nama penyakit sudah ada di kategori target (duplikat).');
+
+        DB::transaction(function() use ($row, $id_nb, $parent, $nama, $cat){
+            if ($row->parent_id !== $parent) {
+                // pindah kategori => id_nb harus jadi paling bawah kategori target
+                $newId = $this->nextPenyakitId($parent);
+
+                DB::table('diagnosa_k3')->where('id_nb',$id_nb)->update([
+                    'id_nb' => $newId,
+                    'parent_id' => $parent,
+                    'nama_penyakit' => $nama,
+                    'kategori_penyakit' => $cat->nama_penyakit,
+                    'updated_at' => now(),
+                ]);
+
+                // optional: rapikan nomor di kategori lama (isi gap)
+                $this->renumberChildren($row->parent_id);
+            } else {
+                DB::table('diagnosa_k3')->where('id_nb',$id_nb)->update([
+                    'nama_penyakit' => $nama,
+                    'kategori_penyakit' => $cat->nama_penyakit,
+                    'updated_at' => now(),
+                ]);
+            }
+        });
+
+        return back()->with('success','Penyakit berhasil diperbarui.');
+    }
+
+    public function destroyPenyakit($id_nb)
+    {
+        $id_nb = trim($id_nb);
+        $row = DB::table('diagnosa_k3')->where('id_nb',$id_nb)->where('tipe','penyakit')->first();
+        if (!$row) return back()->with('error','Data tidak ditemukan.');
+
+        DB::transaction(function() use ($row, $id_nb){
+            DB::table('diagnosa_k3')->where('id_nb',$id_nb)->delete();
+            $this->renumberChildren($row->parent_id);
+        });
+
+        return back()->with('success','Penyakit berhasil dihapus.');
+    }
+
+    private function renumberChildren(string $parentId): void
+    {
+        $kids = DB::table('diagnosa_k3')
+            ->where('tipe','penyakit')
+            ->where('parent_id',$parentId)
+            ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',-1) AS UNSIGNED) ASC")
+            ->get();
+
+        // pakai temporary untuk menghindari collision
+        foreach ($kids as $i => $k) {
+            $tmp = 't' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT); // 10 char
+            DB::table('diagnosa_k3')->where('id_nb',$k->id_nb)->update(['id_nb'=>$tmp]);
+        }
+        foreach ($kids as $i => $k) {
+            $tmp = 't' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT);
+            $new = $parentId . '.' . ($i+1);
+            DB::table('diagnosa_k3')->where('id_nb',$tmp)->update(['id_nb'=>$new, 'updated_at'=>now()]);
+        }
+    }
+
+    // ================= REORDER (drag-drop) =================
+    // payload:
+    // categories: ["3","1","2"]
+    // children: { "3":["3.2","3.1"], "1":["1.1"], "2":[] }
+    public function reorder(Request $request)
+    {
+        $request->validate([
+            'categories' => ['required','array'],
+            'categories.*' => ['string','max:10'],
+            'children' => ['nullable','array'],
+        ]);
+
+        $catOrder = $request->input('categories', []);
+        $children = $request->input('children', []);   
+
+        DB::transaction(function() use ($catOrder, $children){
+
+            // 1) TEMP rename kategori + update parent_id anak
+            foreach ($catOrder as $i => $oldCatId) {
+                $tmpCatId = 'c' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT); // 10 char
+
+                DB::table('diagnosa_k3')
+                    ->where('tipe','kategori')
+                    ->where('id_nb',$oldCatId)
+                    ->update(['id_nb'=>$tmpCatId, 'updated_at'=>now()]);
+
+                DB::table('diagnosa_k3')
+                    ->where('tipe','penyakit')
+                    ->where('parent_id',$oldCatId)
+                    ->update(['parent_id'=>$tmpCatId, 'updated_at'=>now()]);
+            }
+
+            // 2) Final rename kategori jadi 1..n
+            $tmpToFinal = []; // tmp => final
+            foreach ($catOrder as $i => $oldCatId) {
+                $tmp = 'c' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT);
+                $final = (string)($i+1);
+                $tmpToFinal[$tmp] = $final;
+
+                DB::table('diagnosa_k3')->where('tipe','kategori')->where('id_nb',$tmp)->update([
+                    'id_nb'=>$final,
+                    'updated_at'=>now()
+                ]);
+
+                DB::table('diagnosa_k3')->where('tipe','penyakit')->where('parent_id',$tmp)->update([
+                    'parent_id'=>$final,
+                    'updated_at'=>now()
+                ]);
+            }
+
+            // 3) Renumber penyakit per kategori berdasarkan urutan drag
+            foreach ($tmpToFinal as $finalCatId) {
+                $list = $children[$finalCatId] ?? [];
+
+                // kalau front-end belum kirim urutan, fallback ke urutan existing
+                if (empty($list)) {
+                    $list = DB::table('diagnosa_k3')
+                        ->where('tipe','penyakit')
+                        ->where('parent_id',$finalCatId)
+                        ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',-1) AS UNSIGNED) ASC")
+                        ->pluck('id_nb')
+                        ->toArray();
+                }
+
+                // temp rename anak
+                foreach ($list as $i => $oldChildId) {
+                    $tmp = 'p' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT);
+                    DB::table('diagnosa_k3')->where('tipe','penyakit')->where('id_nb',$oldChildId)->update([
+                        'id_nb'=>$tmp,
+                        'updated_at'=>now()
+                    ]);
+                }
+
+                // final rename anak
+                foreach ($list as $i => $oldChildId) {
+                    $tmp = 'p' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT);
+                    $new = $finalCatId . '.' . ($i+1);
+                    DB::table('diagnosa_k3')->where('tipe','penyakit')->where('id_nb',$tmp)->update([
+                        'id_nb'=>$new,
+                        'updated_at'=>now()
+                    ]);
+                }
+            }
+        });
+
+        return response()->json(['ok'=>true]);
+    }
+
+    // ================= import/export kamu boleh tetap, tapi pastikan filter tipe penyakit =================
+    // (biar exportnya untuk laporan "riwayat pemeriksaan" enak)
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,xlsx,xls|max:5120', // 5MB
+            'file' => 'required|file|mimes:csv,xlsx,xls|max:5120',
         ]);
 
         $rows = Excel::toArray([], $request->file('file'))[0] ?? [];
         if (count($rows) <= 1) {
-            return redirect()->route('adminpoli.diagnosak3.index')->with('error','File kosong / format tidak sesuai.');
+            return back()->with('error','File kosong / format tidak sesuai.');
         }
 
         $header = array_map(fn($h)=>Str::slug((string)$h,'_'), $rows[0]);
-        $idxId = array_search('id_nb', $header);
         $idxNama = array_search('nama_penyakit', $header);
-        $idxKat = array_search('kategori_penyakit', $header);
+        $idxKat  = array_search('kategori_penyakit', $header);
 
-        if ($idxId===false || $idxNama===false || $idxKat===false) {
-            return redirect()->route('adminpoli.diagnosak3.index')
-                ->with('error','Header wajib: id_nb, nama_penyakit, kategori_penyakit');
+        if ($idxNama===false || $idxKat===false) {
+            return back()->with('error','Header wajib: nama_penyakit, kategori_penyakit');
         }
 
         $inserted=0; $skipped=0;
 
-        foreach (array_slice($rows,1) as $r) {
-            $idnb = trim((string)($r[$idxId] ?? ''));
-            $nama = trim((string)($r[$idxNama] ?? ''));
-            $kat  = trim((string)($r[$idxKat] ?? ''));
+        DB::transaction(function() use ($rows, $idxNama, $idxKat, &$inserted, &$skipped){
+            foreach (array_slice($rows,1) as $r) {
+                $nama = trim((string)($r[$idxNama] ?? ''));
+                $kat  = trim((string)($r[$idxKat] ?? ''));
 
-            if ($idnb==='' || $nama==='' || $kat==='') { $skipped++; continue; }
+                if ($nama==='' || $kat==='') { $skipped++; continue; }
 
-            $exists = DB::table('diagnosa_k3')->where('id_nb',$idnb)->exists();
-            if ($exists) { $skipped++; continue; }
+                // cari / buat kategori
+                $cat = DB::table('diagnosa_k3')
+                    ->where('tipe','kategori')
+                    ->whereRaw('LOWER(nama_penyakit)=?', [mb_strtolower($kat)])
+                    ->first();
 
-            DB::table('diagnosa_k3')->insert([
-                'id_nb'=>$idnb,
-                'nama_penyakit'=>$nama,
-                'kategori_penyakit'=>$kat,
-                'created_at'=>now(),
-                'updated_at'=>now(),
-            ]);
-            $inserted++;
-        }
+                if (!$cat) {
+                    $newCatId = $this->nextKategoriId();
+                    DB::table('diagnosa_k3')->insert([
+                        'id_nb'=>$newCatId,
+                        'tipe'=>'kategori',
+                        'parent_id'=>null,
+                        'nama_penyakit'=>$kat,
+                        'kategori_penyakit'=>$kat,
+                        'created_at'=>now(),
+                        'updated_at'=>now(),
+                    ]);
+                    $cat = (object)['id_nb'=>$newCatId, 'nama_penyakit'=>$kat];
+                }
 
-        return redirect()->route('adminpoli.diagnosak3.index')
-            ->with('success',"Import selesai. Berhasil: $inserted, Dilewati: $skipped");
+                // duplikat penyakit di kategori
+                $dup = DB::table('diagnosa_k3')
+                    ->where('tipe','penyakit')
+                    ->where('parent_id',$cat->id_nb)
+                    ->whereRaw('LOWER(nama_penyakit)=?', [mb_strtolower($nama)])
+                    ->exists();
+                if ($dup) { $skipped++; continue; }
+
+                $newId = $this->nextPenyakitId($cat->id_nb);
+
+                DB::table('diagnosa_k3')->insert([
+                    'id_nb'=>$newId,
+                    'tipe'=>'penyakit',
+                    'parent_id'=>$cat->id_nb,
+                    'nama_penyakit'=>$nama,
+                    'kategori_penyakit'=>$cat->nama_penyakit,
+                    'created_at'=>now(),
+                    'updated_at'=>now(),
+                ]);
+
+                $inserted++;
+            }
+        });
+
+        return back()->with('success',"Import selesai. Berhasil: $inserted, Dilewati: $skipped");
     }
 
     public function export(Request $request)
@@ -231,9 +477,10 @@ class DiagnosaK3Controller extends Controller
 
         $data = DB::table('diagnosa_k3')
             ->select('id_nb','kategori_penyakit','nama_penyakit','created_at')
+            ->where('tipe','penyakit')
             ->whereBetween('created_at', [$from,$to])
-            ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',1) AS DECIMAL(10,2)) ASC")
-            ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',-1) AS DECIMAL(10,2)) ASC")
+            ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',1) AS UNSIGNED) ASC")
+            ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',-1) AS UNSIGNED) ASC")
             ->get();
 
         if ($request->action === 'preview') {
@@ -271,7 +518,6 @@ class DiagnosaK3Controller extends Controller
             ]);
         }
 
-        // pdf
         $pdf = Pdf::loadView('adminpoli.diagnosak3.export_pdf', [
             'data'=>$data, 'from'=>$request->from, 'to'=>$request->to
         ])->setPaper('A4','portrait');

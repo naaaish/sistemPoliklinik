@@ -89,16 +89,37 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::resource('diagnosa', DiagnosaController::class)->except(['show']);
 
     // Diagnosa K3
-    Route::post('diagnosa-k3/import', [DiagnosaK3Controller::class, 'import'])->name('diagnosak3.import');
-    Route::get('diagnosa-k3/export', [DiagnosaK3Controller::class, 'export'])->name('diagnosak3.export');
+    Route::get('/diagnosak3', [DiagnosaK3Controller::class,'index'])->name('diagnosak3.index');
 
-    Route::resource('diagnosa-k3', DiagnosaK3Controller::class)->except(['show'])
-        ->names('diagnosak3');
-    Route::post('diagnosa-k3/kategori', [\App\Http\Controllers\AdminPoli\DiagnosaK3Controller::class, 'storeKategori'])->name('diagnosak3.kategori.store');
-    Route::put('diagnosa-k3/kategori/{kategori}', [\App\Http\Controllers\AdminPoli\DiagnosaK3Controller::class, 'updateKategori'])->name('diagnosak3.kategori.update');
-    Route::delete('diagnosa-k3/kategori/{kategori}', [\App\Http\Controllers\AdminPoli\DiagnosaK3Controller::class, 'destroyKategori'])->name('diagnosak3.kategori.destroy');
+    Route::post('/diagnosak3/kategori', [DiagnosaK3Controller::class,'storeKategori'])->name('diagnosak3.kategori.store');
+    Route::put('/diagnosak3/kategori/{id_nb}', [DiagnosaK3Controller::class,'updateKategori'])->name('diagnosak3.kategori.update');
+    Route::delete('/diagnosak3/kategori/{id_nb}', [DiagnosaK3Controller::class,'destroyKategori'])->name('diagnosak3.kategori.destroy');
+
+    Route::post('/diagnosak3/penyakit', [DiagnosaK3Controller::class,'storePenyakit'])->name('diagnosak3.penyakit.store');
+    Route::put('/diagnosak3/penyakit/{id_nb}', [DiagnosaK3Controller::class,'updatePenyakit'])->name('diagnosak3.penyakit.update');
+    Route::delete('/diagnosak3/penyakit/{id_nb}', [DiagnosaK3Controller::class,'destroyPenyakit'])->name('diagnosak3.penyakit.destroy');
+
+    Route::post('/diagnosak3/reorder', [DiagnosaK3Controller::class,'reorder'])->name('diagnosak3.reorder');
+
+    Route::post('/diagnosak3/import', [DiagnosaK3Controller::class,'import'])->name('diagnosak3.import');
+    Route::get('/diagnosak3/export', [DiagnosaK3Controller::class,'export'])->name('diagnosak3.export');
+
+    // LIST hasil pemeriksaan (kelola hasil pasien)
+    Route::get('/pemeriksaan', [PemeriksaanController::class, 'index'])
+        ->name('pemeriksaan.index');
+
+    // DETAIL hasil pemeriksaan (read / ringkasan)
+    Route::get('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'show'])
+        ->name('pemeriksaan.show');
+
+    // FORM edit hasil pemeriksaan
+    Route::get('/pemeriksaan/{pendaftaranId}/edit', [PemeriksaanController::class, 'edit'])
+        ->name('pemeriksaan.edit');
+
+    // UPDATE hasil pemeriksaan
+    Route::put('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'update'])
+        ->name('pemeriksaan.update');
 });
-
 
 
 /*
