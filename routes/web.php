@@ -15,6 +15,7 @@ use App\Http\Controllers\Kepegawaian\KRiwayatController;
 use App\Http\Controllers\Kepegawaian\LaporanController;
 use App\Http\Controllers\AdminPoli\DiagnosaController;
 use App\Http\Controllers\AdminPoli\DiagnosaK3Controller;
+use App\Http\Controllers\Pasien\DetailPemeriksaanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -152,7 +153,11 @@ Route::middleware(['auth'])->group(function () {
         [ArtikelController::class, 'show']
     )->name('pasien.artikel.detail');
 
+    Route::get('/pasien/pemeriksaan/{id}', 
+        [DetailPemeriksaanController::class, 'show']
+    )->name('pasien.pemeriksaan.detail');
 });
+
 
 
 // LAPORAN

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role',['pasien','adminPoli','adminKepegawaian']);
             $table->string('nama_user');
+            $table->string('nip')->nullable(); // TAMBAHKAN INI
             $table->timestamps();
         });
 

@@ -1,0 +1,224 @@
+:root {
+    --primary: #316BA1;
+    --dark: #1a3a52;
+    --bg: #eef5fb;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+}
+
+/* ===== HERO ===== */
+.hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 85vh;
+    background: linear-gradient(135deg, var(--dark), var(--primary));
+    color: white;
+}
+
+.hero-content {
+    padding: 80px 60px;
+}
+
+.hero-badge {
+    background: rgba(255,255,255,.15);
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    font-size: 44px;
+    line-height: 1.2;
+}
+
+.hero h1 span {
+    color: #B4F2F4;
+}
+
+.hero p {
+    max-width: 480px;
+    opacity: .9;
+}
+
+.hero-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 14px;
+}
+
+.btn-primary {
+    background: white;
+    color: var(--primary);
+    padding: 14px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-outline {
+    border: 2px solid rgba(255,255,255,.5);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+/* ===== SERVICES ===== */
+.services {
+    margin-top: -60px;
+    padding: 0 60px 60px;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 24px;
+}
+
+.service-card {
+    background: #1f4561;
+    color: white;
+    padding: 28px;
+    border-radius: 14px;
+    text-align: center;
+}
+
+/* ===== SECTION ===== */
+.section {
+    padding: 90px 60px;
+    background: white;
+}
+
+.section.alt {
+    background: #f8f9fa;
+}
+
+.section-title {
+    font-size: 28px;
+    margin-bottom: 40px;
+}
+
+/* ================= JADWAL DOKTER ================= */
+
+.doctor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+    margin-top: 30px;
+}
+
+.doctor-card-modern {
+    display: flex;
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    transition: .3s;
+}
+
+.doctor-card-modern:hover {
+    transform: translateY(-6px);
+}
+
+.doctor-photo {
+    width: 110px;
+    background: #eaf4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doctor-photo img {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    object-fit: cover;
+}
+
+.doctor-body {
+    padding: 18px;
+    flex: 1;
+}
+
+.doctor-body h4 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.doctor-body span {
+    font-size: 13px;
+    color: #2563eb;
+    font-weight: 500;
+}
+
+.doctor-schedule {
+    margin-top: 12px;
+    border-left: 3px solid #3b82f6;
+    padding-left: 12px;
+}
+
+.doctor-schedule p {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.doctor-schedule strong {
+    font-size: 14px;
+}
+
+
+/* ===== ARTICLE ===== */
+.article-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 24px;
+}
+
+.article-card {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+/* ===== ABOUT ===== */
+.about {
+    text-align: center;
+}
+
+.about-grid {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 16px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+    .hero { grid-template-columns: 1fr; }
+    .services-grid,
+    .article-grid { grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 768px) {
+    .services-grid,
+    .article-grid,
+    .doctor-grid,
+    .about-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-content,
+    .section {
+        padding: 60px 30px;
+    }
+}
