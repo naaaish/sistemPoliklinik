@@ -65,7 +65,7 @@
 
 
             {{-- Download + rentang tanggal --}}
-            <form action="{{ route('adminpoli.obat.export') }}" method="GET" class="obat-download">
+            <form action="{{ route('adminpoli.obat.export') }}" method="GET" class="obat-download" id="obatExportForm">
                 <input type="date" name="from" value="{{ request('from') }}" class="obat-date" required>
                 <span class="obat-sep">s/d</span>
                 <input type="date" name="to" value="{{ request('to') }}" class="obat-date" required>
@@ -358,4 +358,40 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.style.display = 'none';
         }
     }
+
+// Validasi rentang tanggal export
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('obatExportForm');
+  if (!form) return;
+
+  const fromEl = form.querySelector('input[name="from"]');
+  const toEl   = form.querySelector('input[name="to"]');
+
+  function toastError(msg){
+    if (window.AdminPoliToast) AdminPoliToast.fire({ icon:'error', title: msg });
+    else Swal.fire({ icon:'error', title: msg });
+  }
+
+  function isInvalidRange(){
+    const from = fromEl?.value;
+    const to = toEl?.value;
+    if (!from || !to) return false; // required sudah handle
+    return from > to; // aman karena format YYYY-MM-DD
+  }
+
+  // validasi saat submit (preview atau download)
+  form.addEventListener('submit', (e) => {
+    if (isInvalidRange()) {
+      e.preventDefault();
+      toastError('Tanggal awal tidak boleh lebih besar dari tanggal akhir.');
+    }
+  });
+
+  // optional: auto alert saat user ganti tanggal
+  [fromEl, toEl].forEach(el => {
+    el?.addEventListener('change', () => {
+      if (isInvalidRange()) toastError('Rentang tanggal tidak valid. Perbaiki tanggalnya.');
+    });
+  });
+});
 </script>

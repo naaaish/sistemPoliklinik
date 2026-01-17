@@ -13,6 +13,8 @@ use App\Http\Controllers\Kepegawaian\KDashboardController;
 use App\Http\Controllers\Kepegawaian\PegawaiController;
 use App\Http\Controllers\Kepegawaian\KRiwayatController;
 use App\Http\Controllers\Kepegawaian\LaporanController;
+use App\Http\Controllers\AdminPoli\DiagnosaController;
+use App\Http\Controllers\AdminPoli\DiagnosaK3Controller;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,13 +75,27 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::post('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'store'])
         ->name('pemeriksaan.store');
 
+    // (optional untuk autofill)
+    Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
+
     Route::resource('obat', ObatController::class)->except(['show']);
     Route::post('obat/import', [\App\Http\Controllers\AdminPoli\ObatController::class, 'import'])->name('obat.import');
     Route::get('obat/export', [\App\Http\Controllers\AdminPoli\ObatController::class, 'export'])->name('obat.export');
 
+    // Diagnosa
+    Route::post('diagnosa/import', [DiagnosaController::class, 'import'])->name('diagnosa.import');
+    Route::get('diagnosa/export', [DiagnosaController::class, 'export'])->name('diagnosa.export');
+    Route::resource('diagnosa', DiagnosaController::class)->except(['show']);
 
-    // (optional untuk autofill)
-    Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
+    // Diagnosa K3
+    Route::post('diagnosa-k3/import', [DiagnosaK3Controller::class, 'import'])->name('diagnosak3.import');
+    Route::get('diagnosa-k3/export', [DiagnosaK3Controller::class, 'export'])->name('diagnosak3.export');
+
+    Route::resource('diagnosa-k3', DiagnosaK3Controller::class)->except(['show'])
+        ->names('diagnosak3');
+    Route::post('diagnosa-k3/kategori', [\App\Http\Controllers\AdminPoli\DiagnosaK3Controller::class, 'storeKategori'])->name('diagnosak3.kategori.store');
+    Route::put('diagnosa-k3/kategori/{kategori}', [\App\Http\Controllers\AdminPoli\DiagnosaK3Controller::class, 'updateKategori'])->name('diagnosak3.kategori.update');
+    Route::delete('diagnosa-k3/kategori/{kategori}', [\App\Http\Controllers\AdminPoli\DiagnosaK3Controller::class, 'destroyKategori'])->name('diagnosak3.kategori.destroy');
 });
 
 

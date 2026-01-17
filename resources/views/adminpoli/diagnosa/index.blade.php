@@ -1,0 +1,291 @@
+@extends('layouts.adminpoli')
+@section('title', 'Diagnosa')
+
+@section('content')
+<div class="obat-page">
+
+  <div class="obat-topbar">
+    <div class="obat-left">
+      <a href="{{ route('adminpoli.dashboard') }}" class="obat-back-img" title="Kembali">
+        <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
+      </a>
+      <div class="obat-heading">Diagnosa</div>
+    </div>
+
+    <button type="button" class="obat-btn-add" onclick="openTambahDiagnosa()">
+      <img src="{{ asset('assets/adminPoli/plus1.png') }}" alt="+" class="obat-ic">
+      <span>Tambah</span>
+    </button>
+  </div>
+
+  <div class="obat-card">
+
+    {{-- Search --}}
+    <form class="obat-search" method="GET" action="{{ route('adminpoli.diagnosa.index') }}">
+      <input type="text" name="q" value="{{ request('q') }}"
+             placeholder="Masukkan diagnosa yang dicari" class="obat-search-input">
+      <button class="obat-search-btn" type="submit">
+        <img src="{{ asset('assets/adminPoli/search.png') }}" alt="cari" class="obat-ic">
+        <span>Cari</span>
+      </button>
+    </form>
+
+    {{-- Upload + Download --}}
+    <div class="obat-tools-row">
+
+      <form action="{{ route('adminpoli.diagnosa.import') }}" method="POST" enctype="multipart/form-data" class="obat-upload" id="diagUploadForm">
+        @csrf
+        <label class="obat-file" for="diagFileInput">
+          <input type="file" id="diagFileInput" name="file" accept=".csv,.xlsx,.xls">
+          <span id="diagFileLabel">Pilih File</span>
+        </label>
+
+        <span class="obat-file-name" id="diagFileName">Belum ada file dipilih</span>
+
+        <button type="submit" class="obat-btn-soft" id="diagUploadBtn" disabled>
+          <span>Upload</span>
+        </button>
+
+        <small class="obat-file-hint">Max 2MB • Format: CSV / XLSX / XLS</small>
+      </form>
+
+      <form action="{{ route('adminpoli.diagnosa.export') }}" method="GET" class="obat-download" id="diagnosaExportForm">
+        <input type="date" name="from" value="{{ request('from') }}" class="obat-date" required>
+        <span class="obat-sep">s/d</span>
+        <input type="date" name="to" value="{{ request('to') }}" class="obat-date" required>
+
+        <select name="format" class="obat-select" required>
+          <option value="" disabled selected>Pilih Format</option>
+          <option value="csv">CSV</option>
+          <option value="excel">Excel</option>
+          <option value="pdf">PDF</option>
+        </select>
+
+        <button type="submit" name="action" value="preview" class="obat-btn-soft"><span>Preview</span></button>
+        <button type="submit" name="action" value="download" class="obat-btn-soft">
+          <img src="{{ asset('assets/adminPoli/download.png') }}" alt="download" class="obat-ic">
+          <span>Download</span>
+        </button>
+      </form>
+
+    </div>
+
+    @if(request('from') && request('to'))
+      <div class="obat-preview">
+        <span>{{ $previewCount ?? 0 }} data diagnosa ditemukan ({{ request('from') }} s/d {{ request('to') }})</span>
+      </div>
+    @endif
+
+    {{-- Table --}}
+    <div class="obat-table">
+      <div class="obat-table-head diag-head">
+        <div>Diagnosa</div>
+        <div>Aksi</div>
+      </div>
+
+      <div class="obat-table-body">
+        @forelse($diagnosa as $row)
+          <div class="obat-row diag-row">
+            <div><div class="obat-cell">{{ $row->diagnosa }}</div></div>
+
+            <div class="obat-actions">
+              <button type="button" class="obat-act obat-edit js-diag-edit"
+                      data-id="{{ $row->id_diagnosa }}"
+                      data-text="{{ $row->diagnosa }}">
+                <img src="{{ asset('assets/adminPoli/edit.png') }}" class="obat-ic-sm" alt="">
+                Edit
+              </button>
+
+              <form method="POST" action="{{ route('adminpoli.diagnosa.destroy', $row->id_diagnosa) }}"
+                    class="obat-del-form js-diag-delete">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="obat-act obat-del">
+                  <span>Hapus</span>
+                  <img src="{{ asset('assets/adminPoli/sampah.png') }}" class="obat-ic-sm" alt="">
+                </button>
+              </form>
+            </div>
+          </div>
+        @empty
+          <div class="obat-row obat-row-empty">
+            <div class="obat-empty-span">
+              {{ request('q') ? 'Tidak ada diagnosa ditemukan' : 'Belum ada data diagnosa' }}
+            </div>
+          </div>
+        @endforelse
+      </div>
+    </div>
+
+    {{-- MODAL TAMBAH --}}
+    <div class="modal-overlay" id="modalTambahDiagnosa">
+      <div class="modal-card">
+        <h3>Tambah Diagnosa</h3>
+
+        <form action="{{ route('adminpoli.diagnosa.store') }}" method="POST">
+          @csrf
+          <div class="modal-group">
+            <label>Diagnosa</label>
+            <input type="text" name="diagnosa" required>
+          </div>
+          <button type="submit" class="modal-btn">Simpan</button>
+        </form>
+      </div>
+    </div>
+
+    {{-- MODAL EDIT --}}
+    <div class="modal-overlay" id="modalEditDiagnosa">
+      <div class="modal-card">
+        <h3>Edit Diagnosa</h3>
+
+        <form method="POST" id="formEditDiagnosa">
+          @csrf
+          @method('PUT')
+          <div class="modal-group">
+            <label>Diagnosa</label>
+            <input type="text" name="diagnosa" id="editDiagnosaText" required>
+          </div>
+          <button type="submit" class="modal-btn">Simpan</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="obat-foot">
+    Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
+  </div>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+  // table grid 2 kolom (override)
+  // cukup via CSS class diag-head/diag-row (lihat CSS di bawah)
+
+  function openTambahDiagnosa(){
+    document.getElementById('modalTambahDiagnosa').style.display = 'flex';
+  }
+
+  // edit modal
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.js-diag-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        const text = btn.dataset.text ?? '';
+
+        document.getElementById('modalEditDiagnosa').style.display = 'flex';
+        document.getElementById('editDiagnosaText').value = text;
+        document.getElementById('formEditDiagnosa').action = "{{ url('adminpoli/diagnosa') }}/" + id;
+      });
+    });
+
+    // confirm delete (SweetAlert2)
+    document.querySelectorAll('form.js-diag-delete').forEach((form) => {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        Swal.fire({
+          title: 'Hapus diagnosa ini?',
+          text: 'Data diagnosa akan dihapus dari daftar.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Ya, hapus',
+          cancelButtonText: 'Batal',
+          reverseButtons: true,
+        }).then((r) => { if (r.isConfirmed) form.submit(); });
+      });
+    });
+
+    // upload: tampilkan nama file + validasi size/ext + enable tombol
+    const input = document.getElementById('diagFileInput');
+    const nameEl = document.getElementById('diagFileName');
+    const labelEl = document.getElementById('diagFileLabel');
+    const btn = document.getElementById('diagUploadBtn');
+    const form = document.getElementById('diagUploadForm');
+
+    const MAX_MB = 2, MAX_BYTES = MAX_MB * 1024 * 1024;
+    const allowedExt = ['csv','xlsx','xls'];
+
+    function toastError(msg){
+      if (window.AdminPoliToast) AdminPoliToast.fire({ icon:'error', title: msg });
+      else Swal.fire({ icon:'error', title: msg });
+    }
+
+    input?.addEventListener('change', () => {
+      const file = input.files && input.files[0];
+      if (!file){
+        nameEl.textContent = 'Belum ada file dipilih';
+        labelEl.textContent = 'Pilih File';
+        btn.disabled = true;
+        return;
+      }
+      const ext = (file.name.split('.').pop() || '').toLowerCase();
+      if (!allowedExt.includes(ext)) {
+        input.value = '';
+        btn.disabled = true;
+        nameEl.textContent = 'Belum ada file dipilih';
+        labelEl.textContent = 'Pilih File';
+        toastError('Format file harus CSV / XLSX / XLS');
+        return;
+      }
+      if (file.size > MAX_BYTES) {
+        input.value = '';
+        btn.disabled = true;
+        nameEl.textContent = 'Belum ada file dipilih';
+        labelEl.textContent = 'Pilih File';
+        toastError(`Ukuran file maksimal ${MAX_MB}MB`);
+        return;
+      }
+      nameEl.textContent = file.name;
+      labelEl.textContent = 'Ganti File';
+      btn.disabled = false;
+    });
+
+    form?.addEventListener('submit', (e) => {
+      const file = input.files && input.files[0];
+      if (!file) { e.preventDefault(); toastError('Pilih file terlebih dahulu sebelum upload.'); }
+    });
+  });
+
+  // close modal when click overlay
+  window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-overlay')) e.target.style.display = 'none';
+  });
+
+// Validasi rentang tanggal export
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('diagnosaExportForm');
+  if (!form) return;
+
+  const fromEl = form.querySelector('input[name="from"]');
+  const toEl   = form.querySelector('input[name="to"]');
+
+  function toastError(msg){
+    if (window.AdminPoliToast) AdminPoliToast.fire({ icon:'error', title: msg });
+    else Swal.fire({ icon:'error', title: msg });
+  }
+
+  function isInvalidRange(){
+    const from = fromEl?.value;
+    const to = toEl?.value;
+    if (!from || !to) return false; // required sudah handle
+    return from > to; // aman karena format YYYY-MM-DD
+  }
+
+  // validasi saat submit (preview atau download)
+  form.addEventListener('submit', (e) => {
+    if (isInvalidRange()) {
+      e.preventDefault();
+      toastError('Tanggal awal tidak boleh lebih besar dari tanggal akhir.');
+    }
+  });
+
+  // optional: auto alert saat user ganti tanggal
+  [fromEl, toEl].forEach(el => {
+    el?.addEventListener('change', () => {
+      if (isInvalidRange()) toastError('Rentang tanggal tidak valid. Perbaiki tanggalnya.');
+    });
+  });
+});
+</script>
+@endpush
