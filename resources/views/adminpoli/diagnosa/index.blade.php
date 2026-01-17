@@ -2,68 +2,68 @@
 @section('title', 'Diagnosa')
 
 @section('content')
-<div class="obat-page">
+<div class="diag-page">
 
-  <div class="obat-topbar">
-    <div class="obat-left">
-      <a href="{{ route('adminpoli.dashboard') }}" class="obat-back-img" title="Kembali">
+  <div class="diag-topbar">
+    <div class="diag-left">
+      <a href="{{ route('adminpoli.dashboard') }}" class="diag-back-img" title="Kembali">
         <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
       </a>
-      <div class="obat-heading">Diagnosa</div>
+      <div class="diag-heading">Diagnosa</div>
     </div>
 
-    <button type="button" class="obat-btn-add" onclick="openTambahDiagnosa()">
-      <img src="{{ asset('assets/adminPoli/plus1.png') }}" alt="+" class="obat-ic">
+    <button type="button" class="diag-btn-add" onclick="openTambahDiagnosa()">
+      <img src="{{ asset('assets/adminPoli/plus1.png') }}" alt="+" class="diag-ic">
       <span>Tambah</span>
     </button>
   </div>
 
-  <div class="obat-card">
+  <div class="diag-card">
 
     {{-- Search --}}
-    <form class="obat-search" method="GET" action="{{ route('adminpoli.diagnosa.index') }}">
+    <form class="diag-search" method="GET" action="{{ route('adminpoli.diagnosa.index') }}">
       <input type="text" name="q" value="{{ request('q') }}"
-             placeholder="Masukkan diagnosa yang dicari" class="obat-search-input">
-      <button class="obat-search-btn" type="submit">
-        <img src="{{ asset('assets/adminPoli/search.png') }}" alt="cari" class="obat-ic">
+             placeholder="Masukkan diagnosa yang dicari" class="diag-search-input">
+      <button class="diag-search-btn" type="submit">
+        <img src="{{ asset('assets/adminPoli/search.png') }}" alt="cari" class="diag-ic">
         <span>Cari</span>
       </button>
     </form>
 
     {{-- Upload + Download --}}
-    <div class="obat-tools-row">
+    <div class="diag-tools-row">
 
-      <form action="{{ route('adminpoli.diagnosa.import') }}" method="POST" enctype="multipart/form-data" class="obat-upload" id="diagUploadForm">
+      <form action="{{ route('adminpoli.diagnosa.import') }}" method="POST" enctype="multipart/form-data" class="diag-upload" id="diagUploadForm">
         @csrf
-        <label class="obat-file" for="diagFileInput">
+        <label class="diag-file" for="diagFileInput">
           <input type="file" id="diagFileInput" name="file" accept=".csv,.xlsx,.xls">
           <span id="diagFileLabel">Pilih File</span>
         </label>
 
-        <span class="obat-file-name" id="diagFileName">Belum ada file dipilih</span>
+        <span class="diag-file-name" id="diagFileName">Belum ada file dipilih</span>
 
-        <button type="submit" class="obat-btn-soft" id="diagUploadBtn" disabled>
+        <button type="submit" class="diag-btn-soft" id="diagUploadBtn" disabled>
           <span>Upload</span>
         </button>
 
-        <small class="obat-file-hint">Max 2MB • Format: CSV / XLSX / XLS</small>
+        <small class="diag-file-hint">Max 2MB • Format: CSV / XLSX / XLS</small>
       </form>
 
-      <form action="{{ route('adminpoli.diagnosa.export') }}" method="GET" class="obat-download" id="diagnosaExportForm">
-        <input type="date" name="from" value="{{ request('from') }}" class="obat-date" required>
-        <span class="obat-sep">s/d</span>
-        <input type="date" name="to" value="{{ request('to') }}" class="obat-date" required>
+      <form action="{{ route('adminpoli.diagnosa.export') }}" method="GET" class="diag-download" id="diagnosaExportForm">
+        <input type="date" name="from" value="{{ request('from') }}" class="diag-date" required>
+        <span class="diag-sep">s/d</span>
+        <input type="date" name="to" value="{{ request('to') }}" class="diag-date" required>
 
-        <select name="format" class="obat-select" required>
+        <select name="format" class="diag-select" required>
           <option value="" disabled selected>Pilih Format</option>
           <option value="csv">CSV</option>
           <option value="excel">Excel</option>
           <option value="pdf">PDF</option>
         </select>
 
-        <button type="submit" name="action" value="preview" class="obat-btn-soft"><span>Preview</span></button>
-        <button type="submit" name="action" value="download" class="obat-btn-soft">
-          <img src="{{ asset('assets/adminPoli/download.png') }}" alt="download" class="obat-ic">
+        <button type="submit" name="action" value="preview" class="diag-btn-soft"><span>Preview</span></button>
+        <button type="submit" name="action" value="download" class="diag-btn-soft">
+          <img src="{{ asset('assets/adminPoli/download.png') }}" alt="download" class="diag-ic">
           <span>Download</span>
         </button>
       </form>
@@ -71,45 +71,45 @@
     </div>
 
     @if(request('from') && request('to'))
-      <div class="obat-preview">
+      <div class="diag-preview">
         <span>{{ $previewCount ?? 0 }} data diagnosa ditemukan ({{ request('from') }} s/d {{ request('to') }})</span>
       </div>
     @endif
 
     {{-- Table --}}
-    <div class="obat-table">
-      <div class="obat-table-head diag-head">
+    <div class="diag-table">
+      <div class="diag-table-head diag-head">
         <div>Diagnosa</div>
         <div>Aksi</div>
       </div>
 
-      <div class="obat-table-body">
+      <div class="diag-table-body">
         @forelse($diagnosa as $row)
-          <div class="obat-row diag-row">
-            <div><div class="obat-cell">{{ $row->diagnosa }}</div></div>
+          <div class="diag-row diag-row">
+            <div><div class="diag-cell">{{ $row->diagnosa }}</div></div>
 
-            <div class="obat-actions">
-              <button type="button" class="obat-act obat-edit js-diag-edit"
+            <div class="diag-actions">
+              <button type="button" class="diag-act diag-edit js-diag-edit"
                       data-id="{{ $row->id_diagnosa }}"
                       data-text="{{ $row->diagnosa }}">
-                <img src="{{ asset('assets/adminPoli/edit.png') }}" class="obat-ic-sm" alt="">
+                <img src="{{ asset('assets/adminPoli/edit.png') }}" class="diag-ic-sm" alt="">
                 Edit
               </button>
 
               <form method="POST" action="{{ route('adminpoli.diagnosa.destroy', $row->id_diagnosa) }}"
-                    class="obat-del-form js-diag-delete">
+                    class="diag-del-form js-diag-delete">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="obat-act obat-del">
+                <button type="submit" class="diag-act diag-del">
                   <span>Hapus</span>
-                  <img src="{{ asset('assets/adminPoli/sampah.png') }}" class="obat-ic-sm" alt="">
+                  <img src="{{ asset('assets/adminPoli/sampah.png') }}" class="diag-ic-sm" alt="">
                 </button>
               </form>
             </div>
           </div>
         @empty
-          <div class="obat-row obat-row-empty">
-            <div class="obat-empty-span">
+          <div class="diag-row diag-row-empty">
+            <div class="diag-empty-span">
               {{ request('q') ? 'Tidak ada diagnosa ditemukan' : 'Belum ada data diagnosa' }}
             </div>
           </div>
@@ -152,7 +152,7 @@
 
   </div>
 
-  <div class="obat-foot">
+  <div class="diag-foot">
     Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
   </div>
 </div>

@@ -103,6 +103,22 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
 
     Route::post('/diagnosak3/import', [DiagnosaK3Controller::class,'import'])->name('diagnosak3.import');
     Route::get('/diagnosak3/export', [DiagnosaK3Controller::class,'export'])->name('diagnosak3.export');
+
+    // LIST hasil pemeriksaan (kelola hasil pasien)
+    Route::get('/pemeriksaan', [PemeriksaanController::class, 'index'])
+        ->name('pemeriksaan.index');
+
+    // DETAIL hasil pemeriksaan (read / ringkasan)
+    Route::get('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'show'])
+        ->name('pemeriksaan.show');
+
+    // FORM edit hasil pemeriksaan
+    Route::get('/pemeriksaan/{pendaftaranId}/edit', [PemeriksaanController::class, 'edit'])
+        ->name('pemeriksaan.edit');
+
+    // UPDATE hasil pemeriksaan
+    Route::put('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'update'])
+        ->name('pemeriksaan.update');
 });
 
 

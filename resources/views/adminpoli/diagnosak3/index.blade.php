@@ -3,77 +3,77 @@
 @section('title', 'Diagnosa K3')
 
 @section('content')
-<div class="obat-page">
+<div class="k3-page">
 
-  <div class="obat-topbar">
-    <div class="obat-left">
-      <a href="{{ route('adminpoli.dashboard') }}" class="obat-back-img" title="Kembali">
+  <div class="k3-topbar">
+    <div class="k3-left">
+      <a href="{{ route('adminpoli.dashboard') }}" class="k3-back-img" title="Kembali">
         <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
       </a>
-      <div class="obat-heading">Diagnosa K3</div>
+      <div class="k3-heading">Diagnosa K3</div>
     </div>
 
     <div style="display:flex; gap:10px;">
-      <button type="button" class="obat-btn-add" onclick="openTambahKategori()">
-        <img src="{{ asset('assets/adminPoli/plus1.png') }}" class="obat-ic" alt="+">
+      <button type="button" class="k3-btn-add" onclick="openTambahKategori()">
+        <img src="{{ asset('assets/adminPoli/plus1.png') }}" class="k3-ic" alt="+">
         <span>Tambah Kategori</span>
       </button>
 
-      <button type="button" class="obat-btn-add" onclick="openTambahPenyakit(null)">
-        <img src="{{ asset('assets/adminPoli/plus1.png') }}" class="obat-ic" alt="+">
+      <button type="button" class="k3-btn-add" onclick="openTambahPenyakit(null)">
+        <img src="{{ asset('assets/adminPoli/plus1.png') }}" class="k3-ic" alt="+">
         <span>Tambah Penyakit</span>
       </button>
     </div>
   </div>
 
-  <div class="obat-card">
+  <div class="k3-card">
 
     {{-- Search --}}
-    <form class="obat-search" method="GET" action="{{ route('adminpoli.diagnosak3.index') }}">
-      <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari id_nb / kategori / penyakit" class="obat-search-input">
-      <button class="obat-search-btn" type="submit">
-        <img src="{{ asset('assets/adminPoli/search.png') }}" class="obat-ic" alt="cari">
+    <form class="k3-search" method="GET" action="{{ route('adminpoli.diagnosak3.index') }}">
+      <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari id_nb / kategori / penyakit" class="k3-search-input">
+      <button class="k3-search-btn" type="submit">
+        <img src="{{ asset('assets/adminPoli/search.png') }}" class="k3-ic" alt="cari">
         <span>Cari</span>
       </button>
     </form>
 
     {{-- Upload + Download --}}
-    <div class="obat-tools-row">
-      <form action="{{ route('adminpoli.diagnosak3.import') }}" method="POST" enctype="multipart/form-data" class="obat-upload" id="k3UploadForm">
+    <div class="k3-tools-row">
+      <form action="{{ route('adminpoli.diagnosak3.import') }}" method="POST" enctype="multipart/form-data" class="k3-upload" id="k3UploadForm">
         @csrf
-        <label class="obat-file" for="k3FileInput">
+        <label class="k3-file" for="k3FileInput">
           <input type="file" id="k3FileInput" name="file" accept=".csv,.xlsx,.xls">
           <span id="k3FileLabel">Pilih File</span>
         </label>
 
-        <span class="obat-file-name" id="k3FileName">Belum ada file dipilih</span>
+        <span class="k3-file-name" id="k3FileName">Belum ada file dipilih</span>
 
-        <button type="submit" class="obat-btn-soft" id="k3UploadBtn" disabled>Upload</button>
-        <small class="obat-file-hint">Max 5MB • Header wajib: nama_penyakit, kategori_penyakit</small>
+        <button type="submit" class="k3-btn-soft" id="k3UploadBtn" disabled>Upload</button>
+        <small class="k3-file-hint">Max 5MB • Header wajib: nama_penyakit, kategori_penyakit</small>
       </form>
 
-      <form action="{{ route('adminpoli.diagnosak3.export') }}" method="GET" class="obat-download">
-        <input type="date" name="from" value="{{ request('from') }}" class="obat-date" required>
-        <span class="obat-sep">s/d</span>
-        <input type="date" name="to" value="{{ request('to') }}" class="obat-date" required>
+      <form action="{{ route('adminpoli.diagnosak3.export') }}" method="GET" class="k3-download">
+        <input type="date" name="from" value="{{ request('from') }}" class="k3-date" required>
+        <span class="k3-sep">s/d</span>
+        <input type="date" name="to" value="{{ request('to') }}" class="k3-date" required>
 
-        <select name="format" class="obat-select" required>
+        <select name="format" class="k3-select" required>
           <option value="" disabled selected>Pilih Format</option>
           <option value="csv">CSV</option>
           <option value="excel">Excel</option>
           <option value="pdf">PDF</option>
         </select>
 
-        <button type="submit" name="action" value="preview" class="obat-btn-soft">Preview</button>
-        <button type="submit" name="action" value="download" class="obat-btn-soft">
-          <img src="{{ asset('assets/adminPoli/download.png') }}" class="obat-ic" alt="download">
+        <button type="submit" name="action" value="preview" class="k3-btn-soft">Preview</button>
+        <button type="submit" name="action" value="download" class="k3-btn-soft">
+          <img src="{{ asset('assets/adminPoli/download.png') }}" class="k3-ic" alt="download">
           <span>Download</span>
         </button>
       </form>
     </div>
 
     {{-- LIST KATEGORI + PENYAKIT (sortable) --}}
-    <div class="obat-table-body" id="k3CategoryList">
+    <div class="k3-table-body" id="k3CategoryList">
 
       @forelse($categories as $cat)
         @php
@@ -91,13 +91,13 @@
 
           <div class="k3-cat-actions">
             <button type="button"
-                class="obat-act obat-edit js-edit-kategori"
+                class="k3-act k3-edit js-edit-kategori"
                 data-id="{{ $cat->id_nb }}"
                 data-nama="{{ $cat->nama_penyakit }}">
-                <img src="{{ asset('assets/adminPoli/edit.png') }}" class="obat-ic-sm" alt=""> Edit
+                <img src="{{ asset('assets/adminPoli/edit.png') }}" class="k3-ic-sm" alt=""> Edit
             </button>
 
-            <button type="button" class="obat-act obat-edit"
+            <button type="button" class="k3-act k3-edit"
               onclick="openTambahPenyakit('{{ $cat->id_nb }}')">
               <span>+ Penyakit</span>
             </button>
@@ -105,9 +105,9 @@
             <form method="POST" action="{{ route('adminpoli.diagnosak3.kategori.destroy', $cat->id_nb) }}" class="js-k3-delete">
               @csrf
               @method('DELETE')
-              <button type="submit" class="obat-act obat-del">
+              <button type="submit" class="k3-act k3-del">
                 <span>Hapus</span>
-                <img src="{{ asset('assets/adminPoli/sampah.png') }}" class="obat-ic-sm" alt="">
+                <img src="{{ asset('assets/adminPoli/sampah.png') }}" class="k3-ic-sm" alt="">
               </button>
             </form>
           </div>
@@ -121,20 +121,20 @@
                 <div class="k3-name">{{ $k->nama_penyakit }}</div>
                 <div class="k3-child-actions">
                   <button type="button"
-                    class="obat-act obat-edit js-edit-penyakit"
+                    class="k3-act k3-edit js-edit-penyakit"
                     data-id="{{ $k->id_nb }}"
                     data-parent="{{ $cat->id_nb }}"
                     data-nama="{{ $k->nama_penyakit }}">
 
-                    <img src="{{ asset('assets/adminPoli/edit.png') }}" class="obat-ic-sm" alt=""> Edit
+                    <img src="{{ asset('assets/adminPoli/edit.png') }}" class="k3-ic-sm" alt=""> Edit
                   </button>
 
                   <form method="POST" action="{{ route('adminpoli.diagnosak3.penyakit.destroy', $k->id_nb) }}" class="js-k3-delete">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="obat-act obat-del">
+                    <button type="submit" class="k3-act k3-del">
                       <span>Hapus</span>
-                      <img src="{{ asset('assets/adminPoli/sampah.png') }}" class="obat-ic-sm" alt="">
+                      <img src="{{ asset('assets/adminPoli/sampah.png') }}" class="k3-ic-sm" alt="">
                     </button>
                   </form>
                 </div>
@@ -150,8 +150,8 @@
         </div>
 
       @empty
-        <div class="obat-row obat-row-empty">
-          <div class="obat-empty-span">
+        <div class="k3-row k3-row-empty">
+          <div class="k3-empty-span">
             {{ request('q') ? 'Tidak ada data ditemukan' : 'Belum ada data Diagnosa K3' }}
           </div>
         </div>
@@ -198,7 +198,7 @@
 
           <div class="modal-group">
             <label>Kategori</label>
-            <select name="parent_id" id="tambahParent" class="obat-select" required style="width:100%;">
+            <select name="parent_id" id="tambahParent" class="k3-select" required style="width:100%;">
               <option value="" disabled selected>Pilih Kategori</option>
               @foreach($categories as $c)
                 <option value="{{ $c->id_nb }}">[{{ $c->id_nb }}] {{ $c->nama_penyakit }}</option>
@@ -226,7 +226,7 @@
 
           <div class="modal-group">
             <label>Kategori</label>
-            <select name="parent_id" id="editParent" class="obat-select" required style="width:100%;">
+            <select name="parent_id" id="editParent" class="k3-select" required style="width:100%;">
               @foreach($categories as $c)
                 <option value="{{ $c->id_nb }}">[{{ $c->id_nb }}] {{ $c->nama_penyakit }}</option>
               @endforeach
@@ -245,7 +245,7 @@
 
   </div>
 
-  <div class="obat-foot">
+  <div class="k3-foot">
     Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
   </div>
 
