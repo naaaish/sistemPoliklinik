@@ -16,6 +16,7 @@ use App\Http\Controllers\Kepegawaian\LaporanController;
 use App\Http\Controllers\AdminPoli\DiagnosaController;
 use App\Http\Controllers\AdminPoli\DiagnosaK3Controller;
 use App\Http\Controllers\Pasien\DetailPemeriksaanController;
+use App\Http\Controllers\Kepegawaian\DetailRiwayatController;
 
 /*
 |--------------------------------------------------------------------------
@@ -158,6 +159,9 @@ Route::middleware(['auth', 'ensureKepegawaian'])->prefix('kepegawaian')->group(f
 
     Route::get('/laporan/{jenis}/download', [LaporanController::class, 'downloadPdf'])
         ->name('kepegawaian.laporan.download');
+
+    Route::get('/kepegawaian/riwayat/{id}', [DetailRiwayatController::class, 'show'])
+    ->name('kepegawaian.riwayat.detail');
 });
 
 // Route::get('/pasien/riwayat', [RiwayatController::class, 'index'])
