@@ -25,7 +25,9 @@
                 <td>{{ \Carbon\Carbon::parse($r->tanggal)->translatedFormat('l, d M Y, H:i') }}</td>
                 <td>{{ $r->dokter }}</td>
                 <td>{{ $r->pemeriksa }}</td>
-                <td><a class="view-btn">+</a></td>
+                <td>
+                    <a href="{{ route('kepegawaian.riwayat.detail', $r->id_pemeriksaan) }}" class="view-btn">+</a>
+                </td>
             </tr>
             @empty
             <tr>
@@ -44,4 +46,3 @@
 </div>
 
 @endsection
-
