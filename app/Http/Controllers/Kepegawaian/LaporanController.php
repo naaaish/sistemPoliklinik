@@ -15,7 +15,7 @@ class LaporanController extends Controller
     {
         $rekapan = [
             'pegawai'  => 'Rekapan Pemeriksaan Pegawai',
-            'keluarga' => 'Rekapan Pemeriksaan Keluarga',
+            // 'keluarga' => 'Rekapan Pemeriksaan Keluarga',
             'pensiun'  => 'Rekapan Pemeriksaan Pensiunan',
             'dokter'   => 'Rekapan Pemeriksaan Dokter',
             'obat'     => 'Rekapan Penggunaan Obat',
@@ -207,7 +207,7 @@ class LaporanController extends Controller
     {
         return match ($jenis) {
             'pegawai'  => 'Rekapan Pemeriksaan Pegawai',
-            'keluarga' => 'Rekapan Pemeriksaan Keluarga',
+            // 'keluarga' => 'Rekapan Pemeriksaan Keluarga',
             'pensiun'  => 'Rekapan Pemeriksaan Pensiunan',
             'dokter'   => 'Rekapan Pemeriksaan Dokter',
             'obat'     => 'Rekapan Penggunaan Obat',

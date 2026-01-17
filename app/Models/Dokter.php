@@ -7,17 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 class Dokter extends Model
 {
     protected $table = 'dokter';
-    
+    protected $primaryKey = 'id_dokter';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $fillable = [
+        'id_dokter',
         'nama',
-        'spesialisasi',
-        'foto',
-        'no_telepon',
-        'email'
+        'jenis_dokter'
     ];
 
-    public function jadwalDokter()
+    public function jadwal()
     {
-        return $this->hasMany(JadwalDokter::class);
+        return $this->hasMany(JadwalDokter::class, 'id_dokter', 'id_dokter');
     }
 }

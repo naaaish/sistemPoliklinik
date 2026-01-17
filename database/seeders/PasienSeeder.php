@@ -2,39 +2,32 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PasienSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $now = Carbon::now();
 
-        // Data NIP diambil dari PegawaiSeeder Anda:
-        // 198765432001 -> Dr. Ahmad Pratama (Laki-laki)
-        // 198765432002 -> Siti Aisyah (Perempuan)
-
         $data_pasien = [
             // --- KELUARGA AHMAD PRATAMA (198765432001) ---
             
-            // 1. Ahmad sendiri (Status: Pegawai, Hub: YBS)
+            // 1. Ahmad sendiri (YBS)
             [
                 'id_pasien'     => 'PS-001',
-                'nama_pasien'   => 'Dr. Ahmad Pratama', // Sama dengan nama pegawai
+                'nama_pasien'   => 'Dr. Ahmad Pratama',
                 'tipe_pasien'   => 'pegawai',
                 'hub_kel'       => 'YBS',
-                'tgl_lahir'     => '1990-01-01', // Sama dengan tgl lahir pegawai
+                'tgl_lahir'     => '1990-01-01',
                 'nip'           => '198765432001',
                 'created_at'    => $now,
                 'updated_at'    => $now,
             ],
-            // 2. Istri Ahmad (Status: Keluarga, Hub: Pasangan)
+            
+            // 2. Istri Ahmad
             [
                 'id_pasien'     => 'PS-002',
                 'nama_pasien'   => 'Dewi Sartika',
@@ -45,8 +38,9 @@ class PasienSeeder extends Seeder
                 'created_at'    => $now,
                 'updated_at'    => $now,
             ],
-             // 3. Anak Ahmad (Status: Keluarga, Hub: Anak)
-             [
+            
+            // 3. Anak Ahmad
+            [
                 'id_pasien'     => 'PS-003',
                 'nama_pasien'   => 'Budi Pratama',
                 'tipe_pasien'   => 'keluarga',
@@ -59,7 +53,7 @@ class PasienSeeder extends Seeder
 
             // --- KELUARGA SITI AISYAH (198765432002) ---
 
-            // 4. Siti sendiri (Status: Pegawai, Hub: YBS)
+            // 4. Siti sendiri (YBS)
             [
                 'id_pasien'     => 'PS-004',
                 'nama_pasien'   => 'Siti Aisyah',
@@ -70,8 +64,8 @@ class PasienSeeder extends Seeder
                 'created_at'    => $now,
                 'updated_at'    => $now,
             ],
-            // 5. Anak Siti (Status: Keluarga, Hub: Anak)
-            // (Asumsi single parent atau suami tidak terdaftar di sistem ini)
+            
+            // 5. Anak Siti
             [
                 'id_pasien'     => 'PS-005',
                 'nama_pasien'   => 'Putri Ramadhani',
