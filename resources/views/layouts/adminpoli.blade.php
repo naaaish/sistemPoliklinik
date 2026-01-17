@@ -81,10 +81,14 @@
             </a>
         </nav>
 
-        <div class="ap-logout">
-            <img src="{{ asset('assets/adminPoli/masuk.png') }}" alt="logout">
-            <a href="#" class="ap-logout-link">Logout</a>
-        </div>
+        {{-- LOGOUT --}}
+        <form action="{{ route('logout') }}" method="POST" class="logout-form">
+        @csrf
+        <button type="submit" class="logout-btn">
+            <img src="{{ asset('assets/adminPoli/logout.png') }}" alt="Logout">
+            Logout
+        </button>
+    </form>
     </aside>
 
     {{-- Main --}}
