@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pemeriksaan extends Model
 {
+    protected $table = 'pemeriksaan';
+    protected $primaryKey = 'id_pemeriksaan';
+    public $incrementing = false;
+    protected $keyType = 'string';
+    
     protected $fillable = [
         'pendaftaran_id',
         'sistol','diastol','nadi',
@@ -27,8 +32,8 @@ class Pemeriksaan extends Model
         return $this->belongsTo(Pendaftaran::class);
     }
 
-    public function obat()
-    {
-        return $this->hasMany(PemeriksaanObat::class);
-    }
+    // public function obat()
+    // {
+    //     return $this->hasMany(PemeriksaanObat::class);
+    // }
 }

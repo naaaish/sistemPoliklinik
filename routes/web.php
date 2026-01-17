@@ -7,6 +7,7 @@ use App\Http\Controllers\RiwayatController;
 use App\Http\Controllers\AdminPoli\ObatController;
 use App\Http\Controllers\AdminPoli\DashboardController as AdminPoliDashboardController;
 use App\Http\Controllers\AdminPoli\PendaftaranController;
+use App\Http\Controllers\AdminPoli\PemeriksaanInputController;
 use App\Http\Controllers\AdminPoli\PemeriksaanController;
 
 use App\Http\Controllers\Kepegawaian\KDashboardController;
@@ -70,10 +71,10 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
     Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
     // pemeriksaan (HARUS bawa id pendaftaran)
-    Route::get('/pemeriksaan/{pendaftaranId}/create', [PemeriksaanController::class, 'create'])
+    Route::get('/pemeriksaan/{pendaftaranId}/create', [PemeriksaanInputController::class, 'create'])
         ->name('pemeriksaan.create');
 
-    Route::post('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'store'])
+    Route::post('/pemeriksaan/{pendaftaranId}', [PemeriksaanInputController::class, 'store'])
         ->name('pemeriksaan.store');
 
     // (optional untuk autofill)
@@ -104,21 +105,22 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::post('/diagnosak3/import', [DiagnosaK3Controller::class,'import'])->name('diagnosak3.import');
     Route::get('/diagnosak3/export', [DiagnosaK3Controller::class,'export'])->name('diagnosak3.export');
 
-    // LIST hasil pemeriksaan (kelola hasil pasien)
-    Route::get('/pemeriksaan', [PemeriksaanController::class, 'index'])
-        ->name('pemeriksaan.index');
+    // MENU PEMERIKSAAN PASIEN
+    Route::get('/pemeriksaan',
+        [PemeriksaanController::class, 'index']
+    )->name('pemeriksaan.index');
 
-    // DETAIL hasil pemeriksaan (read / ringkasan)
-    Route::get('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'show'])
-        ->name('pemeriksaan.show');
+    Route::get('/pemeriksaan/{pendaftaranId}',
+        [PemeriksaanController::class, 'show']
+    )->name('pemeriksaan.show');
 
-    // FORM edit hasil pemeriksaan
-    Route::get('/pemeriksaan/{pendaftaranId}/edit', [PemeriksaanController::class, 'edit'])
-        ->name('pemeriksaan.edit');
+    Route::get('/pemeriksaan/{pendaftaranId}/edit',
+        [PemeriksaanController::class, 'edit']
+    )->name('pemeriksaan.edit');
 
-    // UPDATE hasil pemeriksaan
-    Route::put('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'update'])
-        ->name('pemeriksaan.update');
+    Route::put('/pemeriksaan/{pendaftaranId}',
+        [PemeriksaanController::class, 'update']
+    )->name('pemeriksaan.update');
 });
 
 

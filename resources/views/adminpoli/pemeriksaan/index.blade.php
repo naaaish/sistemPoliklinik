@@ -46,10 +46,10 @@
             <div><div class="periksa-cell periksa-center">{{ $i + 1 }}</div></div>
             <div><div class="periksa-cell">{{ $row->nama_pasien ?? '-' }}</div></div>
             <div><div class="periksa-cell periksa-center">{{ $row->tanggal_periksa ?? '-' }}</div></div>
-            <div><div class="periksa-cell">{{ $row->dokter ?? '-' }}</div></div>
+            <div><div class="periksa-cell">{{ $row->dokter_pemeriksa ?? '-' }}</div></div>
 
             <div class="periksa-actions">
-              <a href="{{ route('adminpoli.pemeriksaan.show', $row->id ?? $row->id_pemeriksaan ?? 0) }}"
+              <a href="{{ route('adminpoli.pemeriksaan.show', ['pendaftaranId' => $row->id_pendaftaran]) }}"
                  class="periksa-act periksa-view">
                 <span>Lihat</span>
                 <img src="{{ asset('assets/adminPoli/eye.png') }}" class="periksa-ic-sm" alt="">

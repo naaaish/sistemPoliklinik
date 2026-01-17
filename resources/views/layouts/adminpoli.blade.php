@@ -16,6 +16,9 @@
     <link rel="stylesheet" href="{{ asset('css/adminpoli/modal.css') }}?v={{ filemtime(public_path('css/adminpoli/modal.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/diagnosa.css') }}?v={{ filemtime(public_path('css/adminpoli/diagnosa.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/diagnosak3.css') }}?v={{ filemtime(public_path('css/adminpoli/diagnosak3.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/pemeriksaan.css') }}?v={{ filemtime(public_path('css/adminpoli/pemeriksaan.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/pemeriksaan-detail.css') }}?v={{ filemtime(public_path('css/adminpoli/pemeriksaan-detail.css')) }}">
+
     {{-- Sweet Alert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
