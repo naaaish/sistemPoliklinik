@@ -48,7 +48,7 @@
                 <td>{{ \Carbon\Carbon::parse($r->tanggal)->translatedFormat('d M Y H:i') }}</td>
                 <td>{{ $r->dokter }}</td>
                 <td>
-                    <a href="#" class="view-btn">+</a>
+                    <a href="{{ route('kepegawaian.riwayat.detail', $r->id_pemeriksaan) }}" class="view-btn">+</a>
                 </td>
             </tr>
             @endforeach
