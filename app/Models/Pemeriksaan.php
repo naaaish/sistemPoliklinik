@@ -23,8 +23,8 @@ class Pemeriksaan extends Model
         return $this->belongsTo(Pendaftaran::class);
     }
 
-    // public function obat()
-    // {
-    //     return $this->hasMany(PemeriksaanObat::class);
-    // }
+    public function resep()
+    {
+        return $this->hasOne(Resep::class, 'id_pemeriksaan', 'id_pemeriksaan');
+    }
 }
