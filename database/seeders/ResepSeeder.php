@@ -2,55 +2,54 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class ResepSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // 1. Ambil semua ID Pemeriksaan yang ada
-        $list_pemeriksaan = DB::table('pemeriksaan')->pluck('id_pemeriksaan')->toArray();
+        // ===============================
+        // RESEP
+        // ===============================
+        DB::table('resep')->insert([
+            'id_resep' => 'RSP-001',
+            'id_pemeriksaan' => 'PMX-001',
+            'total_tagihan' => 62500,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-        // Cek agar tidak error jika tabel pemeriksaan masih kosong
-        if (empty($list_pemeriksaan)) {
-            $this->command->warn("Tabel 'pemeriksaan' kosong. Harap jalankan PemeriksaanSeeder terlebih dahulu.");
-            return;
-        }
+        // Ambil harga obat
+        $obat = DB::table('obat')
+            ->whereIn('id_obat', ['OBT-001','OBT-002','OBT-004'])
+            ->pluck('harga','id_obat');
 
-        $now = Carbon::now();
-        $data_resep = [];
-
-        // 2. Loop data pemeriksaan untuk dibuatkan tagihan resepnya
-        foreach ($list_pemeriksaan as $index => $id_pmx) {
-            
-            // LOGIKA: Kita anggap 80% pemeriksaan menghasilkan resep obat.
-            // Sisanya (20%) mungkin cuma konsultasi tanpa obat.
-            if (rand(1, 100) <= 80) {
-                
-                // Generate ID Resep: RSP-001, RSP-002, dst.
-                $id_resep = 'RSP-' . str_pad($index + 1, 3, '0', STR_PAD_LEFT);
-
-                // Generate Total Tagihan (Random kelipatan 5000)
-                // Range: 15.000 s/d 250.000
-                $tagihan = rand(3, 50) * 5000;
-
-                $data_resep[] = [
-                    'id_resep'       => $id_resep,
-                    'total_tagihan'  => $tagihan,
-                    'id_pemeriksaan' => $id_pmx,
-                    'created_at'     => $now,
-                    'updated_at'     => $now,
-                ];
-            }
-        }
-
-        // 3. Masukkan ke database
-        DB::table('resep')->insert($data_resep);
+        // ===============================
+        // DETAIL RESEP (WAJIB subtotal)
+        // ===============================
+        DB::table('detail_resep')->insert([
+            [
+                'id_resep' => 'RSP-001',
+                'id_obat'  => 'OBT-001',
+                'jumlah'   => 2,
+                'satuan'   => 'tablet',
+                'subtotal' => 2 * $obat['OBT-001'],
+            ],
+            [
+                'id_resep' => 'RSP-001',
+                'id_obat'  => 'OBT-002',
+                'jumlah'   => 4,
+                'satuan'   => 'tablet',
+                'subtotal' => 4 * $obat['OBT-002'],
+            ],
+            [
+                'id_resep' => 'RSP-001',
+                'id_obat'  => 'OBT-004',
+                'jumlah'   => 3,
+                'satuan'   => 'botol',
+                'subtotal' => 3 * $obat['OBT-004'],
+            ],
+        ]);
     }
 }

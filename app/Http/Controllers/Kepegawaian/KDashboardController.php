@@ -21,6 +21,7 @@ class KDashboardController extends Controller
             ->join('pasien', 'pendaftaran.id_pasien', '=', 'pasien.id_pasien')
             ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
             ->select(
+                'pemeriksaan.id_pemeriksaan', // TAMBAHKAN INI
                 'pasien.nama_pasien',
                 'pasien.nip',
                 'pemeriksaan.created_at as tanggal',
