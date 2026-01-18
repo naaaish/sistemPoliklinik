@@ -33,7 +33,7 @@ class DetailRiwayatController extends Controller
             ->where('id_dokter', $pendaftaran->id_dokter)
             ->first();
 
-        // Fetch pegawai data berdasarkan NIP dari pasien
+        // Fetch pegawai data
         $pegawai = DB::table('pegawai')
             ->where('nip', $pasien->nip)
             ->first();
@@ -59,21 +59,23 @@ class DetailRiwayatController extends Controller
             ->where('id_pemeriksaan', $id_pemeriksaan)
             ->first();
 
-        // Fetch detail resep with obat data
-        $detailResep = [];
+        // Fetch detail resep with harga dari tabel obat
+        $detailResep = collect();
+        
         if ($resep) {
             $detailResep = DB::table('detail_resep')
                 ->join('obat', 'detail_resep.id_obat', '=', 'obat.id_obat')
                 ->where('detail_resep.id_resep', $resep->id_resep)
                 ->select(
                     'obat.nama_obat',
+                    'obat.harga',
                     'detail_resep.jumlah',
                     'detail_resep.satuan'
                 )
                 ->get();
         }
 
-        return view('pasien.detail-pemeriksaan', compact(
+        return view('kepegawaian.detail-riwayat', compact(
             'pemeriksaan',
             'pendaftaran',
             'pasien',
@@ -84,5 +86,4 @@ class DetailRiwayatController extends Controller
             'detailResep'
         ));
     }
-    
 }

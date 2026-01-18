@@ -162,6 +162,8 @@ Route::middleware(['auth', 'ensureKepegawaian'])->prefix('kepegawaian')->group(f
 
     Route::get('/kepegawaian/riwayat/{id}', [DetailRiwayatController::class, 'show'])
     ->name('kepegawaian.riwayat.detail');
+    
+    Route::get('/kepegawaian/pegawai/{id}', [PegawaiController::class, 'show'])->name('kepegawaian.pegawai.show');
 });
 
 // Route::get('/pasien/riwayat', [RiwayatController::class, 'index'])

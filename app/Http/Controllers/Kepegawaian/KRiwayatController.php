@@ -15,7 +15,7 @@ class KRiwayatController extends Controller
             ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
             ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
             ->select(
-                'pemeriksaan.id_pemeriksaan', // TAMBAHKAN INI!
+                'pemeriksaan.id_pemeriksaan', 
                 'pasien.nama_pasien',
                 'pasien.nip',
                 'pemeriksaan.created_at as tanggal',
