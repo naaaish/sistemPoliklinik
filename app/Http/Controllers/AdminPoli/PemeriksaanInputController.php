@@ -89,6 +89,20 @@ class PemeriksaanInputController extends Controller
             'harga_satuan.*' => 'nullable|numeric',
         ]);
 
+        $obatIds = $validated['obat_id'] ?? [];
+        $satuans = $validated['satuan'] ?? [];
+
+        foreach ($obatIds as $i => $idObat) {
+            if (!$idObat) continue; // skip baris kosong
+
+            $satuan = $satuans[$i] ?? null;
+            if (!$satuan) {
+                return back()
+                    ->withInput()
+                    ->withErrors(["satuan.$i" => "Satuan wajib diisi jika obat dipilih."]);
+            }
+        }
+
         // pastikan pendaftaran ada
         Pendaftaran::findOrFail($pendaftaranId);
 

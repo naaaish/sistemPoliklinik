@@ -44,14 +44,15 @@ class DashboardController extends Controller
         // 4) Daftar pasien aktif hari ini (buat tabel dashboard)
         $daftarPasienAktif = DB::table('pendaftaran as p')
             ->join('pasien as ps', 'ps.id_pasien', '=', 'p.id_pasien')
-            ->select(
+            ->leftJoin('pemeriksaan as pm', 'pm.id_pendaftaran', '=', 'p.id_pendaftaran')
+            ->whereNull('pm.id_pendaftaran') // <-- kunci: belum ada pemeriksaan
+            ->orderBy('p.tanggal', 'desc')
+            ->select([
                 'p.id_pendaftaran',
                 'p.tanggal',
                 'ps.nama_pasien',
-                'ps.nip'
-            )
-            ->whereDate('p.tanggal', $today)
-            ->orderBy('p.created_at', 'desc')
+                'ps.nip',
+            ])
             ->get();
 
         return view('adminpoli.dashboard', compact(

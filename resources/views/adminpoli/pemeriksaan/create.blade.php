@@ -219,11 +219,12 @@
 
     const chip = document.createElement('span');
     chip.style.cssText =
-      'display:inline-flex;align-items:center;gap:8px;background:#eef3ff;border:1px solid #c7d7f5;' +
-      'color:#316BA1;padding:6px 10px;border-radius:14px;margin:4px 6px 0 0;';
+    'display:inline-flex;align-items:center;gap:6px;background:#eef3ff;border:1px solid #c7d7f5;' +
+    'color:#316BA1;padding:4px 8px;border-radius:10px;margin:3px 6px 0 0;font-size:13px;';
+
     chip.innerHTML =
-      `<span>${label}</span>` +
-      `<button type="button" style="border:none;background:transparent;cursor:pointer;font-weight:700;color:#316BA1;">×</button>`;
+    `<span>${label}</span>` +
+    `<button type="button" style="border:none;background:transparent;cursor:pointer;font-weight:700;color:#316BA1;font-size:14px;line-height:1;">×</button>`;
 
     const hidden = document.createElement('input');
     hidden.type = 'hidden';
@@ -403,6 +404,44 @@ function hitungTotal(){
 
   document.getElementById('totalHarga').innerText = rupiah(total);
 }
+document.addEventListener('change', function(e){
+  if(!e.target.classList.contains('obat-select')) return;
+
+  const row = e.target.closest('.obat-row');
+  const opt = e.target.selectedOptions[0];
+
+  const satuan = opt?.dataset?.satuan || '';
+  row.querySelector('.obat-satuan').value = satuan;   // <<< INI
+
+  // kalau kamu juga isi harga raw/tampilan, biarkan seperti biasa
+});
+document.getElementById('formPemeriksaan').addEventListener('submit', (e) => {
+  const rows = document.querySelectorAll('#obatWrap .obat-row');
+
+  for (const row of rows) {
+    const obat = row.querySelector('.obat-select')?.value?.trim();
+    if(!obat) continue; // baris kosong di-skip
+
+    const satuanInput = row.querySelector('.obat-satuan');
+    const satuan = satuanInput?.value?.trim();
+
+    if(!satuan){
+      e.preventDefault();
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Data Obat Belum Lengkap',
+        text: 'Satuan wajib diisi jika obat dipilih.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#316BA1',
+      }).then(() => {
+        satuanInput?.focus();
+      });
+
+      return;
+    }
+  }
+});
 
 </script>
 @endsection
