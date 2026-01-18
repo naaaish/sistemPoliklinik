@@ -67,8 +67,6 @@ class PemeriksaanInputController extends Controller
             // ubah name input blade jadi penyakit_id[] dan diagnosa_id[] kalau memang tabelnya beda
             'penyakit_id'     => 'nullable|array',
             'penyakit_id.*'   => 'nullable|string',
-            'penyakit_json' => array_values(array_filter($validated['penyakit_id'] ?? [])),
-
 
             'diagnosa_id'     => 'nullable|array',
             'diagnosa_id.*'   => 'nullable|string',

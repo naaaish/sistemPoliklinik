@@ -39,23 +39,24 @@
     </div>
 
     <div class="dp-table-body">
-      @forelse($dokter as $d)
+      @forelse($rows as $d)
         <div class="dp-row"
-             data-id="{{ $d->id_dokter }}"
-             data-nama="{{ e($d->nama) }}"
-             data-jenis="{{ e($d->jenis_dokter) }}"
-             data-status="{{ e($d->status ?? 'Aktif') }}">
+            data-tipe="{{ $d->tipe }}"
+            data-id="{{ $d->id }}"
+            data-nama="{{ e($d->nama) }}"
+            data-jenis="{{ e($d->jenis) }}"
+            data-status="{{ e($d->status) }}">
 
           <div class="dp-cell">
             <span class="dp-celltext">{{ $d->nama }}</span>
           </div>
 
           <div class="dp-cell dp-center">
-            <span class="dp-plain">{{ $d->jenis_dokter }}</span>
+            <span class="dp-plain">{{ $d->jenis }}</span>
           </div>
 
           <div class="dp-status-wrap">
-            <select class="dp-status-select">
+            <select class="dp-status-select" data-tipe="{{ $d->tipe }}" data-id="{{ $d->id }}">
                 <option value="Aktif" {{ ($d->status ?? 'Aktif') == 'Aktif' ? 'selected' : '' }}>
                 Aktif
                 </option>
@@ -71,7 +72,7 @@
           </div>
 
           <div class="dp-cell dp-center dp-cell-jadwal">
-            <button type="button" class="dp-jadwal-btn" data-id="{{ $d->id_dokter }}">
+            <button type="button" class="dp-jadwal-btn" data-tipe="{{ $d->tipe }}" data-id="{{ $d->id }}">
                 <span class="dp-jadwal-text">Lihat</span>
                 <span class="dp-jadwal-icons">
                 <img src="{{ asset('assets/adminPoli/eye.png') }}" class="dp-ic-sm" alt="lihat">
@@ -82,14 +83,17 @@
 
           <div class="dp-cell dp-center">
             <div class="dp-actions">
-              <button type="button" class="dp-act dp-edit dp-edit-btn" data-id="{{ $d->id_dokter }}">
+              <button type="button" class="dp-act dp-edit dp-edit-btn" data-tipe="{{ $d->tipe }}" data-id="{{ $d->id }}">
                 <img src="{{ asset('assets/adminPoli/edit.png') }}" class="dp-ic-sm" alt="edit">
                 <span>Edit</span>
               </button>
 
 
               <form class="dp-del-form" method="POST"
-                    action="{{ route('adminpoli.dokter_pemeriksa.destroy', $d->id_dokter) }}"
+                    action="{{ $d->tipe === 'dokter'
+                        ? route('adminpoli.dokter_pemeriksa.dokter.destroy', $d->id)
+                        : route('adminpoli.dokter_pemeriksa.pemeriksa.destroy', $d->id)
+                    }}"
                     onsubmit="return confirm('Hapus data ini?')">
                 @csrf
                 @method('DELETE')
@@ -123,7 +127,7 @@
     <div class="dp-modal-card">
       <div class="dp-modal-title">Tambah Dokter/Pemeriksa</div>
 
-      <form method="POST" action="{{ route('adminpoli.dokter_pemeriksa.store') }}" id="dpFormTambah">
+      <form method="POST" action="{{ route('adminpoli.dokter_pemeriksa.dokter.store') }}" id="dpFormTambah">
         @csrf
 
         <div class="dp-form-row">
@@ -143,7 +147,7 @@
           <div class="dp-colon">:</div>
 
           {{-- jika kamu pakai tabel pemeriksa --}}
-          <select class="dp-input dp-select2" name="jenis_dokter" required>
+          <select class="dp-input dp-select2" name="jenis" required>
             <option value="" disabled selected>Pilih Jenis Dokter/Pemeriksa</option>
             @foreach($jenisList as $j)
               <option value="{{ $j->nama_pemeriksa }}">{{ $j->nama_pemeriksa }}</option>
@@ -151,7 +155,7 @@
           </select>
 
           {{-- kalau tidak pakai pemeriksa, ganti jadi input text:
-          <input class="dp-input" name="jenis_dokter" type="text" required>
+          <input class="dp-input" name="jenis" type="text" required>
           --}}
         </div>
 
@@ -207,7 +211,7 @@
         <div class="dp-form-row">
           <label class="dp-label">Jenis Dokter/Pemeriksa</label>
           <div class="dp-colon">:</div>
-          <select class="dp-input dp-select2" name="jenis_dokter" id="dpEditJenis" required>
+          <select class="dp-input dp-select2" name="jenis" id="dpEditJenis" required>
             @foreach($jenisList as $j)
               <option value="{{ $j->nama_pemeriksa }}">{{ $j->nama_pemeriksa }}</option>
             @endforeach
@@ -396,11 +400,12 @@
 
   document.querySelectorAll('.dp-jadwal-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
-      const id = btn.dataset.id;
+      const tipe = btn.dataset.tipe;
+      const id   = btn.dataset.id;
       jadwalBox.innerHTML = `<div class="dp-jadwal-line">Memuat...</div>`;
 
       try{
-        const res = await fetch(`{{ url('admin/dokter-pemeriksa') }}/${id}/jadwal`);
+        const res = await fetch(`{{ url('admin/dokter-pemeriksa') }}/${tipe}/${id}/jadwal`);
         const json = await res.json();
 
         if(json.jadwal && json.jadwal.length){
@@ -419,5 +424,41 @@
   });
 
 })();
+
+
+(function(){
+  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+  document.querySelectorAll('.dp-status-select').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const tipe = sel.dataset.tipe;
+      const id   = sel.dataset.id;
+      const val  = sel.value;
+
+      const url = (tipe === 'pemeriksa')
+        ? `/adminpoli/dokter-pemeriksa/pemeriksa/${id}/status`
+        : `/adminpoli/dokter-pemeriksa/dokter/${id}/status`;
+
+      try{
+        const res = await fetch(url, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...(token ? {'X-CSRF-TOKEN': token} : {})
+          },
+          body: JSON.stringify({ status: val })
+        });
+
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+
+        if(typeof showDpAlert === 'function') showDpAlert('Status berhasil diperbarui.');
+      }catch(e){
+        if(typeof showDpAlert === 'function') showDpAlert('Gagal update status.', true);
+      }
+    });
+  });
+})();
+
 </script>
 @endsection

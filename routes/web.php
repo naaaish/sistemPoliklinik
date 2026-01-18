@@ -127,17 +127,33 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::get('/dokter-pemeriksa', [DokterPemeriksaController::class, 'index'])
         ->name('dokter_pemeriksa.index');
 
-    Route::post('/dokter-pemeriksa', [DokterPemeriksaController::class, 'store'])
-        ->name('dokter_pemeriksa.store');
+    // CRUD dokter
+    Route::post('/dokter-pemeriksa/dokter', [DokterPemeriksaController::class, 'storeDokter'])
+        ->name('dokter_pemeriksa.dokter.store');
+    Route::put('/dokter-pemeriksa/dokter/{id}', [DokterPemeriksaController::class, 'updateDokter'])
+        ->name('dokter_pemeriksa.dokter.update');
+    Route::delete('/dokter-pemeriksa/dokter/{id}', [DokterPemeriksaController::class, 'destroyDokter'])
+        ->name('dokter_pemeriksa.dokter.destroy');
 
-    Route::put('/dokter-pemeriksa/{id}', [DokterPemeriksaController::class, 'update'])
-        ->name('dokter_pemeriksa.update');
+    // CRUD pemeriksa
+    Route::post('/dokter-pemeriksa/pemeriksa', [DokterPemeriksaController::class, 'storePemeriksa'])
+        ->name('dokter_pemeriksa.pemeriksa.store');
+    Route::put('/dokter-pemeriksa/pemeriksa/{id}', [DokterPemeriksaController::class, 'updatePemeriksa'])
+        ->name('dokter_pemeriksa.pemeriksa.update');
+    Route::delete('/dokter-pemeriksa/pemeriksa/{id}', [DokterPemeriksaController::class, 'destroyPemeriksa'])
+        ->name('dokter_pemeriksa.pemeriksa.destroy');
 
-    Route::delete('/dokter-pemeriksa/{id}', [DokterPemeriksaController::class, 'destroy'])
-        ->name('dokter_pemeriksa.destroy');
-
-    Route::get('/dokter-pemeriksa/{id}/jadwal', [DokterPemeriksaController::class, 'jadwalJson'])
+    // jadwal gabungan
+    Route::get('/dokter-pemeriksa/{tipe}/{id}/jadwal', [DokterPemeriksaController::class, 'jadwalJson'])
         ->name('dokter_pemeriksa.jadwal_json');
+
+    Route::patch('/dokter-pemeriksa/dokter/{id}/status', [DokterPemeriksaController::class, 'updateStatusDokter'])
+        ->name('dokter_pemeriksa.dokter.status');
+
+    Route::patch('/dokter-pemeriksa/pemeriksa/{id}/status', [DokterPemeriksaController::class, 'updateStatusPemeriksa'])
+        ->name('dokter_pemeriksa.pemeriksa.status');
+
+    
 });
 
 
