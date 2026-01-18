@@ -275,3 +275,17 @@ tbody tr:last-child {
     font-size: 12px;
     color: #6B7DA3;
 }
+.btn-lihat {
+        background-color: #316BA1;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .btn-lihat:hover { background-color: #06869A; }

@@ -1,0 +1,274 @@
+/* ================= CONTAINER ================= */
+.detail-pegawai-container {
+    padding: 26px 60px;
+    background: #F1F8FF;
+    min-height: 100vh;
+}
+
+/* ================= HEADER ================= */
+.detail-pegawai-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.detail-pegawai-header svg {
+    width: 38px;
+    height: 37px;
+    color: #06869A;
+}
+
+.detail-pegawai-header h1 {
+    font-size: 21.73px;
+    font-weight: 500;
+    color: #06869A;
+    margin: 0;
+}
+
+/* ================= PROFIL CARD ================= */
+.profil-card {
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 31px;
+    overflow: hidden;
+}
+
+.profil-header {
+    background: rgba(49, 107, 161, 0.76);
+    padding: 0;
+    height: 73px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    padding-left: 27px;
+    padding-bottom: 31px;
+}
+
+.profil-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid rgba(49, 107, 161, 0.60);
+    overflow: hidden;
+    background: white;
+    position: relative;
+    z-index: 2;
+}
+
+.profil-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profil-info {
+    margin-left: 15px;
+    margin-bottom: 5px;
+}
+
+.profil-info h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #316BA1;
+    margin: 0 0 2px 0;
+    line-height: 22px;
+    letter-spacing: 0.88px;
+}
+
+.profil-bidang {
+    font-size: 14px;
+    font-weight: 500;
+    color: #686868;
+    margin: 0 0 8px 0;
+    line-height: 22px;
+    letter-spacing: 0.88px;
+}
+
+.profil-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.88px;
+    line-height: 22px;
+}
+
+.status-aktif {
+    background: rgba(157, 255, 204, 0.69);
+    border: 1px solid rgba(18, 248, 125, 0.70);
+    color: #438762;
+}
+
+.nip-text {
+    font-size: 11px;
+    font-weight: 500;
+    color: #686868;
+    letter-spacing: 0.88px;
+    line-height: 22px;
+}
+
+/* ================= DATA SECTION ================= */
+.data-section {
+    background: white;
+    border-radius: 10px;
+    margin-bottom: 21px;
+    overflow: hidden;
+}
+
+.section-header {
+    background: rgba(49, 107, 161, 0.77);
+    padding: 15px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+}
+
+.section-header:hover {
+    background: rgba(49, 107, 161, 0.85);
+}
+
+.section-header-alt {
+    background: #5283B0;
+}
+
+.section-header-alt:hover {
+    background: #4572a0;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-title svg {
+    width: 28px;
+    height: 28px;
+    color: white;
+}
+
+.section-title h3 {
+    font-size: 19px;
+    font-weight: 500;
+    color: white;
+    margin: 0;
+    line-height: 22px;
+    letter-spacing: 0.88px;
+}
+
+.toggle-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.toggle-btn svg {
+    color: white;
+    transition: transform 0.3s;
+}
+
+/* ================= SECTION CONTENT ================= */
+.section-content {
+    padding: 26px 24px 32px;
+}
+
+.data-grid-two {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px 40px;
+}
+
+.data-grid-single {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+.data-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(120, 116, 116, 0.91);
+    margin-bottom: 6px;
+    line-height: 22px;
+    letter-spacing: 0.88px;
+}
+
+.data-field p {
+    font-size: 16px;
+    font-weight: 500;
+    color: black;
+    margin: 0;
+    line-height: 22px;
+    letter-spacing: 0.88px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 992px) {
+    .detail-pegawai-container {
+        padding: 20px 30px;
+    }
+
+    .data-grid-two {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .profil-header {
+        flex-direction: column;
+        align-items: center;
+        padding: 15px;
+        height: auto;
+        padding-top: 50px;
+    }
+
+    .profil-info {
+        text-align: center;
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .profil-meta {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .detail-pegawai-container {
+        padding: 15px;
+    }
+
+    .detail-pegawai-header h1 {
+        font-size: 18px;
+    }
+
+    .section-title h3 {
+        font-size: 16px;
+    }
+
+    .section-content {
+        padding: 20px 16px;
+    }
+}
