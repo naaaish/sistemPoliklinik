@@ -157,6 +157,41 @@ const namaPasienHelp = document.getElementById('namaPasienHelp');
 
 const hubKel = document.getElementById('hub_kel');
 
+  // simpan DOB pegawai hasil lookup NIP
+  let pegawaiDob = '';
+
+  function applyTglLahirRule(){
+    const tipe = (tipePasien?.value || '').toLowerCase();
+
+    if(tipe === 'pegawai'){
+      // auto dari DB pegawai
+      if(pegawaiDob) tglLahir.value = pegawaiDob;
+
+      // kunci agar tidak bisa diedit manual
+      tglLahir.readOnly = true;
+
+      // hubungan keluarga YBS (optional tapi biasanya wajib)
+      if(hubKel){
+        hubKel.value = 'YBS';
+        hubKel.disabled = true;
+      }
+
+      return;
+    }
+
+    // keluarga / pensiunan: boleh isi sendiri
+    tglLahir.readOnly = false;
+    if(hubKel) hubKel.disabled = false;
+
+    // kalau sebelumnya pegawai lalu ganti keluarga, kosongkan biar user isi sendiri
+    if(tglLahir.value === pegawaiDob) tglLahir.value = '';
+  }
+
+  // trigger saat tipe pasien berubah
+  if(tipePasien){
+    tipePasien.addEventListener('change', applyTglLahirRule);
+  }
+
 function isPensiunanBidang(){
   return (bidang.value || '').trim().toLowerCase() === 'pensiunan';
 }
@@ -181,28 +216,6 @@ function unlockKeluarga(){
   namaPasienHelp.textContent = 'Isi nama pasien keluarga, pilih hubungan (pasangan/anak).';
   namaPasienHelp.style.color = '#5C6E9A';
 }
-
-function applyTanggalLahirByTipe(){
-  const tipe = tipePasien.value;
-
-  if(tipe === 'pegawai'){
-    // auto isi kalau belum diisi
-    if(!tglLahir.value && tglLahir.dataset.pegawaiDob){
-      tglLahir.value = tglLahir.dataset.pegawaiDob;
-    }
-    // tetap bisa diedit
-    tglLahir.readOnly = false;
-    return;
-  }
-
-  // keluarga/pensiunan: admin isi manual
-  tglLahir.readOnly = false;
-  // kalau sebelumnya auto dari pegawai dan user pindah tipe, kosongkan biar input manual
-  if(tglLahir.value === (tglLahir.dataset.pegawaiDob || '')){
-    tglLahir.value = '';
-  }
-}
-
 
 function applyRulesByTipe(){
   const tipe = tipePasien.value;
@@ -271,6 +284,9 @@ async function fetchPegawai(nipValue){
       namaPasien.readOnly = false;
       hubKel.disabled = false;
       return;
+      pegawaiDob = '';
+      delete tglLahir.dataset.pegawaiDob;
+      tglLahir.readOnly = false;
     }
 
     const json = await res.json();
@@ -278,8 +294,9 @@ async function fetchPegawai(nipValue){
 
     namaPegawai.value = d.nama_pegawai || '';
     bidang.value = d.bidang || '';
-    const pegawaiDob = (d.tgl_lahir || '').substring(0, 10);
+    pegawaiDob = (d.tgl_lahir || '').substring(0, 10);
     tglLahir.dataset.pegawaiDob = pegawaiDob;
+
 
     // aturan default setelah NIP ditemukan:
     // kalau pegawai bidang pensiunan → auto set tipe pensiunan
@@ -290,12 +307,16 @@ async function fetchPegawai(nipValue){
     }
 
     applyRulesByTipe();
+    applyTglLahirRule();
 
     nipHelp.textContent = 'Data pegawai ditemukan.';
     nipHelp.style.color = '#3bb54a';
   }catch(e){
     nipHelp.textContent = 'Gagal mengambil data pegawai.';
     nipHelp.style.color = '#e74c3c';
+    pegawaiDob = '';
+    tglLahir.readOnly = false;
+    if(hubKel) hubKel.disabled = false;
   }
 }
 

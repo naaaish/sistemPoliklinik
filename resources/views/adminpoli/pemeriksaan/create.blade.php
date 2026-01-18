@@ -117,7 +117,7 @@
           <select id="inpDiagnosa" class="ap-select">
             <option value="">-- pilih (boleh kosong) --</option>
             @foreach($diagnosaK3 as $d)
-              <option value="{{ $d->id_diagnosa_k3 }}">{{ $d->nama_penyakit }}</option>
+              <option value="{{ $d->id_nb }}">{{ $d->nama_penyakit }}</option>
             @endforeach
           </select>
 
@@ -136,7 +136,7 @@
           <select id="inpSaran" class="ap-select">
             <option value="">-- pilih (boleh kosong) --</option>
             @foreach($saran as $s)
-                <option value="{{ $s->id_saran }}">{{ $s->isi }}</option>
+                <option value="{{ $s->id_saran }}" data-diagnosa="{{ $s->id_diagnosa }}">{{ $s->saran }}</option>
             @endforeach
           </select>
 
@@ -150,11 +150,19 @@
       {{-- ===== OBAT & HARGA ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Obat & Harga</div>
 
+      <div class="obat-header">
+        <div>Nama Obat</div>
+        <div>Jumlah</div>
+        <div>Satuan</div>
+        <div>Harga Satuan</div>
+        <div>Subtotal</div>
+      </div>
+
       {{-- TEMPLATE ROW OBAT (hidden) --}}
       <div id="obatTemplate" style="display:none;">
-        <div class="obat-row" style="display:flex;gap:10px;align-items:center;margin:10px 0;flex-wrap:wrap;">
-          <select name="obat_id[]" class="ap-select obat-select" style="min-width:180px;">
-            <option value="">-- pilih obat (boleh kosong) --</option>
+        <div class="obat-row">
+          <select name="obat_id[]" class="ap-select obat-select">
+            <option value="">pilih obat </option>
             @foreach($obat as $o)
               <option value="{{ $o->id_obat }}"
                 data-harga="{{ $o->harga ?? 0 }}"
@@ -164,24 +172,25 @@
             @endforeach
           </select>
 
-          <input name="jumlah[]" type="number" min="1" placeholder="Jumlah" style="width:90px;">
-          <input name="satuan[]" type="text" placeholder="Satuan" style="width:120px;">
-          <input name="harga_satuan[]" type="number" min="0" placeholder="Harga Satuan" style="width:140px;">
-          <input class="subtotal" type="number" placeholder="Subtotal" style="width:140px;" readonly>
+          <input name="jumlah[]" type="number" min="1" placeholder="Jumlah" class="obat-jumlah">
+          <input name="satuan[]" type="text" placeholder="Satuan" class="obat-satuan">
+          <input type="hidden" name="harga_satuan[]" class="obat-harga-raw">
+          <input type="text" class="ap-input obat-harga" placeholder="Harga Satuan">
 
-          <button type="button" class="btnDel"
-            style="border:none;background:#ffe7e7;color:#b30000;padding:8px 10px;border-radius:8px;cursor:pointer;">
-            Hapus
-          </button>
+          <input type="hidden" class="obat-subtotal-raw">
+          <input type="text" class="ap-input obat-subtotal" placeholder="Subtotal" readonly>
+
+          <button type="button" class="btnDel obat-hapus">Hapus</button>
         </div>
       </div>
+
 
       <div id="obatWrap"></div>
 
       <button type="button" id="btnAddObat" class="ap-btn-small">Tambah Obat/Alkes</button>
 
-      <div style="text-align:right;margin-top:10px;font-weight:600;color:#787676;">
-        Total : <span id="totalText">Rp0</span>
+      <div class="total-harga" style="text-align:right;margin-top:10px;font-weight:600;color:#787676;">
+        Total : <strong id="totalHarga">Rp0</strong>
       </div>
 
       <button class="ap-register" type="submit" style="margin-top:18px;">Submit</button>
@@ -210,11 +219,12 @@
 
     const chip = document.createElement('span');
     chip.style.cssText =
-      'display:inline-flex;align-items:center;gap:8px;background:#eef3ff;border:1px solid #c7d7f5;' +
-      'color:#316BA1;padding:6px 10px;border-radius:14px;margin:4px 6px 0 0;';
+    'display:inline-flex;align-items:center;gap:6px;background:#eef3ff;border:1px solid #c7d7f5;' +
+    'color:#316BA1;padding:4px 8px;border-radius:10px;margin:3px 6px 0 0;font-size:13px;';
+
     chip.innerHTML =
-      `<span>${label}</span>` +
-      `<button type="button" style="border:none;background:transparent;cursor:pointer;font-weight:700;color:#316BA1;">×</button>`;
+    `<span>${label}</span>` +
+    `<button type="button" style="border:none;background:transparent;cursor:pointer;font-weight:700;color:#316BA1;font-size:14px;line-height:1;">×</button>`;
 
     const hidden = document.createElement('input');
     hidden.type = 'hidden';
@@ -229,8 +239,36 @@
     chipContainer.appendChild(chip);
     hiddenContainer.appendChild(hidden);
   }
+  function getSelectedPenyakitIds(){
+    return [...document.querySelectorAll('#hiddenPenyakit input[name="penyakit_id[]"]')].map(i => i.value);
+  }
 
-  // Penyakit (text)
+  function filterSaran(){
+    const selected = new Set(getSelectedPenyakitIds());
+    const saranSelect = document.getElementById('inpSaran');
+
+    [...saranSelect.options].forEach((opt, idx) => {
+      if(idx === 0) return; // keep placeholder
+      const diagId = opt.dataset.diagnosa;
+      opt.hidden = selected.size > 0 ? !selected.has(diagId) : false;
+    });
+
+    // reset kalau pilihan jadi tidak valid
+    if (saranSelect.selectedIndex > 0 && saranSelect.options[saranSelect.selectedIndex].hidden) {
+      saranSelect.value = "";
+    }
+  }
+
+  function filterSaranByDiagnosa(diagnosaId){
+    const sel = document.getElementById('inpSaran');
+    [...sel.options].forEach((opt, idx) => {
+      if(idx === 0) return; // placeholder
+      opt.hidden = diagnosaId ? (opt.dataset.diagnosa !== diagnosaId) : false;
+    });
+    sel.value = ""; // reset pilihan
+  }
+
+    // Penyakit (text)
   document.getElementById('btnAddPenyakit').addEventListener('click', () => {
     const sel = document.getElementById('inpPenyakit');
     if(!sel.value) return;
@@ -242,6 +280,8 @@
         hiddenContainer: document.getElementById('hiddenPenyakit'),
         inputName: 'penyakit_id'
     });
+
+    filterSaranByDiagnosa(sel.value);
 
     sel.value = '';
   });
@@ -323,5 +363,85 @@
 
   // NOTE: kalau mau awalnya ada 1 row obat, aktifin ini:
   // addObatRow();
+
+  document.addEventListener('change', function(e){
+  if(!e.target.classList.contains('obat-select')) return;
+
+  const row = e.target.closest('.obat-row');
+  const opt = e.target.selectedOptions[0];
+
+  const harga = Number(opt?.dataset?.harga || 0);
+  const satuan = opt?.dataset?.satuan || '';
+
+  row.querySelector('.obat-harga-raw').value = harga;
+  row.querySelector('.obat-harga').value = rupiah(harga);
+  row.querySelector('.obat-satuan').value = satuan;
+
+  hitungSubtotal(row);
+});
+document.addEventListener('input', function(e){
+  if(!e.target.classList.contains('obat-jumlah')) return;
+
+  const row = e.target.closest('.obat-row');
+  hitungSubtotal(row);
+});
+function hitungSubtotal(row){
+  const qty = Number(row.querySelector('.obat-jumlah').value || 0);
+  const harga = Number(row.querySelector('.obat-harga-raw').value || 0);
+
+  const subtotal = qty * harga;
+
+  row.querySelector('.obat-subtotal-raw').value = subtotal;
+  row.querySelector('.obat-subtotal').value = rupiah(subtotal);
+
+  hitungTotal();
+}
+function hitungTotal(){
+  let total = 0;
+  document.querySelectorAll('.obat-subtotal-raw').forEach(i => {
+    total += Number(i.value || 0);
+  });
+
+  document.getElementById('totalHarga').innerText = rupiah(total);
+}
+document.addEventListener('change', function(e){
+  if(!e.target.classList.contains('obat-select')) return;
+
+  const row = e.target.closest('.obat-row');
+  const opt = e.target.selectedOptions[0];
+
+  const satuan = opt?.dataset?.satuan || '';
+  row.querySelector('.obat-satuan').value = satuan;   // <<< INI
+
+  // kalau kamu juga isi harga raw/tampilan, biarkan seperti biasa
+});
+document.getElementById('formPemeriksaan').addEventListener('submit', (e) => {
+  const rows = document.querySelectorAll('#obatWrap .obat-row');
+
+  for (const row of rows) {
+    const obat = row.querySelector('.obat-select')?.value?.trim();
+    if(!obat) continue; // baris kosong di-skip
+
+    const satuanInput = row.querySelector('.obat-satuan');
+    const satuan = satuanInput?.value?.trim();
+
+    if(!satuan){
+      e.preventDefault();
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Data Obat Belum Lengkap',
+        text: 'Satuan wajib diisi jika obat dipilih.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#316BA1',
+      }).then(() => {
+        satuanInput?.focus();
+      });
+
+      return;
+    }
+  }
+});
+
 </script>
 @endsection

@@ -191,3 +191,21 @@
   font-size: 13px;
   font-weight: 600;
 }
+
+/* =========================
+   CHIP PENYAKIT - DIKECILIN
+   ========================= */
+.chip,
+.chip-item,
+.selected-item,
+.penyakit-chip{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 12px;     /* <<< ini yang bikin kecil */
+  font-size: 14px;       /* <<< sebelumnya biasanya 16–18px */
+  line-height: 1.2;
+
+  border-radius: 999px;  /* pill kecil rapi */
+}
