@@ -608,3 +608,91 @@ body{
 @media (max-width: 700px){
   .ap-vitals-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+:root{
+  --c-obat: 260px;
+  --c-jumlah: 120px;
+  --c-satuan: 120px;
+  --c-harga: 200px;
+  --c-subtotal: 200px;
+  --c-aksi: 90px;
+  --gap-obat: 16px;
+}
+
+#obatWrap{
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Header dan row pakai kolom yang sama persis */
+.obat-header,
+#obatWrap .obat-row{
+  display: grid;
+  grid-template-columns: var(--c-obat) var(--c-jumlah) var(--c-satuan) var(--c-harga) var(--c-subtotal);
+  gap: var(--gap-obat);
+  align-items: center;
+}
+
+/* spacing header */
+.obat-header{
+  margin: 10px 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5A6B85;
+}
+
+/* spacing row */
+#obatWrap .obat-row{
+  margin: 12px 0;
+}
+
+/* samain style field */
+#obatWrap .obat-row select,
+#obatWrap .obat-row input{
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #CFE0FF;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+#obatWrap .obat-row input{
+  padding: 0 12px;
+}
+
+/* tombol hapus */
+#obatWrap .obat-hapus{
+  height: 44px;
+  border-radius: 12px;
+  padding: 0 14px;
+  border: none;
+  background: #ffe7e7;
+  color: #b30000;
+  white-space: nowrap;
+}
+
+/* bikin baris obat punya ruang khusus untuk tombol hapus */
+#obatWrap .obat-row{
+  position: relative;
+  padding-right: 110px; /* ruang buat tombol hapus */
+}
+
+/* tombol hapus dipaku di kanan */
+#obatWrap .obat-hapus{
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 44px;
+}
+
+
+/* responsive: layar kecil = header hilang, row jadi 2 kolom biar tetap bagus */
+@media (max-width: 900px){
+  .obat-header{ display: none; }
+
+  #obatWrap .obat-row{
+    grid-template-columns: 1fr 1fr;
+  }
+  #obatWrap .obat-row .obat-select{ grid-column: 1 / -1; }
+  #obatWrap .obat-row .obat-hapus{ grid-column: 1 / -1; }
+}

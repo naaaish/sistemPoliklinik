@@ -6,5 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Resep extends Model
 {
-    //
+    protected $table = 'resep';
+    protected $primaryKey = 'id_resep';
+    public $incrementing = false;
+    protected $keyType = 'string';
+    protected $guarded = [];
+    public $timestamps = false;
 }
+

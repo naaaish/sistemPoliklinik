@@ -4,6 +4,8 @@ namespace App\Http\Controllers\AdminPoli;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\Pendaftaran;
 use App\Models\Pemeriksaan;
@@ -12,6 +14,7 @@ use App\Models\DiagnosaK3;
 use App\Models\Saran;
 use App\Models\Diagnosa;
 use App\Models\DetailResep;
+use App\Models\Resep;
 
 class PemeriksaanInputController extends Controller
 {
@@ -31,6 +34,10 @@ class PemeriksaanInputController extends Controller
         $obat = Obat::orderBy('nama_obat', 'asc')->get();
         $diagnosaK3 = DiagnosaK3::orderBy('nama_penyakit', 'asc')->get();
         $saran = Saran::orderBy('saran', 'asc')->get();
+        $diagnosaK3 = DiagnosaK3::where('tipe', 'penyakit')
+            ->orderBy('nama_penyakit', 'asc')
+            ->get();
+
 
         return view('adminpoli.pemeriksaan.create', compact(
             'pendaftaran',
@@ -43,43 +50,35 @@ class PemeriksaanInputController extends Controller
 
     public function store(Request $request, $pendaftaranId)
     {
-        /**
-         * PENTING:
-         * - dari migration kamu, PK banyak yang string: id_obat, id_saran, id_diagnosa_k3, id_pendaftaran
-         * - jadi validasi pakai string, bukan integer
-         */
         $validated = $request->validate([
-            // pemeriksaan kesehatan (semua boleh kosong)
+            // pemeriksaan (nullable semua)
             'sistol'        => 'nullable|numeric',
             'diastol'       => 'nullable|numeric',
             'nadi'          => 'nullable|numeric',
+
             'gula_puasa'    => 'nullable|numeric',
             'gula_2jam_pp'  => 'nullable|numeric',
             'gula_sewaktu'  => 'nullable|numeric',
+
             'asam_urat'     => 'nullable|numeric',
             'cholesterol'   => 'nullable|numeric',
             'trigliseride'  => 'nullable|numeric',
+
             'suhu'          => 'nullable|numeric',
             'berat_badan'   => 'nullable|numeric',
             'tinggi_badan'  => 'nullable|numeric',
 
-            // penyakit & diagnosa (kalau kamu simpan sebagai tabel relasi, kirim ID)
-            // ubah name input blade jadi penyakit_id[] dan diagnosa_id[] kalau memang tabelnya beda
+            // pilihan (UI kamu kirim array via chips)
             'penyakit_id'     => 'nullable|array',
             'penyakit_id.*'   => 'nullable|string',
 
-            'diagnosa_id'     => 'nullable|array',
-            'diagnosa_id.*'   => 'nullable|string',
-
-            // kalau kamu tetap pakai diagnosa_k3 (dropdown dari diagnosa_k3)
             'diagnosa_k3_id'    => 'nullable|array',
             'diagnosa_k3_id.*'  => 'nullable|string',
 
-            // saran (tabel saran id_saran string)
             'saran_id'    => 'nullable|array',
             'saran_id.*'  => 'nullable|string',
 
-            // obat & detail resep (satuan ada di detailresep)
+            // resep
             'obat_id'        => 'nullable|array',
             'obat_id.*'      => 'nullable|string',
             'jumlah'         => 'nullable|array',
@@ -93,84 +92,97 @@ class PemeriksaanInputController extends Controller
         // pastikan pendaftaran ada
         Pendaftaran::findOrFail($pendaftaranId);
 
-        // ========= SIMPAN PEMERIKSAAN =========
-        // ⚠️ sesuaikan nama kolom FK di tabel pemeriksaan kamu:
-        // kalau kolomnya id_pendaftaran → pakai 'id_pendaftaran'
-        // kalau kolomnya pendaftaran_id → pakai 'pendaftaran_id'
-        $pemeriksaan = Pemeriksaan::create([
-            'id_pendaftaran' => $pendaftaranId,
+        return DB::transaction(function () use ($validated, $pendaftaranId) {
 
-            'sistol'       => $validated['sistol'] ?? null,
-            'diastol'      => $validated['diastol'] ?? null,
-            'nadi'         => $validated['nadi'] ?? null,
-            'gula_puasa'   => $validated['gula_puasa'] ?? null,
-            'gula_2jam_pp' => $validated['gula_2jam_pp'] ?? null,
-            'gula_sewaktu' => $validated['gula_sewaktu'] ?? null,
-            'asam_urat'    => $validated['asam_urat'] ?? null,
-            'cholesterol'  => $validated['cholesterol'] ?? null,
-            'trigliseride' => $validated['trigliseride'] ?? null,
-            'suhu'         => $validated['suhu'] ?? null,
-            'berat_badan'  => $validated['berat_badan'] ?? null,
-            'tinggi_badan' => $validated['tinggi_badan'] ?? null,
-        ]);
+            // ========= GENERATE ID (20 char) =========
+            // 2(prefix) + 12(ymdHis) + 6(random) = 20
+            $idPemeriksaan = 'PM' . date('ymdHis') . Str::upper(Str::random(6));
 
-        // ========= SIMPAN RELASI PENYAKIT & DIAGNOSA =========
-        // Aktifkan kalau kamu memang punya pivot & relasinya sudah dibuat di model
-        // Contoh relasi di Pemeriksaan:
-        // public function penyakits(){ return $this->belongsToMany(Penyakit::class, 'pemeriksaan_penyakit', 'id_pemeriksaan','id_penyakit'); }
-        // public function diagnosas(){ return $this->belongsToMany(Diagnosa::class, 'pemeriksaan_diagnosa', 'id_pemeriksaan','id_diagnosa'); }
+            // ========= SIMPAN PEMERIKSAAN =========
+            $pemeriksaan = Pemeriksaan::create([
+                'id_pemeriksaan' => $idPemeriksaan,
+                'id_pendaftaran' => $pendaftaranId,
 
-        /*
-        $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
-        if ($penyakitIds) {
-            $pemeriksaan->penyakits()->sync($penyakitIds);
-        }
+                'sistol'   => $validated['sistol'] ?? null,
+                'diastol'  => $validated['diastol'] ?? null,
+                'nadi'     => $validated['nadi'] ?? null,
 
-        $diagnosaIds = array_values(array_filter($validated['diagnosa_id'] ?? []));
-        if ($diagnosaIds) {
-            $pemeriksaan->diagnosas()->sync($diagnosaIds);
-        }
-        */
+                // mapping sesuai migration pemeriksaan
+                'gd_puasa'   => $validated['gula_puasa'] ?? null,
+                'gd_duajam'  => $validated['gula_2jam_pp'] ?? null,
+                'gd_sewaktu' => $validated['gula_sewaktu'] ?? null,
 
-        // Kalau kamu masih pakai diagnosa_k3 & saran sebagai relasi many-to-many juga:
-        /*
-        $diagK3 = array_values(array_filter($validated['diagnosa_k3_id'] ?? []));
-        if ($diagK3) $pemeriksaan->diagnosaK3s()->sync($diagK3);
+                'asam_urat' => $validated['asam_urat'] ?? null,
+                'chol'      => $validated['cholesterol'] ?? null,
+                'tg'        => $validated['trigliseride'] ?? null,
 
-        $saranIds = array_values(array_filter($validated['saran_id'] ?? []));
-        if ($saranIds) $pemeriksaan->sarans()->sync($saranIds);
-        */
+                'suhu'   => $validated['suhu'] ?? null,
+                'berat'  => $validated['berat_badan'] ?? null,
+                'tinggi' => $validated['tinggi_badan'] ?? null,
 
-        // ========= SIMPAN DETAIL RESEP (satuan di detailresep) =========
-        $total = 0;
-
-        $obatIds = $validated['obat_id'] ?? [];
-        $jumlahs = $validated['jumlah'] ?? [];
-        $satuans = $validated['satuan'] ?? [];
-        $hargas  = $validated['harga_satuan'] ?? [];
-
-        for ($i = 0; $i < count($obatIds); $i++) {
-            if (empty($obatIds[$i])) continue;
-
-            $qty = (int)($jumlahs[$i] ?? 0);
-            $harga = (int)($hargas[$i] ?? 0);
-            $subtotal = $qty * $harga;
-            $total += $subtotal;
-
-            // ini asumsi: detailresep punya kolom id_pemeriksaan langsung
-            // kalau detailresep kamu pakai id_resep dulu, nanti aku sesuaikan
-            DetailResep::create([
-                'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan ?? $pemeriksaan->getKey(), // sesuaikan PK
-                'id_obat'        => $obatIds[$i],
-                'jumlah'         => $qty,
-                'satuan'         => $satuans[$i] ?? null,
-                'harga_satuan'   => $harga,
-                'subtotal'       => $subtotal,
+                // tabel pemeriksaan cuma simpan 1 value (bukan banyak)
+                'id_diagnosa' => $validated['penyakit_id'][0] ?? null,
+                'id_nb'       => $validated['diagnosa_k3_id'][0] ?? null,
+                'id_saran'    => $validated['saran_id'][0] ?? null,
             ]);
-        }
 
-        return redirect()
-            ->route('adminpoli.dashboard')
-            ->with('success', 'Hasil pemeriksaan berhasil disimpan.');
+            // ========= SIMPAN RESEP + DETAIL_RESEP =========
+            $obatIds = $validated['obat_id'] ?? [];
+            $jumlahs = $validated['jumlah'] ?? [];
+            $satuans = $validated['satuan'] ?? [];
+            $hargas  = $validated['harga_satuan'] ?? [];
+
+            $detailRows = [];
+            $totalTagihan = 0;
+
+            $count = count($obatIds);
+            for ($i = 0; $i < $count; $i++) {
+                $idObat = $obatIds[$i] ?? null;
+                if (!$idObat) continue;
+
+                $qty   = (int) ($jumlahs[$i] ?? 0);
+                $harga = (float) ($hargas[$i] ?? 0);
+                $satuan = $satuans[$i] ?? '';
+
+                // skip kalau qty <= 0 (biar ga nyimpen baris kosong)
+                if ($qty <= 0) continue;
+
+                $subtotal = $qty * $harga;
+                $totalTagihan += $subtotal;
+
+                $detailRows[] = [
+                    'id_obat'  => $idObat,
+                    'jumlah'   => $qty,
+                    'satuan'   => $satuan,
+                    'subtotal' => $subtotal,
+                ];
+            }
+
+            // hanya buat resep kalau ada minimal 1 detail
+            if (count($detailRows) > 0) {
+                $idResep = 'RS' . date('ymdHis') . Str::upper(Str::random(6));
+
+                Resep::create([
+                    'id_resep'       => $idResep,
+                    'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
+                    'total_tagihan'  => $totalTagihan,
+                ]);
+
+                foreach ($detailRows as $row) {
+                    DetailResep::create([
+                        'id_resep'  => $idResep,
+                        'id_obat'   => $row['id_obat'],
+                        'jumlah'    => $row['jumlah'],
+                        'satuan'    => $row['satuan'],
+                        'subtotal'  => $row['subtotal'],
+                    ]);
+                }
+            }
+
+            return redirect()
+                ->route('adminpoli.dashboard')
+                ->with('success', 'Hasil pemeriksaan berhasil disimpan.');
+        });
     }
+
 }

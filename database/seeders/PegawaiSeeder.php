@@ -13,7 +13,7 @@ class PegawaiSeeder extends Seeder
         DB::table('pegawai')->insert([
             [
                 'nip' => '198765432001',
-                'nama_pegawai' => 'Dr. Ahmad Pratama',
+                'nama_pegawai' => 'Ahmad Pratama',
                 'nik' => '3275010101900001',
                 'agama' => 'Islam',
                 'jenis_kelamin' => 'Laki-laki',
