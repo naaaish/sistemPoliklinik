@@ -14,7 +14,8 @@ class Dokter extends Model
     protected $fillable = [
         'id_dokter',
         'nama',
-        'jenis_dokter'
+        'jenis_dokter',
+        'status',
     ];
 
     public function jadwal()

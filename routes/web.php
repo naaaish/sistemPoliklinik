@@ -7,7 +7,9 @@ use App\Http\Controllers\RiwayatController;
 use App\Http\Controllers\AdminPoli\ObatController;
 use App\Http\Controllers\AdminPoli\DashboardController as AdminPoliDashboardController;
 use App\Http\Controllers\AdminPoli\PendaftaranController;
+use App\Http\Controllers\AdminPoli\PemeriksaanInputController;
 use App\Http\Controllers\AdminPoli\PemeriksaanController;
+use App\Http\Controllers\AdminPoli\DokterPemeriksaController;
 
 use App\Http\Controllers\Kepegawaian\KDashboardController;
 use App\Http\Controllers\Kepegawaian\PegawaiController;
@@ -71,10 +73,10 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
     Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
     // pemeriksaan (HARUS bawa id pendaftaran)
-    Route::get('/pemeriksaan/{pendaftaranId}/create', [PemeriksaanController::class, 'create'])
+    Route::get('/pemeriksaan/{pendaftaranId}/create', [PemeriksaanInputController::class, 'create'])
         ->name('pemeriksaan.create');
 
-    Route::post('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'store'])
+    Route::post('/pemeriksaan/{pendaftaranId}', [PemeriksaanInputController::class, 'store'])
         ->name('pemeriksaan.store');
 
     // (optional untuk autofill)
@@ -105,22 +107,56 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::post('/diagnosak3/import', [DiagnosaK3Controller::class,'import'])->name('diagnosak3.import');
     Route::get('/diagnosak3/export', [DiagnosaK3Controller::class,'export'])->name('diagnosak3.export');
 
-    // LIST hasil pemeriksaan (kelola hasil pasien)
-    Route::get('/pemeriksaan', [PemeriksaanController::class, 'index'])
-        ->name('pemeriksaan.index');
+    // MENU PEMERIKSAAN PASIEN
+    Route::get('/pemeriksaan',
+        [PemeriksaanController::class, 'index']
+    )->name('pemeriksaan.index');
 
-    // DETAIL hasil pemeriksaan (read / ringkasan)
-    Route::get('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'show'])
-        ->name('pemeriksaan.show');
+    Route::get('/pemeriksaan/{pendaftaranId}',
+        [PemeriksaanController::class, 'show']
+    )->name('pemeriksaan.show');
 
-    // FORM edit hasil pemeriksaan
-    Route::get('/pemeriksaan/{pendaftaranId}/edit', [PemeriksaanController::class, 'edit'])
-        ->name('pemeriksaan.edit');
+    Route::get('/pemeriksaan/{pendaftaranId}/edit',
+        [PemeriksaanController::class, 'edit']
+    )->name('pemeriksaan.edit');
 
-    // UPDATE hasil pemeriksaan
-    Route::put('/pemeriksaan/{pendaftaranId}', [PemeriksaanController::class, 'update'])
-        ->name('pemeriksaan.update');
+    Route::put('/pemeriksaan/{pendaftaranId}',
+        [PemeriksaanController::class, 'update']
+    )->name('pemeriksaan.update');
+
+    // Dokter/pemeriksa
+    Route::get('/dokter-pemeriksa', [DokterPemeriksaController::class, 'index'])
+        ->name('dokter_pemeriksa.index');
+
+    // CRUD dokter
+    Route::post('/dokter-pemeriksa/dokter', [DokterPemeriksaController::class, 'storeDokter'])
+        ->name('dokter_pemeriksa.dokter.store');
+    Route::put('/dokter-pemeriksa/dokter/{id}', [DokterPemeriksaController::class, 'updateDokter'])
+        ->name('dokter_pemeriksa.dokter.update');
+    Route::delete('/dokter-pemeriksa/dokter/{id}', [DokterPemeriksaController::class, 'destroyDokter'])
+        ->name('dokter_pemeriksa.dokter.destroy');
+
+    // CRUD pemeriksa
+    Route::post('/dokter-pemeriksa/pemeriksa', [DokterPemeriksaController::class, 'storePemeriksa'])
+        ->name('dokter_pemeriksa.pemeriksa.store');
+    Route::put('/dokter-pemeriksa/pemeriksa/{id}', [DokterPemeriksaController::class, 'updatePemeriksa'])
+        ->name('dokter_pemeriksa.pemeriksa.update');
+    Route::delete('/dokter-pemeriksa/pemeriksa/{id}', [DokterPemeriksaController::class, 'destroyPemeriksa'])
+        ->name('dokter_pemeriksa.pemeriksa.destroy');
+
+    // jadwal gabungan
+    Route::get('/dokter-pemeriksa/{tipe}/{id}/jadwal', [DokterPemeriksaController::class, 'jadwalJson'])
+        ->name('dokter_pemeriksa.jadwal_json');
+
+    Route::patch('/dokter-pemeriksa/dokter/{id}/status', [DokterPemeriksaController::class, 'updateStatusDokter'])
+        ->name('dokter_pemeriksa.dokter.status');
+
+    Route::patch('/dokter-pemeriksa/pemeriksa/{id}/status', [DokterPemeriksaController::class, 'updateStatusPemeriksa'])
+        ->name('dokter_pemeriksa.pemeriksa.status');
+
+    
 });
+
 
 
 /*

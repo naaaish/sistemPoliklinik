@@ -1,0 +1,193 @@
+*{ box-sizing:border-box; }
+.periksa-detail-page{ font-family:Poppins,sans-serif; }
+
+.periksa-detail-topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:14px;
+}
+.periksa-detail-left{ display:flex; align-items:center; gap:12px; }
+
+.periksa-detail-back{
+  display:inline-flex; width:40px; height:40px; align-items:center; justify-content:center;
+  text-decoration:none; transition:transform .15s ease, filter .15s ease;
+}
+.periksa-detail-back img{ width:40px; height:40px; object-fit:contain; }
+.periksa-detail-back:hover{ transform:translateY(-1px); filter:brightness(1.05); }
+.periksa-detail-back:active{ transform:translateY(0); filter:brightness(.95); }
+
+.periksa-detail-heading{ font-size:22px; font-weight:700; color:#3B5E8C; }
+
+.periksa-detail-card{
+  width: 920px; max-width: 920px; margin:0 auto;
+  background:#fff; border-radius:14px;
+  box-shadow:0 8px 18px rgba(0,0,0,.10);
+  padding: 22px 22px 18px;
+}
+
+.periksa-detail-title{
+  text-align:center; font-weight:800; color:#3B5E8C;
+  font-size:16px; margin-bottom:14px;
+}
+
+.periksa-detail-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 18px;
+  margin-bottom: 14px;
+}
+
+.periksa-detail-item{ display:flex; gap:10px; }
+.periksa-detail-label{
+  width: 160px;
+  font-weight:700;
+  color:#7B8DA8;
+  font-size:12px;
+}
+.periksa-detail-value{
+  flex:1;
+  font-weight:700;
+  color:#3B5E8C;
+  font-size:12px;
+}
+
+.periksa-detail-subtitle{
+  text-align:center;
+  font-weight:800;
+  color:#3B5E8C;
+  font-size:14px;
+  margin: 16px 0 10px;
+}
+
+.periksa-chip-wrap{
+  display:flex; flex-wrap:wrap; gap:10px;
+  justify-content:center;
+  margin-bottom: 12px;
+}
+
+.periksa-chip{
+  width: 120px;
+  border:1px solid #D6D6D6;
+  border-radius:10px;
+  padding: 8px 8px 6px;
+  text-align:center;
+  background:#fff;
+}
+
+.periksa-chip-label{
+  font-size:11px;
+  color:#7B8DA8;
+  font-weight:800;
+  margin-bottom:4px;
+}
+
+.periksa-chip-val{
+  font-size:12px;
+  color:#3B5E8C;
+  font-weight:800;
+}
+
+.periksa-box-title{
+  width: 100%;
+  background:#6F8FB8;
+  color:#fff;
+  font-weight:800;
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:8px;
+  margin-top: 10px;
+}
+
+.periksa-box{
+  border:1px solid #CFE0FF;
+  border-radius:10px;
+  padding:10px;
+  font-size:12px;
+  color:#3B5E8C;
+  font-weight:700;
+  margin-top:6px;
+  background:#fff;
+}
+
+.periksa-resep-table{ margin-top: 10px; }
+.periksa-resep-head,
+.periksa-resep-row{
+  display:grid;
+  grid-template-columns: 2.4fr .8fr .8fr 1.2fr 1.2fr;
+  gap: 10px;
+  align-items:center;
+}
+.periksa-resep-head{
+  color:#7B8DA8;
+  font-weight:800;
+  font-size:12px;
+  padding: 6px 2px 8px;
+}
+.periksa-resep-body{ border-top:1px solid #EEF4FF; padding-top:10px; }
+
+.periksa-resep-cell{
+  border:1px solid #D6D6D6;
+  border-radius:8px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  padding: 0 10px;
+  font-size:12px;
+  font-weight:700;
+  color:#666;
+  background:#fff;
+}
+
+.periksa-center{ justify-content:center; }
+.periksa-right{ justify-content:flex-end; }
+
+.periksa-resep-empty{
+  margin-top: 10px;
+  text-align:center;
+  font-size:12px;
+  color:#7B8DA8;
+  font-weight:800;
+}
+
+.periksa-total{
+  display:flex;
+  justify-content:flex-end;
+  gap: 12px;
+  margin-top: 10px;
+  align-items:center;
+}
+.periksa-total-label{ font-weight:800; color:#7B8DA8; font-size:12px; }
+.periksa-total-val{ font-weight:900; color:#3B5E8C; font-size:12px; }
+
+.periksa-detail-actions{
+  display:flex;
+  justify-content:center;
+  margin-top: 14px;
+}
+
+.periksa-detail-btn{
+  width: 180px;
+  height: 42px;
+  background:#4E78A8;
+  color:#fff;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  font-weight:800;
+  transition:transform .15s ease, filter .15s ease, box-shadow .15s ease;
+}
+.periksa-detail-btn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow:0 8px 18px rgba(0,0,0,.12);
+}
+.periksa-detail-btn:active{ transform: translateY(0); filter: brightness(.98); }
+
+.periksa-detail-foot{
+  margin-top: 18px;
+  text-align:center;
+  color: rgba(0,0,0,0.55);
+  font-size: 13px;
+  font-weight: 600;
+}

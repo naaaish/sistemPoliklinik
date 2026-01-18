@@ -19,74 +19,76 @@
     </div>
 
     <form method="POST" action="{{ route('adminpoli.pemeriksaan.store', $pendaftaran->id_pendaftaran) }}" id="formPemeriksaan">
+      @csrf
 
+      {{-- ===== DATA PEMERIKSAAN ===== --}}  
     <div style="color:#316BA1;font-size:19px;margin:18px 0 10px;">
-  Data Pemeriksaan Kesehatan
-</div>
+        Data Pemeriksaan Kesehatan
+      </div>
 
-<div class="ap-vitals-grid">
-  {{-- BARIS 1 --}}
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Sistol</div>
-    <input class="ap-vital-input" name="sistol">
-  </div>
+      <div class="ap-vitals-grid">
+        {{-- BARIS 1 --}}
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Sistol</div>
+          <input class="ap-vital-input" name="sistol">
+        </div>
 
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Diastol</div>
-    <input class="ap-vital-input" name="diastol">
-  </div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Diastol</div>
+          <input class="ap-vital-input" name="diastol">
+        </div>
 
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Denyut Nadi</div>
-    <input class="ap-vital-input" name="nadi">
-  </div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Denyut Nadi</div>
+          <input class="ap-vital-input" name="nadi">
+        </div>
 
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Gula Darah<br>Puasa</div>
-    <input class="ap-vital-input" name="gula_puasa">
-  </div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Gula Darah<br>Puasa</div>
+          <input class="ap-vital-input" name="gula_puasa">
+        </div>
 
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Gula Darah<br>2 jam PP</div>
-    <input class="ap-vital-input" name="gula_2jam_pp">
-  </div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Gula Darah<br>2 jam PP</div>
+          <input class="ap-vital-input" name="gula_2jam_pp">
+        </div>
 
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Gula Darah<br>Sewaktu</div>
-    <input class="ap-vital-input" name="gula_sewaktu">
-  </div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Gula Darah<br>Sewaktu</div>
+          <input class="ap-vital-input" name="gula_sewaktu">
+        </div>
 
-  {{-- BARIS 2 --}}
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Asam Urat</div>
-    <input class="ap-vital-input" name="asam_urat">
-  </div>
+        {{-- BARIS 2 --}}
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Asam Urat</div>
+          <input class="ap-vital-input" name="asam_urat">
+        </div>
 
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Cholesterol</div>
-    <input class="ap-vital-input" name="cholesterol">
-  </div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Cholesterol</div>
+          <input class="ap-vital-input" name="cholesterol">
+        </div>
 
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Trigliseride</div>
-    <input class="ap-vital-input" name="trigliseride">
-  </div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Trigliseride</div>
+          <input class="ap-vital-input" name="trigliseride">
+        </div>
 
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Suhu</div>
-    <input class="ap-vital-input" name="suhu">
-  </div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Suhu</div>
+          <input class="ap-vital-input" name="suhu">
+        </div>
 
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Berat Badan</div>
-    <input class="ap-vital-input" name="berat_badan">
-  </div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Berat Badan</div>
+          <input class="ap-vital-input" name="berat_badan">
+        </div>
 
-  <div class="ap-vital-item">
-    <div class="ap-vital-label">Tinggi Badan</div>
-    <input class="ap-vital-input" name="tinggi_badan">
-  </div>
-</div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Tinggi Badan</div>
+          <input class="ap-vital-input" name="tinggi_badan">
+        </div>
+      </div>
 
 
 
