@@ -1,163 +1,129 @@
 @extends('layouts.adminpoli')
-@section('title', 'Detail Pemeriksaan Pasien')
+@section('title', 'Edit Hasil Pemeriksaan Pasien')
 
 @section('content')
-<div class="periksa-detail-page">
+<div class="ap-page">
 
-  <div class="periksa-detail-topbar">
-    <div class="periksa-detail-left">
-      <a href="{{ route('adminpoli.pemeriksaan.index') }}" class="periksa-detail-back" title="Kembali">
-        <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
-      </a>
-      <div class="periksa-detail-heading">Pemeriksaan Pasien</div>
-    </div>
+  <div class="ap-topbar">
+    <a href="{{ route('adminpoli.pemeriksaan.show', $pendaftaran->id_pendaftaran) }}" class="ap-back-inline">
+      <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="kembali">
+    </a>
+    <h1 class="ap-title">Edit Hasil Pemeriksaan Pasien</h1>
   </div>
 
-  <div class="periksa-detail-card">
-
-    <div class="periksa-detail-title">Data Hasil Pemeriksaan Pasien</div>
-
-    {{-- DATA PASIEN (ambil dari $pendaftaran + relasi/hasil yang ada) --}}
-    <div class="periksa-detail-grid">
-      <div class="periksa-detail-item">
-        <div class="periksa-detail-label">No. Registrasi</div>
-        <div class="periksa-detail-value">{{ $pendaftaran->id_pendaftaran ?? '-' }}</div>
-      </div>
-
-      <div class="periksa-detail-item">
-        <div class="periksa-detail-label">Tanggal Periksa</div>
-        <div class="periksa-detail-value">
-          {{ $hasil?->created_at ? \Carbon\Carbon::parse($hasil->created_at)->format('d F Y, H:i') : '-' }}
-        </div>
-      </div>
-
-      <div class="periksa-detail-item">
-        <div class="periksa-detail-label">Nama Pasien</div>
-        <div class="periksa-detail-value">
-          {{ $pendaftaran->pasien->nama_pasien ?? '-' }}
-        </div>
-      </div>
-
-      <div class="periksa-detail-item">
-        <div class="periksa-detail-label">Jenis Kelamin</div>
-        <div class="periksa-detail-value">
-          {{ $pendaftaran->pasien->jenis_kelamin ?? '-' }}
-        </div>
-      </div>
-
-      <div class="periksa-detail-item">
-        <div class="periksa-detail-label">Bidang / Unit</div>
-        <div class="periksa-detail-value">
-          {{ $pendaftaran->pasien->bidang ?? '-' }}
-        </div>
-      </div>
-
-      <div class="periksa-detail-item">
-        <div class="periksa-detail-label">Tanggal Lahir</div>
-        <div class="periksa-detail-value">
-          {{ $pendaftaran->pasien->tanggal_lahir ?? '-' }}
-        </div>
-      </div>
-
-      <div class="periksa-detail-item">
-        <div class="periksa-detail-label">Dokter / Pemeriksa</div>
-        <div class="periksa-detail-value">
-          {{ $pendaftaran->dokter->nama ?? ($pendaftaran->pemeriksa->nama_pemeriksa ?? '-') }}
-        </div>
-      </div>
-
-      <div class="periksa-detail-item">
-        <div class="periksa-detail-label">Status</div>
-        <div class="periksa-detail-value">
-          {{ $pendaftaran->status ?? '-' }}
-        </div>
-      </div>
+  <div class="ap-card-form">
+    <div class="ap-form-head">
+      <div class="ap-form-head__title">Formulir Hasil Pemeriksaan</div>
+      <div class="ap-form-head__sub">Pasien Poliklinik PT PLN Indonesia Power UBP Mrica</div>
     </div>
 
-    {{-- PEMERIKSAAN KESEHATAN --}}
-    <div class="periksa-detail-subtitle">Pemeriksaan Kesehatan</div>
+    <form method="POST" action="{{ route('adminpoli.pemeriksaan.update', $pendaftaran->id_pendaftaran) }}" id="formPemeriksaan">
+      @csrf
+      @method('PUT')
 
-    <div class="periksa-chip-wrap">
-      <div class="periksa-chip"><div class="periksa-chip-label">Sistol</div><div class="periksa-chip-val">{{ $hasil->sistol ?? '-' }}</div></div>
-      <div class="periksa-chip"><div class="periksa-chip-label">Diastol</div><div class="periksa-chip-val">{{ $hasil->diastol ?? '-' }}</div></div>
-      <div class="periksa-chip"><div class="periksa-chip-label">Nadi</div><div class="periksa-chip-val">{{ $hasil->nadi ?? '-' }}</div></div>
+      <div style="color:#316BA1;font-size:19px;margin:18px 0 10px;">Data Pemeriksaan Kesehatan</div>
 
-      <div class="periksa-chip"><div class="periksa-chip-label">GD Puasa</div><div class="periksa-chip-val">{{ $hasil->gd_puasa ?? ($hasil->gula_puasa ?? '-') }}</div></div>
-      <div class="periksa-chip"><div class="periksa-chip-label">GD 2 Jam PP</div><div class="periksa-chip-val">{{ $hasil->gd_duajam ?? ($hasil->gula_2jam_pp ?? '-') }}</div></div>
-      <div class="periksa-chip"><div class="periksa-chip-label">GD Sewaktu</div><div class="periksa-chip-val">{{ $hasil->gd_sewaktu ?? ($hasil->gula_sewaktu ?? '-') }}</div></div>
+      <div class="ap-vitals-grid">
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Sistol</div>
+          <input class="ap-vital-input" name="sistol" value="{{ old('sistol', $hasil->sistol) }}">
+        </div>
 
-      <div class="periksa-chip"><div class="periksa-chip-label">Asam Urat</div><div class="periksa-chip-val">{{ $hasil->asam_urat ?? '-' }}</div></div>
-      <div class="periksa-chip"><div class="periksa-chip-label">Cholesterol</div><div class="periksa-chip-val">{{ $hasil->chol ?? ($hasil->cholesterol ?? '-') }}</div></div>
-      <div class="periksa-chip"><div class="periksa-chip-label">Trigliseride</div><div class="periksa-chip-val">{{ $hasil->tg ?? ($hasil->trigliseride ?? '-') }}</div></div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Diastol</div>
+          <input class="ap-vital-input" name="diastol" value="{{ old('diastol', $hasil->diastol) }}">
+        </div>
 
-      <div class="periksa-chip"><div class="periksa-chip-label">Suhu</div><div class="periksa-chip-val">{{ $hasil->suhu ?? '-' }}</div></div>
-      <div class="periksa-chip"><div class="periksa-chip-label">Berat</div><div class="periksa-chip-val">{{ $hasil->berat ?? ($hasil->berat_badan ?? '-') }}</div></div>
-      <div class="periksa-chip"><div class="periksa-chip-label">Tinggi</div><div class="periksa-chip-val">{{ $hasil->tinggi ?? ($hasil->tinggi_badan ?? '-') }}</div></div>
-    </div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Denyut Nadi</div>
+          <input class="ap-vital-input" name="nadi" value="{{ old('nadi', $hasil->nadi) }}">
+        </div>
 
-    {{-- Diagnosa & Saran (sementara placeholder kalau belum ada kolomnya) --}}
-    <div class="periksa-box-title">Diagnosa Dokter</div>
-    <div class="periksa-box">
-      {{ $hasil->diagnosa_dokter ?? '-' }}
-    </div>
+        <div class="ap-vital-item">
+          <div class="ap-vital-label">Gula Darah<br>Puasa</div>
+          <input class="ap-vital-input" name="gula_puasa" value="{{ old('gula_puasa', $hasil->gd_puasa ?? $hasil->gula_puasa) }}">
+        </div>
 
-    <div class="periksa-box-title">Saran Dokter</div>
-    <div class="periksa-box">
-      {{ $hasil->saran_dokter ?? '-' }}
-    </div>
-
-    {{-- RESEP --}}
-    <div class="periksa-detail-subtitle">Data Resep Obat</div>
-
-    <div class="periksa-resep-table">
-      <div class="periksa-resep-head">
-        <div>Nama</div>
-        <div>Jumlah</div>
-        <div>Satuan</div>
-        <div>Harga Satuan</div>
-        <div>Subtotal</div>
+        {{-- lanjutkan field lain sesuai create kamu --}}
       </div>
 
-      @php
-        $total = 0;
-      @endphp
+      {{-- =========================
+           OBAT & HARGA (PREFILL)
+           ========================= --}}
+      <div style="color:#316BA1;font-size:19px;margin:18px 0 10px;">Obat & Harga</div>
 
-      <div class="periksa-resep-body">
-        @forelse($detailResep as $r)
-          @php $total += (int)($r->subtotal ?? 0); @endphp
-          <div class="periksa-resep-row">
-            <div class="periksa-resep-cell">{{ $r->obat->nama_obat ?? $r->id_obat ?? '-' }}</div>
-            <div class="periksa-resep-cell periksa-center">{{ $r->jumlah ?? '-' }}</div>
-            <div class="periksa-resep-cell periksa-center">{{ $r->satuan ?? '-' }}</div>
-            <div class="periksa-resep-cell periksa-right">Rp{{ number_format((int)($r->harga_satuan ?? 0),0,',','.') }}</div>
-            <div class="periksa-resep-cell periksa-right">Rp{{ number_format((int)($r->subtotal ?? 0),0,',','.') }}</div>
+      <div class="obat-header">
+        <div>Nama Obat</div><div>Jumlah</div><div>Satuan</div><div>Harga Satuan</div><div>Subtotal</div><div></div>
+      </div>
+
+      <div id="obatWrap">
+        @php
+          $rows = old('obat_id') ? count(old('obat_id')) : ($detailResep->count() ?: 1);
+        @endphp
+
+        @for($i=0; $i<$rows; $i++)
+          @php
+            $oldObat   = old("obat_id.$i", $detailResep[$i]->id_obat ?? '');
+            $oldJumlah = old("jumlah.$i", $detailResep[$i]->jumlah ?? 1);
+            $oldSatuan = old("satuan.$i", $detailResep[$i]->satuan ?? '');
+            $oldSub    = old("subtotal.$i", $detailResep[$i]->subtotal ?? 0);
+          @endphp
+
+          <div class="obat-row">
+            <select class="obat-select" name="obat_id[]">
+              <option value="">-- pilih obat (boleh kosong) --</option>
+              @foreach($obat as $o)
+                <option value="{{ $o->id_obat }}"
+                  data-harga="{{ (int)($o->harga ?? 0) }}"
+                  data-satuan="{{ $o->satuan ?? '' }}"
+                  @selected($oldObat == $o->id_obat)
+                >
+                  {{ $o->nama_obat }}
+                </option>
+              @endforeach
+            </select>
+
+            <input class="obat-jumlah" name="jumlah[]" value="{{ $oldJumlah }}">
+            <input class="obat-satuan" name="satuan[]" value="{{ $oldSatuan }}">
+
+            <input class="obat-harga" value="">
+            <input type="hidden" class="obat-harga-raw" name="harga_satuan[]" value="0">
+
+            <input class="obat-subtotal" value="">
+            <input type="hidden" class="obat-subtotal-raw" name="subtotal_raw[]" value="{{ (int)$oldSub }}">
+
+            <button type="button" class="obat-hapus">Hapus</button>
           </div>
-        @empty
-          <div class="periksa-resep-empty">Belum ada resep obat</div>
-        @endforelse
+        @endfor
       </div>
 
-      <div class="periksa-total">
-        <div class="periksa-total-label">Total</div>
-        <div class="periksa-total-val">Rp{{ number_format($total,0,',','.') }}</div>
+      <button type="button" id="btnAddObat" class="ap-btn-outline">Tambah Obat/Alkes</button>
+
+      <div class="ap-total-line">
+        <div class="ap-total-label">Total :</div>
+        <div class="ap-total-val" id="totalHarga">Rp0</div>
       </div>
-    </div>
 
-    <div class="periksa-detail-actions">
-      <a href="{{ route('adminpoli.pemeriksaan.edit', $pendaftaran->id_pendaftaran) }}" class="periksa-detail-btn">
-        Edit
-      </a>
-    </div>
-
+      <button type="submit" class="ap-submit">Update</button>
+    </form>
   </div>
-
-  <div class="periksa-detail-foot">
-    Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
-  </div>
-
 </div>
 @endsection
+<script>
+document.querySelectorAll('#obatWrap .obat-row').forEach(row => {
+  const sel = row.querySelector('.obat-select');
+  const opt = sel?.selectedOptions?.[0];
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/adminpoli/pemeriksaan-detail.css') }}">
-@endpush
+  const harga = Number(opt?.dataset?.harga || 0);
+  const satuan = opt?.dataset?.satuan || row.querySelector('.obat-satuan').value || '';
+
+  row.querySelector('.obat-harga-raw').value = harga;
+  row.querySelector('.obat-harga').value = rupiah(harga);
+
+  row.querySelector('.obat-satuan').value = satuan;
+
+  hitungSubtotal(row);
+});
+hitungTotal();
+
+</script>

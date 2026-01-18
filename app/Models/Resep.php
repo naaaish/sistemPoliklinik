@@ -12,5 +12,10 @@ class Resep extends Model
     protected $keyType = 'string';
     protected $guarded = [];
     public $timestamps = false;
+
+    public function detail()
+    {
+        return $this->hasMany(DetailResep::class, 'id_resep', 'id_resep');
+    }
 }
 
