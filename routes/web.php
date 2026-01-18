@@ -233,7 +233,8 @@ Route::prefix('kepegawaian')->middleware('auth')->group(function () {
     Route::get('/laporan/{jenis}', [LaporanController::class, 'detail'])
         ->name('kepegawaian.laporan.detail');
 
-    Route::get('/laporan/{jenis}/download', [LaporanController::class, 'download'])
-        ->name('kepegawaian.laporan.download');
+
+    Route::get('/laporan/{jenis}/pdf', [LaporanController::class, 'downloadPdf'])
+       ->name('laporan.pdf');
 
 });
