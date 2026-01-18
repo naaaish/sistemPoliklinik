@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminPoli\DashboardController as AdminPoliDashboardCont
 use App\Http\Controllers\AdminPoli\PendaftaranController;
 use App\Http\Controllers\AdminPoli\PemeriksaanInputController;
 use App\Http\Controllers\AdminPoli\PemeriksaanController;
+use App\Http\Controllers\AdminPoli\DokterPemeriksaController;
 
 use App\Http\Controllers\Kepegawaian\KDashboardController;
 use App\Http\Controllers\Kepegawaian\PegawaiController;
@@ -121,7 +122,24 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::put('/pemeriksaan/{pendaftaranId}',
         [PemeriksaanController::class, 'update']
     )->name('pemeriksaan.update');
+
+    // Dokter/pemeriksa
+    Route::get('/dokter-pemeriksa', [DokterPemeriksaController::class, 'index'])
+        ->name('dokter_pemeriksa.index');
+
+    Route::post('/dokter-pemeriksa', [DokterPemeriksaController::class, 'store'])
+        ->name('dokter_pemeriksa.store');
+
+    Route::put('/dokter-pemeriksa/{id}', [DokterPemeriksaController::class, 'update'])
+        ->name('dokter_pemeriksa.update');
+
+    Route::delete('/dokter-pemeriksa/{id}', [DokterPemeriksaController::class, 'destroy'])
+        ->name('dokter_pemeriksa.destroy');
+
+    Route::get('/dokter-pemeriksa/{id}/jadwal', [DokterPemeriksaController::class, 'jadwalJson'])
+        ->name('dokter_pemeriksa.jadwal_json');
 });
+
 
 
 /*

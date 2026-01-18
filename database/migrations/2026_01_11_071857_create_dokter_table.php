@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('id_dokter',20)->primary();
             $table->string('nama');
             $table->string('jenis_dokter');
-            $table->string('status')->default('Aktif')->after('jenis_dokter');
+            $table->enum('status', ['Aktif', 'Nonaktif'])->default('Aktif');
             $table->timestamps();
         });
 
