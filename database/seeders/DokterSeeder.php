@@ -18,9 +18,9 @@ class DokterSeeder extends Seeder
             ],
             [
                 'id_dokter' => 'DOK002',
-                'nama' => 'dr. Siti Aisyah',
+                'nama' => 'dr Hening Widiawati',
                 'jenis_dokter' => 'Dokter Umum',
-                'status' => 'Nonaktif',
+                'status' => 'Aktif',
             ],
         ]);
     }

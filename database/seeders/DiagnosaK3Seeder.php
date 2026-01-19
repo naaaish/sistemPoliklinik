@@ -36,6 +36,7 @@ class DiagnosaK3Seeder extends Seeder
                 'id_nb'            => $k['id_nb'],
                 'tipe'             => 'kategori',
                 'parent_id'        => null,
+                'is_active'        => true,
                 // biar tidak kosong, kita isi nama_penyakit sama dengan judul kategorinya
                 'nama_penyakit'    => $k['kategori_penyakit'],
                 'kategori_penyakit'=> $k['kategori_penyakit'],
@@ -99,6 +100,7 @@ class DiagnosaK3Seeder extends Seeder
                 'id_nb'             => $p['id_nb'],
                 'tipe'              => 'penyakit',
                 'parent_id'         => $p['parent_id'],
+                'is_active'         => true,
                 'nama_penyakit'     => $p['nama_penyakit'],
                 'kategori_penyakit' => $p['kategori_penyakit'],
                 'created_at'        => $now,
