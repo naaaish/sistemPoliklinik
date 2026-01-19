@@ -316,27 +316,6 @@ body{ margin:0; }
   padding: 2px;               /* bikin jarak kecil seperti status */
 }
 
-/* .dp-jadwal-btn{
-  width: 100%;
-  height: 38px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-
-  background: #E7F0FF;
-  border: 1px solid #CFE0FF;
-  border-radius: 10px;
-
-  font-weight: 600;
-  font-size: 13px;
-  color: #3B5E8C;
-
-  cursor: pointer;
-  transition: filter .15s ease, transform .15s ease;
-} */
-
 .dp-jadwal-btn:hover{ filter: brightness(0.98); }
 .dp-jadwal-btn:active{ transform: scale(0.98); }
 
@@ -586,4 +565,9 @@ body{ margin:0; }
 .dp-alert.is-error{
   border-color:#FFA3A3;
   color:#B42318;
+}
+
+#dpEditJadwalBtn,
+#dpTambahJadwalBtn {
+  margin-top: 12px;   /* ← atur 10–16px sesuai selera */
 }
