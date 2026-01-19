@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('diagnosa', function (Blueprint $table) {
             $table->string('id_diagnosa',20)->primary();
             $table->text('diagnosa');
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

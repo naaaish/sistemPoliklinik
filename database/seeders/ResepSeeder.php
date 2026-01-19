@@ -16,18 +16,13 @@ class ResepSeeder extends Seeder
             'id_resep' => 'RSP-001',
             'id_pemeriksaan' => 'PMX-001',
             'total_tagihan' => 62500,
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
 
         // Ambil harga obat
         $obat = DB::table('obat')
             ->whereIn('id_obat', ['OBT-001','OBT-002','OBT-004'])
             ->pluck('harga','id_obat');
-
-        // ===============================
-        // DETAIL RESEP (WAJIB subtotal)
-        // ===============================
+            
         DB::table('detail_resep')->insert([
             [
                 'id_resep' => 'RSP-001',

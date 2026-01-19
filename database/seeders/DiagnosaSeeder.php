@@ -36,6 +36,7 @@ class DiagnosaSeeder extends Seeder
 
         // Loop data untuk menambahkan timestamps otomatis
         foreach ($data_diagnosa as &$data) {
+            $data['is_active'] = true;
             $data['created_at'] = $now;
             $data['updated_at'] = $now;
         }

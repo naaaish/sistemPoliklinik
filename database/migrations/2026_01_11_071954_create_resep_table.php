@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('id_pemeriksaan',20);
 
             $table->foreign('id_pemeriksaan')->references('id_pemeriksaan')->on('pemeriksaan');
-            $table->timestamps();
         });
 
     }
