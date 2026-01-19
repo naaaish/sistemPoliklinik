@@ -233,3 +233,12 @@ body{ margin:0; }
   font-size: 13px;
   font-weight: 600;
 }
+
+.hasil-list ul{
+  margin: 0;
+  padding-left: 18px;
+}
+
+.hasil-list li{
+  line-height: 1.6;
+}

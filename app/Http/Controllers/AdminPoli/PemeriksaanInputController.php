@@ -135,11 +135,37 @@ class PemeriksaanInputController extends Controller
                 'suhu'   => $validated['suhu'] ?? null,
                 'berat'  => $validated['berat_badan'] ?? null,
                 'tinggi' => $validated['tinggi_badan'] ?? null,
-
-                'id_diagnosa' => implode(',', $penyakitIds),
-                'id_nb'       => implode(',', $k3Ids),
-                'id_saran'    => implode(',', $saranIds),
             ]);
+            
+            // penyakit
+            if (count($penyakitIds) > 0) {
+                $rows = array_map(fn($id) => [
+                    'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
+                    'id_diagnosa' => $id,
+                ], $penyakitIds);
+
+                DB::table('detail_pemeriksaan_penyakit')->insert($rows);
+            }
+
+            // diagnosa k3
+            if (count($k3Ids) > 0) {
+                $rows = array_map(fn($id) => [
+                    'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
+                    'id_nb' => $id,
+                ], $k3Ids);
+
+                DB::table('detail_pemeriksaan_diagnosa_k3')->insert($rows);
+            }
+
+            // saran
+            if (count($saranIds) > 0) {
+                $rows = array_map(fn($id) => [
+                    'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
+                    'id_saran' => $id,
+                ], $saranIds);
+
+                DB::table('detail_pemeriksaan_saran')->insert($rows);
+            }
 
             // ========= SIMPAN RESEP + DETAIL_RESEP =========
             $obatIds = $validated['obat_id'] ?? [];
