@@ -1,0 +1,417 @@
+/* ===================================
+   DETAIL PEMERIKSAAN PASIEN
+   =================================== */
+
+:root {
+    --blue-main: #316BA1;
+    --blue-light: #F1F8FF;
+    --text-dark: #1f2933;
+    --text-light: #52606d;
+}
+
+.detail-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 30px 60px;
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 30px;
+    color: var(--blue-main);
+}
+
+.detail-header svg {
+    width: 42px;
+    height: 42px;
+}
+
+.detail-header h1 {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--blue-main);
+}
+
+/* Main Card */
+.detail-card {
+    background: var(--blue-light);
+    border: 2px solid rgba(6, 134, 154, 0.43);
+    border-radius: 12px;
+    padding: 40px;
+}
+
+/* Section Title */
+.section-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--blue-main);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid rgba(49, 107, 161, 0.2);
+}
+
+/* Data Pendaftaran */
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 40px;
+    margin-bottom: 40px;
+}
+
+.data-item {
+    display: flex;
+    gap: 12px;
+}
+
+.data-label {
+    min-width: 180px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(67, 67, 67, 0.7);
+    letter-spacing: 0.5px;
+}
+
+.data-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: black;
+    letter-spacing: 0.3px;
+}
+
+/* Pemeriksaan Kesehatan Cards */
+.health-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.metric-card {
+    background: var(--blue-light);
+    border-radius: 10px;
+    padding: 20px 18px;
+    position: relative;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 10px 10px 0 0;
+}
+
+/* Metric Colors */
+.metric-red::before { background: #FF8686; }
+.metric-pink::before { background: #FF86EC; }
+.metric-yellow::before { background: #FFFB86; }
+.metric-purple::before { background: #F885FE; }
+.metric-orange::before { background: #FFAE86; }
+.metric-blue::before { background: #86CEFF; }
+.metric-green::before { background: #86FF92; }
+
+.metric-label {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.metric-red .metric-label { color: #4E0D0D; }
+.metric-pink .metric-label { color: #4E0D40; }
+.metric-yellow .metric-label { color: #878213; }
+.metric-purple .metric-label { color: #591387; }
+.metric-orange .metric-label { color: #874513; }
+.metric-blue .metric-label { color: #135F87; }
+.metric-green .metric-label { color: #138738; }
+
+.metric-value {
+    font-size: 20px;
+    font-weight: 500;
+    color: #121212;
+}
+
+/* Diagnosa & Saran */
+.info-box {
+    background: #FFFDFD;
+    border: 2px solid rgba(49, 107, 161, 0.4);
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.info-header {
+    background: var(--blue-main);
+    padding: 12px 20px;
+    border-radius: 6px 6px 0 0;
+    border: 2px solid rgba(49, 107, 161, 0.4);
+    border-bottom: none;
+}
+
+.info-header h3 {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--blue-light);
+}
+
+.info-content {
+    padding: 18px 20px;
+}
+
+.info-content p {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--blue-main);
+    line-height: 1.5;
+}
+
+/* Resep Table */
+.resep-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.resep-table thead {
+    background: var(--blue-light);
+}
+
+.resep-table th {
+    padding: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #151054;
+    text-align: left;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.resep-table tbody tr {
+    border-bottom: 1px solid #F3F3F3;
+}
+
+.resep-table tbody tr:last-child {
+    background: rgba(49, 107, 161, 0.51);
+}
+
+.resep-table td {
+    padding: 14px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: black;
+    letter-spacing: 0.9px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .health-metrics {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .detail-container {
+        padding: 0 20px 40px;
+    }
+    
+    .detail-card {
+        padding: 24px;
+    }
+    
+    .data-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .health-metrics {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+    
+    .detail-header h1 {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 480px) {
+    .health-metrics {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================= */
+/* DETAIL PEMERIKSAAN */
+/* ============================= */
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.detail-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #316BA1;
+}
+
+/* ============================= */
+/* DATA GRID */
+/* ============================= */
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 14px 40px;
+    margin-bottom: 30px;
+}
+
+.data-item span:first-child {
+    color: #6c757d;
+}
+
+.data-item span:last-child {
+    font-weight: 600;
+}
+
+/* ============================= */
+/* HEALTH METRIC */
+/* ============================= */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 14px;
+    margin-bottom: 30px;
+}
+
+.metric {
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    font-weight: 600;
+    background: #f8f9fa;
+}
+
+/* ============================= */
+/* INFO BOX */
+/* ============================= */
+.info-box {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.info-box h3 {
+    background: #316BA1;
+    color: #fff;
+    padding: 10px 14px;
+    font-size: 14px;
+}
+
+.info-box p {
+    padding: 14px;
+}
+
+/* ============================= */
+/* RESEP TABLE */
+/* ============================= */
+.resep-total {
+    font-weight: 700;
+    text-align: right;
+}
+
+.detail-page{
+    max-width:1100px;
+    margin:auto;
+}
+
+.detail-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:20px;
+}
+
+.detail-main-card{
+    background:white;
+    border-radius:18px;
+    padding:28px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+
+/* DATA GRID */
+.data-grid-detail{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px 40px;
+    margin-bottom:25px;
+}
+
+.data-row{
+    display:flex;
+    justify-content:space-between;
+}
+
+.data-label-detail{
+    color:#6B7DA3;
+    font-weight:500;
+}
+
+/* METRIC */
+.health-metrics-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-bottom:20px;
+}
+
+.metric-card-detail{
+    background:#F9FBFF;
+    border-radius:12px;
+    padding:12px;
+    text-align:center;
+    border-left:4px solid #316BA1;
+}
+
+/* DIAGNOSA & SARAN */
+.info-box-detail{
+    margin-bottom:16px;
+}
+
+.info-box-header{
+    background:#316BA1;
+    color:white;
+    padding:10px 14px;
+    border-radius:8px 8px 0 0;
+}
+
+.info-box-content{
+    border:1px solid #DCE7F5;
+    padding:14px;
+    border-radius:0 0 8px 8px;
+}
+
+/* RESEP */
+.resep-table-detail{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.resep-table-detail th{
+    background:#EAF3FB;
+    padding:10px;
+}
+
+.resep-table-detail td{
+    padding:10px;
+    border-bottom:1px solid #eee;
+}
+
+.total-row{
+    background:#F4F8FC;
+}

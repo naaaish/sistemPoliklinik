@@ -1,10 +1,14 @@
 @extends('layouts.pasien')
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title') Dashboard</title>
+    <link rel="stylesheet" href="{{ asset('css/dashboard-pasien.css') }}">
 
-@section('title','Dashboard Pasien')
-
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/dashboard-pasien.css') }}">
-@endpush
+    @stack('styles') 
+</head>
 
 @section('content')
 
@@ -79,22 +83,25 @@
 
         <div class="doctor-grid">
 
-            @forelse($jadwalDokter as $jadwal)
-                <div class="doctor-card-modern">
+        @foreach($jadwalDokter as $idDokter => $jadwals)
+        @php
+            $dokter = $jadwals->first()->dokter;
+        @endphp
 
-                    {{-- FOTO --}}
-                    <div class="doctor-photo">
-                        <img
-                            src="https://ui-avatars.com/api/?name={{ urlencode($jadwal->dokter->nama ?? 'Dokter') }}&background=EAF4FF&color=1E3A8A&size=256"
-                            alt="{{ $jadwal->dokter->nama }}"
-                        >
-                    </div>
+        <div class="doctor-card-modern">
 
-                    {{-- INFO --}}
-                    <div class="doctor-body">
-                        <h4>{{ $jadwal->dokter->nama ?? '-' }}</h4>
-                        <span>{{ $jadwal->dokter->jenis_dokter ?? '-' }}</span>
+            <div class="doctor-photo">
+                <div class="initials">
+                    {{ collect(explode(' ', $dokter->nama))->map(fn($n) => strtoupper($n[0]))->take(2)->implode('') }}
+                </div>
+            </div>
 
+            <div class="doctor-body">
+                <h4>{{ $dokter->nama }}</h4>
+                <span>{{ $dokter->jenis_dokter }}</span>
+
+                <div class="doctor-schedule-list">
+                    @foreach($jadwals as $jadwal)
                         <div class="doctor-schedule">
                             <p>{{ $jadwal->hari }}</p>
                             <strong>
@@ -102,14 +109,44 @@
                                 {{ substr($jadwal->jam_selesai,0,5) }}
                             </strong>
                         </div>
-                    </div>
-
+                    @endforeach
                 </div>
-            @empty
-                <p class="empty">Belum ada jadwal dokter</p>
-            @endforelse
+            </div>
 
         </div>
+        @endforeach
+
+        </div>
+
+
+    </div>
+</section>
+
+{{-- ================= ARTIKEL KESEHATAN ================= --}}
+<section class="section alt">
+    <div class="container">
+
+        <div class="section-header-between">
+            <h2 class="section-title">Artikel Kesehatan</h2>
+            <a href="{{ route('artikel.index') }}" class="lihat-semua">
+                Lihat Semua →
+            </a>
+        </div>
+
+        <div class="artikel-home-grid">
+            @foreach($articles as $article)
+                <div class="artikel-home-card">
+                    <div class="artikel-home-image">
+                        <img src="{{ asset($article->cover_path) }}">
+                    </div>
+                    <div class="artikel-home-content">
+                        <h4>{{ $article->judul_artikel }}</h4>
+                        <span>{{ \Carbon\Carbon::parse($article->tanggal)->translatedFormat('d F Y') }}</span>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
     </div>
 </section>
 

@@ -7,14 +7,14 @@ use App\Models\Artikel;
 
 class HomeController extends Controller
 {
-    public function index()
-    {
-        $jadwalDokter = JadwalDokter::with('dokter')
+    public function index(){
+        $jadwalDokter = \App\Models\JadwalDokter::with('dokter')
+            ->whereHas('dokter', fn ($q) => $q->where('status', 'Aktif'))
             ->orderByRaw("
-                FIELD(hari,'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu')
+                FIELD(hari, 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu')
             ")
-            ->orderBy('jam_mulai')
-            ->get();
+            ->get()
+            ->groupBy('id_dokter');
 
         $articles = Artikel::latest()->take(4)->get();
 

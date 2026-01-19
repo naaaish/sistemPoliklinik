@@ -1,0 +1,17 @@
+.about-section {
+    background: white;
+    border-radius: 18px;
+    padding: 30px;
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+.about-card {
+    background: #f9f9f9;
+    border-radius: 12px;
+    padding: 20px;
+}

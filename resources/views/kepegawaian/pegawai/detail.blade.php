@@ -1,28 +1,20 @@
 @extends('layouts.kepegawaian')
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') Rincian Data Pegawai</title>
-    <link rel="stylesheet" href="{{ asset('css/kepegawaian.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/detail-pegawai.css') }}">
-    @stack('styles') 
-</head>
+
+@section('title','Rincian Data Pegawai')
 
 @section('content')
+
 
 <div class="detail-pegawai-container">
     
     {{-- HEADER --}}
     <div class="detail-pegawai-header">
-        <svg xmlns="http://www.w3.org/2000/svg" width="38" height="37" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
+        <a href="{{ url()->previous() }}" class="btn-back">
+            <img src="{{ asset('images/back.png') }}" alt="Back">
+        </a>
         <h1>Rincian Data Pegawai</h1>
     </div>
+
 
     {{-- PROFIL --}}
     <div class="profil-card">

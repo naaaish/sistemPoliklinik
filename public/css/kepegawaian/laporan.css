@@ -64,3 +64,35 @@
     gap:12px;
     margin-bottom:20px;
 }
+.laporan-card {
+    background:#fff;
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+
+.laporan-table th {
+    background:#eaf3fb;
+}
+
+.laporan-card{
+    background:white;
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+    margin-bottom:24px;
+}
+
+.laporan-header{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:14px;
+}
+
+.btn-download{
+    background:#316BA1;
+    color:white;
+    padding:10px 18px;
+    border-radius:8px;
+    text-decoration:none;
+}
