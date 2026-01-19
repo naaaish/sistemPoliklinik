@@ -22,13 +22,6 @@ class DokterSeeder extends Seeder
                 'jenis_dokter' => 'Dokter Umum',
                 'status' => 'Nonaktif',
             ],
-            [
-                'id_dokter' => 'DOK003',
-                'nama' => 'dr. Budi Santoso',
-                'jenis_dokter' => 'Dokter Perusahaan',
-                'status' => 'Aktif',
-            ],
-
         ]);
     }
 }
