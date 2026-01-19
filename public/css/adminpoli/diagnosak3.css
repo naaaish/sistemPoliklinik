@@ -518,3 +518,65 @@ body{ margin:0; }
   align-items:center;
   white-space:nowrap;
 }
+
+/* =========================
+   PREVIEW EXPORT (garis per baris)
+========================= */
+.k3-preview-table{
+  width: 100%;
+  border-top: 1px solid #E6EEF9;
+}
+
+.k3-preview-head{
+  display: grid;
+  grid-template-columns: 120px 1fr 1.2fr;
+  gap: 12px;
+  padding: 14px 14px;
+  font-weight: 800;
+  color: #6F86A6;
+  border-bottom: 1px solid #E6EEF9;
+}
+
+.k3-preview-row{
+  display: grid;
+  grid-template-columns: 120px 1fr 1.2fr;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid #EEF4FF;
+  align-items: start;
+}
+
+.k3-preview-row:hover{
+  background: #F8FBFF;
+}
+
+.k3-preview-cat{
+  background: #F3F8FF;
+  font-weight: 800;
+}
+
+.k3-col-id{
+  text-align: center;
+  color: #2E3A4A;
+}
+
+.k3-col-kat{
+  color: #2E3A4A;
+}
+
+.k3-col-nama{
+  color: #2E3A4A;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.k3-muted{
+  color: #7B8DA8;
+}
+
+.k3-preview-empty{
+  padding: 14px;
+  text-align: center;
+  color: #7B8DA8;
+  font-weight: 700;
+}

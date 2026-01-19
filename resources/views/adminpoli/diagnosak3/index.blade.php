@@ -251,18 +251,23 @@
 
 </div>
 @endsection
-
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 
 <script>
-function openModal(id){ document.getElementById(id).style.display='flex'; }
-function closeModal(id){ document.getElementById(id).style.display='none'; }
+function openModal(id){
+  var el = document.getElementById(id);
+  if (el) el.style.display = 'flex';
+}
+function closeModal(id){
+  var el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
 
-document.addEventListener('click', (e)=>{
-  const overlays = ['modalTambahKategori','modalEditKategori','modalTambahPenyakit','modalEditPenyakit'];
-  overlays.forEach(id=>{
-    const el = document.getElementById(id);
+document.addEventListener('click', function(e){
+  var overlays = ['modalTambahKategori','modalEditKategori','modalTambahPenyakit','modalEditPenyakit'];
+  overlays.forEach(function(id){
+    var el = document.getElementById(id);
     if (!el) return;
     if (e.target === el) closeModal(id);
   });
@@ -270,97 +275,85 @@ document.addEventListener('click', (e)=>{
 
 function openTambahKategori(){ openModal('modalTambahKategori'); }
 
-// function openEditKategori(id, nama){
-//   document.getElementById('editNamaKategori').value = nama;
-//   document.getElementById('formEditKategori').action =
-//     "{{ url('adminpoli/diagnosak3/kategori') }}/" + encodeURIComponent(id);
-//   openModal('modalEditKategori');
-// }
-
 function openTambahPenyakit(catId){
-  const sel = document.getElementById('tambahParent');
-  if (catId) sel.value = catId;
+  var sel = document.getElementById('tambahParent');
+  if (sel && catId) sel.value = catId;
   openModal('modalTambahPenyakit');
 }
 
-// function openEditPenyakit(id, parentId, nama){
-//   document.getElementById('editParent').value = parentId;
-//   document.getElementById('editNamaPenyakit').value = nama;
-//   document.getElementById('formEditPenyakit').action =
-//     "{{ url('adminpoli/diagnosak3/penyakit') }}/" + encodeURIComponent(id);
-//   openModal('modalEditPenyakit');
-// }
+/**
+ * === Template route update (ANTI mismatch route) ===
+ * Route kamu: /diagnosak3/kategori/{id_nb} dan /diagnosak3/penyakit/{id_nb}
+ * Jadi action harus bener-bener sesuai.
+ *
+ * Kita bikin URL dummy pakai id_nb = '__ID__' lalu replace.
+ */
+var KATEGORI_UPDATE_TPL = "{{ route('adminpoli.diagnosak3.kategori.update', ['id_nb' => '__ID__']) }}";
+var PENYAKIT_UPDATE_TPL = "{{ route('adminpoli.diagnosak3.penyakit.update', ['id_nb' => '__ID__']) }}";
+
+function setFormAction(formId, tpl, id){
+  var form = document.getElementById(formId);
+  if (!form) return;
+  // encode karena id bisa ada titik (contoh 1.2)
+  form.action = tpl.replace('__ID__', encodeURIComponent(id));
+}
+
+function openEditKategori(id, nama){
+  var input = document.getElementById('editNamaKategori');
+  if (input) input.value = nama || '';
+  setFormAction('formEditKategori', KATEGORI_UPDATE_TPL, id);
+  openModal('modalEditKategori');
+}
+
+function openEditPenyakit(id, parentId, nama){
+  var parentEl = document.getElementById('editParent');
+  var namaEl = document.getElementById('editNamaPenyakit');
+  if (parentEl) parentEl.value = parentId || '';
+  if (namaEl) namaEl.value = nama || '';
+  setFormAction('formEditPenyakit', PENYAKIT_UPDATE_TPL, id);
+  openModal('modalEditPenyakit');
+}
 
 function toggleChildren(catId){
-  const box = document.getElementById('children-'+catId);
-  const btn = box && box.previousElementSibling
-    ? box.previousElementSibling.querySelector('.k3-toggle')
-    : null;
+  var box = document.getElementById('children-'+catId);
+  var btn = null;
 
+  if (box && box.previousElementSibling){
+    btn = box.previousElementSibling.querySelector('.k3-toggle');
+  }
   if (!box) return;
 
-  const hidden = box.style.display === 'none';
+  var hidden = (box.style.display === 'none');
   box.style.display = hidden ? 'block' : 'none';
   if (btn) btn.textContent = hidden ? '-' : '+';
 }
 
-// ===== isi modal EDIT KATEGORI =====
-document.querySelectorAll('.js-edit-kategori').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const id = btn.dataset.id;
-    const nama = btn.dataset.nama || '';
-
-    document.getElementById('editNamaKategori').value = nama;
-    document.getElementById('formEditKategori').action =
-      "{{ url('adminpoli/diagnosak3/kategori') }}/" + encodeURIComponent(id);
-
-    openModal('modalEditKategori');
-  });
-});
-
-// ===== isi modal EDIT PENYAKIT =====
-document.querySelectorAll('.js-edit-penyakit').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const id = btn.dataset.id;
-    const parent = btn.dataset.parent;
-    const nama = btn.dataset.nama || '';
-
-    document.getElementById('editParent').value = parent;
-    document.getElementById('editNamaPenyakit').value = nama;
-    document.getElementById('formEditPenyakit').action =
-      "{{ url('adminpoli/diagnosak3/penyakit') }}/" + encodeURIComponent(id);
-
-    openModal('modalEditPenyakit');
-  });
-});
-
-
 // ===== REORDER (tanpa JSON) =====
 async function saveOrder() {
-  const categories = Array.from(document.querySelectorAll('.k3-cat-row'))
-    .map(el => el.getAttribute('data-cat-id'))
+  var categories = Array.from(document.querySelectorAll('.k3-cat-row'))
+    .map(function(el){ return el.getAttribute('data-cat-id'); })
     .filter(Boolean);
 
-  const childrenMap = {};
-  document.querySelectorAll('.k3-children').forEach(box => {
-    const parent = box.getAttribute('data-parent');
-    const ids = Array.from(box.querySelectorAll('.k3-child-row'))
-      .map(el => el.getAttribute('data-child-id'))
+  var childrenMap = {};
+  document.querySelectorAll('.k3-children').forEach(function(box){
+    var parent = box.getAttribute('data-parent');
+    var ids = Array.from(box.querySelectorAll('.k3-child-row'))
+      .map(function(el){ return el.getAttribute('data-child-id'); })
       .filter(Boolean);
     childrenMap[parent] = ids;
   });
 
-  const fd = new FormData();
-  categories.forEach(id => fd.append('categories[]', id));
+  var fd = new FormData();
+  categories.forEach(function(id){ fd.append('categories[]', id); });
 
-  Object.keys(childrenMap).forEach(parentId => {
-    childrenMap[parentId].forEach(childId => {
+  Object.keys(childrenMap).forEach(function(parentId){
+    childrenMap[parentId].forEach(function(childId){
       fd.append('children[' + parentId + '][]', childId);
     });
   });
 
   try {
-    const res = await fetch("{{ route('adminpoli.diagnosak3.reorder') }}", {
+    var res = await fetch("{{ route('adminpoli.diagnosak3.reorder') }}", {
       method: 'POST',
       headers: {
         'X-CSRF-TOKEN': "{{ csrf_token() }}",
@@ -376,54 +369,75 @@ async function saveOrder() {
       title:'Urutan berhasil disimpan',
       timer: 1200,
       showConfirmButton:false
-    }).then(()=> location.reload());
+    }).then(function(){ location.reload(); });
 
   } catch (err) {
-    Swal.fire({ icon:'error', title:'Urutan gagal disimpan', text: err.message || '' });
+    Swal.fire({
+      icon:'error',
+      title:'Urutan gagal disimpan',
+      text: (err && err.message) ? err.message : ''
+    });
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  // ===== Upload helper =====
-  const input = document.getElementById('k3FileInput');
-  const nameEl = document.getElementById('k3FileName');
-  const labelEl = document.getElementById('k3FileLabel');
-  const btn = document.getElementById('k3UploadBtn');
+document.addEventListener('DOMContentLoaded', function(){
 
-  const MAX_BYTES = 5 * 1024 * 1024;
-  const allowedExt = ['csv','xlsx','xls'];
+  // ===== Bind tombol edit (kategori & penyakit) =====
+  document.querySelectorAll('.js-edit-kategori').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      openEditKategori(btn.dataset.id, btn.dataset.nama || '');
+    });
+  });
+
+  document.querySelectorAll('.js-edit-penyakit').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      openEditPenyakit(btn.dataset.id, btn.dataset.parent, btn.dataset.nama || '');
+    });
+  });
+
+  // ===== Upload helper =====
+  var input = document.getElementById('k3FileInput');
+  var nameEl = document.getElementById('k3FileName');
+  var labelEl = document.getElementById('k3FileLabel');
+  var btnUp = document.getElementById('k3UploadBtn');
+
+  var MAX_BYTES = 5 * 1024 * 1024;
+  var allowedExt = ['csv','xlsx','xls'];
 
   if (input){
-    input.addEventListener('change', ()=>{
-      const file = input.files && input.files[0];
+    input.addEventListener('change', function(){
+      var file = input.files && input.files[0];
       if (!file){
-        nameEl.textContent = 'Belum ada file dipilih';
-        labelEl.textContent = 'Pilih File';
-        btn.disabled = true;
+        if (nameEl) nameEl.textContent = 'Belum ada file dipilih';
+        if (labelEl) labelEl.textContent = 'Pilih File';
+        if (btnUp) btnUp.disabled = true;
         return;
       }
-      const ext = (file.name.split('.').pop() || '').toLowerCase();
-      if (!allowedExt.includes(ext)){
+
+      var ext = (file.name.split('.').pop() || '').toLowerCase();
+      if (allowedExt.indexOf(ext) === -1){
         Swal.fire({icon:'error', title:'Format file harus CSV / XLSX / XLS'});
         input.value = '';
-        btn.disabled = true;
+        if (btnUp) btnUp.disabled = true;
         return;
       }
+
       if (file.size > MAX_BYTES){
         Swal.fire({icon:'error', title:'Ukuran file melebihi 5MB'});
         input.value = '';
-        btn.disabled = true;
+        if (btnUp) btnUp.disabled = true;
         return;
       }
-      labelEl.textContent = 'File Dipilih';
-      nameEl.textContent = file.name;
-      btn.disabled = false;
+
+      if (labelEl) labelEl.textContent = 'File Dipilih';
+      if (nameEl) nameEl.textContent = file.name;
+      if (btnUp) btnUp.disabled = false;
     });
   }
 
   // ===== SweetAlert confirm delete =====
-  document.querySelectorAll('.js-k3-delete').forEach(form=>{
-    form.addEventListener('submit', (e)=>{
+  document.querySelectorAll('.js-k3-delete').forEach(function(form){
+    form.addEventListener('submit', function(e){
       e.preventDefault();
       Swal.fire({
         icon: 'warning',
@@ -431,15 +445,15 @@ document.addEventListener('DOMContentLoaded', () => {
         text: 'Data yang dihapus tidak bisa dikembalikan.',
         showCancelButton: true,
         confirmButtonText: 'Ya, hapus',
-        cancelButtonText: 'Batal',
-      }).then((r)=>{
+        cancelButtonText: 'Batal'
+      }).then(function(r){
         if (r.isConfirmed) form.submit();
       });
     });
   });
 
   // ===== Sortable kategori =====
-  const catList = document.getElementById('k3CategoryList');
+  var catList = document.getElementById('k3CategoryList');
   if (catList){
     new Sortable(catList, {
       handle: '.k3-handle',
@@ -450,8 +464,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ===== Sortable penyakit per kategori =====
-  document.querySelectorAll('.k3-children').forEach(box=>{
-    const list = box.querySelector('.k3-children-list');
+  document.querySelectorAll('.k3-children').forEach(function(box){
+    var list = box.querySelector('.k3-children-list');
     if (!list) return;
     new Sortable(list, {
       handle: '.k3-child-handle',
@@ -460,36 +474,36 @@ document.addEventListener('DOMContentLoaded', () => {
       onEnd: saveOrder
     });
   });
+
+});
+
+
+document.addEventListener('DOMContentLoaded', function(){
+  function toast(icon, msg){
+    if (!msg) return;
+
+    // pakai toast samping seperti Obat
+    if (window.AdminPoliToast) {
+      AdminPoliToast.fire({ icon: icon, title: msg });
+      return;
+    }
+
+    // fallback
+    Swal.fire({ icon: icon, title: msg, timer: 1600, showConfirmButton: false });
+  }
+
+  @if(session('success'))
+    toast('success', "{{ addslashes(session('success')) }}");
+  @endif
+
+  @if(session('error'))
+    toast('error', "{{ addslashes(session('error')) }}");
+  @endif
+
+  @if($errors->any())
+    toast('error', "{{ addslashes($errors->first()) }}");
+  @endif
 });
 </script>
-
-@if(session('success'))
-<script>
-Swal.fire({
-  icon: 'success',
-  title: "{{ addslashes(session('success')) }}",
-  timer: 1600,
-  showConfirmButton: false
-});
-</script>
-@endif
-
-@if(session('error'))
-<script>
-Swal.fire({
-  icon: 'error',
-  title: "{{ addslashes(session('error')) }}"
-});
-</script>
-@endif
-
-@if($errors->any())
-<script>
-  Swal.fire({
-    icon: 'error',
-    title: "{{ addslashes($errors->first()) }}"
-  });
-</script>
-@endif
 
 @endpush
