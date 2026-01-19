@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="saran-page">
-
     {{-- Header: Back + Title + Tambah --}}
     <div class="saran-topbar">
         <div class="saran-left">
@@ -158,7 +157,7 @@
 
                     <div class="modal-group">
                         <label>Diagnosa</label>
-                        <select name="id_diagnosa" class="saran-modal-select" required>
+                        <select name="id_diagnosa" class="modal-select js-diagnosa-select" required>
                             <option value="" disabled selected>Pilih Diagnosa</option>
                             @foreach($diagnosaList as $d)
                                 <option value="{{ $d->id_diagnosa }}">{{ $d->diagnosa }}</option>
@@ -168,7 +167,7 @@
 
                     <div class="modal-group">
                         <label>Saran</label>
-                        <textarea name="saran" class="saran-modal-textarea" rows="4" required></textarea>
+                        <textarea name="saran" class="modal-textarea" rows="4" required></textarea>
                     </div>
 
                     <button type="submit" class="modal-btn">Simpan</button>
@@ -187,7 +186,8 @@
 
                     <div class="modal-group">
                         <label>Diagnosa</label>
-                        <select name="id_diagnosa" class="saran-modal-select" id="editDiagnosa" required>
+                        <select name="id_diagnosa" class="modal-select js-diagnosa-select" id="editDiagnosa" required>
+
                             <option value="" disabled>Pilih Diagnosa</option>
                             @foreach($diagnosaList as $d)
                                 <option value="{{ $d->id_diagnosa }}">{{ $d->diagnosa }}</option>
@@ -197,7 +197,7 @@
 
                     <div class="modal-group">
                         <label>Saran</label>
-                        <textarea name="saran" class="saran-modal-textarea" id="editSaran" rows="4" required></textarea>
+                        <textarea name="saran" class="modal-textarea" id="editSaran" rows="4" required></textarea>
                     </div>
 
                     <button type="submit" class="modal-btn">Simpan</button>
@@ -213,13 +213,35 @@
 </div>
 @endsection
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/adminpoli/saran.css') }}">
-<link rel="stylesheet" href="{{ asset('css/adminpoli/modal.css') }}">
-@endpush
-
 @push('scripts')
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+  function initSelect2(modalId){
+    if (typeof $ === 'undefined' || !$.fn.select2) return;
+
+    const $modal = $(modalId);
+    const $select = $modal.find('.js-diagnosa-select');
+
+    // prevent double init
+    $select.each(function(){
+      if ($(this).hasClass("select2-hidden-accessible")) return;
+
+      $(this).select2({
+        dropdownParent: $modal,
+        width: '100%',
+        placeholder: 'Pilih Diagnosa',
+        allowClear: true
+      });
+    });
+  }
+
+  // init untuk kedua modal (supaya search langsung aktif)
+  initSelect2('#modalTambah');
+  initSelect2('#modalEdit');
+
+  // kalau modal dibuka setelah init, tetap aman.
+});
+
 // Upload file (copy behavior obat)
 document.addEventListener('DOMContentLoaded', () => {
   const input  = document.getElementById('saranFileInput');
