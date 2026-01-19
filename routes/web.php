@@ -27,8 +27,10 @@ use App\Http\Controllers\Kepegawaian\DetailRiwayatController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/tentang', [HomeController::class, 'tentang'])->name('tentang');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/artikel', [HomeController::class, 'artikelIndex'])->name('artikel.index');
+Route::get('/tentang', [HomeController::class, 'tentang'])->name('tentang');
+
 
 /*
 |--------------------------------------------------------------------------

@@ -243,3 +243,84 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ============================= */
+/* DETAIL PEMERIKSAAN */
+/* ============================= */
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.detail-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #316BA1;
+}
+
+/* ============================= */
+/* DATA GRID */
+/* ============================= */
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 14px 40px;
+    margin-bottom: 30px;
+}
+
+.data-item span:first-child {
+    color: #6c757d;
+}
+
+.data-item span:last-child {
+    font-weight: 600;
+}
+
+/* ============================= */
+/* HEALTH METRIC */
+/* ============================= */
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 14px;
+    margin-bottom: 30px;
+}
+
+.metric {
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    font-weight: 600;
+    background: #f8f9fa;
+}
+
+/* ============================= */
+/* INFO BOX */
+/* ============================= */
+.info-box {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.info-box h3 {
+    background: #316BA1;
+    color: #fff;
+    padding: 10px 14px;
+    font-size: 14px;
+}
+
+.info-box p {
+    padding: 14px;
+}
+
+/* ============================= */
+/* RESEP TABLE */
+/* ============================= */
+.resep-total {
+    font-weight: 700;
+    text-align: right;
+}

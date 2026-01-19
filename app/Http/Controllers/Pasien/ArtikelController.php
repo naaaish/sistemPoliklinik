@@ -12,11 +12,13 @@ class ArtikelController extends Controller
      */
     public function index()
     {
-        $artikel = DB::table('artikel')
+        $articles = DB::table('artikel')
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        return view('pasien.artikel', compact('artikel'));
+        return view('pasien.artikel', compact('articles'));
+
+ 
     }
 
     /**

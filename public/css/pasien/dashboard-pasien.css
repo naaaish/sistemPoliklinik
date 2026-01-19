@@ -1,0 +1,307 @@
+:root {
+    --primary: #316BA1;
+    --dark: #1a3a52;
+    --bg: #eef5fb;
+    --text: #1f2d3d;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ================= CONTAINER GLOBAL ================= */
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* ================= HERO ================= */
+.hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 85vh;
+    background: linear-gradient(135deg, var(--dark), var(--primary));
+    color: white;
+}
+
+.hero-content {
+    padding: 90px 60px;
+}
+
+.hero-badge {
+    background: rgba(255,255,255,.15);
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.hero h1 {
+    font-size: 42px;
+    line-height: 1.25;
+    margin-bottom: 20px;
+}
+
+.hero h1 span {
+    color: #b4f2f4;
+}
+
+.hero p {
+    max-width: 480px;
+    opacity: .9;
+}
+
+.hero-actions {
+    margin-top: 32px;
+    display: flex;
+    gap: 14px;
+}
+
+.btn-primary {
+    background: white;
+    color: var(--primary);
+    padding: 14px 30px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-outline {
+    border: 2px solid rgba(255,255,255,.5);
+    color: white;
+    padding: 14px 30px;
+    border-radius: 10px;
+    text-decoration: none;
+}
+
+.hero-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-image img {
+    max-width: 90%;
+}
+
+/* ================= SERVICES ================= */
+.services {
+    margin-top: -70px;
+    padding: 0 60px 80px;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.service-card {
+    background: #1f4561;
+    color: white;
+    padding: 32px 20px;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,.15);
+}
+
+.service-card .icon {
+    font-size: 34px;
+    margin-bottom: 12px;
+}
+
+/* ================= SECTION ================= */
+.section {
+    padding: 90px 60px;
+    background: white;
+}
+
+.section.alt {
+    background: #f8fafc;
+}
+
+.section-title {
+    font-size: 28px;
+    margin-bottom: 40px;
+}
+
+/* ================= JADWAL DOKTER ================= */
+.doctor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 26px;
+}
+
+.doctor-card-modern {
+    display: flex;
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+    transition: .3s;
+}
+
+.doctor-card-modern:hover {
+    transform: translateY(-6px);
+}
+
+.doctor-photo {
+    width: 110px;
+    background: #eaf4ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.doctor-photo .initials {
+    font-size: 26px;
+    font-weight: 600;
+    color: #1e3a8a;
+}
+
+.doctor-body {
+    padding: 20px;
+    flex: 1;
+}
+
+.doctor-body h4 {
+    margin: 0;
+    font-size: 17px;
+}
+
+.doctor-body span {
+    font-size: 13px;
+    color: #2563eb;
+    font-weight: 500;
+}
+
+.doctor-schedule-list {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.doctor-schedule {
+    border-left: 3px solid #3b82f6;
+    padding-left: 12px;
+}
+
+.doctor-schedule p {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.doctor-schedule strong {
+    font-size: 14px;
+}
+
+/* ================= ARTIKEL ================= */
+.section-header-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 36px;
+}
+
+.lihat-semua {
+    font-size: 14px;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.artikel-home-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 28px;
+}
+
+.artikel-home-card {
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 28px rgba(0,0,0,.1);
+    transition: .3s;
+}
+
+.artikel-home-card:hover {
+    transform: translateY(-6px);
+}
+
+.artikel-home-image {
+    height: 160px;
+    background: #eaf2f8;
+}
+
+.artikel-home-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.artikel-home-content {
+    padding: 16px;
+}
+
+.artikel-home-content h4 {
+    font-size: 15px;
+    line-height: 1.45;
+    margin-bottom: 6px;
+}
+
+.artikel-home-content span {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* ================= ABOUT ================= */
+.about {
+    text-align: center;
+}
+
+.about-grid {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1024px) {
+    .hero {
+        grid-template-columns: 1fr;
+    }
+
+    .services-grid,
+    .about-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .services-grid,
+    .doctor-grid,
+    .about-grid,
+    .artikel-home-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-content,
+    .section {
+        padding: 60px 30px;
+    }
+
+    .services {
+        padding: 0 30px 60px;
+    }
+}

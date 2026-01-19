@@ -16,13 +16,12 @@
     
     {{-- HEADER --}}
     <div class="detail-pegawai-header">
-        <svg xmlns="http://www.w3.org/2000/svg" width="38" height="37" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="16" x2="12" y2="12"></line>
-            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
+        <a href="{{ url()->previous() }}" class="btn-back">
+            <img src="{{ asset('images/back.png') }}" alt="Back">
+        </a>
         <h1>Rincian Data Pegawai</h1>
     </div>
+
 
     {{-- PROFIL --}}
     <div class="profil-card">

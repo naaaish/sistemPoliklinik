@@ -54,9 +54,10 @@
 /* ===== ARTICLE GRID ===== */
 .article-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 28px;
+    grid-template-columns: 1fr;
+    gap: 32px;
 }
+
 
 /* ===== CARD ===== */
 .article-card {
@@ -136,30 +137,34 @@
 
 <!-- CONTENT -->
 <div class="container">
-    <div class="article-cards">
+    @forelse($articles as $article)
+        <div class="article-card">
+            <div class="article-image">
+                <img
+                    src="{{ asset($article->cover_path) }}"
+                    onerror="this.src='https://via.placeholder.com/400x300/4fa3d1/ffffff?text=Artikel'"
+                >
+            </div>
 
-        @forelse($articles as $article)
-            <div class="article-card">
-                <div class="article-image">
-                    <img src="{{ asset('images/articles/' . ($article->gambar ?? 'default.jpg')) }}"
-                         onerror="this.src='https://via.placeholder.com/400x300/4fa3d1/ffffff?text=Artikel'">
-                </div>
-                <div class="article-content">
-                    <h3>{{ $article->judul }}</h3>
-                    <p>{{ Str::limit($article->konten, 100) }}</p>
-                    <div class="article-date">
-                        {{ $article->created_at->format('d F Y') }}
-                    </div>
+            <div class="article-content">
+                <h3>{{ $article->judul_artikel }}</h3>
+
+                <p>
+                    {{ \Illuminate\Support\Str::limit($article->isi_artikel, 100) }}
+                </p>
+
+                <div class="article-date">
+                    {{ \Carbon\Carbon::parse($article->tanggal)->translatedFormat('d F Y') }}
                 </div>
             </div>
-        @empty
-            <div class="empty-state">
-                <h3>Belum ada artikel</h3>
-                <p>Artikel kesehatan akan muncul di sini</p>
-            </div>
-        @endforelse
+        </div>
+    @empty
+        <div class="empty-state">
+            <h3>Belum ada artikel</h3>
+            <p>Artikel kesehatan akan muncul di sini</p>
+        </div>
+    @endforelse
 
-    </div>
 </div>
 
 @endsection
