@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') | Rincian Pemeriksaan</title>
+    <title>@yield('title') Rincian Pemeriksaan</title>
     <link rel="stylesheet" href="{{ asset('css/kepegawaian.css') }}">
     <link rel="stylesheet" href="{{ asset('css/detail-pemeriksaan.css') }}">
     @stack('styles') 
@@ -46,7 +46,7 @@
             </div>
             <div class="data-item">
                 <span class="data-label">Nama Pemeriksa :</span>
-                <span class="data-value">{{ $dokter->nama }}</span>
+                <span class="data-value">{{ $namaPemeriksa }}</span>
             </div>
             <div class="data-item">
                 <span class="data-label">Hubungan Keluarga :</span>

@@ -23,8 +23,8 @@
             <tr>
                 <td>{{ $r->nama_pasien }}</td>
                 <td>{{ \Carbon\Carbon::parse($r->tanggal)->translatedFormat('l, d M Y, H:i') }}</td>
-                <td>{{ $r->dokter }}</td>
-                <td>{{ $r->pemeriksa }}</td>
+                <td>{{ $r->dokter ?? '-' }}</td>
+                <td>{{ $r->pemeriksa ?? '-' }}</td>
                 <td>
                     <a href="{{ route('kepegawaian.riwayat.detail', $r->id_pemeriksaan) }}" class="view-btn">+</a>
                 </td>

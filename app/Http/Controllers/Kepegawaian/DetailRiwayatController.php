@@ -28,10 +28,30 @@ class DetailRiwayatController extends Controller
             ->where('id_pasien', $pendaftaran->id_pasien)
             ->first();
 
-        // Fetch dokter data
-        $dokter = DB::table('dokter')
-            ->where('id_dokter', $pendaftaran->id_dokter)
-            ->first();
+        // pemeriksa
+        $namaPemeriksa = '-';
+
+        // cek dokter
+        $dokter = null;
+        if (!empty($pendaftaran->id_dokter) && $pendaftaran->id_dokter !== '-') {
+            $dokter = DB::table('dokter')
+                ->where('id_dokter', $pendaftaran->id_dokter)
+                ->first();
+        }
+
+        // cek pemeriksa jika bukan dokter
+        if ($dokter) {
+            $namaPemeriksa = $dokter->nama;
+        } else {
+            $pemeriksa = DB::table('pemeriksa')
+                ->where('id_pemeriksa', $pendaftaran->id_pemeriksa)
+                ->first();
+
+            if ($pemeriksa) {
+                $namaPemeriksa = $pemeriksa->nama_pemeriksa;
+            }
+        }
+
 
         // Fetch pegawai data
         $pegawai = DB::table('pegawai')
@@ -79,7 +99,7 @@ class DetailRiwayatController extends Controller
             'pemeriksaan',
             'pendaftaran',
             'pasien',
-            'dokter',
+            'namaPemeriksa',
             'pegawai',
             'diagnosa',
             'saran',
