@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('nama');
             $table->string('jenis_dokter');
             $table->enum('status', ['Aktif', 'Nonaktif'])->default('Aktif');
-            $table->timestamps();
         });
 
     }

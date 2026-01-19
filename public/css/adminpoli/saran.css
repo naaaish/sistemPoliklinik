@@ -440,7 +440,7 @@ body{ margin:0; }
 
 #modalTambah .modal-group,
 #modalEdit .modal-group{
-  margin-bottom: 14px;
+  width: 100%;
 }
 
 #modalTambah .modal-group label,
@@ -469,6 +469,7 @@ body{ margin:0; }
 #modalTambah .modal-textarea,
 #modalEdit .modal-textarea{
   width: 100%;
+  box-sizing: border-box;
   min-height: 120px;
   border-radius: 10px;
   border: 1px solid #CFE0FF;
@@ -518,4 +519,3 @@ body{ margin:0; }
   transform: translateY(0);
   filter: brightness(0.98);
 }
-

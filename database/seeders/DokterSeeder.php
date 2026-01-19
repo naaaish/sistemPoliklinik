@@ -15,16 +15,18 @@ class DokterSeeder extends Seeder
                 'nama' => 'dr Farah Heniyati',
                 'jenis_dokter' => 'Dokter Umum',
                 'status' => 'Aktif',
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'id_dokter' => 'DOK002',
-                'nama' => 'dr Hening Widiawati',
-                'jenis_dokter' => 'Dokter Perusahaan',
+                'nama' => 'dr. Siti Aisyah',
+                'jenis_dokter' => 'Dokter Umum',
                 'status' => 'Nonaktif',
-                'created_at' => now(),
-                'updated_at' => now(),
+            ],
+            [
+                'id_dokter' => 'DOK003',
+                'nama' => 'dr. Budi Santoso',
+                'jenis_dokter' => 'Dokter Perusahaan',
+                'status' => 'Aktif',
             ],
 
         ]);
