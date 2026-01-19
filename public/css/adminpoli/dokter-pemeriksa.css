@@ -239,52 +239,59 @@ body{ margin:0; }
   -moz-appearance: none;
 }
 
-/* =========================
-   STATUS DROPDOWN (1 KOTAKAN)
-========================= */
 .dp-status-wrap{
   position: relative;
-  height: 38px;
-  min-width: 110px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  display:flex;
+  align-items:center;
+
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
 }
 
-/* select-nya */
-.dp-status-select{
+.dp-status-wrap form{
   width: 100%;
-  height: 38px;
-  padding: 0 34px 0 14px; /* kanan dikosongin buat icon */
-  border-radius: 10px;
-  border: 1px solid #CFE0FF;
-  background: #fff;
-  font-weight: 600;
-  font-size: 13px;
+  margin: 0;
+}
+
+.dp-status-select{
+  /* reset */
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+
+  /* penting biar native arrow ilang */
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+
+  width: 100%;
+  padding: 0 30px 0 0;  /* ruang buat icon */
+  margin: 0;
+
+  font: inherit;
+  font-weight: 700;
   color: #3B5E8C;
   cursor: pointer;
-
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-
-  transition: box-shadow .15s ease, border-color .15s ease;
+  line-height: 1;
 }
 
 .dp-status-select:focus{
-  outline: none;
-  border-color: #89B2D9;
-  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-/* icon dropdown */
+/* icon dropdown custom */
 .dp-status-arrow{
   position: absolute;
-  right: 12px;
+  right: 2px;
   width: 14px;
   height: 14px;
   pointer-events: none;
-  opacity: .8;
+  opacity: .75;
 }
 
 /* teks polos seperti "Edit/Hapus" */
@@ -309,7 +316,7 @@ body{ margin:0; }
   padding: 2px;               /* bikin jarak kecil seperti status */
 }
 
-.dp-jadwal-btn{
+/* .dp-jadwal-btn{
   width: 100%;
   height: 38px;
 
@@ -328,7 +335,7 @@ body{ margin:0; }
 
   cursor: pointer;
   transition: filter .15s ease, transform .15s ease;
-}
+} */
 
 .dp-jadwal-btn:hover{ filter: brightness(0.98); }
 .dp-jadwal-btn:active{ transform: scale(0.98); }
@@ -502,3 +509,81 @@ body{ margin:0; }
 
 .dp-edit{ color:#E58A1F; }
 .dp-del{ color:#E04A4A; } /* sudah ada, pastikan sama */
+
+/* modal obat tapi untuk DP */
+.dp-modal-wide{ width: 520px; }
+.dp-modal-select{
+  width: 100%;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #CFE0FF;
+  padding: 0 12px;
+  background: #fff;
+  font-weight: 600;
+  color: #3B5E8C;
+}
+
+.dp-btn-soft-full{ width: 100%; justify-content: center; }
+
+.dp-jadwal-list{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+.dp-jrow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.dp-jinput{
+  height: 38px;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 10px;
+  outline:none;
+  font-weight: 600;
+  color:#3B5E8C;
+  background:#fff;
+}
+.dp-jinput[type="text"]{ flex:1.2; }
+.dp-jinput[type="time"]{ width: 120px; }
+.dp-jsep{ font-weight: 800; color:#3B5E8C; }
+
+.dp-jremove{
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #FFA3A3;
+  background: #fff;
+  color:#B42318;
+  font-weight: 900;
+  cursor:pointer;
+}
+
+.dp-jadwal-fixed{
+  padding: 10px 12px;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  background:#E7F0FF;
+  color:#3B5E8C;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* toast alert */
+.dp-alert{
+  position: fixed;
+  left: 50%;
+  top: 18px;
+  transform: translateX(-50%);
+  z-index: 10050;
+  min-width: 280px;
+  max-width: calc(100% - 28px);
+  background:#fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+  border: 1px solid #CFE0FF;
+  font-weight: 800;
+  color:#3B5E8C;
+}
+.dp-alert.is-error{
+  border-color:#FFA3A3;
+  color:#B42318;
+}

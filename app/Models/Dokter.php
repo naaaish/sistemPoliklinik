@@ -10,6 +10,7 @@ class Dokter extends Model
     protected $primaryKey = 'id_dokter';
     public $incrementing = false;
     protected $keyType = 'string';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_dokter',
