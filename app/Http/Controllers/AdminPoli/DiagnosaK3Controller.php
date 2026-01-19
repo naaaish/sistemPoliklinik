@@ -466,42 +466,65 @@ class DiagnosaK3Controller extends Controller
     public function export(Request $request)
     {
         $request->validate([
-            'from'   => ['required','date'],
-            'to'     => ['required','date','after_or_equal:from'],
             'format' => ['required','in:csv,excel,pdf'],
             'action' => ['required','in:preview,download'],
         ]);
 
-        $from = $request->from.' 00:00:00';
-        $to   = $request->to.' 23:59:59';
+        // Ambil kategori urut 1..n
+        $cats = DB::table('diagnosa_k3')
+            ->where('tipe','kategori')
+            ->orderByRaw("CAST(id_nb AS UNSIGNED) ASC")
+            ->get();
 
-        $data = DB::table('diagnosa_k3')
-            ->select('id_nb','kategori_penyakit','nama_penyakit','created_at')
+        // Ambil penyakit urut per kategori
+        $kids = DB::table('diagnosa_k3')
             ->where('tipe','penyakit')
-            ->whereBetween('created_at', [$from,$to])
             ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',1) AS UNSIGNED) ASC")
             ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',-1) AS UNSIGNED) ASC")
-            ->get();
+            ->get()
+            ->groupBy('parent_id');
+
+        // Flatten untuk export tabel (kategori jadi row header)
+        $rows = [];
+        foreach ($cats as $c) {
+            $rows[] = (object)[
+                'tipe' => 'kategori',
+                'id_nb' => $c->id_nb,
+                'kategori_penyakit' => $c->nama_penyakit,
+                'nama_penyakit' => '',
+            ];
+
+            foreach (($kids[$c->id_nb] ?? collect()) as $p) {
+                $rows[] = (object)[
+                    'tipe' => 'penyakit',
+                    'id_nb' => $p->id_nb,
+                    'kategori_penyakit' => $p->kategori_penyakit,
+                    'nama_penyakit' => $p->nama_penyakit,
+                ];
+            }
+        }
+
+        $countPenyakit = DB::table('diagnosa_k3')->where('tipe','penyakit')->count();
+        $countKategori = DB::table('diagnosa_k3')->where('tipe','kategori')->count();
 
         if ($request->action === 'preview') {
             return view('adminpoli.diagnosak3.preview', [
-                'data'=>$data,
-                'from'=>$request->from,
-                'to'=>$request->to,
-                'format'=>$request->format,
-                'count'=>$data->count(),
+                'rows' => $rows,
+                'countKategori' => $countKategori,
+                'countPenyakit' => $countPenyakit,
+                'format' => $request->format,
             ]);
         }
 
-        $fileBase = 'diagnosa_k3_'.$request->from.'_sd_'.$request->to;
+        $fileBase = 'diagnosa_k3_' . date('Y-m-d_His');
 
         if ($request->format === 'csv') {
-            return response()->streamDownload(function() use ($data){
+            return response()->streamDownload(function() use ($rows){
                 $out = fopen('php://output','w');
                 fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
-                fputcsv($out, ['ID NB','Kategori Penyakit','Nama Penyakit','Created At']);
-                foreach ($data as $row) {
-                    fputcsv($out, [$row->id_nb,$row->kategori_penyakit,$row->nama_penyakit,$row->created_at]);
+                fputcsv($out, ['Tipe','ID NB','Kategori','Nama Penyakit']);
+                foreach ($rows as $r) {
+                    fputcsv($out, [$r->tipe, $r->id_nb, $r->kategori_penyakit, $r->nama_penyakit]);
                 }
                 fclose($out);
             }, $fileBase.'.csv', ['Content-Type'=>'text/csv; charset=UTF-8']);
@@ -509,7 +532,7 @@ class DiagnosaK3Controller extends Controller
 
         if ($request->format === 'excel') {
             $html = view('adminpoli.diagnosak3.export_excel', [
-                'data'=>$data, 'from'=>$request->from, 'to'=>$request->to
+                'rows' => $rows
             ])->render();
 
             return response($html, 200, [
@@ -519,9 +542,10 @@ class DiagnosaK3Controller extends Controller
         }
 
         $pdf = Pdf::loadView('adminpoli.diagnosak3.export_pdf', [
-            'data'=>$data, 'from'=>$request->from, 'to'=>$request->to
+            'rows' => $rows
         ])->setPaper('A4','portrait');
 
         return $pdf->download($fileBase.'.pdf');
     }
+
 }
