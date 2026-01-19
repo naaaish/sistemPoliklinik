@@ -10,6 +10,7 @@ class Pemeriksa extends Model
     protected $primaryKey = 'id_pemeriksa';
     public $incrementing = false;
     protected $keyType = 'string';
+    public $timestamps = false;
 
     protected $fillable = [
         'id_pemeriksa',
