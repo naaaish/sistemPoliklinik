@@ -7,17 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Artikel extends Model
 {
     protected $table = 'artikel';
-    
-    protected $fillable = [
-        'judul',
-        'konten',
-        'gambar',
-        'penulis',
-        'kategori'
-    ];
+    protected $primaryKey = 'id_artikel';
+    public $incrementing = false;  
+    protected $keyType = 'string'; 
+    public $timestamps = false;
 
-    protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+    protected $fillable = [
+        'id_artikel',
+        'judul_artikel',
+        'tanggal',
+        'cover_path',
+        'isi_artikel',
     ];
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\JadwalDokter;
 use App\Models\Artikel;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
@@ -26,9 +27,25 @@ class HomeController extends Controller
         return view('tentang');
     }
 
-    public function artikelIndex()
+    public function artikelIndex(Request $request)
     {
-        $articles = Artikel::latest()->paginate(9);
-        return view('artikel.index', compact('articles'));
+        $search = $request->search;
+
+        $artikels = Artikel::when($search, function ($query, $search) {
+            $query->where('judul_artikel', 'like', '%' . $search . '%');
+        })
+        ->orderBy('tanggal', 'desc')
+        ->get();
+
+        return view('artikel.index', compact('artikels'));
     }
+
+    public function artikelDetail($id_artikel)
+    {
+        $artikel = Artikel::where('id_artikel', $id_artikel)->firstOrFail();
+
+        return view('artikel.detail', compact('artikel'));
+    }
+
+
 }
