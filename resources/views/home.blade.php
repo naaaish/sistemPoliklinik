@@ -128,14 +128,14 @@
 
         <div class="section-header-between">
             <h2 class="section-title">Artikel Kesehatan</h2>
-            <a href="{{ route('artikel.index') }}" class="lihat-semua">
+            <a href="{{ route('artikel.index.public') }}" class="lihat-semua">
                 Lihat Semua →
             </a>
         </div>
 
         <div class="artikel-home-grid">
             @foreach($articles as $article)
-                <div class="artikel-home-card">
+                <a href="{{ route('artikel.detail.public', $article->id_artikel) }}" class="artikel-home-card">
                     <div class="artikel-home-image">
                         <img src="{{ asset($article->cover_path) }}">
                     </div>
@@ -143,7 +143,7 @@
                         <h4>{{ $article->judul_artikel }}</h4>
                         <span>{{ \Carbon\Carbon::parse($article->tanggal)->translatedFormat('d F Y') }}</span>
                     </div>
-                </div>
+                </a>
             @endforeach
         </div>
 

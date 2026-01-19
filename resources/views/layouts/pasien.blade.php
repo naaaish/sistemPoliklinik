@@ -33,7 +33,7 @@
     <div class="nav-menu">
         <a href="{{ route('tentang') }}">Tentang Kami</a>
         <a href="{{ route('pasien.riwayat') }}">Riwayat Pemeriksaan</a>
-        <a href="{{ route('artikel.index') }}">Artikel Kesehatan</a>
+        <a href="{{ route('artikel.index.public') }}">Artikel Kesehatan</a>
 
         @auth
         <form action="{{ route('logout') }}" method="POST">
