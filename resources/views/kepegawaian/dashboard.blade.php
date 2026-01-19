@@ -46,7 +46,7 @@
                 <td>{{ $r->nama_pasien }}</td>
                 <td>{{ $r->nip }}</td>
                 <td>{{ \Carbon\Carbon::parse($r->tanggal)->translatedFormat('d M Y H:i') }}</td>
-                <td>{{ $r->dokter }}</td>
+                <td>{{ $r->nama_pemeriksa ?? '-' }}</td>
                 <td>
                     <a href="{{ route('kepegawaian.riwayat.detail', $r->id_pemeriksaan) }}" class="view-btn">+</a>
                 </td>
