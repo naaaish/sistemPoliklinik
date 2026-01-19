@@ -12,7 +12,7 @@ class DokterSeeder extends Seeder
         DB::table('dokter')->insert([
             [
                 'id_dokter' => 'DOK001',
-                'nama' => 'dr. Andi Pratama',
+                'nama' => 'dr Farah Heniyati',
                 'jenis_dokter' => 'Dokter Umum',
                 'status' => 'Aktif',
             ],
@@ -28,6 +28,7 @@ class DokterSeeder extends Seeder
                 'jenis_dokter' => 'Dokter Perusahaan',
                 'status' => 'Aktif',
             ],
+
         ]);
     }
 }
