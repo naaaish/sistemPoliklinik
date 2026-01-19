@@ -3,59 +3,59 @@
 @section('title', 'Preview Export Saran')
 
 @section('content')
-<div class="obat-page">
-    <div class="obat-topbar">
-        <div class="obat-left">
-            <a href="{{ route('adminpoli.saran.index', ['from'=>$from,'to'=>$to]) }}" class="obat-back-img" title="Kembali">
+<div class="saran-page">
+    <div class="saran-topbar">
+        <div class="saran-left">
+            <a href="{{ route('adminpoli.saran.index', ['from'=>$from,'to'=>$to]) }}" class="saran-back-img" title="Kembali">
                 <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
             </a>
-            <div class="obat-heading">Preview Export Saran</div>
+            <div class="saran-heading">Preview Export Saran</div>
         </div>
 
         <a
-            class="obat-btn-add"
+            class="saran-btn-add"
             href="{{ route('adminpoli.saran.export', ['from'=>$from,'to'=>$to,'format'=>$format,'action'=>'download']) }}"
         >
             <span>Download</span>
         </a>
     </div>
 
-    <div class="obat-card">
-        <div class="obat-preview">
+    <div class="saran-card">
+        <div class="saran-preview">
             Rentang: <b>{{ $from }}</b> s/d <b>{{ $to }}</b> • Total: <b>{{ $count }}</b> data • Format: <b>{{ strtoupper($format) }}</b>
         </div>
 
         <div style="margin-top:12px;">
-            <div class="obat-table-head" style="grid-template-columns: 1fr 2fr 1fr 1fr;">
+            <div class="saran-table-head" style="grid-template-columns: 1fr 2fr 1fr 1fr;">
                 <div>ID Saran</div>
                 <div>Saran</div>
                 <div>ID Diagnosa</div>
                 <div>Diagnosa</div>
             </div>
 
-            <div class="obat-table-body">
+            <div class="saran-table-body">
                 @forelse($data as $row)
-                    <div class="obat-row" style="grid-template-columns: 1fr 2fr 1fr 1fr;">
-                        <div class="obat-cell obat-center">{{ $row->id_saran }}</div>
-                        <div class="obat-cell">{{ $row->saran }}</div>
-                        <div class="obat-cell obat-center">{{ $row->id_diagnosa }}</div>
-                        <div class="obat-cell">{{ $row->diagnosa_text }}</div>
+                    <div class="saran-row" style="grid-template-columns: 1fr 2fr 1fr 1fr;">
+                        <div class="saran-cell saran-center">{{ $row->id_saran }}</div>
+                        <div class="saran-cell">{{ $row->saran }}</div>
+                        <div class="saran-cell saran-center">{{ $row->id_diagnosa }}</div>
+                        <div class="saran-cell">{{ $row->diagnosa_text }}</div>
                     </div>
                 @empty
-                    <div class="obat-row obat-row-empty">
-                        <div class="obat-empty-span">Tidak ada data pada rentang ini.</div>
+                    <div class="saran-row saran-row-empty">
+                        <div class="saran-empty-span">Tidak ada data pada rentang ini.</div>
                     </div>
                 @endforelse
             </div>
         </div>
     </div>
 
-    <div class="obat-foot">
+    <div class="saran-foot">
         Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
     </div>
 </div>
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/adminpoli/obat.css') }}">
+<link rel="stylesheet" href="{{ asset('css/adminpoli/saran.css') }}">
 @endpush

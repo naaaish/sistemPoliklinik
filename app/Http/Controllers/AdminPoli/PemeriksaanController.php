@@ -66,21 +66,23 @@ class PemeriksaanController extends Controller
         $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
         $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
 
-        $penyakitIds = $this->parseIds($hasil->id_diagnosa);
-        $penyakitTerpilih = $penyakitIds
-            ? Diagnosa::whereIn('id_diagnosa', $penyakitIds)->pluck('diagnosa')->toArray()
-            : [];
+        $penyakitTerpilih = DB::table('detail_pemeriksaan_penyakit as dp')
+            ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dp.id_diagnosa')
+            ->where('dp.id_pemeriksaan', $hasil->id_pemeriksaan)
+            ->pluck('d.diagnosa')
+            ->toArray();
 
-        $k3Ids = $this->parseIds($hasil->id_nb);
-        $diagnosaK3Terpilih = $k3Ids
-            ? DiagnosaK3::whereIn('id_nb', $k3Ids)->pluck('nama_penyakit')->toArray()
-            : [];
+        $diagnosaK3Terpilih = DB::table('detail_pemeriksaan_diagnosa_k3 as dk')
+            ->join('diagnosa_k3 as k3', 'k3.id_nb', '=', 'dk.id_nb')
+            ->where('dk.id_pemeriksaan', $hasil->id_pemeriksaan)
+            ->pluck('k3.nama_penyakit')
+            ->toArray();
 
-        $saranIds = $this->parseIds($hasil->id_saran);
-        $saranTerpilih = $saranIds
-            ? Saran::whereIn('id_saran', $saranIds)->pluck('saran')->toArray()
-            : [];
-
+        $saranTerpilih = DB::table('detail_pemeriksaan_saran as ds')
+            ->join('saran as s', 's.id_saran', '=', 'ds.id_saran')
+            ->where('ds.id_pemeriksaan', $hasil->id_pemeriksaan)
+            ->pluck('s.saran')
+            ->toArray();
 
         // ===== resep berdasarkan id_pemeriksaan =====
         $resep = Resep::where('id_pemeriksaan', $hasil->id_pemeriksaan)->first();
@@ -159,7 +161,8 @@ class PemeriksaanController extends Controller
      */
     public function update(Request $request, $pendaftaranId)
     {
-        Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
+        $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
+        $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaran->id_pendaftaran)->firstOrFail();
 
         $validated = $request->validate([
             'sistol'        => 'nullable|numeric',
@@ -193,7 +196,7 @@ class PemeriksaanController extends Controller
 
             $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
 
-            // mapping request -> kolom tabel pemeriksaan
+            // update data pemeriksaan (mapping ke kolom tabel kamu)
             $hasil->update([
                 'sistol'     => $validated['sistol'] ?? null,
                 'diastol'    => $validated['diastol'] ?? null,
@@ -212,78 +215,76 @@ class PemeriksaanController extends Controller
                 'tinggi'     => $validated['tinggi_badan'] ?? null,
             ]);
 
-            // ====== RESEP & DETAIL_RESEP ======
+            // ===== RESEP & DETAIL_RESEP =====
             $obatIds = $validated['obat_id'] ?? [];
             $jumlahs = $validated['jumlah'] ?? [];
             $satuans = $validated['satuan'] ?? [];
             $hargas  = $validated['harga_satuan'] ?? [];
 
-            // validasi: kalau obat dipilih, satuan wajib ada
+            // validasi: kalau obat dipilih, satuan wajib
             foreach ($obatIds as $i => $idObat) {
                 if (!$idObat) continue;
-                if (empty($satuans[$i])) {
-                    return back()->withInput()->withErrors(["satuan.$i" => "Satuan wajib diisi jika obat dipilih."]);
+                if (!isset($satuans[$i]) || trim((string)$satuans[$i]) === '') {
+                    return back()
+                        ->withInput()
+                        ->withErrors(["satuan.$i" => "Satuan wajib diisi jika obat dipilih."]);
                 }
             }
 
-            $resep = Resep::where('id_pemeriksaan', $hasil->id_pemeriksaan)->first();
-
-            // hitung total & siapkan detail rows
-            $detailRows = [];
+            // siapkan rows detail yang valid (skip baris kosong)
+            $detailToInsert = [];
             $totalTagihan = 0;
 
             for ($i = 0; $i < count($obatIds); $i++) {
-                $idObat = $obatIds[$i] ?? null;
-                if (!$idObat) continue;
+                $obatId = $obatIds[$i] ?? null;
+                if (!$obatId) continue;
 
-                $qty   = (int)($jumlahs[$i] ?? 0);
-                $harga = (float)($hargas[$i] ?? 0);
-                $satuan = $satuans[$i] ?? '';
+                $qty = (int)($jumlahs[$i] ?? 1);
+                if ($qty <= 0) $qty = 1;
 
-                if ($qty <= 0) continue;
+                $harga = (int)($hargas[$i] ?? 0);
+                $satuan = trim((string)($satuans[$i] ?? ''));
 
                 $subtotal = $qty * $harga;
                 $totalTagihan += $subtotal;
 
-                $detailRows[] = [
-                    'id_obat'  => $idObat,
+                $detailToInsert[] = [
+                    'id_obat'  => $obatId,
                     'jumlah'   => $qty,
                     'satuan'   => $satuan,
                     'subtotal' => $subtotal,
                 ];
             }
 
-            // kalau tidak ada detail, hapus resep (jika ada) supaya bersih
-            if (count($detailRows) === 0) {
+            // ambil resep existing (kalau ada)
+            $resep = Resep::where('id_pemeriksaan', $hasil->id_pemeriksaan)->first();
+
+            // kalau tidak ada obat sama sekali → hapus resep & detail kalau ada, selesai
+            if (count($detailToInsert) === 0) {
                 if ($resep) {
                     DetailResep::where('id_resep', $resep->id_resep)->delete();
                     $resep->delete();
                 }
 
                 return redirect()
-                    ->route('adminpoli.pemeriksaan.show', $pendaftaranId)
+                    ->route('adminpoli.pemeriksaan.index')
                     ->with('success', 'Hasil pemeriksaan berhasil diupdate (tanpa resep).');
             }
 
-            // kalau belum ada resep, buat baru
+            // kalau belum ada resep → buat
             if (!$resep) {
-                $idResep = 'RS' . date('ymdHis') . \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(6));
-
                 $resep = Resep::create([
-                    'id_resep'       => $idResep,
+                    'id_resep'       => 'RS' . now()->format('ymdHis') . strtoupper(substr(uniqid(), -6)),
                     'id_pemeriksaan' => $hasil->id_pemeriksaan,
                     'total_tagihan'  => $totalTagihan,
                 ]);
             } else {
-                // update total tagihan
                 $resep->update(['total_tagihan' => $totalTagihan]);
-
-                // reset detail lama
                 DetailResep::where('id_resep', $resep->id_resep)->delete();
             }
 
             // insert detail baru
-            foreach ($detailRows as $row) {
+            foreach ($detailToInsert as $row) {
                 DetailResep::create([
                     'id_resep'  => $resep->id_resep,
                     'id_obat'   => $row['id_obat'],
@@ -294,11 +295,12 @@ class PemeriksaanController extends Controller
             }
 
             return redirect()
-                ->route('adminpoli.pemeriksaan.show', $pendaftaranId)
+                ->route('adminpoli.pemeriksaan.index')
                 ->with('success', 'Hasil pemeriksaan berhasil diupdate.');
         });
     }
 
+    
     private function parseIds($val): array
     {
         if (!$val) return [];
@@ -312,5 +314,4 @@ class PemeriksaanController extends Controller
         // default CSV
         return array_values(array_filter(array_map('trim', explode(',', (string)$val))));
     }
-
 }
