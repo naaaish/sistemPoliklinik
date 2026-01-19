@@ -209,3 +209,76 @@
 
   border-radius: 999px;  /* pill kecil rapi */
 }
+
+.info-list{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-item{
+  background:#F4F7FF;
+  border:1px solid #CFE0FF;
+  color:#316BA1;
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:14px;
+  margin-bottom:6px;
+}
+
+/* baris label : value -> lurus */
+.ap-form-row{
+  display: grid;
+  grid-template-columns: 160px 20px 1fr;
+  align-items: start;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.ap-form-label{
+  font-weight: 700;
+  font-size: 15px;
+  color: #000;
+}
+
+.ap-form-sep{
+  font-weight: 700;
+  font-size: 15px;
+  color: #000;
+}
+
+.ap-form-value{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* khusus saran: biar satu baris penuh */
+.ap-form-value.is-long .ap-readonly-pill{
+  width: 100%;
+}
+
+/* pill hasil (lebih kecil dari input) */
+.ap-readonly-pill{
+  /* display: inline-block;
+  max-width: 100%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #CFE0FF;
+  background: #F4F7FF;
+  color: #316BA1;
+  font-size: 15px;
+  line-height: 1.35;
+  box-sizing: border-box;
+  white-space: normal;
+  word-break: break-word; */
+  font-weight: 700;
+  font-size: 15px;
+  color: #4e6070;
+}
+
+.ap-form-value .ap-readonly-pill{
+  width:100%; /* kalau mau satu item per baris */
+}
+
+.ap-form-value .ap-readonly-pill{ width:auto; }

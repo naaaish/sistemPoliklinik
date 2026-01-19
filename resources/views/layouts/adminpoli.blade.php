@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="{{ asset('css/adminpoli/pemeriksaan.css') }}?v={{ filemtime(public_path('css/adminpoli/pemeriksaan.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/pemeriksaan-detail.css') }}?v={{ filemtime(public_path('css/adminpoli/pemeriksaan-detail.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/dokter-pemeriksa.css') }}?v={{ filemtime(public_path('css/adminpoli/dokter-pemeriksa.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/saran.css') }}?v={{ filemtime(public_path('css/adminpoli/saran.css')) }}">
 
     {{-- Sweet Alert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -53,7 +54,8 @@
                 <span>Obat</span>
             </a>
 
-            <a class="ap-nav-item" href="#">
+            <a class="ap-nav-item {{ request()->routeIs('adminpoli.saran.*') ? 'active' : '' }}"
+            href="{{ route('adminpoli.saran.index') }}">
                 <img src="{{ asset('assets/adminPoli/saran.png') }}" alt="saran">
                 <span>Saran</span>
             </a>

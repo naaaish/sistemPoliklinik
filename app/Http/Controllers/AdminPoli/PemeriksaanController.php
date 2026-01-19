@@ -62,32 +62,56 @@ class PemeriksaanController extends Controller
      * DETAIL hasil pemeriksaan (read-only / ringkasan)
      */
     public function show($pendaftaranId)
-    { 
+    {
         $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
         $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
 
-        // resep berdasarkan id_pemeriksaan
-        $resep = Resep::where('id_pemeriksaan', $hasil->id_pemeriksaan)->first();
-        $obat = Obat::orderBy('nama_obat','asc')->get();
-        $diagnosaK3 = DiagnosaK3::orderBy('nama_penyakit','asc')->get();
-        $penyakit = Diagnosa::orderBy('diagnosa','asc')->get();
-        $saran = Saran::orderBy('saran','asc')->get();
+        $penyakitIds = $this->parseIds($hasil->id_diagnosa);
+        $penyakitTerpilih = $penyakitIds
+            ? Diagnosa::whereIn('id_diagnosa', $penyakitIds)->pluck('diagnosa')->toArray()
+            : [];
 
-        // detail berdasarkan id_resep (bukan id_pemeriksaan)
+        $k3Ids = $this->parseIds($hasil->id_nb);
+        $diagnosaK3Terpilih = $k3Ids
+            ? DiagnosaK3::whereIn('id_nb', $k3Ids)->pluck('nama_penyakit')->toArray()
+            : [];
+
+        $saranIds = $this->parseIds($hasil->id_saran);
+        $saranTerpilih = $saranIds
+            ? Saran::whereIn('id_saran', $saranIds)->pluck('saran')->toArray()
+            : [];
+
+
+        // ===== resep berdasarkan id_pemeriksaan =====
+        $resep = Resep::where('id_pemeriksaan', $hasil->id_pemeriksaan)->first();
+
+        // ===== detail resep berdasarkan id_resep (join obat biar ada nama & harga) =====
         $detailResep = collect();
         if ($resep) {
             $detailResep = DetailResep::where('id_resep', $resep->id_resep)
                 ->join('obat', 'obat.id_obat', '=', 'detail_resep.id_obat')
                 ->select([
                     'detail_resep.*',
-                    'obat.nama_obat',
+                    'obat.nama_obat as nama_obat',
+                    'obat.harga as harga_satuan',
                 ])
                 ->get();
         }
 
-        return view('adminpoli.pemeriksaan.show', compact('pendaftaran', 'hasil', 'resep', 'detailResep', 'obat', 'diagnosaK3', 'penyakit', 'saran'));
-    }
+        // ===== master obat (buat dropdown obat editable di show) =====
+        $obat = Obat::orderBy('nama_obat', 'asc')->get();
 
+        return view('adminpoli.pemeriksaan.show', compact(
+            'pendaftaran',
+            'hasil',
+            'resep',
+            'detailResep',
+            'obat',
+            'penyakitTerpilih',
+            'diagnosaK3Terpilih',
+            'saranTerpilih'
+        ));
+    }
 
     /**
      * FORM edit hasil pemeriksaan
@@ -273,6 +297,20 @@ class PemeriksaanController extends Controller
                 ->route('adminpoli.pemeriksaan.show', $pendaftaranId)
                 ->with('success', 'Hasil pemeriksaan berhasil diupdate.');
         });
+    }
+
+    private function parseIds($val): array
+    {
+        if (!$val) return [];
+
+        // kalau JSON array
+        if (is_string($val) && strlen($val) && $val[0] === '[') {
+            $arr = json_decode($val, true);
+            return is_array($arr) ? array_values(array_filter($arr)) : [];
+        }
+
+        // default CSV
+        return array_values(array_filter(array_map('trim', explode(',', (string)$val))));
     }
 
 }
