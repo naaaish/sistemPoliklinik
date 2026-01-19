@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminPoli\PendaftaranController;
 use App\Http\Controllers\AdminPoli\PemeriksaanInputController;
 use App\Http\Controllers\AdminPoli\PemeriksaanController;
 use App\Http\Controllers\AdminPoli\DokterPemeriksaController;
+use App\Http\Controllers\AdminPoli\SaranController;
 
 use App\Http\Controllers\Kepegawaian\KDashboardController;
 use App\Http\Controllers\Kepegawaian\PegawaiController;
@@ -106,6 +107,11 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
 
     Route::post('/diagnosak3/import', [DiagnosaK3Controller::class,'import'])->name('diagnosak3.import');
     Route::get('/diagnosak3/export', [DiagnosaK3Controller::class,'export'])->name('diagnosak3.export');
+
+    // Saran
+    Route::resource('saran', SaranController::class)->except(['show']);
+    Route::post('saran/import', [SaranController::class, 'import'])->name('saran.import');
+    Route::get('saran/export', [SaranController::class, 'export'])->name('saran.export');
 
     // MENU PEMERIKSAAN PASIEN
     Route::get('/pemeriksaan',

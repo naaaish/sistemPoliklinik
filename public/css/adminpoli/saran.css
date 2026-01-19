@@ -1,0 +1,521 @@
+/* =========================
+   SARAN PAGE (layout sama seperti OBAT)
+========================= */
+*{ box-sizing: border-box; }
+body{ margin:0; }
+
+.saran-page{
+  font-family: Poppins, sans-serif;
+}
+
+/* topbar */
+.saran-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 14px;
+}
+
+.saran-left{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.saran-back-img{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  width: 40px;
+  height: 40px;
+  transition: transform .15s ease, filter .15s ease;
+}
+
+.saran-back-img img{
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.saran-back-img:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.saran-back-img:active{
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+.saran-heading{
+  font-size: 22px;
+  font-weight: 700;
+  color:#3B5E8C;
+}
+
+/* icons */
+.saran-ic{
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+.saran-ic-sm{
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+/* buttons */
+.saran-btn-add{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  background:#3B5E8C;
+  color:#fff;
+  text-decoration:none;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow:
+    0 6px 16px rgba(74, 111, 165, 0.25),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: all .25s ease;
+}
+
+.saran-btn-soft{
+  height: 38px;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  background:#E7F0FF;
+  color:#3B5E8C;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-weight: 600;
+  cursor:pointer;
+}
+
+.saran-btn-soft[disabled]{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+/* hover */
+.saran-btn-add,
+.saran-btn-soft,
+.saran-search-btn{
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+}
+
+.saran-btn-add:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow:
+    0 10px 22px rgba(74, 111, 165, 0.30),
+    0 4px 10px rgba(0, 0, 0, 0.14);
+}
+
+.saran-btn-add:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+.saran-btn-soft:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 8px 18px rgba(0,0,0,.10);
+}
+
+.saran-btn-soft:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+.saran-search-btn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+
+.saran-search-btn:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+.saran-card{
+  width: 920px;
+  max-width: 920px;
+  flex: 0 0 920px;
+  margin: 0 auto;
+  background:#fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  padding: 20px 22px;
+}
+
+/* search */
+.saran-search{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  margin-bottom: 12px;
+}
+
+.saran-search-input{
+  flex: 1;
+  height: 42px;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 14px;
+  outline:none;
+}
+
+.saran-search-btn{
+  height: 42px;
+  border:none;
+  border-radius: 10px;
+  padding: 0 14px;
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  background:#7FA6D9;
+  color:#fff;
+  font-weight: 600;
+  cursor:pointer;
+}
+
+/* tools row */
+.saran-tools-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+/* upload */
+.saran-upload{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.saran-file{
+  height: 38px;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 12px;
+  display:flex;
+  align-items:center;
+  background:#fff;
+  color:#3B5E8C;
+  font-weight: 600;
+  cursor:pointer;
+  user-select:none;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+}
+
+.saran-file input{ display:none; }
+
+.saran-file:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.01);
+  box-shadow: 0 8px 18px rgba(0,0,0,.10);
+}
+.saran-file:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+.saran-file-name{
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0,0,0,.55);
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saran-file-hint{
+  display:block;
+  margin-left: 2px;
+  font-size: 11px;
+  color: rgba(0,0,0,.5);
+  font-weight: 600;
+}
+
+/* download */
+.saran-download{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.saran-date{
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #CFE0FF;
+  padding: 0 10px;
+  outline:none;
+  background:#fff;
+}
+
+.saran-sep{
+  font-weight: 700;
+  color:#3B5E8C;
+}
+
+.saran-select{
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #CFE0FF;
+  padding: 0 10px;
+  outline:none;
+  background:#fff;
+  font-weight:600;
+  color:#3B5E8C;
+}
+
+.saran-preview{
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color:#3B5E8C;
+  background:#E7F0FF;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display:inline-block;
+}
+
+.saran-search-input,
+.saran-date,
+.saran-select{
+  transition: box-shadow .12s ease, border-color .12s ease, transform .12s ease;
+}
+
+.saran-search-input:focus,
+.saran-date:focus,
+.saran-select:focus{
+  border-color:#89B2D9;
+  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
+}
+
+/* table */
+.saran-table-head,
+.saran-row{
+  display:grid;
+  grid-template-columns: 1fr 2fr 1.6fr 1fr; /* ID | Saran | Diagnosa | Aksi */
+  gap: 16px;
+  align-items: center;
+}
+
+.saran-row.saran-row-3{
+  grid-template-columns: 1fr 2fr 1fr; /* preview: ID | Saran | Diagnosa */
+}
+
+.saran-table-head{
+  padding: 6px 4px 10px;
+  color:#7B8DA8;
+  font-weight: 700;
+  font-size: 16px;
+  text-align:center;
+}
+
+.saran-table-body{
+  border-top: 1px solid #EEF4FF;
+  padding-top: 12px;
+}
+
+.saran-row{
+  min-height: 56px;
+  align-items: center;
+  border-bottom: 1px solid #E6EEF8; /* GARIS PEMISAH */
+  padding: 6px 0;
+}
+
+
+.saran-cell{
+  min-height: 34px;
+  display:flex;
+  align-items:center;
+  padding: 8px 6px;
+  color:#444;
+  font-size: 13px;
+  background: transparent;
+}
+
+.saran-center{ 
+  justify-content:center; 
+  text-align:center;
+}
+
+/* actions */
+.saran-actions{
+  display:flex;
+  justify-content:center;
+  gap: 14px;
+  align-items:center;
+}
+
+.saran-act{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  border:none;
+  background:transparent;
+  font-weight: 700;
+  cursor:pointer;
+  text-decoration:none;
+  padding: 6px 6px;
+  transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+}
+
+.saran-act:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+.saran-act:active{
+  transform: translateY(0);
+  opacity: .85;
+}
+
+.saran-edit{ color:#E58A1F; }
+.saran-del{ color:#E04A4A; }
+
+.saran-del-form{ margin:0; }
+
+/* empty */
+.saran-row-empty{
+  padding: 8px 4px;
+  border-bottom: 1px solid #EEF4FF;
+  min-height: 50px;
+}
+
+.saran-empty-span{
+  grid-column: 1 / -1;
+  height: 34px;
+  border-radius: 8px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 0 12px;
+  font-size: 13px;
+  color:#7B8DA8;
+  font-weight:700;
+}
+
+.saran-foot{
+  margin-top: 18px;
+  text-align:center;
+  color: rgba(0,0,0,0.55);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================
+   Modal field styling (Saran)
+========================= */
+#modalTambah .modal-card,
+#modalEdit .modal-card{
+  width: 520px;
+  max-width: calc(100vw - 40px);
+  border-radius: 14px;
+  padding: 26px 28px;
+}
+
+#modalTambah .modal-card h3,
+#modalEdit .modal-card h3{
+  margin: 0 0 18px 0;
+  text-align: center;
+  color:#3B5E8C;
+  font-weight: 800;
+  font-size: 20px;
+}
+
+#modalTambah .modal-group,
+#modalEdit .modal-group{
+  margin-bottom: 14px;
+}
+
+#modalTambah .modal-group label,
+#modalEdit .modal-group label{
+  display:block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color:#2E3A4A;
+}
+
+/* bikin select & textarea bagus */
+#modalTambah .modal-select,
+#modalEdit .modal-select{
+  width: 100%;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #CFE0FF;
+  padding: 0 12px;
+  outline: none;
+  background: #F9FBFF;
+  font-weight: 600;
+  color:#2E3A4A;
+}
+
+#modalTambah .modal-textarea,
+#modalEdit .modal-textarea{
+  width: 100%;
+  min-height: 120px;
+  border-radius: 10px;
+  border: 1px solid #CFE0FF;
+  padding: 10px 12px;
+  outline: none;
+  background: #F9FBFF;
+  font-weight: 600;
+  color:#2E3A4A;
+  line-height: 1.35;
+  resize: vertical;
+}
+
+/* focus glow */
+#modalTambah .modal-select:focus,
+#modalEdit .modal-select:focus,
+#modalTambah .modal-textarea:focus,
+#modalEdit .modal-textarea:focus{
+  border-color:#89B2D9;
+  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
+}
+
+/* tombol simpan biar full dan cakep */
+#modalTambah .modal-btn,
+#modalEdit .modal-btn{
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  background:#3B5E8C;
+  color:#fff;
+  font-weight: 800;
+  margin-top: 8px;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(74, 111, 165, 0.25);
+  transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+}
+
+#modalTambah .modal-btn:hover,
+#modalEdit .modal-btn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 10px 22px rgba(74, 111, 165, 0.30);
+}
+
+#modalTambah .modal-btn:active,
+#modalEdit .modal-btn:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+

@@ -32,12 +32,10 @@ class PemeriksaanInputController extends Controller
         // kolom sesuai migration: obat.nama_obat, diagnosa_k3.nama_penyakit, saran.isi
         $penyakit   = Diagnosa::orderBy('diagnosa')->get();
         $obat = Obat::orderBy('nama_obat', 'asc')->get();
-        $diagnosaK3 = DiagnosaK3::orderBy('nama_penyakit', 'asc')->get();
         $saran = Saran::orderBy('saran', 'asc')->get();
         $diagnosaK3 = DiagnosaK3::where('tipe', 'penyakit')
             ->orderBy('nama_penyakit', 'asc')
             ->get();
-
 
         return view('adminpoli.pemeriksaan.create', compact(
             'pendaftaran',
@@ -112,6 +110,10 @@ class PemeriksaanInputController extends Controller
             // 2(prefix) + 12(ymdHis) + 6(random) = 20
             $idPemeriksaan = 'PM' . date('ymdHis') . Str::upper(Str::random(6));
 
+            $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
+            $k3Ids       = array_values(array_filter($validated['diagnosa_k3_id'] ?? []));
+            $saranIds    = array_values(array_filter($validated['saran_id'] ?? []));
+
             // ========= SIMPAN PEMERIKSAAN =========
             $pemeriksaan = Pemeriksaan::create([
                 'id_pemeriksaan' => $idPemeriksaan,
@@ -134,10 +136,9 @@ class PemeriksaanInputController extends Controller
                 'berat'  => $validated['berat_badan'] ?? null,
                 'tinggi' => $validated['tinggi_badan'] ?? null,
 
-                // tabel pemeriksaan cuma simpan 1 value (bukan banyak)
-                'id_diagnosa' => $validated['penyakit_id'][0] ?? null,
-                'id_nb'       => $validated['diagnosa_k3_id'][0] ?? null,
-                'id_saran'    => $validated['saran_id'][0] ?? null,
+                'id_diagnosa' => implode(',', $penyakitIds),
+                'id_nb'       => implode(',', $k3Ids),
+                'id_saran'    => implode(',', $saranIds),
             ]);
 
             // ========= SIMPAN RESEP + DETAIL_RESEP =========

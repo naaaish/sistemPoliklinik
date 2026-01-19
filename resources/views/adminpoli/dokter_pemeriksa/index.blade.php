@@ -460,5 +460,75 @@
   });
 })();
 
+(function(){
+  // --- helpers ---
+  function openModal(modalId){
+    const m = document.getElementById(modalId);
+    if(m) m.classList.add('is-open');
+  }
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[c]));
+  }
+
+  // --- config (sesuaikan kalau id modal kamu beda) ---
+  const MODAL_ID = 'dpModalJadwal';
+  const VIEW_ID  = 'dpJadwalView';
+
+  const view = document.getElementById(VIEW_ID);
+
+  // --- bind click ke semua tombol lihat jadwal ---
+  document.querySelectorAll('.dp-jadwal-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const tipe = btn.dataset.tipe;  // 'dokter' / 'pemeriksa'
+      const id   = btn.dataset.id;
+
+      // buka modal dulu
+      openModal(MODAL_ID);
+
+      if(view) view.innerHTML = '<div class="dp-jadwal-line">Memuat...</div>';
+
+      try{
+        // endpoint sesuai route kamu: /adminpoli/dokter-pemeriksa/{tipe}/{id}/jadwal
+        const url = `/adminpoli/dokter-pemeriksa/${encodeURIComponent(tipe)}/${encodeURIComponent(id)}/jadwal`;
+
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if(!res.ok) throw new Error('HTTP ' + res.status);
+
+        const data = await res.json();
+        const jadwal = data && data.jadwal ? data.jadwal : [];
+
+        if(!Array.isArray(jadwal)) throw new Error('bad jadwal');
+
+        if(view){
+          if(jadwal.length === 0){
+            view.innerHTML = '<div class="dp-jadwal-line">Tidak ada jadwal.</div>';
+          }else{
+            view.innerHTML = jadwal.map(j => {
+              const hari = esc(j.hari ?? '-');
+              const jm   = esc(j.jam_mulai ?? '--:--');
+              const js   = esc(j.jam_selesai ?? '--:--');
+              return `<div class="dp-jadwal-line">${hari} : ${jm} - ${js}</div>`;
+            }).join('');
+          }
+        }
+      }catch(e){
+        if(view) view.innerHTML = '<div class="dp-jadwal-line">Gagal mengambil data.</div>';
+      }
+    });
+  });
+
+  // Optional: close modal via data-close
+  document.querySelectorAll('[data-close]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.getAttribute('data-close');
+      const m = document.getElementById(id);
+      if(m) m.classList.remove('is-open');
+    });
+  });
+})();
+
 </script>
 @endsection
