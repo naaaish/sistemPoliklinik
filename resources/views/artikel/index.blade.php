@@ -1,63 +1,64 @@
 @extends('layouts.pasien')
 
-@section('title', 'Artikel Kesehatan')
+@section('title','Artikel Kesehatan')
 
 @push('styles')
-{{-- css khusus artikel kalau ada --}}
+<link rel="stylesheet" href="{{ asset('css/artikel.css') }}">
 @endpush
 
 @section('content')
 
-<!-- HERO -->
-<div class="pasien-hero">
-    <div class="hero-overlay"></div>
+{{-- HERO --}}
+<section class="pasien-hero">
     <div class="hero-content">
         <h2>Artikel Kesehatan</h2>
-        <p>Informasi dan tips kesehatan untuk menjaga kebugaran pegawai</p>
+        <p>Informasi kesehatan terpercaya untuk Anda dan keluarga</p>
     </div>
-</div>
+</section>
 
-<!-- SEARCH -->
-<div class="search-section">
-    <form action="{{ route('artikel.index.public') }}" method="GET" class="search-box">
-        <input
-            type="text"
-            name="search"
-            placeholder="Cari artikel kesehatan..."
-            value="{{ request('search') }}"
-        >
-        <button type="submit" class="search-btn">Cari</button>
-    </form>
-</div>
+<div class="container">
 
-<!-- CONTENT -->
-@forelse ($artikels as $artikel)
-    <a 
-        href="{{ route('artikel.detail.public', $artikel->id_artikel) }}"
-        class="article-card-link"
-    >
-        <div class="article-card">
+    {{-- SEARCH --}}
+    <div class="search-section">
+        <form action="{{ route('artikel.index.public') }}" method="GET" class="search-box">
+            <input
+                type="text"
+                name="search"
+                placeholder="Cari artikel kesehatan..."
+                value="{{ request('search') }}"
+            >
+            <button class="search-btn">Cari</button>
+        </form>
+    </div>
 
-            <div class="article-image">
-                <img
-                    src="{{ asset($artikel->cover_path) }}"
-                    alt="{{ $artikel->judul_artikel }}"
-                    onerror="this.src='https://via.placeholder.com/400x300?text=Artikel'"
-                >
-            </div>
+    {{-- GRID ARTIKEL --}}
+    <div class="article-grid">
+        @forelse ($articles as $article)
+            <a href="{{ route('artikel.detail', $article->id_artikel) }}"
+               class="article-card-link">
 
-            <div class="article-content">
-                <h3>{{ $artikel->judul_artikel }}</h3>
+                <div class="article-card">
+                    <div class="article-image">
+                        <img src="{{ asset($article->cover_path) }}"
+                             alt="{{ $article->judul_artikel }}">
+                    </div>
 
-                <div class="article-date">
-                    {{ \Carbon\Carbon::parse($artikel->tanggal)->translatedFormat('d F Y') }}
+                    <div class="article-content">
+                        <h3>{{ $article->judul_artikel }}</h3>
+                        <span class="article-date">
+                            {{ \Carbon\Carbon::parse($article->tanggal)->translatedFormat('d F Y') }}
+                        </span>
+                    </div>
                 </div>
+
+            </a>
+        @empty
+            <div class="empty-state">
+                <h3>Tidak ada artikel</h3>
+                <p>Artikel yang kamu cari belum tersedia.</p>
             </div>
+        @endforelse
+    </div>
 
-        </div>
-    </a>
-@empty
-@endforelse
-
-
+</div>
 @endsection

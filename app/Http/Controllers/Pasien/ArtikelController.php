@@ -4,21 +4,28 @@ namespace App\Http\Controllers\Pasien;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use App\Models\Artikel;
+use Illuminate\Http\Request;
 
 class ArtikelController extends Controller
 {
     /**
      * Halaman daftar artikel
      */
-    public function index()
+    public function indexPublic(Request $request)
     {
-        $articles = DB::table('artikel')
+        $query = Artikel::query();
+
+        // SEARCH
+        if ($request->filled('search')) {
+            $query->where('judul_artikel', 'like', '%' . $request->search . '%');
+        }
+
+        $articles = $query
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        return view('pasien.artikel', compact('articles'));
-
- 
+        return view('artikel.index', compact('articles'));
     }
 
     /**

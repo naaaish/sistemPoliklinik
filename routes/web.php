@@ -21,6 +21,7 @@ use App\Http\Controllers\AdminPoli\DiagnosaController;
 use App\Http\Controllers\AdminPoli\DiagnosaK3Controller;
 use App\Http\Controllers\Pasien\DetailPemeriksaanController;
 use App\Http\Controllers\Kepegawaian\DetailRiwayatController;
+use App\Http\Controllers\Pasien\ArtikelController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,13 @@ Route::get('/artikel', [HomeController::class, 'artikelIndex'])
 
 Route::get('/artikel/{id_artikel}', [HomeController::class, 'artikelDetail'])
     ->name('artikel.detail.public');
+
+Route::get('/artikel', [ArtikelController::class, 'indexPublic'])
+    ->name('artikel.index.public');
+
+Route::get('/artikel/{id}', [ArtikelController::class, 'detail'])
+    ->name('artikel.detail');
+
 
 Route::get('/tentang', [HomeController::class, 'tentang'])->name('tentang');
 
@@ -233,7 +241,7 @@ Route::middleware(['auth', 'ensureKepegawaian'])->prefix('kepegawaian')->group(f
 
 // Route::get('/pasien/riwayat', [RiwayatController::class, 'index'])
 //     ->name('pasien.riwayat');
-use App\Http\Controllers\Pasien\ArtikelController;
+
 
 Route::middleware(['auth'])->group(function () {
 
