@@ -324,3 +324,94 @@
     font-weight: 700;
     text-align: right;
 }
+
+.detail-page{
+    max-width:1100px;
+    margin:auto;
+}
+
+.detail-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:20px;
+}
+
+.detail-main-card{
+    background:white;
+    border-radius:18px;
+    padding:28px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+
+/* DATA GRID */
+.data-grid-detail{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px 40px;
+    margin-bottom:25px;
+}
+
+.data-row{
+    display:flex;
+    justify-content:space-between;
+}
+
+.data-label-detail{
+    color:#6B7DA3;
+    font-weight:500;
+}
+
+/* METRIC */
+.health-metrics-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-bottom:20px;
+}
+
+.metric-card-detail{
+    background:#F9FBFF;
+    border-radius:12px;
+    padding:12px;
+    text-align:center;
+    border-left:4px solid #316BA1;
+}
+
+/* DIAGNOSA & SARAN */
+.info-box-detail{
+    margin-bottom:16px;
+}
+
+.info-box-header{
+    background:#316BA1;
+    color:white;
+    padding:10px 14px;
+    border-radius:8px 8px 0 0;
+}
+
+.info-box-content{
+    border:1px solid #DCE7F5;
+    padding:14px;
+    border-radius:0 0 8px 8px;
+}
+
+/* RESEP */
+.resep-table-detail{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.resep-table-detail th{
+    background:#EAF3FB;
+    padding:10px;
+}
+
+.resep-table-detail td{
+    padding:10px;
+    border-bottom:1px solid #eee;
+}
+
+.total-row{
+    background:#F4F8FC;
+}

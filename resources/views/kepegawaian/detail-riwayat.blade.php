@@ -1,14 +1,8 @@
 @extends('layouts.kepegawaian')
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') Rincian Pemeriksaan</title>
-    <link rel="stylesheet" href="{{ asset('css/kepegawaian.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/detail-pemeriksaan.css') }}">
-    @stack('styles') 
-</head>
+
+@section('title','Rincian Riwayat Pemeriksaan')
+
+@section('content')
 
 
 @section('content')

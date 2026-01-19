@@ -1,0 +1,206 @@
+/* ================= NAVBAR PASIEN ================= */
+
+.navbar-pasien{
+    background: linear-gradient(90deg, #316BA1, #3f7fbf);
+    padding: 18px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    transition: all .3s ease;
+}
+
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    text-decoration:none;
+    color:white;
+}
+
+.brand img{
+    width:34px;
+}
+
+.brand span{
+    font-size:24px;
+    font-weight:700;
+    letter-spacing:.6px;
+}
+
+.nav-menu{
+    display:flex;
+    align-items:center;
+    gap:32px;
+}
+
+.nav-menu a{
+    color:white;
+    text-decoration:none;
+    font-weight:500;
+    font-size:16px;
+    font-style: bold;
+    opacity:.9;
+
+    padding:10px 16px;
+    border-radius:12px;
+    transition: all .25s ease;
+}
+
+.nav-menu a:hover{
+    background: rgba(255,255,255,.12);
+    box-shadow: 0 4px 10px rgba(0,0,0,.15);
+    opacity:1;
+    transform: translateY(-1px);
+}
+
+.nav-menu a.active{
+    background: rgba(255,255,255,.18);
+    box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    font-weight:600;
+}
+
+
+.nav-menu a:hover::after{
+    width:100%;
+}
+
+
+
+.logout-btn{
+    background:white;
+    color:#316BA1;
+    border:none;
+    padding:8px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    transition:.2s;
+}
+
+.logout-btn:hover{
+    background:#e8f1ff;
+}
+
+/* ============================= */
+/* GLOBAL */
+/* ============================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: #F4F8FC;
+    font-size: 14px;
+    color: #1f2d3d;
+}
+
+/* ============================= */
+/* SIDEBAR */
+/* ============================= */
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: #316BA1;
+    padding: 28px 20px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h2 {
+    font-size: 18px;
+    color: #B4F2F4;
+}
+
+.sidebar small {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* ============================= */
+/* MENU */
+/* ============================= */
+.menu {
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.menu a {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.menu a img {
+    width: 20px;
+    filter: brightness(0) invert(1);
+}
+
+.menu a:hover {
+    background: rgba(255,255,255,.15);
+}
+
+.menu a.active {
+    background: rgba(255,255,255,.3);
+}
+
+/* ============================= */
+/* LOGOUT */
+/* ============================= */
+.logout-form {
+    margin-top: auto;
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    background: rgba(255,255,255,.15);
+    color: #FFD6D6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.logout-btn img {
+    width: 20px;
+    filter: brightness(0) invert(1);
+}
+
+.logout-btn:hover {
+    background: #ff6b6b;
+    color: white;
+}
+
+/* ============================= */
+/* MAIN CONTENT */
+/* ============================= */
+.main {
+    margin-left: 260px;
+    padding: 32px 36px;
+    min-height: 100vh;
+}

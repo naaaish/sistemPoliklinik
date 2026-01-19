@@ -1,0 +1,40 @@
+.table-box{
+    background:white;
+    border-radius:16px;
+    padding:20px 22px;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead{
+    background:#E8FAFF;
+}
+
+th,td{
+    padding:12px 14px;
+    font-size:14px;
+}
+
+tbody tr{
+    border-bottom:1px solid #EEF2F7;
+}
+
+tbody tr:hover{
+    background:#F6FAFF;
+}
+
+.btn-lihat{
+    width:32px;
+    height:32px;
+    background:#316BA1;
+    color:white;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+}

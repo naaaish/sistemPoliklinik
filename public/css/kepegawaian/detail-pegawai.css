@@ -126,14 +126,14 @@
 .data-section {
     background: white;
     border-radius: 10px;
-    margin-bottom: 21px;
+    margin-bottom: 18px;
     overflow: hidden;
 }
 
 .section-header {
     background: rgba(49, 107, 161, 0.77);
     height: 52px;
-    padding: 0 24px;
+    padding: 0 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -157,12 +157,12 @@
 .section-title {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .section-title svg {
     width: 28px;
-    height: 28px;
+    height: px;
     color: white;
 }
 
@@ -171,7 +171,7 @@
     font-weight: 500;
     color: white;
     margin: 0;
-    line-height: 22px;
+    line-height: normal;
     letter-spacing: 0.88px;
 }
 
