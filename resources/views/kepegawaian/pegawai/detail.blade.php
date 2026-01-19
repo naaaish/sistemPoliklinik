@@ -1,10 +1,14 @@
 @extends('layouts.kepegawaian')
-
-@section('title', 'Rincian Data Pegawai')
-
-@push('styles')
-<link rel="stylesheet" href="{{ asset('css/detail-pegawai.css') }}">
-@endpush
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title') Rincian Data Pegawai</title>
+    <link rel="stylesheet" href="{{ asset('css/kepegawaian.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/detail-pegawai.css') }}">
+    @stack('styles') 
+</head>
 
 @section('content')
 
@@ -20,7 +24,7 @@
         <h1>Rincian Data Pegawai</h1>
     </div>
 
-    {{-- CARD HEADER PROFIL --}}
+    {{-- PROFIL --}}
     <div class="profil-card">
         <div class="profil-header">
             <div class="profil-avatar">
@@ -30,16 +34,18 @@
                 <h2>{{ $pegawai->nama_pegawai }}</h2>
                 <p class="profil-bidang">{{ $pegawai->bidang }}</p>
                 <div class="profil-meta">
-                    <span class="status-badge status-aktif">Aktif</span>
+                    <span class="status-badge status-aktif">
+                        {{ $pegawai->status ?? 'Aktif' }}
+                    </span>
                     <span class="nip-text">NIP : {{ $pegawai->nip }}</span>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- SECTION DATA PRIBADI --}}
+    {{-- DATA PRIBADI --}}
     <div class="data-section">
-        <div class="section-header" onclick="toggleSection('pribadi')">
+        <div class="section-header">
             <div class="section-title">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -47,14 +53,9 @@
                 </svg>
                 <h3>Data Pribadi</h3>
             </div>
-            <button class="toggle-btn" id="toggle-pribadi">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-            </button>
         </div>
-        <div class="section-content" id="content-pribadi" style="display: none;">
+
+        <div class="section-content">
             <div class="data-grid-two">
                 <div class="data-field">
                     <label>NAMA LENGKAP :</label>
@@ -92,24 +93,19 @@
         </div>
     </div>
 
-    {{-- SECTION DATA KEPEGAWAIAN --}}
+    {{-- DATA KEPEGAWAIAN --}}
     <div class="data-section">
-        <div class="section-header section-header-alt" onclick="toggleSection('kepegawaian')">
+        <div class="section-header section-header-alt">
             <div class="section-title">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <rect x="2" y="7" width="20" height="14" rx="2"></rect>
                     <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                 </svg>
                 <h3>Data Kepegawaian</h3>
             </div>
-            <button class="toggle-btn" id="toggle-kepegawaian">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-            </button>
         </div>
-        <div class="section-content" id="content-kepegawaian" style="display: none;">
+
+        <div class="section-content">
             <div class="data-grid-two">
                 <div class="data-field">
                     <label>NIP :</label>
@@ -133,15 +129,21 @@
                 </div>
                 <div class="data-field">
                     <label>MASSA KERJA :</label>
-                    <p>{{ $pegawai->tgl_masuk ? \Carbon\Carbon::parse($pegawai->tgl_masuk)->diffForHumans(null, true) : '-' }}</p>
+                    @php
+                        $start = \Carbon\Carbon::parse($pegawai->tgl_masuk);
+                        $now = now();
+                        $years = $start->diffInYears($now);
+                        $months = $start->copy()->addYears($years)->diffInMonths($now);
+                    @endphp
+                    <p>{{ $years }} Tahun {{ $months }} Bulan</p>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- SECTION KONTAK DAN ALAMAT --}}
+    {{-- KONTAK DAN ALAMAT --}}
     <div class="data-section">
-        <div class="section-header" onclick="toggleSection('kontak')">
+        <div class="section-header">
             <div class="section-title">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
@@ -149,14 +151,9 @@
                 </svg>
                 <h3>Kontak dan Alamat</h3>
             </div>
-            <button class="toggle-btn" id="toggle-kontak">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-            </button>
         </div>
-        <div class="section-content" id="content-kontak" style="display: none;">
+
+        <div class="section-content">
             <div class="data-grid-single">
                 <div class="data-field">
                     <label>NO. TELEPON :</label>
@@ -174,9 +171,9 @@
         </div>
     </div>
 
-    {{-- SECTION RIWAYAT PENDIDIKAN --}}
+    {{-- RIWAYAT PENDIDIKAN --}}
     <div class="data-section">
-        <div class="section-header section-header-alt" onclick="toggleSection('pendidikan')">
+        <div class="section-header section-header-alt">
             <div class="section-title">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
@@ -184,14 +181,9 @@
                 </svg>
                 <h3>Riwayat Pendidikan</h3>
             </div>
-            <button class="toggle-btn" id="toggle-pendidikan">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-            </button>
         </div>
-        <div class="section-content" id="content-pendidikan" style="display: none;">
+
+        <div class="section-content">
             <div class="data-grid-single">
                 <div class="data-field">
                     <label>PENDIDIKAN TERAKHIR :</label>
@@ -210,23 +202,5 @@
     </div>
 
 </div>
-
-@push('scripts')
-<script>
-function toggleSection(section) {
-    const content = document.getElementById('content-' + section);
-    const toggleBtn = document.getElementById('toggle-' + section);
-    const svgLine = toggleBtn.querySelector('svg line:first-child');
-    
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        svgLine.style.display = 'none'; // Hide vertical line (make it minus)
-    } else {
-        content.style.display = 'none';
-        svgLine.style.display = 'block'; // Show vertical line (make it plus)
-    }
-}
-</script>
-@endpush
 
 @endsection
