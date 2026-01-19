@@ -1,100 +1,113 @@
-.article-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 24px;
+/* ================= ROOT ================= */
+:root {
+    --primary: #316BA1;
+    --bg: #eef5fb;
+    --text: #1f2d3d;
 }
 
-.article-card {
-    background: white;
-    border-radius: 16px;
-    overflow: hidden;
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Poppins', sans-serif;
 }
 
-.article-card img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-}
-
-.article-body {
-    padding: 16px;
-}
-
-.article-body h4 {
-    font-size: 16px;
-    font-weight: 600;
-}
-
-/* ===== HERO ===== */
-.pasien-hero{
+/* ================= HERO ================= */
+.pasien-hero {
     background:
         url("/images/bg2.png") top center no-repeat,
         linear-gradient(135deg, rgba(49,107,161,.95), rgba(63,127,191,.95));
-    background-size:100% auto;
-    padding:90px 80px 150px;
-    color:white;
-}
-
-/* .hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        to right,
-        rgba(255,255,255,0.9),
-        rgba(255,255,255,0.65),
-        rgba(255,255,255,0.2)
-    );
-} */
-
-.hero-content {
-    position: relative;
-    z-index: 2;
+    background-size: cover;
+    padding: 90px 80px 140px;
+    color: white;
 }
 
 .hero-content h2 {
     font-size: 40px;
     font-weight: 700;
-    color: #f4f6f8;
 }
 
 .hero-content p {
-    margin-top: 5px;
+    margin-top: 6px;
     font-size: 18px;
-    color: #f9fafb;
     max-width: 520px;
 }
 
-/* ===== CONTAINER ===== */
+/* ================= CONTAINER ================= */
 .container {
     max-width: 1200px;
-    margin: -90px auto 60px;
+    margin: -100px auto 80px;
     padding: 0 40px;
 }
 
-/* ===== ARTICLE GRID ===== */
-.article-cards {
+/* ================= SEARCH ================= */
+.search-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 50px;
+}
+
+.search-box {
+    display: flex;
+    width: 100%;
+    max-width: 520px;
+    background: white;
+    border-radius: 30px;
+    padding: 6px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+}
+
+.search-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 12px 18px;
+    border-radius: 30px;
+    font-size: 14px;
+}
+
+.search-btn {
+    background: linear-gradient(135deg, #4fa3d1, #2b7bb9);
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ================= GRID ARTIKEL ================= */
+.article-grid {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(4, 1fr); /* 👈 4 CARD */
     gap: 32px;
 }
 
+/* ================= LINK ================= */
+.article-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
 
-/* ===== CARD ===== */
+/* ================= CARD ================= */
 .article-card {
     background: white;
     border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-    transition: 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0,0,0,.08);
+    transition: .3s ease;
+    cursor: pointer;
+    height: 100%;
 }
 
 .article-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    box-shadow: 0 14px 35px rgba(0,0,0,.12);
 }
 
+/* IMAGE */
 .article-image {
-    height: 190px;
+    height: 180px;
     background: #eaf2f8;
 }
 
@@ -104,22 +117,15 @@
     object-fit: cover;
 }
 
+/* CONTENT */
 .article-content {
-    padding: 22px;
+    padding: 20px;
 }
 
 .article-content h3 {
-    font-size: 18px;
-    color: #1f2d3d;
-    margin-bottom: 10px;
+    font-size: 16px;
     line-height: 1.4;
-}
-
-.article-content p {
-    font-size: 14px;
-    color: #5b6b82;
-    line-height: 1.7;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .article-date {
@@ -127,108 +133,33 @@
     color: #8fa0b5;
 }
 
-/* ===== EMPTY STATE ===== */
+/* ================= EMPTY ================= */
 .empty-state {
     grid-column: 1 / -1;
     text-align: center;
-    padding: 100px 20px;
+    padding: 120px 20px;
     color: #8fa0b5;
 }
 
-.empty-state h3 {
-    font-size: 20px;
-    margin-bottom: 6px;
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1200px) {
+    .article-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 */
+    }
 }
 
-/* =========================
-   SEARCH BAR ARTIKEL
-========================= */
-
-.search-section {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin: 30px 0 40px;
+@media (max-width: 900px) {
+    .article-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 */
+    }
 }
-
-.search-box {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 520px;
-    background: #ffffff;
-    border-radius: 30px;
-    padding: 6px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-}
-
-.search-box:focus-within {
-    box-shadow: 0 12px 28px rgba(79, 163, 209, 0.25);
-}
-
-.search-box input {
-    flex: 1;
-    border: none;
-    outline: none;
-    padding: 12px 18px;
-    font-size: 14px;
-    color: #333;
-    border-radius: 30px;
-}
-
-.search-box input::placeholder {
-    color: #9aa6b2;
-}
-
-.search-btn {
-    border: none;
-    outline: none;
-    background: linear-gradient(135deg, #4fa3d1, #2b7bb9);
-    color: #fff;
-    padding: 10px 22px;
-    border-radius: 25px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.search-btn:hover {
-    background: linear-gradient(135deg, #2b7bb9, #1f5f94);
-    transform: translateY(-1px);
-}
-
-/* =========================
-   RESPONSIVE
-========================= */
 
 @media (max-width: 576px) {
-    .search-box {
-        max-width: 100%;
-        padding: 5px;
+    .article-grid {
+        grid-template-columns: 1fr; /* 1 */
     }
 
-    .search-btn {
-        padding: 10px 16px;
-        font-size: 13px;
+    .container {
+        padding: 0 20px;
     }
-
-    .search-box input {
-        font-size: 13px;
-    }
-}
-
-/* PASTIKAN GRID & CARD DI ATAS */
-.article-grid,
-.article-card-link,
-.article-card {
-    position: relative;
-    z-index: 10;
-}
-
-/* MATIKAN SEMUA OVERLAY YANG BISA NUTUP */
-.hero-overlay,
-.overlay {
-    pointer-events: none !important;
 }
