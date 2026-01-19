@@ -11,6 +11,7 @@ use App\Http\Controllers\AdminPoli\PemeriksaanInputController;
 use App\Http\Controllers\AdminPoli\PemeriksaanController;
 use App\Http\Controllers\AdminPoli\DokterPemeriksaController;
 use App\Http\Controllers\AdminPoli\SaranController;
+use App\Http\Controllers\AdminPoli\ArtikelController as AdminPoliArtikelController;
 
 use App\Http\Controllers\Kepegawaian\KDashboardController;
 use App\Http\Controllers\Kepegawaian\PegawaiController;
@@ -167,6 +168,17 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::get('/dokter-pemeriksa/{tipe}/{id}/jadwal-view',
         [DokterPemeriksaController::class, 'jadwalView']
         )->name('dokter_pemeriksa.jadwal_view');
+
+    // Artikel
+    Route::get('/artikel', [AdminPoliArtikelController::class, 'index'])->name('artikel.index');
+    Route::get('/artikel/create', [AdminPoliArtikelController::class, 'create'])->name('artikel.create');
+    Route::post('/artikel', [AdminPoliArtikelController::class, 'store'])->name('artikel.store');
+    Route::get('/artikel/{id}/edit', [AdminPoliArtikelController::class, 'edit'])->name('artikel.edit');
+    Route::put('/artikel/{id}', [AdminPoliArtikelController::class, 'update'])->name('artikel.update');
+    Route::delete('/artikel/{id}', [AdminPoliArtikelController::class, 'destroy'])->name('artikel.destroy');
+
+    // upload from pdf/word → create draft → redirect edit
+    Route::post('/artikel/import', [AdminPoliArtikelController::class, 'importDoc'])->name('artikel.import');
 });
 
 

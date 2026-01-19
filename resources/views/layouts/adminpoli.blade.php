@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="{{ asset('css/adminpoli/pemeriksaan-detail.css') }}?v={{ filemtime(public_path('css/adminpoli/pemeriksaan-detail.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/dokter-pemeriksa.css') }}?v={{ filemtime(public_path('css/adminpoli/dokter-pemeriksa.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/saran.css') }}?v={{ filemtime(public_path('css/adminpoli/saran.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/artikel.css') }}?v={{ filemtime(public_path('css/adminpoli/artikel.css')) }}">
 
     {{-- Sweet Alert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -90,7 +91,8 @@
                 <span>Laporan & Dokumen</span>
             </a>
 
-            <a class="ap-nav-item" href="#">
+            <a class="ap-nav-item {{ request()->routeIs('adminpoli.artikel.*') ? 'active' : '' }}"
+            href="{{ route('adminpoli.artikel.index') }}">
                 <img src="{{ asset('assets/adminPoli/artikel.png') }}" alt="artikel">
                 <span>Artikel</span>
             </a>
