@@ -33,6 +33,9 @@ class DatabaseSeeder extends Seeder
             ResepSeeder::class,
             detailResepSeeder::class,
             ArtikelSeeder::class,
+            DetailPemeriksaanPenyakitSeeder::class,
+            DetailPemeriksaanDiagnosaK3Seeder::class,
+            DetailPemeriksaanSaranSeeder::class,
         ]);
     }
 }
