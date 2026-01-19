@@ -30,7 +30,7 @@ class JadwalDokterSeeder extends Seeder
                 'hari' => 'Rabu',
                 'jam_mulai' => '13:00:00',
                 'jam_selesai' => '16:00:00',
-                'id_dokter' => 'DOK003',
+                'id_dokter' => 'DOK001',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

@@ -75,7 +75,7 @@ class PendaftaranSeeder extends Seeder
                 'keluhan'          => 'Luka sayat pada tangan kanan saat bekerja.',
                 'id_pasien'        => $pasien[array_rand($pasien)],
                 'id_dokter'        => !empty($dokter) ? $dokter[array_rand($dokter)] : null,
-                'id_pemeriksa'     => !empty($pemeriksa) ? $pemeriksa[array_rand($pemeriksa)] : null, // Bisa ditangani keduanya
+                'id_pemeriksa'     => null,
                 'created_at'       => $now,
                 'updated_at'       => $now,
             ],
