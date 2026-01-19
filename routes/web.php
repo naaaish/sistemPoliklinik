@@ -141,6 +141,9 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
         ->name('dokter_pemeriksa.dokter.update');
     Route::delete('/dokter-pemeriksa/dokter/{id}', [DokterPemeriksaController::class, 'destroyDokter'])
         ->name('dokter_pemeriksa.dokter.destroy');
+    Route::get('/dokter-pemeriksa/dokter/{id}/jadwal', [DokterPemeriksaController::class, 'jadwalDokterJson'])
+        ->name('dokter_pemeriksa.dokter.jadwal');
+
 
     // CRUD pemeriksa
     Route::post('/dokter-pemeriksa/pemeriksa', [DokterPemeriksaController::class, 'storePemeriksa'])
@@ -159,8 +162,9 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
 
     Route::patch('/dokter-pemeriksa/pemeriksa/{id}/status', [DokterPemeriksaController::class, 'updateStatusPemeriksa'])
         ->name('dokter_pemeriksa.pemeriksa.status');
-
-    
+    Route::get('/dokter-pemeriksa/{tipe}/{id}/jadwal-view',
+        [DokterPemeriksaController::class, 'jadwalView']
+        )->name('dokter_pemeriksa.jadwal_view');
 });
 
 
