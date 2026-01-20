@@ -17,25 +17,40 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
+            // 1) master paling dasar
             UserSeeder::class,
+
+            // 2) master pegawai & keluarga (karena keluarga FK ke pegawai)
             PegawaiSeeder::class,
+            KeluargaSeeder::class,
+
+            // 3) master klinik
             DokterSeeder::class,
-            ObatSeeder::class,
-            DiagnosaK3Seeder::class,
-            JadwalDokterSeeder::class,
             PemeriksaSeeder::class,
-            SaranSeeder::class,
+            JadwalDokterSeeder::class,
+
+            // 4) master medis
             DiagnosaSeeder::class,
             DiagnosaK3Seeder::class,
-            PasienSeeder::class,
+            SaranSeeder::class,
+            ObatSeeder::class,
+
+            // 5) transaksi inti
             PendaftaranSeeder::class,
             PemeriksaanSeeder::class,
-            ResepSeeder::class,
-            detailResepSeeder::class,
-            ArtikelSeeder::class,
+
+            // 6) detail pemeriksaan (relasi ke pemeriksaan)
             DetailPemeriksaanPenyakitSeeder::class,
             DetailPemeriksaanDiagnosaK3Seeder::class,
             DetailPemeriksaanSaranSeeder::class,
+
+            // 7) resep (relasi ke pemeriksaan dan obat)
+            ResepSeeder::class,
+            DetailResepSeeder::class,
+
+            // 8) konten (bebas taruh akhir/awal, ga FK biasanya)
+            ArtikelSeeder::class,
         ]);
     }
 }
+

@@ -117,7 +117,7 @@ class DokterPemeriksaController extends Controller
             ]);
         }
 
-        return view('kepegawwaian.dokter_pemeriksa.jadwal_view', compact('tipe','id','jadwal'));
+        return view('kepegawaian.dokter_pemeriksa.jadwal_view', compact('tipe','id','jadwal'));
     }
 
     public function storeDokter(Request $request)

@@ -43,7 +43,7 @@
     });
     </script>
 
-
+    {{-- Sweet Alert --}}
     @stack('styles')
 </head>
 
@@ -113,6 +113,13 @@
                 <img src="{{ asset('assets/adminPoli/artikel.png') }}">
                 <span>Riwayat Pemeriksaan</span>
             </a>
+
+            <a class="ap-nav-item {{ request()->routeIs('kepegawaian.dokter_pemeriksa.*') ? 'active' : '' }}"
+            href="{{ route('kepegawaian.dokter_pemeriksa.index') }}">
+                <img src="{{ asset('assets/adminPoli/doctor.png') }}" alt="dokter">
+                <span>Dokter/Pemeriksa</span>
+            </a>
+
 
             <a href="{{ route('kepegawaian.laporan') }}"
                class="{{ request()->routeIs('kepegawaian.laporan*') ? 'active' : '' }}">

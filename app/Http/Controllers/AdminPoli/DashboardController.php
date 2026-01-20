@@ -31,8 +31,8 @@ class DashboardController extends Controller
         // 2) Total pasien bulan ini = distinct pasien yang berkunjung bulan ini
         $totalPasienBulanIni = DB::table('pendaftaran')
             ->whereBetween('tanggal', [$startOfMonth, $endOfMonth])
-            ->distinct('id_pasien')
-            ->count('id_pasien');
+            ->distinct(DB::raw("CONCAT(nip,'|',COALESCE(id_keluarga,'-'))"))
+            ->count();
 
         // 3) Hasil pemeriksaan belum diinput = pendaftaran yg belum ada record pemeriksaan
         // Asumsi: pemeriksaan punya kolom id_pendaftaran
@@ -43,15 +43,19 @@ class DashboardController extends Controller
 
         // 4) Daftar pasien aktif hari ini (buat tabel dashboard)
         $daftarPasienAktif = DB::table('pendaftaran as p')
-            ->join('pasien as ps', 'ps.id_pasien', '=', 'p.id_pasien')
+            ->join('pegawai as pg', 'pg.nip', '=', 'p.nip')
+            ->leftJoin('keluarga as k', 'k.id_keluarga', '=', 'p.id_keluarga')
             ->leftJoin('pemeriksaan as pm', 'pm.id_pendaftaran', '=', 'p.id_pendaftaran')
-            ->whereNull('pm.id_pendaftaran') // <-- kunci: belum ada pemeriksaan
+            ->whereNull('pm.id_pendaftaran')
             ->orderBy('p.tanggal', 'desc')
             ->select([
                 'p.id_pendaftaran',
                 'p.tanggal',
-                'ps.nama_pasien',
-                'ps.nip',
+                'p.nip',
+                DB::raw("CASE 
+                    WHEN p.tipe_pasien = 'keluarga' THEN k.nama_keluarga
+                    ELSE pg.nama_pegawai
+                END AS nama_pasien"),
             ])
             ->get();
 

@@ -12,6 +12,7 @@ use App\Http\Controllers\AdminPoli\PemeriksaanController;
 use App\Http\Controllers\Kepegawaian\DokterPemeriksaController;
 use App\Http\Controllers\AdminPoli\SaranController;
 use App\Http\Controllers\AdminPoli\ArtikelController as AdminPoliArtikelController;
+use App\Http\Controllers\AdminPoli\LaporanController as AdminPoliLaporanController;
 
 use App\Http\Controllers\Kepegawaian\KDashboardController;
 use App\Http\Controllers\Kepegawaian\PegawaiController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Kepegawaian\LaporanController;
 use App\Http\Controllers\AdminPoli\DiagnosaController;
 use App\Http\Controllers\AdminPoli\DiagnosaK3Controller;
 use App\Http\Controllers\Pasien\DetailPemeriksaanController;
+use App\Http\Controllers\Kepegawaian\DokterPemeriksaController;
 use App\Http\Controllers\Kepegawaian\DetailRiwayatController;
 use App\Http\Controllers\Pasien\ArtikelController;
 
@@ -156,7 +158,6 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
 
     // upload from pdf/word → create draft → redirect edit
     Route::post('/artikel/import', [AdminPoliArtikelController::class, 'importDoc'])->name('artikel.import');
-});
 
 /*
 |--------------------------------------------------------------------------

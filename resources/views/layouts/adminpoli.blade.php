@@ -20,9 +20,9 @@
     <link rel="stylesheet" href="{{ asset('css/adminpoli/diagnosak3.css') }}?v={{ filemtime(public_path('css/adminpoli/diagnosak3.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/pemeriksaan.css') }}?v={{ filemtime(public_path('css/adminpoli/pemeriksaan.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/pemeriksaan-detail.css') }}?v={{ filemtime(public_path('css/adminpoli/pemeriksaan-detail.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/adminpoli/dokter-pemeriksa.css') }}?v={{ filemtime(public_path('css/adminpoli/dokter-pemeriksa.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/saran.css') }}?v={{ filemtime(public_path('css/adminpoli/saran.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/artikel.css') }}?v={{ filemtime(public_path('css/adminpoli/artikel.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/laporan.css') }}?v={{ filemtime(public_path('css/adminpoli/laporan.css')) }}">
 
     {{-- Sweet Alert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -80,15 +80,10 @@
                 <span>Pemeriksaan Pasien</span>
             </a>
 
-            <a class="ap-nav-item {{ request()->routeIs('adminpoli.dokter_pemeriksa.*') ? 'active' : '' }}"
-            href="{{ route('adminpoli.dokter_pemeriksa.index') }}">
-                <img src="{{ asset('assets/adminPoli/doctor.png') }}" alt="dokter">
-                <span>Dokter/Pemeriksa</span>
-            </a>
-
-            <a class="ap-nav-item" href="#">
+            <a class="ap-nav-item {{ request()->routeIs('adminpoli.laporan.*') ? 'active' : '' }}"
+            href="{{ route('adminpoli.laporan.index') }}">
                 <img src="{{ asset('assets/adminPoli/laporan.png') }}" alt="laporan">
-                <span>Laporan & Dokumen</span>
+                <span>Laporan</span>
             </a>
 
             <a class="ap-nav-item {{ request()->routeIs('adminpoli.artikel.*') ? 'active' : '' }}"
