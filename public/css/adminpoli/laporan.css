@@ -1,15 +1,13 @@
 /* =========================
-   LAPORAN KLINIK
-   Khusus halaman laporan
-   ========================= */
+   LAPORAN KLINIK (KHUSUS)
+========================= */
 
 :root{
-  --lap-bg: #F1F8FF;
-  --lap-blue: #316BA1;
-  --lap-blue-soft: #89B2D9;
-  --lap-line: #E6EEF7;
-  --lap-text: #1F2D3D;
+  --lap-bg:#F1F8FF;
+  --lap-blue:#316BA1;
+  --lap-line:#E6EEF7;
   --lap-muted: rgba(0,0,0,.55);
+  --lap-text:#1F2D3D;
 }
 
 .lap-page{
@@ -17,193 +15,196 @@
   background: var(--lap-bg);
 }
 
-/* =========================
-   TOPBAR
-========================= */
 .lap-topbar{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 18px;
-}
-
-.lap-left{
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
 }
 
 .lap-back{
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: #fff;
-  border: 1px solid var(--lap-line);
-  cursor: pointer;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  border:3px solid #2E5F92;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+  text-decoration:none;
 }
 
-.lap-back img{
-  width: 18px;
-}
+.lap-back img{ width:22px; height:22px; }
 
 .lap-title{
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--lap-blue);
+  font-size:20px;
+  font-weight:800;
+  color:#1F2D3D;
 }
 
-/* =========================
-   CARD
-========================= */
 .lap-card{
-  background: #fff;
-  border-radius: 18px;
-  padding: 18px 18px 20px;
-  border: 1px solid var(--lap-line);
+  background:#fff;
+  border-radius:18px;
+  border:1px solid var(--lap-line);
+  padding:18px;
 }
 
 /* =========================
-   FILTER / TOOLS
+   TOOLS (tanggal + tombol)
 ========================= */
 .lap-tools{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  flex-wrap:wrap;
 }
 
 .lap-filter{
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
 }
 
 .lap-filter input[type="date"]{
-  height: 36px;
-  padding: 0 10px;
-  border-radius: 10px;
-  border: 1px solid var(--lap-line);
-  font-size: 13px;
-  color: var(--lap-text);
+  height:34px;
+  padding:0 10px;
+  border-radius:8px;
+  border:1px solid #cfdceb;
+  font-weight:700;
+  font-size:13px;
+  outline:none;
 }
 
-.lap-sep{
-  font-weight: 700;
-  color: var(--lap-muted);
-}
+.lap-sep{ font-weight:800; color:var(--lap-muted); }
 
 .lap-btn{
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 1px solid var(--lap-blue);
-  background: #fff;
-  color: var(--lap-blue);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.lap-btn img{
-  width: 16px;
+  height:34px;
+  padding:0 12px;
+  border-radius:8px;
+  border:1px solid #2E5F92;
+  background:#fff;
+  color:#2E5F92;
+  font-weight:800;
+  font-size:13px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  text-decoration:none;
 }
 
 .lap-btn:hover{
-  background: var(--lap-blue);
-  color: #fff;
+  background:#2E5F92;
+  color:#fff;
 }
 
-/* =========================
-   INFO PREVIEW
-========================= */
+.lap-btn img{
+  width:16px;
+  height:16px;
+  display:block;
+}
+
+/* info */
 .lap-info{
-  margin-top: 10px;
-  font-size: 13px;
-  color: var(--lap-muted);
-  font-weight: 700;
+  margin-top:10px;
+  font-size:13px;
+  color:#000;
+  font-weight:800;
 }
 
 /* =========================
-   TABLE
+   TABLE GRID
 ========================= */
 .lap-table-wrap{
-  margin-top: 14px;
-  overflow-x: auto;
+  margin-top:12px;
+  overflow:auto;
+  border-radius:14px;
+  border:1px solid var(--lap-line);
 }
 
+/* Biar tabel panjang tetap rapi */
 .lap-table{
-  min-width: 1500px;
-  border: 1px solid var(--lap-line);
-  border-radius: 14px;
-  overflow: hidden;
+  min-width: 1700px;  /* boleh kamu naikkan kalau kolom banyak */
+  background:#fff;
 }
 
-/* header */
+/* ini kunci: header & row harus display:grid */
+.lap-thead,
+.lap-row{
+  display:grid;
+  /* 25 kolom (sesuaikan kalau kolom kamu beda) */
+  grid-template-columns:
+    60px   /* NO */
+    120px  /* TANGGAL */
+    180px  /* NAMA */
+    70px   /* UMUR */
+    140px  /* BAGIAN */
+    180px  /* NAMA PASIEN */
+    90px   /* HUB KEL */
+    90px   /* TD */
+    90px   /* GDP */
+    110px  /* GD 2JAM PP */
+    80px   /* GDS */
+    70px   /* AU */
+    90px   /* CHOL */
+    70px   /* TG */
+    70px   /* Suhu */
+    70px   /* BB */
+    70px   /* TB */
+    240px  /* DIAGNOSA */
+    240px  /* TERAPHY */
+    120px  /* JUMLAH OBAT */
+    140px  /* HARGA OBAT (SATUAN) */
+    150px  /* TOTAL HARGA OBAT */
+    160px  /* PEMERIKSA */
+    140px  /* NB */
+    110px; /* PERIKSA KE */
+}
+
 .lap-thead{
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(120px, auto);
-  background: #F6FAFF;
-  border-bottom: 1px solid var(--lap-line);
+  background:#F6FAFF;
+  border-bottom:1px solid var(--lap-line);
+  position: sticky;
+  top: 0;
+  z-index: 3;
 }
 
 .lap-th{
-  padding: 10px 8px;
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--lap-blue);
-  text-align: center;
-  border-right: 1px solid var(--lap-line);
-  white-space: nowrap;
+  padding:10px 8px;
+  font-size:12px;
+  font-weight:900;
+  color:var(--lap-blue);
+  text-align:center;
+  border-right:1px solid var(--lap-line);
+  white-space:nowrap;
 }
 
-.lap-th:last-child{
-  border-right: none;
-}
-
-/* body row */
 .lap-row{
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(120px, auto);
-  border-bottom: 1px solid var(--lap-line);
+  border-bottom:1px solid var(--lap-line);
 }
 
-.lap-row:last-child{
-  border-bottom: none;
-}
+.lap-row:last-child{ border-bottom:none; }
 
 .lap-td{
-  padding: 9px 8px;
-  font-size: 13px;
-  color: var(--lap-text);
-  border-right: 1px solid var(--lap-line);
-  white-space: pre-wrap;
-  line-height: 1.25;
+  padding:9px 8px;
+  font-size:13px;
+  color:var(--lap-text);
+  border-right:1px solid var(--lap-line);
+  line-height:1.25;
+  white-space:pre-wrap;   /* biar diagnosa panjang turun rapi */
+  word-break:break-word;
 }
 
-.lap-td:last-child{
-  border-right: none;
-}
+.lap-th:last-child,
+.lap-td:last-child{ border-right:none; }
 
-.lap-center{
-  text-align: center;
-}
+.lap-center{ text-align:center; }
 
-/* =========================
-   EMPTY STATE
-========================= */
 .lap-empty{
-  padding: 16px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--lap-muted);
+  padding:14px;
+  text-align:center;
+  font-weight:800;
+  color:var(--lap-muted);
 }
