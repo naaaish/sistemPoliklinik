@@ -25,6 +25,25 @@
     {{-- Sweet Alert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script>
+    window.AdminPoliToast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        iconColor: '#2ecc71',
+        customClass: {
+        popup: 'admin-toast'
+        },
+        didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+    </script>
+
+
     @stack('styles')
 </head>
 
@@ -103,6 +122,7 @@
 
             <a href="{{ route('kepegawaian.dokter_pemeriksa.index') }}"
                class="{{ request()->is('kepegawaian/dokter_pemeriksa*') ? 'active' : '' }}">
+                <img src="{{ asset('assets/adminPoli/doctor.png') }}" alt="dokter">
                 <span>Dokter & Pemeriksa</span>
             </a>
         </div>
@@ -121,7 +141,7 @@
         @yield('content')
     </div>
 
-    {{-- ================= SCRIPTS STACK - INI YANG PENTING! ================= --}}
+    {{-- ================= SCRIPTS STACK  ================= --}}
     @stack('scripts')
 </body>
 </html>
