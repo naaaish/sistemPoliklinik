@@ -14,7 +14,7 @@ class RiwayatController extends Controller
 
         /**
          * =====================================
-         * 1. Cari pegawai berdasarkan user (NIP)
+         * 1. Ambil pegawai berdasarkan user login
          * =====================================
          */
         $pegawai = DB::table('pegawai')
@@ -23,85 +23,86 @@ class RiwayatController extends Controller
 
         if (!$pegawai) {
             return view('pasien.riwayat', [
-                'pasien'        => null,
                 'pegawai'       => null,
+                'keluargaAktif' => null,
                 'riwayat'       => collect(),
-                'daftarPasien'  => collect(),
-                'pasienAktifId' => null
+                'daftarKeluarga'=> collect(),
+                'keluargaAktifId' => null
             ]);
         }
 
         /**
          * =====================================
-         * 2. Ambil SEMUA pasien milik pegawai
+         * 2. Ambil SEMUA keluarga milik pegawai
+         * (pegawai juga dianggap pasien)
          * =====================================
-         * Berdasarkan ERD: pegawai.nip → pasien.nip (jika pegawai punya pasien)
-         * ATAU cek lewat tabel pegawai yang punya id_pasien
          */
-        
-        // Cara 1: Jika pasien punya kolom nip (relasi langsung)
-        $daftarPasien = DB::table('pasien')
+        $daftarKeluarga = DB::table('keluarga')
             ->where('nip', $pegawai->nip)
             ->orderByRaw("
-                CASE hub_kel
-                    WHEN 'ybs' THEN 1
-                    WHEN 'istri pegawai' THEN 2
-                    WHEN 'suami pegawai' THEN 2
-                    WHEN 'anak pegawai' THEN 3
+                CASE hubungan
+                    WHEN 'pegawai' THEN 1
+                    WHEN 'istri' THEN 2
+                    WHEN 'suami' THEN 2
+                    WHEN 'anak' THEN 3
                     ELSE 4
                 END
             ")
             ->get();
 
-        // Jika tidak ada pasien
-        if ($daftarPasien->isEmpty()) {
+        if ($daftarKeluarga->isEmpty()) {
             return view('pasien.riwayat', [
-                'pasien'        => null,
-                'pegawai'       => $pegawai,
-                'riwayat'       => collect(),
-                'daftarPasien'  => collect(),
-                'pasienAktifId' => null
+                'pegawai'        => $pegawai,
+                'keluargaAktif'  => null,
+                'riwayat'        => collect(),
+                'daftarKeluarga' => collect(),
+                'keluargaAktifId'=> null
             ]);
         }
 
         /**
          * =====================================
-         * 3. Tentukan pasien aktif
+         * 3. Tentukan keluarga aktif (dropdown)
          * =====================================
          */
-        $pasienAktifId = $request->get('pasien_id', $daftarPasien->first()->id_pasien);
-        $pasien = $daftarPasien->firstWhere('id_pasien', $pasienAktifId);
+        $keluargaAktifId = $request->get(
+            'id_keluarga',
+            $daftarKeluarga->first()->id_keluarga
+        );
 
-        if (!$pasien) {
-            $pasien = $daftarPasien->first();
-            $pasienAktifId = $pasien->id_pasien;
+        $keluargaAktif = $daftarKeluarga
+            ->firstWhere('id_keluarga', $keluargaAktifId);
+
+        if (!$keluargaAktif) {
+            $keluargaAktif = $daftarKeluarga->first();
+            $keluargaAktifId = $keluargaAktif->id_keluarga;
         }
 
         /**
          * =====================================
-         * 4. Ambil riwayat pemeriksaan pasien
+         * 4. Ambil RIWAYAT (dari pemeriksaan)
          * =====================================
          */
         $riwayat = DB::table('pemeriksaan')
             ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-            ->join('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
-            ->where('pendaftaran.id_pasien', $pasien->id_pasien)
-            ->orderBy('pemeriksaan.created_at', 'desc')
+            ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
+            ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
+            ->where('pendaftaran.id_keluarga', $keluargaAktifId)
             ->select(
-                'pemeriksaan.id_pemeriksaan',
-                'pemeriksaan.created_at',
-                'pendaftaran.keluhan',
-                'dokter.nama as nama_dokter',
-                'dokter.jenis_dokter'
+                'pemeriksaan.*',
+                'pendaftaran.tanggal',
+                'dokter.nama as dokter',
+                'pemeriksa.nama_pemeriksa as pemeriksa'
             )
+            ->orderBy('pemeriksaan.created_at', 'desc')
             ->get();
 
         return view('pasien.riwayat', compact(
-            'pasien',
             'pegawai',
+            'keluargaAktif',
             'riwayat',
-            'daftarPasien',
-            'pasienAktifId'
+            'daftarKeluarga',
+            'keluargaAktifId'
         ));
     }
 }

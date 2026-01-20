@@ -24,7 +24,7 @@
             </div>
             <div class="profil-info">
                 <h2>{{ $pegawai->nama_pegawai }}</h2>
-                <p class="profil-bidang">{{ $pegawai->bidang }}</p>
+                <p class="profil-bidang">{{ $pegawai->bagian }}</p>
                 <div class="profil-meta">
                     <span class="status-badge status-aktif">
                         {{ $pegawai->status ?? 'Aktif' }}
@@ -108,8 +108,8 @@
                     <p>{{ $pegawai->jabatan ?? '-' }}</p>
                 </div>
                 <div class="data-field">
-                    <label>BIDANG :</label>
-                    <p>{{ $pegawai->bidang }}</p>
+                    <label>BAGIAN :</label>
+                    <p>{{ $pegawai->bagian }}</p>
                 </div>
                 <div class="data-field">
                     <label>STATUS KEPEGAWAIAN :</label>
