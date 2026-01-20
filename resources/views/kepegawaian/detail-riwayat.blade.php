@@ -32,7 +32,9 @@
             </div>
             <div class="data-item">
                 <span class="data-label">Nama Pasien :</span>
-                <span class="data-value">{{ $pasien->nama_pasien }}</span>
+                <span class="data-value">
+                    {{ $pasien->nama_keluarga ?? $pasien->nama_pegawai ?? '-' }}
+                </span>
             </div>
             <div class="data-item">
                 <span class="data-label">Tanggal Periksa :</span>
@@ -44,7 +46,10 @@
             </div>
             <div class="data-item">
                 <span class="data-label">Hubungan Keluarga :</span>
-                <span class="data-value">{{ ucfirst($pasien->hub_kel) }}</span>
+                <span class="data-value">
+                    {{ $pasien->hub_kel ?? 'Pegawai' }}
+                </span>
+
             </div>
             <div class="data-item">
                 <span class="data-label">NIP :</span>
@@ -52,19 +57,24 @@
             </div>
             <div class="data-item">
                 <span class="data-label">Tanggal Lahir :</span>
-                <span class="data-value">{{ \Carbon\Carbon::parse($pasien->tgl_lahir)->translatedFormat('d F Y') }}</span>
+                <span class="data-value">
+                    {{ $pasien->tgl_lahir 
+                        ? \Carbon\Carbon::parse($pasien->tgl_lahir)->translatedFormat('d F Y') 
+                        : '-' 
+                    }}
+                </span>
             </div>
             <div class="data-item">
                 <span class="data-label">Nama Pegawai :</span>
-                <span class="data-value">{{ $pegawai->nama_pegawai ?? '-' }}</span>
+                <span class="data-value">{{ $pegawai->nama_pegawai ?? '—' }}</span>
             </div>
             <div class="data-item">
                 <span class="data-label">Umur :</span>
                 <span class="data-value">{{ \Carbon\Carbon::parse($pasien->tgl_lahir)->age }} tahun</span>
             </div>
             <div class="data-item">
-                <span class="data-label">Bidang :</span>
-                <span class="data-value">{{ $pegawai->bidang ?? '-' }}</span>
+                <span class="data-label">Bagian :</span>
+                <span class="data-value">{{ $pegawai->bagian ?? '-' }}</span>
             </div>
         </div>
 

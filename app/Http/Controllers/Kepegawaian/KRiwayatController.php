@@ -14,19 +14,17 @@ class KRiwayatController extends Controller
 
             // ⛔ sebelumnya: join pasien
             // ✅ sekarang: join keluarga
-            ->join('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
+            ->leftjoin('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
 
             // tetap
-            ->leftJoin('pegawai', 'keluarga.nip', '=', 'pegawai.nip')
+            ->leftJoin('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
             ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
             ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
 
             ->select(
                 'pemeriksaan.id_pemeriksaan',
 
-                // ⛔ pasien.nama_pasien
-                // ✅ keluarga sebagai pasien
-                'keluarga.nama_keluarga as nama_pasien',
+                DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
 
                 // nip induk
                 'pegawai.nip',

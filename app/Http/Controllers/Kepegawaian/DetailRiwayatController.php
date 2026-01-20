@@ -9,7 +9,11 @@ class DetailRiwayatController extends Controller
 {
     public function show($id_pemeriksaan)
     {
-        // Fetch pemeriksaan data
+        /**
+         * =========================
+         * 1. Pemeriksaan
+         * =========================
+         */
         $pemeriksaan = DB::table('pemeriksaan')
             ->where('id_pemeriksaan', $id_pemeriksaan)
             ->first();
@@ -18,31 +22,62 @@ class DetailRiwayatController extends Controller
             abort(404, 'Data pemeriksaan tidak ditemukan');
         }
 
-        // Fetch pendaftaran data
+        /**
+         * =========================
+         * 2. Pendaftaran
+         * =========================
+         */
         $pendaftaran = DB::table('pendaftaran')
             ->where('id_pendaftaran', $pemeriksaan->id_pendaftaran)
             ->first();
 
-        // Fetch pasien data
-        $pasien = DB::table('pasien')
-            ->where('id_pasien', $pendaftaran->id_pasien)
-            ->first();
+        /**
+         * =========================
+         * 3. Tentukan PASIEN
+         * =========================
+         * - Jika id_keluarga ada → keluarga
+         * - Jika tidak → pegawai langsung
+         */
+        $pasien = null;
+        $pegawai = null;
 
-        // pemeriksa
+        if (!empty($pendaftaran->id_keluarga)) {
+            // pasien = keluarga
+            $pasien = DB::table('keluarga')
+                ->where('id_keluarga', $pendaftaran->id_keluarga)
+                ->first();
+
+            // induk pegawai
+            if ($pasien) {
+                $pegawai = DB::table('pegawai')
+                    ->where('nip', $pasien->nip)
+                    ->first();
+            }
+        } else {
+            // pasien = pegawai langsung
+            $pegawai = DB::table('pegawai')
+                ->where('nip', $pendaftaran->nip)
+                ->first();
+
+            $pasien = $pegawai; // supaya view tetap bisa pakai $pasien
+        }
+
+        /**
+         * =========================
+         * 4. Pemeriksa (dokter / pemeriksa)
+         * =========================
+         */
         $namaPemeriksa = '-';
 
-        // cek dokter
-        $dokter = null;
-        if (!empty($pendaftaran->id_dokter) && $pendaftaran->id_dokter !== '-') {
+        if (!empty($pendaftaran->id_dokter)) {
             $dokter = DB::table('dokter')
                 ->where('id_dokter', $pendaftaran->id_dokter)
                 ->first();
-        }
 
-        // cek pemeriksa jika bukan dokter
-        if ($dokter) {
-            $namaPemeriksa = $dokter->nama;
-        } else {
+            if ($dokter) {
+                $namaPemeriksa = $dokter->nama;
+            }
+        } elseif (!empty($pendaftaran->id_pemeriksa)) {
             $pemeriksa = DB::table('pemeriksa')
                 ->where('id_pemeriksa', $pendaftaran->id_pemeriksa)
                 ->first();
@@ -52,36 +87,41 @@ class DetailRiwayatController extends Controller
             }
         }
 
-
-        // Fetch pegawai data
-        $pegawai = DB::table('pegawai')
-            ->where('nip', $pasien->nip)
-            ->first();
-
-        // Fetch diagnosa
+        /**
+         * =========================
+         * 5. Diagnosa
+         * =========================
+         */
         $diagnosa = null;
-        if ($pemeriksaan->id_diagnosa) {
+        if (!empty($pemeriksaan->id_diagnosa)) {
             $diagnosa = DB::table('diagnosa')
                 ->where('id_diagnosa', $pemeriksaan->id_diagnosa)
                 ->first();
         }
 
-        // Fetch saran
+        /**
+         * =========================
+         * 6. Saran
+         * =========================
+         */
         $saran = null;
-        if ($pemeriksaan->id_saran) {
+        if (!empty($pemeriksaan->id_saran)) {
             $saran = DB::table('saran')
                 ->where('id_saran', $pemeriksaan->id_saran)
                 ->first();
         }
 
-        // Fetch resep data
+        /**
+         * =========================
+         * 7. Resep + Detail Resep
+         * =========================
+         */
         $resep = DB::table('resep')
             ->where('id_pemeriksaan', $id_pemeriksaan)
             ->first();
 
-        // Fetch detail resep with harga dari tabel obat
         $detailResep = collect();
-        
+
         if ($resep) {
             $detailResep = DB::table('detail_resep')
                 ->join('obat', 'detail_resep.id_obat', '=', 'obat.id_obat')
@@ -99,8 +139,8 @@ class DetailRiwayatController extends Controller
             'pemeriksaan',
             'pendaftaran',
             'pasien',
-            'namaPemeriksa',
             'pegawai',
+            'namaPemeriksa',
             'diagnosa',
             'saran',
             'detailResep'
