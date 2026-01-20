@@ -289,3 +289,88 @@ tbody tr:last-child {
         transition: 0.3s;
     }
     .btn-lihat:hover { background-color: #06869A; }
+
+    /* ============================= */
+/* PEGAWAI PAGE */
+/* ============================= */
+
+.pegawai-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.pegawai-title {
+    color: #3B5E8C;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+/* Search Form */
+.pegawai-search {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.pegawai-search-input {
+    flex: 1;
+    height: 42px;
+    border: 1px solid #CFE0FF;
+    border-radius: 10px;
+    padding: 0 14px;
+    outline: none;
+    font-family: Poppins, sans-serif;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pegawai-search-input:focus {
+    border-color: #89B2D9;
+    box-shadow: 0 0 0 3px rgba(137, 178, 217, 0.25);
+}
+
+.pegawai-search-btn {
+    height: 42px;
+    border: none;
+    border-radius: 10px;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #7FA6D9;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: Poppins, sans-serif;
+    transition: all 0.15s ease;
+}
+
+.pegawai-search-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.pegawai-search-btn:active {
+    transform: translateY(0);
+    filter: brightness(0.98);
+}
+
+.pegawai-search-icon {
+    width: 16px;
+    height: 16px;
+}
+
+/* Table Empty State */
+.pegawai-empty {
+    text-align: center;
+    color: #7B8DA8;
+    font-weight: 600;
+}
+
+/* Table Cell Center */
+.pegawai-cell-center {
+    text-align: center;
+}

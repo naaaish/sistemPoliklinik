@@ -19,12 +19,13 @@
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/laporan.css') }}?v={{ filemtime(public_path('css/kepegawaian/laporan.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/riwayat.css') }}?v={{ filemtime(public_path('css/kepegawaian/riwayat.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/dokter-pemeriksa.css') }}?v={{ filemtime(public_path('css/kepegawaian/dokter-pemeriksa.css')) }}">
-
-
+    <link rel="stylesheet" href="{{ asset('css/kepegawaian/modal.css') }}?v={{ filemtime(public_path('css/kepegawaian/modal.css')) }}">
+    
+    
+    {{-- Sweet Alert --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     @stack('styles')
-
-    
 </head>
 
 <style>
@@ -67,17 +68,15 @@
         font-size: 12px;
         opacity: 0.85;
     }
-
 </style>
-<body>
 
+<body>
     {{-- ================= SIDEBAR ================= --}}
     <div class="sidebar">
         <h2>SISTEM POLIKLINIK</h2>
         <small>ADMIN KEPEGAWAIAN PANEL</small>
 
         <div class="menu">
-
             <a href="{{ route('kepegawaian.dashboard') }}"
                class="{{ request()->routeIs('kepegawaian.dashboard') ? 'active' : '' }}">
                 <img src="{{ asset('assets/adminPoli/dashboard.png') }}">
@@ -103,10 +102,9 @@
             </a>
 
             <a href="{{ route('kepegawaian.dokter_pemeriksa.index') }}"
-            class="{{ request()->is('kepegawaian/dokter_pemeriksa*') ? 'active' : '' }}">
+               class="{{ request()->is('kepegawaian/dokter_pemeriksa*') ? 'active' : '' }}">
                 <span>Dokter & Pemeriksa</span>
             </a>
-
         </div>
 
         <form action="{{ route('logout') }}" method="POST" class="logout-form">
@@ -123,5 +121,7 @@
         @yield('content')
     </div>
 
+    {{-- ================= SCRIPTS STACK - INI YANG PENTING! ================= --}}
+    @stack('scripts')
 </body>
 </html>
