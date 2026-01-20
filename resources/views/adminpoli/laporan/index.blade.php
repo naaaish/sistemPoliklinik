@@ -1,117 +1,123 @@
 @extends('layouts.adminpoli')
 
-@section('title', 'Laporan')
+@section('title', 'Laporan Klinik')
 
 @section('content')
+<link rel="stylesheet" href="{{ asset('css/laporan.css') }}">
+
 <div class="lap-page">
 
+  {{-- Topbar --}}
   <div class="lap-topbar">
-    <div class="lap-left">
-      <a href="{{ route('adminpoli.dashboard') }}" class="lap-back-img" title="Kembali">
-        <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
-      </a>
-      <div class="lap-heading">Laporan Klinik</div>
-    </div>
+    <a href="{{ route('adminpoli.dashboard') }}" class="lap-back" title="Kembali">
+      <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
+    </a>
+    <div class="lap-title">Laporan Klinik</div>
   </div>
 
   <div class="lap-card">
 
-    <div class="lap-tools-row" style="justify-content:space-between; gap:12px; flex-wrap:wrap;">
-      <form action="{{ route('adminpoli.laporan.index') }}" method="GET" class="lap-download" style="margin:0;">
-        <input type="date" name="from" value="{{ $from }}" class="lap-date" required>
+    {{-- Tools: rentang tanggal + download --}}
+    <form action="{{ route('adminpoli.laporan.index') }}" method="GET" class="lap-tools">
+      <div class="lap-filter">
+        <input type="date" name="from" value="{{ $from }}" required>
         <span class="lap-sep">s/d</span>
-        <input type="date" name="to" value="{{ $to }}" class="lap-date" required>
+        <input type="date" name="to" value="{{ $to }}" required>
 
-        <button type="submit" class="lap-btn-soft">
-          <span>Tampilkan</span>
-        </button>
+        <button type="submit" class="lap-btn">Tampilkan</button>
+      </div>
 
+      <div class="lap-filter">
         <a
-          href="{{ route('adminpoli.laporan.export', ['from'=>$from,'to'=>$to]) }}"
-          class="lap-btn-soft"
-          style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;"
+          class="lap-btn"
+          href="{{ route('adminpoli.laporan.export', ['from' => $from, 'to' => $to]) }}"
         >
-          <img src="{{ asset('assets/adminPoli/download.png') }}" alt="download" class="lap-ic">
-          <span>Download Excel</span>
+          <img src="{{ asset('assets/adminPoli/download.png') }}" alt="Download">
+          Download Excel
         </a>
-      </form>
+      </div>
+    </form>
+
+    <div class="lap-info">
+      <b>{{ $count ?? 0 }}</b> baris laporan ({{ $from }} s/d {{ $to }})
     </div>
 
-    <div class="lap-preview" style="margin-top:10px;">
-      <span>
-        <b>{{ $count }}</b> baris laporan ({{ $from }} s/d {{ $to }})
-      </span>
-    </div>
+    {{-- Table --}}
+    <div class="lap-table-wrap">
+      <div class="lap-table">
 
-    <div style="overflow:auto; margin-top:12px;">
-      <div class="lap-table" style="min-width:1400px;">
-        <div class="lap-table-head">
-          <div>NO</div>
-          <div>TANGGAL</div>
-          <div>NAMA</div>
-          <div>UMUR</div>
-          <div>BAGIAN</div>
-          <div>NAMA PASIEN</div>
-          <div>HUB KEL</div>
-          <div>TD</div>
-          <div>GDP</div>
-          <div>GD 2JAM PP</div>
-          <div>GDS</div>
-          <div>AU</div>
-          <div>CHOL</div>
-          <div>TG</div>
-          <div>Suhu</div>
-          <div>BB</div>
-          <div>TB</div>
-          <div>DIAGNOSA</div>
-          <div>TERAPHY</div>
-          <div>JUMLAH OBAT</div>
-          <div>HARGA OBAT (SATUAN)</div>
-          <div>TOTAL HARGA OBAT</div>
-          <div>PEMERIKSA</div>
-          <div>NB</div>
-          <div>PERIKSA KE :</div>
+        {{-- Header --}}
+        <div class="lap-thead">
+          <div class="lap-th">NO</div>
+          <div class="lap-th">TANGGAL</div>
+          <div class="lap-th">NAMA</div>
+          <div class="lap-th">UMUR</div>
+          <div class="lap-th">BAGIAN</div>
+          <div class="lap-th">NAMA PASIEN</div>
+          <div class="lap-th">HUB KEL</div>
+          <div class="lap-th">TD</div>
+          <div class="lap-th">GDP</div>
+          <div class="lap-th">GD 2JAM PP</div>
+          <div class="lap-th">GDS</div>
+          <div class="lap-th">AU</div>
+          <div class="lap-th">CHOL</div>
+          <div class="lap-th">TG</div>
+          <div class="lap-th">Suhu</div>
+          <div class="lap-th">BB</div>
+          <div class="lap-th">TB</div>
+          <div class="lap-th">DIAGNOSA</div>
+          <div class="lap-th">TERAPHY</div>
+          <div class="lap-th">JUMLAH OBAT</div>
+          <div class="lap-th">HARGA OBAT (SATUAN)</div>
+          <div class="lap-th">TOTAL HARGA OBAT</div>
+          <div class="lap-th">PEMERIKSA</div>
+          <div class="lap-th">NB</div>
+          <div class="lap-th">PERIKSA KE</div>
         </div>
 
-        <div class="lap-table-body">
-          @forelse($rows as $r)
-            <div class="lap-row">
-              <div><div class="lap-cell lap-center">{{ $r['NO'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['TANGGAL'] }}</div></div>
-              <div><div class="lap-cell">{{ $r['NAMA'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['UMUR'] }}</div></div>
-              <div><div class="lap-cell">{{ $r['BAGIAN'] }}</div></div>
-              <div><div class="lap-cell">{{ $r['NAMA_PASIEN'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['HUB_KEL'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['TD'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['GDP'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['GD_2JAM_PP'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['GDS'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['AU'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['CHOL'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['TG'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['SUHU'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['BB'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['TB'] }}</div></div>
-              <div><div class="lap-cell">{{ $r['DIAGNOSA'] }}</div></div>
-              <div><div class="lap-cell">{{ $r['TERAPHY'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['JUMLAH_OBAT'] }}</div></div>
-              <div><div class="lap-cell lap-center">
-                {{ is_numeric($r['HARGA_OBAT_SATUAN']) ? number_format($r['HARGA_OBAT_SATUAN'],0,',','.') : $r['HARGA_OBAT_SATUAN'] }}
-              </div></div>
-              <div><div class="lap-cell lap-center">
-                {{ is_numeric($r['TOTAL_HARGA_OBAT']) ? number_format($r['TOTAL_HARGA_OBAT'],0,',','.') : $r['TOTAL_HARGA_OBAT'] }}
-              </div></div>
-              <div><div class="lap-cell">{{ $r['PEMERIKSA'] }}</div></div>
-              <div><div class="lap-cell">{{ $r['NB'] }}</div></div>
-              <div><div class="lap-cell lap-center">{{ $r['PERIKSA_KE'] }}</div></div>
+        {{-- Rows --}}
+        @forelse($rows as $r)
+          <div class="lap-row">
+            <div class="lap-td lap-center">{{ $r['NO'] }}</div>
+            <div class="lap-td lap-center">{{ $r['TANGGAL'] }}</div>
+            <div class="lap-td">{{ $r['NAMA'] }}</div>
+            <div class="lap-td lap-center">{{ $r['UMUR'] }}</div>
+            <div class="lap-td">{{ $r['BAGIAN'] }}</div>
+            <div class="lap-td">{{ $r['NAMA_PASIEN'] }}</div>
+            <div class="lap-td lap-center">{{ $r['HUB_KEL'] }}</div>
+            <div class="lap-td lap-center">{{ $r['TD'] }}</div>
+            <div class="lap-td lap-center">{{ $r['GDP'] }}</div>
+            <div class="lap-td lap-center">{{ $r['GD_2JAM_PP'] }}</div>
+            <div class="lap-td lap-center">{{ $r['GDS'] }}</div>
+            <div class="lap-td lap-center">{{ $r['AU'] }}</div>
+            <div class="lap-td lap-center">{{ $r['CHOL'] }}</div>
+            <div class="lap-td lap-center">{{ $r['TG'] }}</div>
+            <div class="lap-td lap-center">{{ $r['SUHU'] }}</div>
+            <div class="lap-td lap-center">{{ $r['BB'] }}</div>
+            <div class="lap-td lap-center">{{ $r['TB'] }}</div>
+            <div class="lap-td">{{ $r['DIAGNOSA'] }}</div>
+            <div class="lap-td">{{ $r['TERAPHY'] }}</div>
+            <div class="lap-td lap-center">{{ $r['JUMLAH_OBAT'] }}</div>
+            <div class="lap-td lap-center">
+              @php
+                $hs = $r['HARGA_OBAT_SATUAN'];
+              @endphp
+              {{ is_numeric($hs) ? number_format($hs, 0, ',', '.') : $hs }}
             </div>
-          @empty
-            <div style="padding:14px; text-align:center; color:#7B8DA8; font-weight:700;">
-              Tidak ada data pada rentang ini.
+            <div class="lap-td lap-center">
+              @php
+                $tt = $r['TOTAL_HARGA_OBAT'];
+              @endphp
+              {{ is_numeric($tt) ? number_format($tt, 0, ',', '.') : $tt }}
             </div>
-          @endforelse
-        </div>
+            <div class="lap-td">{{ $r['PEMERIKSA'] }}</div>
+            <div class="lap-td lap-center">{{ $r['NB'] }}</div>
+            <div class="lap-td lap-center">{{ $r['PERIKSA_KE'] }}</div>
+          </div>
+        @empty
+          <div class="lap-empty">Tidak ada data pada rentang ini.</div>
+        @endforelse
+
       </div>
     </div>
 

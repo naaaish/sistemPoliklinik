@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('email');
             $table->text('alamat');
             $table->string('jabatan');
-            $table->string('bidang');
+            $table->string('bagian');
             $table->string('foto')->nullable();
             $table->string('pendidikan_terakhir');
             $table->string('institusi');
