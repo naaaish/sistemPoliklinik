@@ -18,18 +18,33 @@
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/detail-riwayat.css') }}?v={{ filemtime(public_path('css/kepegawaian/detail-riwayat.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/laporan.css') }}?v={{ filemtime(public_path('css/kepegawaian/laporan.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/riwayat.css') }}?v={{ filemtime(public_path('css/kepegawaian/riwayat.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/adminpoli/dokter-pemeriksa.css') }}?v={{ filemtime(public_path('css/adminpoli/dokter-pemeriksa.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/adminpoli/modal.css') }}?v={{ filemtime(public_path('css/adminpoli/modal.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/kepegawaian/dokter-pemeriksa.css') }}?v={{ filemtime(public_path('css/kepegawaian/dokter-pemeriksa.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/kepegawaian/modal.css') }}?v={{ filemtime(public_path('css/kepegawaian/modal.css')) }}">
+    
+    
+    {{-- Sweet Alert --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+    window.AdminPoliToast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        iconColor: '#2ecc71',
+        customClass: {
+        popup: 'admin-toast'
+        },
+        didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+    </script>
 
     {{-- Sweet Alert --}}
     @stack('styles')
-    {{-- SweetAlert2 (karena script dp pakai Swal.fire) --}}
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-@stack('scripts')
-</body>
-
-    
 </head>
 
 <style>
@@ -72,17 +87,15 @@
         font-size: 12px;
         opacity: 0.85;
     }
-
 </style>
-<body>
 
+<body>
     {{-- ================= SIDEBAR ================= --}}
     <div class="sidebar">
         <h2>SISTEM POLIKLINIK</h2>
         <small>ADMIN KEPEGAWAIAN PANEL</small>
 
         <div class="menu">
-
             <a href="{{ route('kepegawaian.dashboard') }}"
                class="{{ request()->routeIs('kepegawaian.dashboard') ? 'active' : '' }}">
                 <img src="{{ asset('assets/adminPoli/dashboard.png') }}">
@@ -113,6 +126,12 @@
                 <img src="{{ asset('assets/adminPoli/laporan.png') }}">
                 <span>Laporan</span>
             </a>
+
+            <a href="{{ route('kepegawaian.dokter_pemeriksa.index') }}"
+               class="{{ request()->is('kepegawaian/dokter_pemeriksa*') ? 'active' : '' }}">
+                <img src="{{ asset('assets/adminPoli/doctor.png') }}" alt="dokter">
+                <span>Dokter & Pemeriksa</span>
+            </a>
         </div>
 
         <form action="{{ route('logout') }}" method="POST" class="logout-form">
@@ -129,5 +148,7 @@
         @yield('content')
     </div>
 
+    {{-- ================= SCRIPTS STACK  ================= --}}
+    @stack('scripts')
 </body>
 </html>

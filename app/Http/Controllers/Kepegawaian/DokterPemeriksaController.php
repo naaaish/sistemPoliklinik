@@ -15,6 +15,7 @@ class DokterPemeriksaController extends Controller
     {
         $q = $request->q;
 
+        // ===== DOKTER =====
         $dokter = Dokter::query()
             ->when($q, fn($qr) => $qr->where('nama', 'like', "%$q%")->orWhere('jenis_dokter', 'like', "%$q%"))
             ->get();
@@ -122,30 +123,50 @@ class DokterPemeriksaController extends Controller
     public function storeDokter(Request $request)
     {
         $request->validate([
-            'id_dokter' => 'required|unique:dokter,id_dokter',
             'nama' => 'required',
             'jenis_dokter' => 'required',
             'status' => 'required',
             'jadwal' => 'required|array|min:1',
+            'jadwal.*.hari' => 'required|string',
+            'jadwal.*.jam_mulai' => 'required',
+            'jadwal.*.jam_selesai' => 'required',
         ]);
 
-        Dokter::create([
-            'id_dokter' => $request->id_dokter,
-            'nama' => $request->nama,
-            'jenis_dokter' => $request->jenis_dokter,
-            'status' => $request->status,
-        ]);
-
-        foreach ($request->jadwal as $j) {
-            JadwalDokter::create([
-                'id_dokter' => $request->id_dokter,
-                'hari' => $j['hari'],
-                'jam_mulai' => $j['jam_mulai'],
-                'jam_selesai' => $j['jam_selesai'],
-            ]);
+        // Auto-generate ID
+        $lastDokter = Dokter::orderBy('id_dokter', 'desc')->first();
+        if ($lastDokter) {
+            $lastNumber = (int) substr($lastDokter->id_dokter, 1);
+            $newId = 'D' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        } else {
+            $newId = 'D001';
         }
 
-        return back()->with('success', 'Dokter berhasil ditambahkan');
+        DB::transaction(function () use ($request, $newId) {
+            Dokter::create([
+                'id_dokter' => $newId,
+                'nama' => $request->nama,
+                'jenis_dokter' => $request->jenis_dokter,
+                'status' => $request->status,
+            ]);
+
+            foreach ($request->jadwal as $j) {
+                if (empty($j['hari']) || empty($j['jam_mulai']) || empty($j['jam_selesai'])) {
+                    continue;
+                }
+
+                JadwalDokter::create([
+                    'id_dokter' => $newId,
+                    'hari' => $j['hari'],
+                    'jam_mulai' => $j['jam_mulai'],
+                    'jam_selesai' => $j['jam_selesai'],
+                ]);
+            }
+        });
+
+        return redirect()
+        ->route('kepegawaian.dokter_pemeriksa.index')
+        ->with('success', 'Data dokter berhasil ditambahkan');
+
     }
 
     public function updateDokter(Request $request, $id)
@@ -156,8 +177,8 @@ class DokterPemeriksaController extends Controller
             'status' => 'required|in:Aktif,Nonaktif',
             'jadwal' => 'nullable|array',
             'jadwal.*.hari' => 'required_with:jadwal|string|max:50',
-            'jadwal.*.jam_mulai' => 'required_with:jadwal|date_format:H:i',
-            'jadwal.*.jam_selesai' => 'required_with:jadwal|date_format:H:i',
+            'jadwal.*.jam_mulai' => 'required_with:jadwal',
+            'jadwal.*.jam_selesai' => 'required_with:jadwal',
         ]);
 
         DB::transaction(function () use ($request, $id) {
@@ -171,7 +192,9 @@ class DokterPemeriksaController extends Controller
             JadwalDokter::where('id_dokter', $dokter->id_dokter)->delete();
 
             foreach (($request->jadwal ?? []) as $j) {
-                if (!$j['hari'] || !$j['jam_mulai'] || !$j['jam_selesai']) continue;
+                if (empty($j['hari']) || empty($j['jam_mulai']) || empty($j['jam_selesai'])) {
+                    continue;
+                }
 
                 JadwalDokter::create([
                     'id_dokter' => $dokter->id_dokter,
@@ -182,7 +205,10 @@ class DokterPemeriksaController extends Controller
             }
         });
 
-        return back()->with('success', 'Dokter berhasil diperbarui.');
+        return redirect()
+        ->route('kepegawaian.dokter_pemeriksa.index')
+        ->with('success', 'Data dokter berhasil diperbarui');
+
     }
 
     public function destroyDokter($id)
@@ -201,13 +227,21 @@ class DokterPemeriksaController extends Controller
     public function storePemeriksa(Request $request)
     {
         $request->validate([
-            'id_pemeriksa' => 'required|unique:pemeriksa,id_pemeriksa',
             'nama_pemeriksa' => 'required',
             'status' => 'required',
         ]);
 
+        // Auto-generate ID
+        $lastPemeriksa = Pemeriksa::orderBy('id_pemeriksa', 'desc')->first();
+        if ($lastPemeriksa) {
+            $lastNumber = (int) substr($lastPemeriksa->id_pemeriksa, 1);
+            $newId = 'P' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        } else {
+            $newId = 'P001';
+        }
+
         Pemeriksa::create([
-            'id_pemeriksa' => $request->id_pemeriksa,
+            'id_pemeriksa' => $newId,
             'nama_pemeriksa' => $request->nama_pemeriksa,
             'status' => $request->status,
         ]);

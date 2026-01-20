@@ -221,7 +221,7 @@
       }
       const ext = (file.name.split('.').pop() || '').toLowerCase();
       if (!allowedExt.includes(ext)) {
-        input.value = '';
+        input.value = ''; 
         btn.disabled = true;
         nameEl.textContent = 'Belum ada file dipilih';
         labelEl.textContent = 'Pilih File';

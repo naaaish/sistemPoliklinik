@@ -151,12 +151,8 @@
 </div>
 
   {{-- FLASH (buat toast) --}}
-  @if(session('success'))
-    <div id="dpFlash" data-type="success" data-msg="{{ session('success') }}"></div>
-  @endif
-  @if(session('error'))
-    <div id="dpFlash" data-type="error" data-msg="{{ session('error') }}"></div>
-  @endif
+
+
   {{-- ================= MODAL TAMBAH ================= --}}
   <div class="modal-overlay" id="dpModalTambah">
     <div class="modal-card dp-modal-wide">
@@ -296,6 +292,7 @@
   </div>
 </div>
 @endsection
+
 
 @push('scripts')
 <script>
@@ -510,12 +507,33 @@ document.addEventListener('DOMContentLoaded', () => {
       <input class="dp-jinput" type="time" name="${baseName}[${idx}][jam_mulai]" value="${(jamMulai || '').substring(0,5)}" required>
       <span class="dp-jsep">-</span>
       <input class="dp-jinput" type="time" name="${baseName}[${idx}][jam_selesai]" value="${(jamSelesai || '').substring(0,5)}" required>
-      <button type="button" class="dp-jremove" title="Hapus">×</button>
+      <button type="button" class="dp-jremove" title="Hapus">x</button>
     `;
 
     row.querySelector('.dp-jremove').addEventListener('click', () => row.remove());
     container.appendChild(row);
   }
 });
+
 </script>
+
+{{-- SWEETALERT TOAST (SAMA DENGAN ADMINPOLI) --}}
+@if(session('success'))
+<script>
+  AdminPoliToast.fire({
+    icon: 'success',
+    title: @json(session('success'))
+  });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+  AdminPoliToast.fire({
+    icon: 'error',
+    title: @json(session('error'))
+  });
+</script>
+@endif
+
 @endpush
