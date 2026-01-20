@@ -3,17 +3,24 @@
 namespace App\Http\Controllers\Kepegawaian;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PegawaiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pegawai = DB::table('pegawai')
-            ->orderBy('nama_pegawai')
-            ->get();
+        $query = DB::table('pegawai');
 
-        return view('kepegawaian.pegawai.index', compact('pegawai'));
+        // Search berdasarkan nama
+        if ($request->has('q') && $request->q != '') {
+            $query->where('nama_pegawai', 'LIKE', '%' . $request->q . '%');
+        }
+
+        $pegawai = $query->orderBy('nama_pegawai')->get();
+        $q = $request->q;
+
+        return view('kepegawaian.pegawai.index', compact('pegawai', 'q'));
     }
 
     public function show($id) {

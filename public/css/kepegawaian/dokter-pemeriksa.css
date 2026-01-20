@@ -414,7 +414,9 @@ body{ margin:0; }
   justify-content: center;
   z-index: 9999;
 }
-.dp-modal.is-open{ display:flex; }
+.dp-modal.is-open{ 
+  pointer-events: auto;
+  display:flex; }
 
 .dp-modal-backdrop{
   position:absolute;
@@ -504,12 +506,19 @@ body{ margin:0; }
 
 .dp-btn-soft-full{ width: 100%; justify-content: center; }
 
-.dp-jadwal-list{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+.dp-jadwal-list{ 
+  display:flex; 
+  flex-direction:column; 
+  gap:10px; 
+  margin-top:8px; 
+}
+
 .dp-jrow{
   display:flex;
   align-items:center;
   gap:8px;
 }
+
 .dp-jinput{
   height: 38px;
   border: 1px solid #CFE0FF;
@@ -520,9 +529,21 @@ body{ margin:0; }
   color:#3B5E8C;
   background:#fff;
 }
-.dp-jinput[type="text"]{ flex:1.2; }
-.dp-jinput[type="time"]{ width: 120px; }
-.dp-jsep{ font-weight: 800; color:#3B5E8C; }
+
+/* ← INI YANG DIPERBAIKI! */
+.dp-jinput[type="text"]{ 
+  flex: 1;              
+  min-width: 100px;     
+}
+
+.dp-jinput[type="time"]{ 
+  width: 110px;         
+}
+
+.dp-jsep{ 
+  font-weight: 800; 
+  color:#3B5E8C; 
+}
 
 .dp-jremove{
   width: 38px;
@@ -569,5 +590,5 @@ body{ margin:0; }
 
 #dpEditJadwalBtn,
 #dpTambahJadwalBtn {
-  margin-top: 12px;   /* ← atur 10–16px sesuai selera */
+  margin-top: 12px;
 }
