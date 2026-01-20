@@ -69,73 +69,96 @@ class PendaftaranController extends Controller
             return back()->withInput()->withErrors(['petugas' => 'Format dokter/pemeriksa tidak valid.']);
         }
         [$petugasType, $petugasId] = $petugas;
-        $petugasId = (int) $petugasId;
+        $petugasId = (string) $petugasId;
 
-        [$tipe, $id] = explode(':', $request->petugas);
+        // [$tipe, $id] = explode(':', $request->petugas);
 
         $idDokter = null;
         $idPemeriksa = null;
-        if ($petugasType === 'dokter') $idDokter = $id;
-        if ($petugasType === 'pemeriksa') $idPemeriksa = $id;
+        if ($petugasType === 'dokter') $idDokter = $petugasId;
+        if ($petugasType === 'pemeriksa') $idPemeriksa = $petugasId;
 
         // insert pasien dan pendaftaran dalam transaksi
-        DB::transaction(function () use ($validated, $idDokter, $idPemeriksa) {
-            // cari pasien existing (nip + nama_pasien + tgl_lahir)
-            $pasien = DB::table('pasien')
-                ->where('nip', $validated['nip'])
-                ->where('nama_pasien', $validated['nama_pasien'])
-                ->whereDate('tgl_lahir', $validated['tgl_lahir'])
-                ->first();
+        DB::transaction(function () use ($validated, $pegawai, $idDokter, $idPemeriksa) {
 
-            if ($pasien) {
-                $idPasien = $pasien->id_pasien;
-                DB::table('pasien')->where('id_pasien', $idPasien)->update([
-                    'tipe_pasien' => $validated['tipe_pasien'],
-                    'hub_kel' => $validated['hub_kel'],
-                ]);
-            } else {
-                $idPasien = $this->generateIdPasien();
-                DB::table('pasien')->insert([
-                    'id_pasien' => $idPasien,
-                    'nip' => $validated['nip'],
-                    'nama_pasien' => $validated['nama_pasien'],
-                    'tipe_pasien' => $validated['tipe_pasien'],
-                    'hub_kel' => $validated['hub_kel'],
-                    'tgl_lahir' => $validated['tgl_lahir'],
-                ]);
+            $idKeluarga = null;
+
+            // ===== kalau pasien KELUARGA: upsert ke tabel keluarga =====
+            if ($validated['tipe_pasien'] === 'keluarga') {
+
+                if ($validated['hub_kel'] === 'YBS') {
+                    // keluarga tapi YBS itu tidak make sense → paksa error biar ga nyimpen data salah
+                    throw new \Exception('Hubungan keluarga tidak valid untuk tipe pasien keluarga.');
+                }
+
+                // tentukan kode id_keluarga: I/S untuk pasangan, A untuk anak
+                // karena form kamu belum ada pilihan suami/istri, kita ambil dari jenis_kelamin pegawai:
+                // pegawai L -> pasangan dianggap Istri (I)
+                // pegawai P -> pasangan dianggap Suami (S)
+                $kode = 'A';
+                $hubungan = 'anak';
+
+                if ($validated['hub_kel'] === 'Pasangan') {
+                    $hubungan = 'pasangan';
+                    $kode = ($pegawai->jenis_kelamin === 'P') ? 'S' : 'I';
+                }
+
+                // cari angka urutan berikutnya (anak: 1..n, pasangan: 1)
+                $nextAngka = 1;
+
+                if ($hubungan === 'anak') {
+                    // ambil max urutan anak per nip
+                    $maxUrutan = DB::table('keluarga')
+                        ->where('nip', $pegawai->nip)
+                        ->where('hubungan_keluarga', 'anak')
+                        ->max('urutan_anak');
+
+                    $nextAngka = ((int) $maxUrutan) + 1;
+                }
+
+                // format id_keluarga sesuai request: nip-I/A/S-angka
+                $idKeluarga = $pegawai->nip . '-' . $kode . '-' . $nextAngka;
+
+                // upsert keluarga (kalau sudah ada id tsb, update datanya)
+                DB::table('keluarga')->updateOrInsert(
+                    ['id_keluarga' => $idKeluarga],
+                    [
+                        'nip' => $pegawai->nip,
+                        'hubungan_keluarga' => $hubungan,
+                        'urutan_anak' => $hubungan === 'anak' ? $nextAngka : null,
+                        'nama_keluarga' => $validated['nama_pasien'],
+                        'tgl_lahir' => $validated['tgl_lahir'], // NOTE: kalau ini sebenarnya tgl lahir keluarga, ubah input form ya
+                        'jenis_kelamin' => ($kode === 'I') ? 'P' : (($kode === 'S') ? 'L' : 'L'),
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
+                );
             }
 
-            
+            // ===== insert pendaftaran =====
             $idPendaftaran = $this->generateIdPendaftaran();
-            // insert pendaftaran (hapus kolom yang tidak ada di DB kamu)
+
             DB::table('pendaftaran')->insert([
                 'id_pendaftaran' => $idPendaftaran,
                 'tanggal' => $validated['tanggal'],
-                'keluhan' => $validated['keluhan'],
-                'id_pasien' => $idPasien,
+                'jenis_pemeriksaan' => $validated['jenis_pemeriksaan'],
+                'keluhan' => $validated['keluhan'] ?? null,
+
+                // NEW schema (tanpa pasien)
+                'tipe_pasien' => $validated['tipe_pasien'],
+                'nip' => $pegawai->nip,
+                'id_keluarga' => $idKeluarga,
+
                 'id_dokter' => $idDokter,
                 'id_pemeriksa' => $idPemeriksa,
+
+                'created_at' => now(),
+                'updated_at' => now(),
             ]);
         });
 
         return redirect()->route('adminpoli.dashboard')
             ->with('success', 'Pendaftaran berhasil disimpan.');
-    }
-
-    private function generateIdPasien()
-    {
-        $last = DB::table('pasien')
-            ->orderBy('id_pasien', 'desc')
-            ->value('id_pasien');
-
-        if (!$last) {
-            return 'PSN0001';
-        }
-
-        $number = (int) substr($last, 3);
-        $number++;
-
-        return 'PSN' . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
 
     private function generateIdPendaftaran()
@@ -163,5 +186,4 @@ class PendaftaranController extends Controller
 
         return 'REG' . $next;
     }
-
 }

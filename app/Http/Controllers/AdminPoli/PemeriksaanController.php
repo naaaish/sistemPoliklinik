@@ -29,7 +29,8 @@ class PemeriksaanController extends Controller
 
         $rows = \App\Models\Pendaftaran::query()
             ->join('pemeriksaan', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-            ->join('pasien', 'pasien.id_pasien', '=', 'pendaftaran.id_pasien')
+            ->join('pegawai', 'pegawai.nip', '=', 'pendaftaran.nip')
+            ->leftJoin('keluarga', 'keluarga.id_keluarga', '=', 'pendaftaran.id_keluarga')
             ->leftJoin('dokter', 'dokter.id_dokter', '=', 'pendaftaran.id_dokter')
             ->leftJoin('pemeriksa', 'pemeriksa.id_pemeriksa', '=', 'pendaftaran.id_pemeriksa')
 
@@ -43,9 +44,10 @@ class PemeriksaanController extends Controller
 
             ->select([
                 'pendaftaran.id_pendaftaran as id_pendaftaran',
-                'pasien.nama_pasien as nama_pasien',
-
-                // tanggal periksa pakai timestamp pemeriksaan
+                DB::raw("CASE 
+                    WHEN pendaftaran.tipe_pasien = 'keluarga' THEN keluarga.nama_keluarga
+                    ELSE pegawai.nama_pegawai
+                END as nama_pasien"),
                 'pemeriksaan.created_at as tanggal_periksa',
             ])
             ->selectRaw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as dokter_pemeriksa")

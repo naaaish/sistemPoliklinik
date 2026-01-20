@@ -156,6 +156,15 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
 
     // upload from pdf/word → create draft → redirect edit
     Route::post('/artikel/import', [AdminPoliArtikelController::class, 'importDoc'])->name('artikel.import');
+
+    // laporan
+    // Laporan
+Route::get('/laporan', [\App\Http\Controllers\AdminPoli\LaporanController::class, 'index'])
+    ->name('laporan.index');
+
+Route::get('/laporan/export', [\App\Http\Controllers\AdminPoli\LaporanController::class, 'exportExcel'])
+    ->name('laporan.export');
+
 });
 
 

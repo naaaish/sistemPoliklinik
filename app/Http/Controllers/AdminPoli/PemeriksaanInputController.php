@@ -21,7 +21,7 @@ class PemeriksaanInputController extends Controller
     public function index()
     {
         // sesuai yang kamu tulis: list pasien/pendaftaran
-        $pendaftaran = Pendaftaran::orderBy('tanggal_periksa', 'desc')->get();
+        $pendaftaran = Pendaftaran::orderBy('tanggal', 'desc')->get();
         return view('adminpoli.pemeriksaan.index', compact('pendaftaran'));
     }
 
@@ -225,5 +225,4 @@ class PemeriksaanInputController extends Controller
                 ->with('success', 'Hasil pemeriksaan berhasil disimpan.');
         });
     }
-
 }
