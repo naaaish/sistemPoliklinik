@@ -46,10 +46,10 @@
             </div>
 
             <div class="ap-row">
-                <div class="ap-label">Bidang</div>
+                <div class="ap-label">Bagian</div>
                 <div class="ap-colon">:</div>
                 <div class="ap-input">
-                    <input type="text" name="bidang" id="bidang" value="{{ old('bidang') }}" placeholder="Bidang" readonly required>
+                    <input type="text" name="bagian" id="bagian" value="{{ old('bagian') }}" placeholder="Bagian" readonly required>
                 </div>
             </div>
 
@@ -69,18 +69,20 @@
                 <div class="ap-label">Nama Pasien</div>
                 <div class="ap-colon">:</div>
                 <div class="ap-input">
-                    <input type="text" name="nama_pasien" id="nama_pasien"
-                        value="{{ old('nama_pasien') }}"
-                        placeholder="Nama Lengkap Pasien" required>
+                    <select name="nama_pasien" id="nama_pasien" class="ap-select" required>
+                        <option value="">-- pilih nama pasien --</option>
+                    </select>
                     <small class="ap-help" id="namaPasienHelp"></small>
                  </div>
             </div>
+
+            <input type="hidden" name="id_keluarga" id="id_keluarga">
 
             <div class="ap-row">
                 <div class="ap-label">Hubungan Keluarga</div>
                 <div class="ap-colon">:</div>
                 <div class="ap-input">
-                    <select name="hub_kel" id="hub_kel" class="ap-select" required>
+                    <select name="hub_kel" id="hub_kel" class="ap-select" required disabled>
                         <option value="YBS">YBS</option>
                         <option value="Pasangan">Pasangan</option>
                         <option value="Anak">Anak</option>
@@ -92,7 +94,7 @@
                 <div class="ap-label">Tanggal Lahir</div>
                 <div class="ap-colon">:</div>
                 <div class="ap-input">
-                    <input type="date" name="tgl_lahir" id="tgl_lahir" value="{{ old('tgl_lahir') }}" required>
+                    <input type="date" name="tgl_lahir" id="tgl_lahir" value="{{ old('tgl_lahir') }}" readonly required>
                 </div>
             </div>
 
@@ -144,188 +146,199 @@
     </footer>
 </div>
 <script>
-const nip = document.getElementById('nip');
-const nipHelp = document.getElementById('nipHelp');
+const nipEl = document.getElementById('nip');
+const tipeEl = document.getElementById('tipe_pasien');
 
-const namaPegawai = document.getElementById('nama_pegawai');
-const bidang = document.getElementById('bidang');
-const tglLahir = document.getElementById('tgl_lahir');
+const namaPegEl = document.getElementById('nama_pegawai');
+const bagianEl  = document.getElementById('bagian');
 
-const tipePasien = document.getElementById('tipe_pasien');
-const namaPasien = document.getElementById('nama_pasien');
-const namaPasienHelp = document.getElementById('namaPasienHelp');
+const namaPasSelect = document.getElementById('nama_pasien');
+const hubEl = document.getElementById('hub_kel');
+const tglEl = document.getElementById('tgl_lahir');
+const idKelEl = document.getElementById('id_keluarga');
 
-const hubKel = document.getElementById('hub_kel');
+// cache
+let pegawaiData = null;
+let keluargaData = [];
 
-  // simpan DOB pegawai hasil lookup NIP
-  let pegawaiDob = '';
-
-  function applyTglLahirRule(){
-    const tipe = (tipePasien?.value || '').toLowerCase();
-
-    if(tipe === 'pegawai'){
-      // auto dari DB pegawai
-      if(pegawaiDob) tglLahir.value = pegawaiDob;
-
-      // kunci agar tidak bisa diedit manual
-      tglLahir.readOnly = true;
-
-      // hubungan keluarga YBS (optional tapi biasanya wajib)
-      if(hubKel){
-        hubKel.value = 'YBS';
-        hubKel.disabled = true;
-      }
-
-      return;
-    }
-
-    // keluarga / pensiunan: boleh isi sendiri
-    tglLahir.readOnly = false;
-    if(hubKel) hubKel.disabled = false;
-
-    // kalau sebelumnya pegawai lalu ganti keluarga, kosongkan biar user isi sendiri
-    if(tglLahir.value === pegawaiDob) tglLahir.value = '';
-  }
-
-  // trigger saat tipe pasien berubah
-  if(tipePasien){
-    tipePasien.addEventListener('change', applyTglLahirRule);
-  }
-
-function isPensiunanBidang(){
-  return (bidang.value || '').trim().toLowerCase() === 'pensiunan';
+// === helpers ===
+function resetNamaPasien(){
+  namaPasSelect.innerHTML = `<option value="">-- pilih pasien --</option>`;
+  hubEl.value = '';
+  tglEl.value = '';
+  idKelEl.value = '';
 }
 
-function lockYBS(){
-  namaPasien.value = namaPegawai.value || '';
-  namaPasien.readOnly = true;
-
-  hubKel.value = 'YBS';
-  hubKel.disabled = true;
-
-  namaPasienHelp.textContent = '';
-}
-
-function unlockKeluarga(){
-  namaPasien.readOnly = false;
-
-  // hub_kel hanya pasangan/anak untuk keluarga
-  if(hubKel.value === 'YBS') hubKel.value = 'pasangan';
-  hubKel.disabled = false;
-
-  namaPasienHelp.textContent = 'Isi nama pasien keluarga, pilih hubungan (pasangan/anak).';
-  namaPasienHelp.style.color = '#5C6E9A';
-}
-
-function applyRulesByTipe(){
-  const tipe = tipePasien.value;
-
-  // belum ada data pegawai dari NIP, jangan auto
-  if(!namaPegawai.value){
-    namaPasien.readOnly = false;
-    hubKel.disabled = false;
+function applySelectedPasien(){
+  const opt = namaPasSelect.selectedOptions[0];
+  if(!opt || !opt.value){
+    hubEl.value = '';
+    tglEl.value = '';
+    idKelEl.value = '';
     return;
   }
 
+  hubEl.value = opt.dataset.hub || '';
+  tglEl.value = opt.dataset.tgl || '';
+
+  // kalau pilih pegawai => id_keluarga kosong
+  idKelEl.value = opt.dataset.idkel || '';
+}
+
+async function fetchPegawai(nip){
+  const res = await fetch(`/adminpoli/api/pegawai/${encodeURIComponent(nip)}`);
+  const j = await res.json().catch(()=> ({}));
+  if(!res.ok || !j.ok) throw new Error(j.message || 'NIP tidak ditemukan');
+  return j.data; // { nip, nama_pegawai, bidang/bagian, tgl_lahir }
+}
+
+async function fetchKeluarga(nip){
+  const res = await fetch(`/adminpoli/api/pegawai/${encodeURIComponent(nip)}/keluarga`);
+  const j = await res.json().catch(()=> ({}));
+  if(!res.ok || !j.ok) throw new Error(j.message || 'Gagal ambil keluarga');
+  return j.data; // [{id_keluarga,nama,hubungan_keluarga,tgl_lahir,umur,covered}]
+}
+
+// === Step 1: NIP -> isi nama pegawai + bagian (STOP) ===
+async function onNipDone(){
+  const nip = (nipEl.value || '').trim();
+  pegawaiData = null;
+  keluargaData = [];
+  resetNamaPasien();
+
+  if(!nip) return;
+
+  const p = await fetchPegawai(nip);
+  pegawaiData = p;
+
+  namaPegEl.value = p.nama_pegawai || '';
+  // kamu nyebutnya BAGIAN (bukan bidang)
+  bagianEl.value = p.bagian ?? p.bidang ?? '';
+
+  // IMPORTANT: di sini STOP. Jangan isi nama_pasien dulu.
+  // === AUTO pensiunan dari bagian ===
+  const bagianVal = (bagianEl.value || '').trim().toLowerCase();
+  const isPensiunan = bagianVal === 'pensiunan';
+
+  // kalau pensiunan -> paksa tipe_pasien = pensiunan
+  if (isPensiunan) {
+    tipeEl.value = 'pensiunan';
+    tipeEl.disabled = true;       // optional: biar ga bisa ganti
+  } else {
+    if (tipeEl.disabled) tipeEl.disabled = false;
+    // kalau sebelumnya kepaksa pensiunan, balikin ke pegawai default
+    if (tipeEl.value === 'pensiunan') tipeEl.value = 'pegawai';
+  }
+  if (tipeEl.value) {
+    onTipeChange().catch(()=>{});
+  }
+}
+
+// === Step 2: pilih tipe -> populate dropdown nama pasien ===
+async function onTipeChange(){
+  resetNamaPasien();
+
+  if(!pegawaiData){
+    // belum isi NIP / gagal fetch pegawai
+    return;
+  }
+
+  const tipe = tipeEl.value;
+
+  // 2A) pegawai: dropdown hanya pegawai, auto select
   if(tipe === 'pegawai'){
-    // pegawai harus aktif (bukan pensiunan)
-    if(isPensiunanBidang()){
-      tipePasien.value = 'pensiunan';
-      lockYBS();
-      return;
-    }
-    lockYBS();
+    namaPasSelect.innerHTML =
+      `<option value="${escapeHtml(pegawaiData.nama_pegawai)}"
+        data-hub="YBS"
+        data-tgl="${(pegawaiData.tgl_lahir || '').substring(0,10)}"
+        data-idkel="">
+        ${escapeHtml(pegawaiData.nama_pegawai)}
+      </option>`;
+    namaPasSelect.selectedIndex = 0;
+    applySelectedPasien();
     return;
   }
 
-  if(tipe === 'keluarga'){
-    // keluarga hanya untuk pegawai aktif
-    if(isPensiunanBidang()){
-      tipePasien.value = 'pensiunan';
-      lockYBS();
-      return;
-    }
-    unlockKeluarga();
-    return;
-  }
+  // 2B) keluarga / pensiunan: butuh list keluarga (pasangan + anak covered)
+  keluargaData = await fetchKeluarga(pegawaiData.nip);
 
+  let opts = `<option value="">-- pilih pasien --</option>`;
+
+  // kalau pensiunan: gabung (pegawai + keluarga)
   if(tipe === 'pensiunan'){
-    // kalau bukan pensiunan, jangan boleh pilih pensiunan
-    if(!isPensiunanBidang()){
-      tipePasien.value = 'pegawai';
-      lockYBS();
+    opts +=
+      `<option value="${escapeHtml(pegawaiData.nama_pegawai)}"
+        data-hub="YBS"
+        data-tgl="${(pegawaiData.tgl_lahir || '').substring(0,10)}"
+        data-idkel="">
+        ${escapeHtml(pegawaiData.nama_pegawai)} (Pegawai)
+      </option>`;
+  }
+
+  keluargaData.forEach(k => {
+    // pasangan selalu tampil
+    if(k.hubungan_keluarga === 'pasangan'){
+      opts +=
+        `<option value="${escapeHtml(k.nama)}"
+          data-hub="Pasangan"
+          data-tgl="${(k.tgl_lahir || '').substring(0,10)}"
+          data-idkel="${k.id_keluarga}">
+          ${escapeHtml(k.nama)} (Pasangan)
+        </option>`;
       return;
     }
-    lockYBS();
-    return;
+
+    // anak: hanya yang covered
+    if(k.hubungan_keluarga === 'anak' && k.covered){
+      opts +=
+        `<option value="${escapeHtml(k.nama)}"
+          data-hub="Anak"
+          data-tgl="${(k.tgl_lahir || '').substring(0,10)}"
+          data-idkel="${k.id_keluarga}">
+          ${escapeHtml(k.nama)} (Anak, ${k.umur} th)
+        </option>`;
+    }
+  });
+
+  namaPasSelect.innerHTML = opts;
+
+  // kalau tipe keluarga: auto select option pertama selain placeholder (biar enak)
+  if(tipe === 'keluarga' && namaPasSelect.options.length > 1){
+    namaPasSelect.selectedIndex = 1;
+    applySelectedPasien();
   }
 }
 
-async function fetchPegawai(nipValue){
-  nipHelp.textContent = '';
-  nipHelp.style.color = '';
-
-  if(!nipValue) return;
-
-  try{
-    const url = "{{ route('adminpoli.api.pegawai', '___') }}".replace('___', encodeURIComponent(nipValue));
-    const res = await fetch(url);
-
-    if(!res.ok){
-      const j = await res.json().catch(()=>null);
-      namaPegawai.value = '';
-      bidang.value = '';
-      tglLahir.value = '';
-      nipHelp.textContent = j?.message || 'NIP tidak ditemukan';
-      nipHelp.style.color = '#e74c3c';
-
-      // reset pasien input
-      namaPasien.value = '';
-      namaPasien.readOnly = false;
-      hubKel.disabled = false;
-      return;
-      pegawaiDob = '';
-      delete tglLahir.dataset.pegawaiDob;
-      tglLahir.readOnly = false;
-    }
-
-    const json = await res.json();
-    const d = json.data;
-
-    namaPegawai.value = d.nama_pegawai || '';
-    bidang.value = d.bidang || '';
-    pegawaiDob = (d.tgl_lahir || '').substring(0, 10);
-    tglLahir.dataset.pegawaiDob = pegawaiDob;
-
-
-    // aturan default setelah NIP ditemukan:
-    // kalau pegawai bidang pensiunan → auto set tipe pensiunan
-    if(isPensiunanBidang()){
-      tipePasien.value = 'pensiunan';
-    }else{
-      tipePasien.value = 'pegawai';
-    }
-
-    applyRulesByTipe();
-    applyTglLahirRule();
-
-    nipHelp.textContent = 'Data pegawai ditemukan.';
-    nipHelp.style.color = '#3bb54a';
-  }catch(e){
-    nipHelp.textContent = 'Gagal mengambil data pegawai.';
-    nipHelp.style.color = '#e74c3c';
-    pegawaiDob = '';
-    tglLahir.readOnly = false;
-    if(hubKel) hubKel.disabled = false;
-  }
+// anti-XSS kecil
+function escapeHtml(str){
+  return (str || '').replace(/[&<>"']/g, (m) => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[m]));
 }
 
-nip.addEventListener('blur', () => fetchPegawai(nip.value.trim()));
-tipePasien.addEventListener('change', applyRulesByTipe);
+// listeners
+nipEl.addEventListener('blur', () => {
+  onNipDone().catch(err => {
+    // kalau gagal, kosongin pegawai/bagian biar jelas
+    namaPegEl.value = '';
+    bagianEl.value = '';
+    resetNamaPasien();
+    alert(err.message);
+  });
+});
 
-// sebelum submit, pastikan disabled field ikut terkirim
+tipeEl.addEventListener('change', () => {
+  onTipeChange().catch(err => {
+    resetNamaPasien();
+    alert(err.message);
+  });
+});
+
+namaPasSelect.addEventListener('change', applySelectedPasien);
+
+// before submit: enable hub_kel biar terkirim
 document.getElementById('formPendaftaran').addEventListener('submit', () => {
-  hubKel.disabled = false;
+  hubEl.disabled = false;
 });
 </script>
 
