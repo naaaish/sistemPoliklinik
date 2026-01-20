@@ -18,6 +18,8 @@
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/detail-riwayat.css') }}?v={{ filemtime(public_path('css/kepegawaian/detail-riwayat.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/laporan.css') }}?v={{ filemtime(public_path('css/kepegawaian/laporan.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/riwayat.css') }}?v={{ filemtime(public_path('css/kepegawaian/riwayat.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/kepegawaian/dokter-pemeriksa.css') }}?v={{ filemtime(public_path('css/kepegawaian/dokter-pemeriksa.css')) }}">
+
 
 
     @stack('styles')
@@ -99,6 +101,12 @@
                 <img src="{{ asset('assets/adminPoli/laporan.png') }}">
                 <span>Laporan</span>
             </a>
+
+            <a href="{{ route('kepegawaian.dokter_pemeriksa.index') }}"
+            class="{{ request()->is('kepegawaian/dokter_pemeriksa*') ? 'active' : '' }}">
+                <span>Dokter & Pemeriksa</span>
+            </a>
+
         </div>
 
         <form action="{{ route('logout') }}" method="POST" class="logout-form">
