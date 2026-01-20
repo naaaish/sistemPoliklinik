@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\AdminPoli;
+namespace App\Http\Controllers\Kepegawaian;
 
 use App\Http\Controllers\Controller;
 use App\Models\Dokter;
@@ -62,7 +62,7 @@ class DokterPemeriksaController extends Controller
             ]);
         }
 
-        return view('adminpoli.dokter_pemeriksa.index', compact('rows','q'));
+        return view('kepegawaian.dokter_pemeriksa.index', compact('rows','q'));
     }
 
     public function jadwalJson($tipe, $id)
@@ -116,7 +116,7 @@ class DokterPemeriksaController extends Controller
             ]);
         }
 
-        return view('adminpoli.dokter_pemeriksa.jadwal_view', compact('tipe','id','jadwal'));
+        return view('kepegawaian.dokter_pemeriksa.jadwal_view', compact('tipe','id','jadwal'));
     }
 
     public function storeDokter(Request $request)

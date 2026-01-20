@@ -9,7 +9,6 @@ use App\Http\Controllers\AdminPoli\DashboardController as AdminPoliDashboardCont
 use App\Http\Controllers\AdminPoli\PendaftaranController;
 use App\Http\Controllers\AdminPoli\PemeriksaanInputController;
 use App\Http\Controllers\AdminPoli\PemeriksaanController;
-use App\Http\Controllers\AdminPoli\DokterPemeriksaController;
 use App\Http\Controllers\AdminPoli\SaranController;
 use App\Http\Controllers\AdminPoli\ArtikelController as AdminPoliArtikelController;
 
@@ -20,6 +19,7 @@ use App\Http\Controllers\Kepegawaian\LaporanController;
 use App\Http\Controllers\AdminPoli\DiagnosaController;
 use App\Http\Controllers\AdminPoli\DiagnosaK3Controller;
 use App\Http\Controllers\Pasien\DetailPemeriksaanController;
+use App\Http\Controllers\Kepegawaian\DokterPemeriksaController;
 use App\Http\Controllers\Kepegawaian\DetailRiwayatController;
 use App\Http\Controllers\Pasien\ArtikelController;
 
@@ -146,42 +146,6 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
         [PemeriksaanController::class, 'update']
     )->name('pemeriksaan.update');
 
-    // Dokter/pemeriksa
-    Route::get('/dokter-pemeriksa', [DokterPemeriksaController::class, 'index'])
-        ->name('dokter_pemeriksa.index');
-
-    // CRUD dokter
-    Route::post('/dokter-pemeriksa/dokter', [DokterPemeriksaController::class, 'storeDokter'])
-        ->name('dokter_pemeriksa.dokter.store');
-    Route::put('/dokter-pemeriksa/dokter/{id}', [DokterPemeriksaController::class, 'updateDokter'])
-        ->name('dokter_pemeriksa.dokter.update');
-    Route::delete('/dokter-pemeriksa/dokter/{id}', [DokterPemeriksaController::class, 'destroyDokter'])
-        ->name('dokter_pemeriksa.dokter.destroy');
-    Route::get('/dokter-pemeriksa/dokter/{id}/jadwal', [DokterPemeriksaController::class, 'jadwalDokterJson'])
-        ->name('dokter_pemeriksa.dokter.jadwal');
-
-
-    // CRUD pemeriksa
-    Route::post('/dokter-pemeriksa/pemeriksa', [DokterPemeriksaController::class, 'storePemeriksa'])
-        ->name('dokter_pemeriksa.pemeriksa.store');
-    Route::put('/dokter-pemeriksa/pemeriksa/{id}', [DokterPemeriksaController::class, 'updatePemeriksa'])
-        ->name('dokter_pemeriksa.pemeriksa.update');
-    Route::delete('/dokter-pemeriksa/pemeriksa/{id}', [DokterPemeriksaController::class, 'destroyPemeriksa'])
-        ->name('dokter_pemeriksa.pemeriksa.destroy');
-
-    // jadwal gabungan
-    Route::get('/dokter-pemeriksa/{tipe}/{id}/jadwal', [DokterPemeriksaController::class, 'jadwalJson'])
-        ->name('dokter_pemeriksa.jadwal_json');
-
-    Route::patch('/dokter-pemeriksa/dokter/{id}/status', [DokterPemeriksaController::class, 'updateStatusDokter'])
-        ->name('dokter_pemeriksa.dokter.status');
-
-    Route::patch('/dokter-pemeriksa/pemeriksa/{id}/status', [DokterPemeriksaController::class, 'updateStatusPemeriksa'])
-        ->name('dokter_pemeriksa.pemeriksa.status');
-    Route::get('/dokter-pemeriksa/{tipe}/{id}/jadwal-view',
-        [DokterPemeriksaController::class, 'jadwalView']
-        )->name('dokter_pemeriksa.jadwal_view');
-
     // Artikel
     Route::get('/artikel', [AdminPoliArtikelController::class, 'index'])->name('artikel.index');
     Route::get('/artikel/create', [AdminPoliArtikelController::class, 'create'])->name('artikel.create');
@@ -206,7 +170,7 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
 Route::middleware(['auth', 'ensureKepegawaian'])->prefix('kepegawaian')->group(function () {
 
 
-        Route::get('/dashboard', [KDashboardController::class, 'index'])
+    Route::get('/dashboard', [KDashboardController::class, 'index'])
             ->name('dashboard');
     // Dashboard
     Route::get('/dashboard', [KDashboardController::class, 'index'])
@@ -219,6 +183,41 @@ Route::middleware(['auth', 'ensureKepegawaian'])->prefix('kepegawaian')->group(f
     // Riwayat Pemeriksaan
     Route::get('/riwayat', [KRiwayatController::class, 'index'])
         ->name('kepegawaian.riwayat');
+    
+    // Dokter/pemeriksa
+    Route::get('/dokter-pemeriksa', [DokterPemeriksaController::class, 'index'])
+        ->name('kepegawaian.dokter_pemeriksa.index');
+    // CRUD dokter
+    Route::post('/dokter-pemeriksa/dokter', [DokterPemeriksaController::class, 'storeDokter'])
+        ->name('kepegawaian.dokter_pemeriksa.dokter.store');
+    Route::put('/dokter-pemeriksa/dokter/{id}', [DokterPemeriksaController::class, 'updateDokter'])
+        ->name('kepegawaian.dokter_pemeriksa.dokter.update');
+    Route::delete('/dokter-pemeriksa/dokter/{id}', [DokterPemeriksaController::class, 'destroyDokter'])
+        ->name('kepegawaian.dokter_pemeriksa.dokter.destroy');
+    Route::get('/dokter-pemeriksa/dokter/{id}/jadwal', [DokterPemeriksaController::class, 'jadwalDokterJson'])
+        ->name('kepegawaian.dokter_pemeriksa.dokter.jadwal');
+
+
+    // CRUD pemeriksa
+    Route::post('/dokter-pemeriksa/pemeriksa', [DokterPemeriksaController::class, 'storePemeriksa'])
+        ->name('kepegawaian.dokter_pemeriksa.pemeriksa.store');
+    Route::put('/dokter-pemeriksa/pemeriksa/{id}', [DokterPemeriksaController::class, 'updatePemeriksa'])
+        ->name('kepegawaian.dokter_pemeriksa.pemeriksa.update');
+    Route::delete('/dokter-pemeriksa/pemeriksa/{id}', [DokterPemeriksaController::class, 'destroyPemeriksa'])
+        ->name('kepegawaian.dokter_pemeriksa.pemeriksa.destroy');
+    // jadwal gabungan
+    Route::get('/dokter-pemeriksa/{tipe}/{id}/jadwal', [DokterPemeriksaController::class, 'jadwalJson'])
+        ->name('kepegawaian.dokter_pemeriksa.jadwal_json');
+
+    Route::patch('/dokter-pemeriksa/dokter/{id}/status', [DokterPemeriksaController::class, 'updateStatusDokter'])
+        ->name('kepegawaian.dokter_pemeriksa.dokter.status');
+
+    Route::patch('/dokter-pemeriksa/pemeriksa/{id}/status', [DokterPemeriksaController::class, 'updateStatusPemeriksa'])
+        ->name('kepegawaian.dokter_pemeriksa.pemeriksa.status');
+    Route::get('/dokter-pemeriksa/{tipe}/{id}/jadwal-view',
+        [DokterPemeriksaController::class, 'jadwalView']
+        )->name('kepegawaian.dokter_pemeriksa.jadwal_view');
+
 
     // Laporan
     Route::prefix('kepegawaian')->group(function () {

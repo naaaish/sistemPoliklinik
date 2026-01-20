@@ -1,4 +1,4 @@
-@extends('layouts.adminpoli')
+@extends('layouts.kepegawaian')
 
 @section('title', 'Dokter/Pemeriksa')
 
@@ -6,7 +6,7 @@
 <div class="dp-page">
   <div class="dp-topbar">
     <div class="dp-left">
-      <a href="{{ route('adminpoli.dashboard') }}" class="dp-back-img" title="Kembali">
+      <a href="{{ route('kepegawaian.dashboard') }}" class="dp-back-img" title="Kembali">
         <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
       </a>
       <div class="dp-heading">Dokter/Pemeriksa</div>
@@ -20,7 +20,7 @@
 
   <div class="dp-card">
     {{-- Search --}}
-    <form class="dp-search" method="GET" action="{{ route('adminpoli.dokter_pemeriksa.index') }}">
+    <form class="dp-search" method="GET" action="{{ route('kepegawaian.dokter_pemeriksa.index') }}">
       <input type="text" name="q" value="{{ $q ?? request('q') }}" placeholder="Cari dokter/pemeriksa" class="dp-search-input">
       <button class="dp-search-btn" type="submit">
         <img src="{{ asset('assets/adminPoli/search.png') }}" class="dp-ic" alt="cari">
@@ -79,7 +79,7 @@
 
           <div class="dp-cell dp-center">
             <div class="dp-status-wrap">
-              <form method="POST" action="{{ $d->tipe === 'dokter' ? route('adminpoli.dokter_pemeriksa.dokter.status', $d->id) : route('adminpoli.dokter_pemeriksa.pemeriksa.status', $d->id) }}">
+              <form method="POST" action="{{ $d->tipe === 'dokter' ? route('kepegawaian.dokter_pemeriksa.dokter.status', $d->id) : route('kepegawaian.dokter_pemeriksa.pemeriksa.status', $d->id) }}">
                 @csrf
                 @method('PATCH')
 
@@ -122,8 +122,8 @@
             <form method="POST"
               class="dp-del-form js-dp-delete"
               action="{{ $d->tipe === 'dokter'
-                ? route('adminpoli.dokter_pemeriksa.dokter.destroy', $d->id)
-                : route('adminpoli.dokter_pemeriksa.pemeriksa.destroy', $d->id)
+                ? route('kepegawaian.dokter_pemeriksa.dokter.destroy', $d->id)
+                : route('kepegawaian.dokter_pemeriksa.pemeriksa.destroy', $d->id)
               }}"
             >
               @csrf
@@ -162,7 +162,7 @@
     <div class="modal-card dp-modal-wide">
       <h3>Tambah Dokter/Pemeriksa</h3>
 
-      <form method="POST" id="dpFormTambah" action="{{ route('adminpoli.dokter_pemeriksa.dokter.store') }}">
+      <form method="POST" id="dpFormTambah" action="{{ route('kepegawaian.dokter_pemeriksa.dokter.store') }}">
         @csrf
 
         <div class="modal-group">
@@ -300,10 +300,10 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const dokterStoreUrl = "{{ route('adminpoli.dokter_pemeriksa.dokter.store') }}";
-  const pemeriksaStoreUrl = "{{ route('adminpoli.dokter_pemeriksa.pemeriksa.store') }}";
-  const dokterUpdateBase = "{{ url('adminpoli/dokter-pemeriksa/dokter') }}";
-  const pemeriksaUpdateBase = "{{ url('adminpoli/dokter-pemeriksa/pemeriksa') }}";
+  const dokterStoreUrl = "{{ route('kepegawaian.dokter_pemeriksa.dokter.store') }}";
+  const pemeriksaStoreUrl = "{{ route('kepegawaian.dokter_pemeriksa.pemeriksa.store') }}";
+  const dokterUpdateBase = "{{ url('kepegawaian/dokter-pemeriksa/dokter') }}";
+  const pemeriksaUpdateBase = "{{ url('kepegawaian/dokter-pemeriksa/pemeriksa') }}";
 
   const genId = (prefix) => prefix + String(Date.now());
 

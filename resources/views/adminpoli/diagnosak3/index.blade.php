@@ -477,7 +477,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
 });
 
-
 document.addEventListener('DOMContentLoaded', function(){
   function toast(icon, msg){
     if (!msg) return;
@@ -491,6 +490,8 @@ document.addEventListener('DOMContentLoaded', function(){
     // fallback
     Swal.fire({ icon: icon, title: msg, timer: 1600, showConfirmButton: false });
   }
+
+</script>
 
   @if(session('success'))
     toast('success', "{{ addslashes(session('success')) }}");

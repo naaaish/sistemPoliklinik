@@ -16,14 +16,22 @@ return new class extends Migration
             $table->date('tanggal');
             $table->enum('jenis_pemeriksaan',['cek_kesehatan','berobat']);
             $table->text('keluhan')->nullable();
-            $table->string('id_pasien',20);
+
+            // pengganti pasien:
+            $table->enum('tipe_pasien', ['pegawai','keluarga']);
+            $table->string('nip', 20)->nullable();
+            $table->string('id_keluarga', 32)->nullable();
+
             $table->string('id_dokter',20)->nullable();
             $table->string('id_pemeriksa',20)->nullable();
 
-            $table->foreign('id_pasien')->references('id_pasien')->on('pasien');
+            $table->timestamps();
+
+            // foreign keys
+            $table->foreign('nip')->references('nip')->on('pegawai')->cascadeOnDelete();
+            $table->foreign('id_keluarga')->references('id_keluarga')->on('keluarga')->nullOnDelete();
             $table->foreign('id_dokter')->references('id_dokter')->on('dokter')->nullOnDelete();
             $table->foreign('id_pemeriksa')->references('id_pemeriksa')->on('pemeriksa')->nullOnDelete();
-            $table->timestamps();
         });
     }
 

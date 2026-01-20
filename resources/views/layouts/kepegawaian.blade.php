@@ -18,9 +18,16 @@
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/detail-riwayat.css') }}?v={{ filemtime(public_path('css/kepegawaian/detail-riwayat.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/laporan.css') }}?v={{ filemtime(public_path('css/kepegawaian/laporan.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/riwayat.css') }}?v={{ filemtime(public_path('css/kepegawaian/riwayat.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/dokter-pemeriksa.css') }}?v={{ filemtime(public_path('css/adminpoli/dokter-pemeriksa.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/modal.css') }}?v={{ filemtime(public_path('css/adminpoli/modal.css')) }}">
 
-
+    {{-- Sweet Alert --}}
     @stack('styles')
+    {{-- SweetAlert2 (karena script dp pakai Swal.fire) --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@stack('scripts')
+</body>
 
     
 </head>
@@ -93,6 +100,13 @@
                 <img src="{{ asset('assets/adminPoli/artikel.png') }}">
                 <span>Riwayat Pemeriksaan</span>
             </a>
+
+            <a class="ap-nav-item {{ request()->routeIs('kepegawaian.dokter_pemeriksa.*') ? 'active' : '' }}"
+            href="{{ route('kepegawaian.dokter_pemeriksa.index') }}">
+                <img src="{{ asset('assets/adminPoli/doctor.png') }}" alt="dokter">
+                <span>Dokter/Pemeriksa</span>
+            </a>
+
 
             <a href="{{ route('kepegawaian.laporan') }}"
                class="{{ request()->routeIs('kepegawaian.laporan*') ? 'active' : '' }}">
