@@ -69,77 +69,97 @@ class LaporanController extends Controller
         //
         // Kalau nama tabelmu beda: ganti di sini aja.
 
-        $q = DB::table('pendaftaran as p')
+        $visits = DB::table('pendaftaran as p')
             ->leftJoin('pegawai as pg', 'pg.nip', '=', 'p.nip')
             ->leftJoin('keluarga as k', 'k.id_keluarga', '=', 'p.id_keluarga')
             ->leftJoin('pemeriksaan as pm', 'pm.id_pendaftaran', '=', 'p.id_pendaftaran')
-            ->whereBetween(DB::raw('DATE(p.tanggal)'), [$from, $to]) // kalau kolommu created_at, ganti jadi DATE(p.created_at)
+            ->leftJoin('dokter as d', 'd.id_dokter', '=', 'p.id_dokter')
+            ->leftJoin('pemeriksa as pr', 'pr.id_pemeriksa', '=', 'p.id_pemeriksa')
+            ->whereBetween('p.tanggal', [$from, $to])
             ->select([
                 'p.id_pendaftaran',
-                DB::raw('DATE(p.tanggal) as tanggal'),
+                'p.tanggal',
+                'p.tipe_pasien',
                 'p.nip',
                 'p.id_keluarga',
-                'p.periksa_ke',
 
-                DB::raw("COALESCE(pg.nama_pegawai, '-') as nama_pegawai"),
-                DB::raw("COALESCE(pg.bagian, '-') as bagian"),
+                'pm.id_pemeriksaan',
+                'pm.id_nb',
 
-                // Nama pasien & hubungan
-                DB::raw("CASE WHEN p.id_keluarga IS NULL OR p.id_keluarga = '' THEN 'YBS' ELSE COALESCE(k.nama_keluarga,'-') END as nama_pasien"),
-                DB::raw("CASE WHEN p.id_keluarga IS NULL OR p.id_keluarga = '' THEN 'YBS' ELSE COALESCE(k.hubungan,'-') END as hub_kel"),
-
-                // vital/lab (kalau kolommu beda, sesuaikan)
                 'pm.sistol',
                 'pm.diastol',
                 'pm.gd_puasa',
-                'pm.gd_2jam_pp',
-                'pm.gds',
+                'pm.gd_duajam',
+                'pm.gd_sewaktu',
                 'pm.asam_urat',
-                'pm.kolesterol',
-                'pm.trigliserida',
+                'pm.chol',
+                'pm.tg',
                 'pm.suhu',
-                'pm.bb',
-                'pm.tb',
+                'pm.berat',
+                'pm.tinggi',
 
-                // catatan / nb
-                DB::raw("COALESCE(pm.nb, pm.catatan, '-') as nb"),
+                DB::raw("COALESCE(pg.nama_pegawai,'-') as nama_pegawai"),
+                DB::raw("COALESCE(pg.bagian,'-') as bagian"),
 
-                // nama pemeriksa (kalau kamu simpan di pm)
-                DB::raw("COALESCE(pm.nama_pemeriksa, pm.dokter, '-') as pemeriksa"),
+                DB::raw("CASE 
+                    WHEN p.tipe_pasien = 'pegawai' 
+                    THEN 'YBS' 
+                    ELSE COALESCE(k.nama_keluarga,'-') 
+                END as nama_pasien"),
+
+                DB::raw("CASE 
+                    WHEN p.tipe_pasien = 'pegawai' 
+                    THEN 'YBS' 
+                    ELSE COALESCE(k.hubungan_keluarga,'-') 
+                END as hub_kel"),
+
+                DB::raw("COALESCE(d.nama, pr.nama_pemeriksa, '-') as pemeriksa"),
             ])
-            ->orderBy('tanggal', 'asc')
-            ->orderBy('p.id_pendaftaran', 'asc');
-
-        $visits = $q->get();
+            ->orderBy('p.tanggal')
+            ->orderBy('p.id_pendaftaran')
+            ->get();
 
         // Tambahin diagnosa + obat per visit (biar format Excel bisa multi-line)
         // NOTE: sesuaikan nama tabel relasi diagnosa & detail obat kalau beda.
 
         foreach ($visits as $v) {
-            // Diagnosa list (contoh: tabel pivot pendaftaran_diagnosa)
-            $v->diagnosa_list = DB::table('pendaftaran_diagnosa as pd')
-                ->leftJoin('diagnosa as d', 'd.id_diagnosa', '=', 'pd.id_diagnosa')
-                ->where('pd.id_pendaftaran', $v->id_pendaftaran)
-                ->pluck(DB::raw("COALESCE(d.nama_diagnosa, pd.diagnosa_text, '-')"))
-                ->filter()
-                ->values()
-                ->all();
+            // diagnosa umum
+            $v->diagnosa_list = DB::table('detail_pemeriksaan_penyakit as dp')
+                ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dp.id_diagnosa')
+                ->where('dp.id_pemeriksaan', $v->id_pemeriksaan)
+                ->pluck('d.diagnosa')
+                ->toArray();
 
-            // Detail obat list (contoh: tabel detail_resep)
-            $v->obat_list = DB::table('detail_resep as dr')
-                ->leftJoin('obat as o', 'o.id_obat', '=', 'dr.id_obat')
-                ->where('dr.id_pendaftaran', $v->id_pendaftaran)
+            // diagnosa K3
+            $v->diagnosa_k3_items = DB::table('detail_pemeriksaan_diagnosa_k3 as dk')
+                ->join('diagnosa_k3 as k3', 'k3.id_nb', '=', 'dk.id_nb')
+                ->where('dk.id_pemeriksaan', $v->id_pemeriksaan)
+                ->select(['k3.id_nb', 'k3.nama_penyakit'])
+                ->get()
+                ->toArray();
+
+            // saran / teraphy
+            $v->saran_list = DB::table('detail_pemeriksaan_saran as ds')
+                ->join('saran as s', 's.id_saran', '=', 'ds.id_saran')
+                ->where('ds.id_pemeriksaan', $v->id_pemeriksaan)
+                ->pluck('s.saran')
+                ->toArray();
+
+            // obat
+            $v->obat_list = DB::table('resep as r')
+                ->join('detail_resep as dr', 'dr.id_resep', '=', 'r.id_resep')
+                ->join('obat as o', 'o.id_obat', '=', 'dr.id_obat')
+                ->where('r.id_pemeriksaan', $v->id_pemeriksaan)
                 ->select([
-                    DB::raw("COALESCE(o.nama_obat, dr.nama_obat, '-') as nama_obat"),
-                    DB::raw("COALESCE(dr.jumlah, 0) as jumlah"),
-                    DB::raw("COALESCE(dr.satuan, '') as satuan"),
-                    DB::raw("COALESCE(dr.harga_satuan, o.harga, 0) as harga_satuan"),
-                    DB::raw("COALESCE(dr.subtotal, (COALESCE(dr.jumlah,0) * COALESCE(dr.harga_satuan, o.harga, 0))) as subtotal"),
+                    'o.nama_obat',
+                    'o.harga',
+                    'dr.jumlah',
+                    'dr.satuan',
+                    'dr.subtotal',
                 ])
                 ->get()
-                ->all();
+                ->toArray();
         }
-
         return $visits;
     }
 
@@ -153,25 +173,69 @@ class LaporanController extends Controller
     {
         $rows = [];
         $no = 1;
+        $counter = []; // nip => urutan tes darah
 
         foreach ($visits as $v) {
-            $diagnosa = $v->diagnosa_list ?? [];
-            $obatList = $v->obat_list ?? [];
 
-            $maxLines = max(count($diagnosa), count($obatList), 1);
+            $isPegawai = ($v->tipe_pasien ?? '') === 'pegawai';
+            $isPensiunan = false; // kalau ada kolom pensiun, isi di sini
+            $allowPeriksaKe = $isPegawai && !$isPensiunan;
 
             $td = ($v->sistol && $v->diastol) ? ($v->sistol . '/' . $v->diastol) : '-';
 
+            // periksa ke: hanya pegawai + hanya jika ada tes darah
+            $hasLab = $this->hasBloodTest($v);
+            $periksaKe = '-';
+            if ($allowPeriksaKe && $hasLab) {
+                $counter[$v->nip] = ($counter[$v->nip] ?? 0) + 1;
+                $periksaKe = $counter[$v->nip];
+            }
+
+            // ==== DIAGNOSA LINES (dipisah per baris) ====
+            // diagnosa umum: nb kosong
+            $diagnosaLines = [];
+
+            $diagUmum = $v->diagnosa_list ?? [];
+            foreach ($diagUmum as $d) {
+                $diagnosaLines[] = [
+                    'diagnosa' => $d,
+                    'nb' => '', // diagnosa umum ga punya id_nb
+                ];
+            }
+
+            // diagnosa k3: nb = id_nb
+            $diagK3Items = $v->diagnosa_k3_items ?? [];
+            foreach ($diagK3Items as $k3) {
+                $diagnosaLines[] = [
+                    'diagnosa' => $k3->nama_penyakit ?? '-',
+                    'nb' => $k3->id_nb ?? '',
+                ];
+            }
+
+            // kalau tidak ada diagnosa sama sekali, tetap 1 baris
+            if (count($diagnosaLines) === 0) {
+                $diagnosaLines[] = ['diagnosa' => '-', 'nb' => ''];
+            }
+
+            // ==== OBAT LIST ====
+            $obatList = $v->obat_list ?? [];
+
+            // total harga obat per pendaftaran (sum subtotal)
             $totalHarga = 0;
             foreach ($obatList as $ob) {
                 $totalHarga += (int)($ob->subtotal ?? 0);
             }
 
-            for ($i = 0; $i < $maxLines; $i++) {
-                $ob = $obatList[$i] ?? null;
-                $diag = $diagnosa[$i] ?? null;
+            // jumlah baris mengikuti yang paling banyak: diagnosa atau obat
+            $maxLines = max(count($diagnosaLines), count($obatList), 1);
 
+            for ($i = 0; $i < $maxLines; $i++) {
                 $isFirst = ($i === 0);
+
+                $diag = $diagnosaLines[$i]['diagnosa'] ?? '';
+                $nbLine = $diagnosaLines[$i]['nb'] ?? '';
+
+                $ob = $obatList[$i] ?? null;
 
                 $rows[] = [
                     'NO' => $isFirst ? $no : '',
@@ -182,23 +246,34 @@ class LaporanController extends Controller
                     'NAMA_PASIEN' => $isFirst ? ($v->nama_pasien ?? '-') : '',
                     'HUB_KEL' => $isFirst ? ($v->hub_kel ?? '-') : '',
                     'TD' => $isFirst ? $td : '',
+
                     'GDP' => $isFirst ? ($v->gd_puasa ?? '-') : '',
-                    'GD_2JAM_PP' => $isFirst ? ($v->gd_2jam_pp ?? '-') : '',
-                    'GDS' => $isFirst ? ($v->gds ?? '-') : '',
+                    'GD_2JAM_PP' => $isFirst ? ($v->gd_duajam ?? '-') : '',
+                    'GDS' => $isFirst ? ($v->gd_sewaktu ?? '-') : '',
                     'AU' => $isFirst ? ($v->asam_urat ?? '-') : '',
-                    'CHOL' => $isFirst ? ($v->kolesterol ?? '-') : '',
-                    'TG' => $isFirst ? ($v->trigliserida ?? '-') : '',
+                    'CHOL' => $isFirst ? ($v->chol ?? '-') : '',
+                    'TG' => $isFirst ? ($v->tg ?? '-') : '',
                     'SUHU' => $isFirst ? ($v->suhu ?? '-') : '',
-                    'BB' => $isFirst ? ($v->bb ?? '-') : '',
-                    'TB' => $isFirst ? ($v->tb ?? '-') : '',
-                    'DIAGNOSA' => $diag ?? ($isFirst ? '-' : ''),
+                    'BB' => $isFirst ? ($v->berat ?? '-') : '',
+                    'TB' => $isFirst ? ($v->tinggi ?? '-') : '',
+
+                    // diagnosa per baris
+                    'DIAGNOSA' => $diag !== '' ? $diag : ($isFirst ? '-' : ''),
+
+                    // TERAPHY = nama obat per baris
                     'TERAPHY' => $ob ? ($ob->nama_obat ?? '-') : ($isFirst ? '-' : ''),
+
                     'JUMLAH_OBAT' => $ob ? trim(($ob->jumlah ?? 0) . ' ' . ($ob->satuan ?? '')) : ($isFirst ? '-' : ''),
-                    'HARGA_OBAT_SATUAN' => $ob ? ($ob->harga_satuan ?? 0) : ($isFirst ? '-' : ''),
+                    'HARGA_OBAT_SATUAN' => $ob ? ($ob->harga ?? 0) : ($isFirst ? '-' : ''),
                     'TOTAL_HARGA_OBAT' => $isFirst ? ($totalHarga ?: '-') : '',
+
+                    // pemeriksa dari join dokter/pemeriksa
                     'PEMERIKSA' => $isFirst ? ($v->pemeriksa ?? '-') : '',
-                    'NB' => $isFirst ? ($v->nb ?? '-') : '',
-                    'PERIKSA_KE' => $isFirst ? ($v->periksa_ke ?? '-') : '',
+
+                    // NB: hanya pegawai, dan per baris (khusus diagnosa K3 ada id_nb)
+                    'NB' => $isPegawai ? ($nbLine ?: ($isFirst ? '-' : '')) : '',
+
+                    'PERIKSA_KE' => $isFirst ? $periksaKe : '',
                 ];
             }
 
@@ -206,5 +281,22 @@ class LaporanController extends Controller
         }
 
         return $rows;
+    }
+
+    private function hasBloodTest($v): bool
+    {
+        $fields = [
+            $v->gd_puasa ?? null,
+            $v->gd_duajam ?? null,
+            $v->gd_sewaktu ?? null,
+            $v->asam_urat ?? null,
+            $v->chol ?? null,
+            $v->tg ?? null,
+        ];
+
+        foreach ($fields as $x) {
+            if ($x !== null && $x !== '' && is_numeric($x) && (float)$x > 0) return true;
+        }
+        return false;
     }
 }
