@@ -67,7 +67,7 @@
           data-nama="{{ e($d->nama) }}"
           data-jenis="{{ e($d->jenis) }}"
           data-status="{{ e($d->status) }}"
-          data-jadwal="{{ e($jadwalStr) }}"
+          data-jadwal="{{ e($d->jadwalStr ?? '') }}"
         >
           <div class="dp-cell">
             <span class="dp-celltext">{{ $d->nama }}</span>
@@ -97,7 +97,7 @@
               <button type="button"
                 class="dp-jadwal-btn"
                 data-tipe="{{ $d->tipe }}"
-                data-jadwal="{{ $jadwalStr }}">
+                data-jadwal="{{ $d->jadwalStr ?? '' }}">
                 <span class="dp-jadwal-text">Lihat</span>
                 <span class="dp-jadwal-icons">
                   <img src="{{ asset('assets/adminPoli/eye.png') }}" class="dp-ic-sm" alt="lihat">
@@ -114,7 +114,6 @@
               data-nama="{{ e($d->nama) }}"
               data-jenis="{{ e($d->jenis) }}"
               data-status="{{ e($d->status) }}"
-              data-jadwal="{{ e($jadwalStr) }}"
             >
               <img src="{{ asset('assets/adminPoli/edit.png') }}" class="dp-ic-sm" alt="">
               Edit
@@ -152,12 +151,8 @@
 </div>
 
   {{-- FLASH (buat toast) --}}
-  @if(session('success'))
-    <div id="dpFlash" data-type="success" data-msg="{{ session('success') }}"></div>
-  @endif
-  @if(session('error'))
-    <div id="dpFlash" data-type="error" data-msg="{{ session('error') }}"></div>
-  @endif
+
+
   {{-- ================= MODAL TAMBAH ================= --}}
   <div class="modal-overlay" id="dpModalTambah">
     <div class="modal-card dp-modal-wide">
@@ -298,6 +293,7 @@
 </div>
 @endsection
 
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -382,9 +378,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ========== TAMBAH ==========
   btnOpenTambah?.addEventListener('click', () => {
-    // Reset form lengkap
-    formTambah.reset();
-    
     // auto-generate ID (hidden)
     const idDokterEl = document.getElementById('dpTambahIdDokter');
     const idPemeriksaEl = document.getElementById('dpTambahIdPemeriksa');
@@ -448,6 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setSectionEnabled(editDokterBox, false);
         setSectionEnabled(editPemeriksaBox, true);
 
+
         document.getElementById('dpEditNamaPemeriksa').value = btn.dataset.nama || '';
         document.getElementById('dpEditStatusPemeriksa').value = btn.dataset.status || 'Aktif';
 
@@ -502,74 +496,44 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ========== HELPER JADWAL ROW (DENGAN PLACEHOLDER!) ==========
+  // helper jadwal row
   function addJadwalRow(container, baseName, hari = '', jamMulai = '', jamSelesai = ''){
     const idx = container.querySelectorAll('.dp-jrow').length;
 
     const row = document.createElement('div');
     row.className = 'dp-jrow';
-    
-    // Buat input hari
-    const inputHari = document.createElement('input');
-    inputHari.className = 'dp-jinput';
-    inputHari.type = 'text';
-    inputHari.name = `${baseName}[${idx}][hari]`;
-    inputHari.placeholder = 'Cth: Senin';
-    inputHari.value = hari || '';
-    inputHari.required = true;
-    
-    // Buat input jam mulai
-    const inputMulai = document.createElement('input');
-    inputMulai.className = 'dp-jinput';
-    inputMulai.type = 'time';
-    inputMulai.name = `${baseName}[${idx}][jam_mulai]`;
-    inputMulai.value = (jamMulai || '').substring(0,5);
-    inputMulai.required = true;
-    
-    // Buat separator
-    const sep = document.createElement('span');
-    sep.className = 'dp-jsep';
-    sep.textContent = '-';
-    
-    // Buat input jam selesai
-    const inputSelesai = document.createElement('input');
-    inputSelesai.className = 'dp-jinput';
-    inputSelesai.type = 'time';
-    inputSelesai.name = `${baseName}[${idx}][jam_selesai]`;
-    inputSelesai.value = (jamSelesai || '').substring(0,5);
-    inputSelesai.required = true;
-    
-    // Buat tombol hapus
-    const btnRemove = document.createElement('button');
-    btnRemove.type = 'button';
-    btnRemove.className = 'dp-jremove';
-    btnRemove.title = 'Hapus';
-    btnRemove.textContent = '×';
-    btnRemove.addEventListener('click', () => row.remove());
-    
-    // Append semua elemen
-    row.appendChild(inputHari);
-    row.appendChild(inputMulai);
-    row.appendChild(sep);
-    row.appendChild(inputSelesai);
-    row.appendChild(btnRemove);
-    
+    row.innerHTML = `
+      <input class="dp-jinput" type="text" name="${baseName}[${idx}][hari]" placeholder="Hari" value="${hari || ''}" required>
+      <input class="dp-jinput" type="time" name="${baseName}[${idx}][jam_mulai]" value="${(jamMulai || '').substring(0,5)}" required>
+      <span class="dp-jsep">-</span>
+      <input class="dp-jinput" type="time" name="${baseName}[${idx}][jam_selesai]" value="${(jamSelesai || '').substring(0,5)}" required>
+      <button type="button" class="dp-jremove" title="Hapus">x</button>
+    `;
+
+    row.querySelector('.dp-jremove').addEventListener('click', () => row.remove());
     container.appendChild(row);
   }
-
-  // ========== FLASH TOAST ==========
-  const flash = document.getElementById('dpFlash');
-  if (flash) {
-    const type = flash.dataset.type;
-    const msg = flash.dataset.msg;
-    Swal.fire({
-      icon: type === 'success' ? 'success' : 'error',
-      title: type === 'success' ? 'Berhasil!' : 'Gagal!',
-      text: msg,
-      timer: 3000,
-      showConfirmButton: false
-    });
-  }
 });
+
 </script>
+
+{{-- SWEETALERT TOAST (SAMA DENGAN ADMINPOLI) --}}
+@if(session('success'))
+<script>
+  AdminPoliToast.fire({
+    icon: 'success',
+    title: @json(session('success'))
+  });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+  AdminPoliToast.fire({
+    icon: 'error',
+    title: @json(session('error'))
+  });
+</script>
+@endif
+
 @endpush
