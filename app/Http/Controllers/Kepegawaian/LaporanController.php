@@ -28,10 +28,10 @@ class LaporanController extends Controller
         foreach (['pegawai','pensiun'] as $tipe) {
             $preview[$tipe] = DB::table('pemeriksaan')
                 ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-                ->join('pasien','pendaftaran.id_pasien','=','pasien.id_pasien')
-                ->where('pasien.tipe_pasien',$tipe)
+                ->join('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
+                ->where('keluarga.tipe_keluarga',$tipe)
                 ->select(
-                    'pasien.nama_pasien',
+                    'keluarga.nama_keluarga',
                     DB::raw('DATE(pemeriksaan.created_at) as tanggal')
                 )
                 ->orderByDesc('pemeriksaan.created_at')
@@ -108,10 +108,10 @@ class LaporanController extends Controller
         if (in_array($jenis, ['pegawai', 'pensiun'])) {
             $query = DB::table('pemeriksaan')
                 ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-                ->join('pasien','pendaftaran.id_pasien','=','pasien.id_pasien')
-                ->where('pasien.tipe_pasien', $jenis)
+                ->join('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
+                ->where('keluarga.tipe_keluarga', $jenis)
                 ->select(
-                    'pasien.nama_pasien',
+                    'keluarga.nama_keluarga',
                     DB::raw('DATE(pemeriksaan.created_at) as tanggal')
                 )
                 ->orderByDesc('pemeriksaan.created_at');
@@ -123,7 +123,7 @@ class LaporanController extends Controller
             $data = $query->get();
         }
 
-        /* ================= DOKTER (DENGAN DETAIL PASIEN) ================= */
+        /* ================= DOKTER ================= */
         elseif ($jenis === 'dokter') {
             // Query untuk dokter dengan total pasien
             $query = DB::table('dokter')
@@ -148,10 +148,10 @@ class LaporanController extends Controller
                 if ($dokter->jenis_dokter === 'umum') { // 'umum' = dokter poliklinik
                     $pasienQuery = DB::table('pemeriksaan')
                         ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-                        ->join('pasien', 'pendaftaran.id_pasien', '=', 'pasien.id_pasien')
+                        ->join('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
                         ->where('pendaftaran.id_dokter', $dokter->id_dokter)
                         ->select(
-                            'pasien.nama_pasien',
+                            'keluarga.nama_keluarga',
                             DB::raw('DATE(pemeriksaan.created_at) as tanggal')
                         )
                         ->orderByDesc('pemeriksaan.created_at');
@@ -248,10 +248,10 @@ class LaporanController extends Controller
         if (in_array($jenis, ['pegawai', 'pensiun'])) {
             $query = DB::table('pemeriksaan')
                 ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-                ->join('pasien','pendaftaran.id_pasien','=','pasien.id_pasien')
-                ->where('pasien.tipe_pasien', $jenis)
+                ->join('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
+                ->where('keluarga.tipe_keluarga', $jenis)
                 ->select(
-                    'pasien.nama_pasien',
+                    'keluarga.nama_keluarga',
                     DB::raw('DATE(pemeriksaan.created_at) as tanggal')
                 )
                 ->orderByDesc('pemeriksaan.created_at');
@@ -287,10 +287,10 @@ class LaporanController extends Controller
                 if ($dokter->jenis_dokter === 'umum') {
                     $pasienQuery = DB::table('pemeriksaan')
                         ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-                        ->join('pasien', 'pendaftaran.id_pasien', '=', 'pasien.id_pasien')
+                        ->join('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
                         ->where('pendaftaran.id_dokter', $dokter->id_dokter)
                         ->select(
-                            'pasien.nama_pasien',
+                            'keluarga.nama_keluarga',
                             DB::raw('DATE(pemeriksaan.created_at) as tanggal')
                         )
                         ->orderByDesc('pemeriksaan.created_at');

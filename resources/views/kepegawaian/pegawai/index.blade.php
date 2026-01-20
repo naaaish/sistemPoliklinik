@@ -38,7 +38,7 @@
                 <td>{{ $p->nip }}</td>
                 <td>{{ $p->nama_pegawai }}</td>
                 <td>{{ $p->jabatan }}</td>
-                <td>{{ $p->bidang }}</td>
+                <td>{{ $p->bagian}}</td>
                 <td class="pegawai-cell-center">
                     <a href="{{ route('kepegawaian.pegawai.show', $p->nip) }}" class="view-btn">+</a>
                 </td>

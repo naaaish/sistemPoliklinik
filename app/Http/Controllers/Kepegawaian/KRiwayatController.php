@@ -11,20 +11,32 @@ class KRiwayatController extends Controller
     {
         $riwayat = DB::table('pemeriksaan')
             ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-            ->join('pasien', 'pendaftaran.id_pasien', '=', 'pasien.id_pasien')
+
+            // ⛔ sebelumnya: join pasien
+            // ✅ sekarang: join keluarga
+            ->join('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
+
+            // tetap
+            ->leftJoin('pegawai', 'keluarga.nip', '=', 'pegawai.nip')
             ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
             ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
+
             ->select(
-                'pemeriksaan.id_pemeriksaan', 
-                'pasien.nama_pasien',
-                'pasien.nip',
+                'pemeriksaan.id_pemeriksaan',
+
+                // ⛔ pasien.nama_pasien
+                // ✅ keluarga sebagai pasien
+                'keluarga.nama_keluarga as nama_pasien',
+
+                // nip induk
+                'pegawai.nip',
+
                 'pemeriksaan.created_at as tanggal',
                 'dokter.nama as dokter',
                 'pemeriksa.nama_pemeriksa as pemeriksa'
             )
             ->orderBy('pemeriksaan.created_at', 'desc')
             ->paginate(10);
-
 
         return view('kepegawaian.riwayat', compact('riwayat'));
     }
