@@ -9,7 +9,6 @@ use App\Http\Controllers\AdminPoli\DashboardController as AdminPoliDashboardCont
 use App\Http\Controllers\AdminPoli\PendaftaranController;
 use App\Http\Controllers\AdminPoli\PemeriksaanInputController;
 use App\Http\Controllers\AdminPoli\PemeriksaanController;
-use App\Http\Controllers\Kepegawaian\DokterPemeriksaController;
 use App\Http\Controllers\AdminPoli\SaranController;
 use App\Http\Controllers\AdminPoli\ArtikelController as AdminPoliArtikelController;
 use App\Http\Controllers\AdminPoli\LaporanController as AdminPoliLaporanController;
@@ -159,6 +158,12 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     // upload from pdf/word → create draft → redirect edit
     Route::post('/artikel/import', [AdminPoliArtikelController::class, 'importDoc'])->name('artikel.import');
 
+    Route::get('/laporan', [\App\Http\Controllers\AdminPoli\LaporanController::class, 'index'])
+    ->name('laporan.index');
+
+    Route::get('/laporan/export', [\App\Http\Controllers\AdminPoli\LaporanController::class, 'exportExcel'])
+    ->name('laporan.export');
+});
 /*
 |--------------------------------------------------------------------------
 | ADMIN KEPEGAWAIAN ROUTES 
@@ -273,5 +278,4 @@ Route::prefix('kepegawaian')->middleware('auth')->group(function () {
 
     Route::get('/laporan/{jenis}/pdf', [LaporanController::class, 'downloadPdf'])
        ->name('laporan.pdf');
-
 });
