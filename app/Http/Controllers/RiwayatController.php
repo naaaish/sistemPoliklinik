@@ -85,14 +85,17 @@ class RiwayatController extends Controller
          */
         $riwayat = DB::table('pemeriksaan')
             ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
+            ->leftJoin('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
+            ->leftJoin('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
             ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
             ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
-            ->where('pendaftaran.id_keluarga', $keluargaAktifId)
+            ->where('pendaftaran.nip', $pegawai->nip)
             ->select(
                 'pemeriksaan.*',
+                DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
                 'pendaftaran.tanggal',
-                'dokter.nama as dokter',
-                'pemeriksa.nama_pemeriksa as pemeriksa'
+                DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa) as dokter"),
+                DB::raw("COALESCE(pemeriksa.nama_pemeriksa, dokter.nama) as pemeriksa")
             )
             ->orderBy('pemeriksaan.created_at', 'desc')
             ->get();

@@ -22,13 +22,13 @@ class KDashboardController extends Controller
             
         $riwayat = DB::table('pemeriksaan')
             ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-            ->join('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
-            ->leftjoin('pegawai', 'keluarga.nip', '=', 'pegawai.nip')
+            ->leftJoin('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
+            ->leftJoin('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
             ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
             ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
             ->select(
                 'pemeriksaan.id_pemeriksaan', 
-                'keluarga.nama_keluarga as nama_pasien',
+                DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
                 'pegawai.nip',
                 'pemeriksaan.created_at as tanggal',
                 DB::raw('COALESCE(dokter.nama, pemeriksa.nama_pemeriksa) as nama_pemeriksa')
