@@ -11,6 +11,7 @@ use App\Http\Controllers\AdminPoli\PemeriksaanInputController;
 use App\Http\Controllers\AdminPoli\PemeriksaanController;
 use App\Http\Controllers\AdminPoli\SaranController;
 use App\Http\Controllers\AdminPoli\ArtikelController as AdminPoliArtikelController;
+use App\Http\Controllers\AdminPoli\LaporanController as AdminPoliLaporanController;
 
 use App\Http\Controllers\Kepegawaian\KDashboardController;
 use App\Http\Controllers\Kepegawaian\PegawaiController;
@@ -158,15 +159,13 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::post('/artikel/import', [AdminPoliArtikelController::class, 'importDoc'])->name('artikel.import');
 
     // laporan
-    // Laporan
-Route::get('/laporan', [\App\Http\Controllers\AdminPoli\LaporanController::class, 'index'])
-    ->name('laporan.index');
+    Route::get('/laporan', [AdminPoliLaporanController::class, 'index'])
+        ->name('laporan.index');
 
-Route::get('/laporan/export', [\App\Http\Controllers\AdminPoli\LaporanController::class, 'exportExcel'])
-    ->name('laporan.export');
+    Route::get('/laporan/export', [AdminPoliLaporanController::class, 'exportExcel'])
+        ->name('laporan.export');
 
 });
-
 
 
 /*

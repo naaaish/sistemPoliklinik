@@ -1,0 +1,209 @@
+/* =========================
+   LAPORAN KLINIK
+   Khusus halaman laporan
+   ========================= */
+
+:root{
+  --lap-bg: #F1F8FF;
+  --lap-blue: #316BA1;
+  --lap-blue-soft: #89B2D9;
+  --lap-line: #E6EEF7;
+  --lap-text: #1F2D3D;
+  --lap-muted: rgba(0,0,0,.55);
+}
+
+.lap-page{
+  padding: 22px;
+  background: var(--lap-bg);
+}
+
+/* =========================
+   TOPBAR
+========================= */
+.lap-topbar{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.lap-left{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lap-back{
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--lap-line);
+  cursor: pointer;
+}
+
+.lap-back img{
+  width: 18px;
+}
+
+.lap-title{
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--lap-blue);
+}
+
+/* =========================
+   CARD
+========================= */
+.lap-card{
+  background: #fff;
+  border-radius: 18px;
+  padding: 18px 18px 20px;
+  border: 1px solid var(--lap-line);
+}
+
+/* =========================
+   FILTER / TOOLS
+========================= */
+.lap-tools{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lap-filter{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lap-filter input[type="date"]{
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--lap-line);
+  font-size: 13px;
+  color: var(--lap-text);
+}
+
+.lap-sep{
+  font-weight: 700;
+  color: var(--lap-muted);
+}
+
+.lap-btn{
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--lap-blue);
+  background: #fff;
+  color: var(--lap-blue);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lap-btn img{
+  width: 16px;
+}
+
+.lap-btn:hover{
+  background: var(--lap-blue);
+  color: #fff;
+}
+
+/* =========================
+   INFO PREVIEW
+========================= */
+.lap-info{
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--lap-muted);
+  font-weight: 700;
+}
+
+/* =========================
+   TABLE
+========================= */
+.lap-table-wrap{
+  margin-top: 14px;
+  overflow-x: auto;
+}
+
+.lap-table{
+  min-width: 1500px;
+  border: 1px solid var(--lap-line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* header */
+.lap-thead{
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(120px, auto);
+  background: #F6FAFF;
+  border-bottom: 1px solid var(--lap-line);
+}
+
+.lap-th{
+  padding: 10px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--lap-blue);
+  text-align: center;
+  border-right: 1px solid var(--lap-line);
+  white-space: nowrap;
+}
+
+.lap-th:last-child{
+  border-right: none;
+}
+
+/* body row */
+.lap-row{
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(120px, auto);
+  border-bottom: 1px solid var(--lap-line);
+}
+
+.lap-row:last-child{
+  border-bottom: none;
+}
+
+.lap-td{
+  padding: 9px 8px;
+  font-size: 13px;
+  color: var(--lap-text);
+  border-right: 1px solid var(--lap-line);
+  white-space: pre-wrap;
+  line-height: 1.25;
+}
+
+.lap-td:last-child{
+  border-right: none;
+}
+
+.lap-center{
+  text-align: center;
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+.lap-empty{
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--lap-muted);
+}
