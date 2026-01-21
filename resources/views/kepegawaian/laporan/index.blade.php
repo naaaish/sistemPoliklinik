@@ -38,8 +38,10 @@
                             <th>Grand Total</th>
 
                         @else
+                            <th>ID Pemeriksaan</th>
                             <th>Nama Pasien</th>
                             <th>Tanggal</th>
+                            <th>Nama Pemeriksa</th>
                         @endif
                     </tr>
                 </thead>
@@ -81,10 +83,13 @@
                                     </td>
 
                                 @else
+                                    <td>{{ $p->id_pemeriksaan }}</td>
                                     <td>{{ $p->nama_pasien }}</td>
                                     <td>
                                         {{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d F Y') }}
                                     </td>
+                                    <td>
+                                        {{ $p->nama_dokter ?? $p->nama_pemeriksa ?? '-' }}
                                 @endif
                             </tr>
                         @empty
