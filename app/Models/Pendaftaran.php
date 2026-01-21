@@ -12,7 +12,8 @@ class Pendaftaran extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    public function pasien() { return $this->belongsTo(\App\Models\Pasien::class, 'id_pasien', 'id_pasien'); }
+    public function pegawai() { return $this->belongsTo(\App\Models\Pegawai::class, 'nip', 'nip'); }
+    public function keluarga() { return $this->belongsTo(\App\Models\Keluarga::class, 'id_keluarga', 'id_keluarga'); }
     public function dokter() { return $this->belongsTo(\App\Models\Dokter::class, 'id_dokter', 'id_dokter'); }
     public function pemeriksa(){ return $this->belongsTo(\App\Models\Pemeriksa::class, 'id_pemeriksa', 'id_pemeriksa'); }
 }
