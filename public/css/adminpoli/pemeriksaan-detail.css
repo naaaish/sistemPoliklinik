@@ -260,18 +260,6 @@
 
 /* pill hasil (lebih kecil dari input) */
 .ap-readonly-pill{
-  /* display: inline-block;
-  max-width: 100%;
-  padding: 8px 12px;
-  border-radius: 12px;
-  border: 1px solid #CFE0FF;
-  background: #F4F7FF;
-  color: #316BA1;
-  font-size: 15px;
-  line-height: 1.35;
-  box-sizing: border-box;
-  white-space: normal;
-  word-break: break-word; */
   font-weight: 700;
   font-size: 15px;
   color: #4e6070;

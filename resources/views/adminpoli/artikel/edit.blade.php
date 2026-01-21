@@ -8,7 +8,7 @@
 
 @section('content')
 <div class="artikel-page">
-
+    
     <div class="artikel-topbar">
         <div class="artikel-left">
             <a href="{{ route('adminpoli.artikel.index') }}" class="artikel-back-img" title="Kembali">

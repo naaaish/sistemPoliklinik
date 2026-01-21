@@ -184,7 +184,6 @@
         </div>
       </div>
 
-
       <div id="obatWrap"></div>
 
       <button type="button" id="btnAddObat" class="ap-btn-small">Tambah Obat/Alkes</button>
@@ -342,7 +341,6 @@
     const hargaEl = templateRow.querySelector('[name="harga_satuan[]"]');
 
     initObatSelect(select);
-    refreshObatOptions();
 
     select.addEventListener('change', () => {
       const opt = select.options[select.selectedIndex];
@@ -361,7 +359,6 @@
     });
 
     hitungTotal();
-    refreshObatOptions();
   }
 
   document.addEventListener('click', function(e){
@@ -376,7 +373,6 @@
 
     row.remove();
     hitungTotal();
-    refreshObatOptions();
   });
 
   function getPickedObatValues(exceptRow=null){
@@ -410,7 +406,6 @@
       row.querySelector('.obat-subtotal') && (row.querySelector('.obat-subtotal').value = '');
 
       hitungTotal();
-      refreshObatOptions();
 
       Swal.fire({
         icon: 'warning',
@@ -421,15 +416,9 @@
 
       return;
     }
-
-    // normalnya: update hide options
-    refreshObatOptions();
   });
 
   document.getElementById('btnAddObat').addEventListener('click', addObatRow);
-
-  // NOTE: kalau mau awalnya ada 1 row obat, aktifin ini:
-  // addObatRow();
 
   document.addEventListener('change', function(e){
   if(!e.target.classList.contains('obat-select')) return;
@@ -478,9 +467,7 @@ document.addEventListener('change', function(e){
   const opt = e.target.selectedOptions[0];
 
   const satuan = opt?.dataset?.satuan || '';
-  row.querySelector('.obat-satuan').value = satuan;   // <<< INI
-
-  // kalau kamu juga isi harga raw/tampilan, biarkan seperti biasa
+  row.querySelector('.obat-satuan').value = satuan;
 });
 document.getElementById('formPemeriksaan').addEventListener('submit', (e) => {
   const rows = document.querySelectorAll('#obatWrap .obat-row');
@@ -530,29 +517,8 @@ document.getElementById('formPemeriksaan').addEventListener('submit', (e) => {
   }
 });
 
-function refreshObatOptions(){
-  const selects = [...document.querySelectorAll('.obat-select')];
-  const picked = new Set(selects.map(s => s.value).filter(Boolean));
-
-  selects.forEach(sel => {
-    const current = sel.value;
-
-    [...sel.options].forEach((opt, idx) => {
-      if(idx === 0) return; // placeholder
-      if(!opt.value) return;
-      opt.hidden = picked.has(opt.value) && opt.value !== current;
-    });
-
-    // kalau pakai tomselect, refresh daftar option-nya
-    if(sel.tomselect){
-      sel.tomselect.refreshOptions(false);
-    }
-  });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.obat-select').forEach(sel => initObatSelect(sel));
-  refreshObatOptions();
 });
 
 document.addEventListener('DOMContentLoaded', () => {
