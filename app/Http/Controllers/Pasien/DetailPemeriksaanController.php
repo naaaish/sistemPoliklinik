@@ -9,7 +9,7 @@ class DetailPemeriksaanController extends Controller
 {
     public function show($id_pemeriksaan)
     {
-        // Fetch pemeriksaan data
+        // ================= PEMERIKSAAN =================
         $pemeriksaan = DB::table('pemeriksaan')
             ->where('id_pemeriksaan', $id_pemeriksaan)
             ->first();
@@ -18,67 +18,92 @@ class DetailPemeriksaanController extends Controller
             abort(404, 'Data pemeriksaan tidak ditemukan');
         }
 
-        // Fetch pendaftaran data
+        // ================= PENDAFTARAN =================
         $pendaftaran = DB::table('pendaftaran')
             ->where('id_pendaftaran', $pemeriksaan->id_pendaftaran)
             ->first();
 
-        // Fetch pasien data
-        $pasien = DB::table('pasien')
-            ->where('id_pasien', $pendaftaran->id_pasien)
-            ->first();
+        // ================= PASIEN (PEGAWAI / KELUARGA) =================
+        $pasien = null;
+        $pegawai = null;
 
-        // Fetch dokter data
-        $dokter = DB::table('dokter')
-            ->where('id_dokter', $pendaftaran->id_dokter)
-            ->first();
+        // ambil pegawai (selalu ada)
+        if ($pendaftaran->nip) {
+            $pegawai = DB::table('pegawai')
+                ->where('nip', $pendaftaran->nip)
+                ->first();
+        }
 
-        // Fetch pegawai data berdasarkan NIP dari pasien
-        $pegawai = DB::table('pegawai')
-            ->where('nip', $pasien->nip)
-            ->first();
+        // kalau keluarga
+        if ($pendaftaran->id_keluarga) {
+            $pasien = DB::table('keluarga')
+                ->where('id_keluarga', $pendaftaran->id_keluarga)
+                ->first();
+        } else {
+            // kalau pegawai (YBS)
+            $pasien = $pegawai;
+        }
 
-        // Fetch diagnosa
+        // ================= DOKTER / PEMERIKSA =================
+        $dokter = null;
+        $pemeriksa = null;
+
+        if ($pendaftaran->id_dokter) {
+            $dokter = DB::table('dokter')
+                ->where('id_dokter', $pendaftaran->id_dokter)
+                ->first();
+        }
+
+        if ($pendaftaran->id_pemeriksa) {
+            $pemeriksa = DB::table('pemeriksa')
+                ->where('id_pemeriksa', $pendaftaran->id_pemeriksa)
+                ->first();
+        }
+
+        // ================= DIAGNOSA =================
         $diagnosa = null;
-        if ($pemeriksaan->id_diagnosa) {
+        if (!empty($pemeriksaan->id_diagnosa)) {
             $diagnosa = DB::table('diagnosa')
                 ->where('id_diagnosa', $pemeriksaan->id_diagnosa)
                 ->first();
         }
 
-        // Fetch saran
+        // ================= SARAN =================
         $saran = null;
-        if ($pemeriksaan->id_saran) {
+        if (!empty($pemeriksaan->id_saran)) {
             $saran = DB::table('saran')
                 ->where('id_saran', $pemeriksaan->id_saran)
                 ->first();
         }
 
-        // Fetch resep data
+        // ================= RESEP =================
         $resep = DB::table('resep')
             ->where('id_pemeriksaan', $id_pemeriksaan)
             ->first();
 
-        // Fetch detail resep with obat data
-        $detailResep = [];
+        $detailResep = collect();
+
         if ($resep) {
             $detailResep = DB::table('detail_resep')
                 ->join('obat', 'detail_resep.id_obat', '=', 'obat.id_obat')
                 ->where('detail_resep.id_resep', $resep->id_resep)
                 ->select(
                     'obat.nama_obat',
+                    'obat.harga',
                     'detail_resep.jumlah',
                     'detail_resep.satuan'
                 )
                 ->get();
         }
 
+        // ================= RETURN =================
         return view('pasien.detail-pemeriksaan', compact(
             'pemeriksaan',
             'pendaftaran',
             'pasien',
-            'dokter',
             'pegawai',
+            'dokter',
+            'pemeriksa',
             'diagnosa',
             'saran',
             'detailResep'

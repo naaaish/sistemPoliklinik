@@ -21,6 +21,16 @@ class RiwayatController extends Controller
             ->where('nip', $user->nip)
             ->first();
 
+        // === PASIEN PEGAWAI (YBS) ===
+        $pasienPegawai = (object) [
+            'id_keluarga'        => 'pegawai', // ID KHUSUS
+            'hubungan_keluarga'  => 'pegawai',
+            'urutan_anak'        => null,
+            'nama_keluarga'      => $pegawai->nama_pegawai,
+            'tgl_lahir'          => $pegawai->tgl_lahir,
+        ];
+
+
         if (!$pegawai) {
             return view('pasien.riwayat', [
                 'pegawai'       => null,
@@ -37,18 +47,21 @@ class RiwayatController extends Controller
          * (pegawai juga dianggap pasien)
          * =====================================
          */
-        $daftarKeluarga = DB::table('keluarga')
+        $Keluarga = DB::table('keluarga')
             ->where('nip', $pegawai->nip)
             ->orderByRaw("
-                CASE hubungan
-                    WHEN 'pegawai' THEN 1
-                    WHEN 'istri' THEN 2
-                    WHEN 'suami' THEN 2
+                CASE hubungan_keluarga
+                    
+                    WHEN 'pasangan' THEN 2
                     WHEN 'anak' THEN 3
                     ELSE 4
                 END
             ")
+            ->orderBy('urutan_anak')
             ->get();
+
+            $daftarKeluarga = collect([$pasienPegawai])->merge($Keluarga);
+
 
         if ($daftarKeluarga->isEmpty()) {
             return view('pasien.riwayat', [
@@ -65,10 +78,7 @@ class RiwayatController extends Controller
          * 3. Tentukan keluarga aktif (dropdown)
          * =====================================
          */
-        $keluargaAktifId = $request->get(
-            'id_keluarga',
-            $daftarKeluarga->first()->id_keluarga
-        );
+        $keluargaAktifId = $request->get('id_keluarga', 'pegawai');
 
         $keluargaAktif = $daftarKeluarga
             ->firstWhere('id_keluarga', $keluargaAktifId);
@@ -89,16 +99,30 @@ class RiwayatController extends Controller
             ->leftJoin('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
             ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
             ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
-            ->where('pendaftaran.nip', $pegawai->nip)
+            ->where(function ($q) use ($keluargaAktifId, $pegawai) {
+                if ($keluargaAktifId === 'pegawai') {
+                    $q->whereNull('pendaftaran.id_keluarga')
+                    ->where('pendaftaran.nip', $pegawai->nip);
+                } else {
+                    $q->where('pendaftaran.id_keluarga', $keluargaAktifId);
+                }
+            })
             ->select(
-                'pemeriksaan.*',
+                'pemeriksaan.id_pemeriksaan',
+                'pemeriksaan.created_at',
                 DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
-                'pendaftaran.tanggal',
-                DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa) as dokter"),
-                DB::raw("COALESCE(pemeriksa.nama_pemeriksa, dokter.nama) as pemeriksa")
+                DB::raw("
+                    CASE
+                        WHEN pendaftaran.id_dokter IS NOT NULL THEN dokter.nama
+                        WHEN pendaftaran.id_pemeriksa IS NOT NULL THEN pemeriksa.nama_pemeriksa
+                        ELSE '-'
+                    END as nama_pemeriksa
+                "),
+                'pendaftaran.keluhan'
             )
             ->orderBy('pemeriksaan.created_at', 'desc')
             ->get();
+
 
         return view('pasien.riwayat', compact(
             'pegawai',
