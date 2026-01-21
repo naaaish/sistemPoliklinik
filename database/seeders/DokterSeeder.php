@@ -13,13 +13,13 @@ class DokterSeeder extends Seeder
             [
                 'id_dokter' => 'DOK001',
                 'nama' => 'dr Farah Heniyati',
-                'jenis_dokter' => 'Dokter Umum',
+                'jenis_dokter' => 'Dokter Poliklinik',
                 'status' => 'Aktif',
             ],
             [
                 'id_dokter' => 'DOK002',
                 'nama' => 'dr Hening Widiawati',
-                'jenis_dokter' => 'Dokter Umum',
+                'jenis_dokter' => 'Dokter Perusahaan',
                 'status' => 'Aktif',
             ],
         ]);

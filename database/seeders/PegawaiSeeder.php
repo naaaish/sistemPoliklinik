@@ -54,7 +54,30 @@ class PegawaiSeeder extends Seeder
                 'thn_lulus' => '2016',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ]
+            ],
+
+            [
+                'nip' => '1234567890',
+                'nama_pegawai' => 'Elvina Neila',
+                'nik' => '3275010101900005',
+                'agama' => 'Islam',
+                'jenis_kelamin' => 'Perempuan',
+                'tgl_lahir' => '2005-02-09',
+                'tgl_masuk' => '2027-06-15',
+                'status' => 'Aktif',
+                'status_pernikahan' => 'Belum Menikah',
+                'no_telp' => '081234567899',
+                'email' => 'elvina.neila@poliklinik.test',
+                'alamat' => 'Jl. Merdeka No. 10, Semarang',
+                'jabatan' => 'Staf',
+                'bagian' => 'SIS',
+                'foto' => null,
+                'pendidikan_terakhir' => 'S1 Informatika',
+                'institusi' => 'Universitas Diponegoro',
+                'thn_lulus' => '2027',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
         ]);
     }
 }

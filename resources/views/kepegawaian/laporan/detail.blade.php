@@ -27,106 +27,157 @@
     </div>
 
     {{-- TABLE --}}
-    <div class="laporan-card">
-        @if($jenis === 'dokter')
-            {{-- Tabel Khusus Dokter dengan Detail --}}
-            <div class="dokter-summary">
-                <h4>Ringkasan Dokter</h4>
-                <table class="laporan-table" id="dataTable">
-                    <thead>
-                        <tr>
-                            <th>Nama Dokter</th>
-                            <th>Jenis Dokter</th>
-                            <th class="text-center">Total Pasien</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $totalPasienPerusahaan = 0;
-                            $totalPasienPoliklinik = 0;
-                        @endphp
-                        
-                        @forelse($data as $dokter)
-                            <tr class="{{ $dokter->jenis_dokter === 'umum' ? 'expandable-row' : '' }}" 
-                                data-dokter-id="{{ $dokter->id_dokter }}">
-                                <td>
-                                    {{ $dokter->nama_dokter }}
-                                    @if($dokter->jenis_dokter === 'umum' && $dokter->total_pasien > 0)
-                                        <button class="btn-expand" onclick="toggleDetail({{ $dokter->id_dokter }})">
-                                            <i class="bi bi-chevron-down" id="icon-{{ $dokter->id_dokter }}"></i>
-                                        </button>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($dokter->jenis_dokter === 'perusahaan')
-                                        <span class="badge badge-blue">Dokter Perusahaan</span>
-                                    @else
-                                        <span class="badge badge-green">Dokter Umum</span>
-                                    @endif
-                                </td>
-                                <td class="text-center">
-                                    {{ $dokter->total_pasien }}
-                                </td>
-                            </tr>
-                            
-                            {{-- Detail Pasien untuk Dokter Poliklinik --}}
-                            @if($dokter->jenis_dokter === 'umum' && isset($dokter->detail_pasien) && $dokter->detail_pasien->count() > 0)
-                                <tr class="detail-row" id="detail-{{ $dokter->id_dokter }}" style="display: none;">
-                                    <td colspan="3" style="padding: 0;">
-                                        <div class="detail-container">
-                                            <table class="detail-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>No</th>
-                                                        <th>Nama Pasien</th>
-                                                        <th>Tanggal Pemeriksaan</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach($dokter->detail_pasien as $index => $pasien)
-                                                        <tr>
-                                                            <td>{{ $index + 1 }}</td>
-                                                            <td>{{ $pasien->nama_pasien }}</td>
-                                                            <td>{{ \Carbon\Carbon::parse($pasien->tanggal)->translatedFormat('d F Y') }}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endif
-                            
-                            @php
-                                if($dokter->jenis_dokter === 'perusahaan') {
-                                    $totalPasienPerusahaan += $dokter->total_pasien;
-                                } else {
-                                    $totalPasienPoliklinik += $dokter->total_pasien;
-                                }
-                            @endphp
-                        @empty
-                            <tr>
-                                <td colspan="3" class="empty">Tidak ada data</td>
-                            </tr>
-                        @endforelse
-                        
-                        @if($data->count() > 0)
-                            <tr style="background: #f0f8ff; font-weight: bold;">
-                                <td colspan="2">TOTAL PASIEN DOKTER PERUSAHAAN</td>
-                                <td class="text-center">{{ $totalPasienPerusahaan }}</td>
-                            </tr>
-                            <tr style="background: #f0fff0; font-weight: bold;">
-                                <td colspan="2">TOTAL PASIEN DOKTER POLIKLINIK</td>
-                                <td class="text-center">{{ $totalPasienPoliklinik }}</td>
-                            </tr>
-                            <tr style="background: #fffacd; font-weight: bold;">
-                                <td colspan="2">GRAND TOTAL</td>
-                                <td class="text-center">{{ $totalPasienPerusahaan + $totalPasienPoliklinik }}</td>
-                            </tr>
-                        @endif
-                    </tbody>
-                </table>
-            </div>
+    @if($jenis === 'dokter')
+
+    {{-- ================= DOKTER POLIKLINIK ================= --}}
+    <div class="dokter-summary">
+        <h4>Dokter Poliklinik (Bayar per Pasien)</h4>
+
+        <table class="laporan-table">
+            <thead>
+                <tr>
+                    <th>Nama Dokter</th>
+                    <th>Total Pasien</th>
+                    <th>Total Biaya</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $grandTotalPoli = 0; @endphp
+
+                @forelse($dokterPoli as $dokter)
+                    <tr class="expandable-row">
+                        <td>
+                            {{ $dokter->nama_dokter }}
+                            <button class="btn-expand" onclick="toggleDetail({{ $dokter->id_dokter }})">
+                                <i class="bi bi-chevron-down" id="icon-{{ $dokter->id_dokter }}"></i>
+                            </button>
+                        </td>
+                        <td class="text-center">{{ $dokter->total_pasien }}</td>
+                        <td>
+                            Rp {{ number_format($dokter->total_biaya,0,',','.') }}
+                        </td>
+                    </tr>
+
+                    {{-- DETAIL PASIEN --}}
+                    <tr id="detail-{{ $dokter->id_dokter }}" class="detail-row" style="display:none;">
+                        <td colspan="3" style="padding:0;">
+                            <div class="detail-container">
+                                <table class="detail-table">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama Pasien</th>
+                                            <th>Tanggal Pemeriksaan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($dokter->pasien as $i => $pasien)
+                                            <tr>
+                                                <td>{{ $i+1 }}</td>
+                                                <td>{{ $pasien->nama_pasien }}</td>
+                                                <td>
+                                                    {{ \Carbon\Carbon::parse($pasien->tanggal)->translatedFormat('d F Y') }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+
+                    @php $grandTotalPoli += $dokter->total_biaya; @endphp
+                @empty
+                    <tr>
+                        <td colspan="3" class="empty">Tidak ada data dokter poliklinik</td>
+                    </tr>
+                @endforelse
+
+                @if(count($dokterPoli) > 0)
+                    <tr style="background:#f0fff0;font-weight:bold;">
+                        <td colspan="2">TOTAL DOKTER POLIKLINIK</td>
+                        <td>Rp {{ number_format($grandTotalPoli,0,',','.') }}</td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
+    </div>
+
+    <br>
+
+    {{-- ================= DOKTER PERUSAHAAN ================= --}}
+    <div class="dokter-summary">
+        <h4>Dokter Perusahaan (Gaji Tetap)</h4>
+
+        <table class="laporan-table">
+            <thead>
+                <tr>
+                    <th>Nama Dokter</th>
+                    <th>Total Pasien</th>
+                    <th>Gaji</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $grandTotalPerusahaan = 0; @endphp
+
+                @forelse($dokterPerusahaan as $dokter)
+                    <tr class="expandable-row">
+                        <td>
+                            {{ $dokter->nama_dokter }}
+                            <button class="btn-expand" onclick="toggleDetail({{ $dokter->id_dokter }}_p)">
+                                <i class="bi bi-chevron-down" id="icon-{{ $dokter->id_dokter }}_p"></i>
+                            </button>
+                        </td>
+                        <td class="text-center">{{ $dokter->total_pasien }}</td>
+                        <td>
+                            Rp {{ number_format($dokter->gaji,0,',','.') }}
+                        </td>
+                    </tr>
+
+                    {{-- DETAIL PASIEN --}}
+                    <tr id="detail-{{ $dokter->id_dokter }}_p" class="detail-row" style="display:none;">
+                        <td colspan="3" style="padding:0;">
+                            <div class="detail-container">
+                                <table class="detail-table">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama Pasien</th>
+                                            <th>Tanggal Pemeriksaan</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($dokter->pasien as $i => $pasien)
+                                            <tr>
+                                                <td>{{ $i+1 }}</td>
+                                                <td>{{ $pasien->nama_pasien }}</td>
+                                                <td>
+                                                    {{ \Carbon\Carbon::parse($pasien->tanggal)->translatedFormat('d F Y') }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+
+                    @php $grandTotalPerusahaan += $dokter->gaji; @endphp
+                @empty
+                    <tr>
+                        <td colspan="3" class="empty">Tidak ada data dokter perusahaan</td>
+                    </tr>
+                @endforelse
+
+                @if(count($dokterPerusahaan) > 0)
+                    <tr style="background:#f0f8ff;font-weight:bold;">
+                        <td colspan="2">TOTAL GAJI DOKTER PERUSAHAAN</td>
+                        <td>Rp {{ number_format($grandTotalPerusahaan,0,',','.') }}</td>
+                    </tr>
+                @endif
+            </tbody>
+        </table>
+    </div>
             
         @else
             {{-- Tabel Biasa untuk Jenis Laporan Lain --}}
@@ -359,7 +410,15 @@
 <script>
 const jenis = '{{ $jenis }}';
 const judul = '{{ $judul }}';
-const dataRaw = @json($data);
+@if($jenis === 'dokter')
+    const dataRaw = {
+        poli: @json($dokterPoli),
+        perusahaan: @json($dokterPerusahaan)
+    };
+@else
+    const dataRaw = @json($data);
+@endif
+
 
 // Toggle detail pasien untuk dokter poliklinik
 function toggleDetail(dokterId) {

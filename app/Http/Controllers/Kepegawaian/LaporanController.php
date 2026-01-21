@@ -213,6 +213,104 @@ class LaporanController extends Controller
         }
 
 
+        elseif ($jenis === 'dokter') {
+
+            $tarifPoliklinik = 100000;   // bayar per pasien
+            $gajiPerusahaan  = 8000000;  // gaji bulanan tetap
+
+            /* =========================
+            DOKTER POLIKLINIK (PER PASIEN)
+            ========================= */
+            $queryPoli = DB::table('pemeriksaan')
+                ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+                ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
+                ->leftJoin('pegawai','pendaftaran.nip','=','pegawai.nip')
+                ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
+                ->whereNotNull('pendaftaran.id_dokter')
+                ->whereIn('dokter.jenis_dokter',['umum','poliklinik'])
+                ->select(
+                    'dokter.id_dokter',
+                    'dokter.nama as nama_dokter',
+                    DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
+                    DB::raw('DATE(pemeriksaan.created_at) as tanggal')
+                )
+                ->orderBy('dokter.nama')
+                ->orderBy('pemeriksaan.created_at');
+
+            if ($dari && $sampai) {
+                $queryPoli->whereBetween(
+                    DB::raw('DATE(pemeriksaan.created_at)'),
+                    [$dari, $sampai]
+                );
+            }
+
+            $dokterPoliRaw = $queryPoli->get()->groupBy('id_dokter');
+
+            $dokterPoli = [];
+
+            foreach ($dokterPoliRaw as $id => $rows) {
+                $dokterPoli[] = (object) [
+                    'id_dokter'    => $id,
+                    'nama_dokter'  => $rows->first()->nama_dokter,
+                    'pasien'       => $rows,                 // list pasien
+                    'total_pasien' => $rows->count(),        // jumlah pasien
+                    'total_biaya'  => $rows->count() * $tarifPoliklinik
+                ];
+            }
+
+            /* =========================
+            DOKTER PERUSAHAAN (GAJI TETAP)
+            ========================= */
+            $queryPerusahaan = DB::table('pemeriksaan')
+                ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+                ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
+                ->join('pegawai','pendaftaran.nip','=','pegawai.nip')
+                ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
+                ->where('dokter.jenis_dokter','perusahaan')
+                ->select(
+                    'dokter.id_dokter',
+                    'dokter.nama as nama_dokter',
+                    DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
+                    DB::raw('DATE(pemeriksaan.created_at) as tanggal')
+                )
+                ->orderBy('dokter.nama')
+                ->orderBy('pemeriksaan.created_at');
+
+            if ($dari && $sampai) {
+                $queryPerusahaan->whereBetween(
+                    DB::raw('DATE(pemeriksaan.created_at)'),
+                    [$dari, $sampai]
+                );
+            }
+
+            $dokterPerusahaanRaw = $queryPerusahaan->get()->groupBy('id_dokter');
+
+            $dokterPerusahaan = [];
+
+            foreach ($dokterPerusahaanRaw as $id => $rows) {
+                $dokterPerusahaan[] = (object) [
+                    'id_dokter'    => $id,
+                    'nama_dokter'  => $rows->first()->nama_dokter,
+                    'pasien'       => $rows,          // list pasien
+                    'total_pasien' => $rows->count(),
+                    'gaji'         => $gajiPerusahaan
+                ];
+            }
+
+            return view('kepegawaian.laporan.detail', compact(
+                'judul',
+                'jenis',
+                'dokterPoli',
+                'dokterPerusahaan',
+                'dari',
+                'sampai'
+            ));
+        }
+
+
+
+        
+
         /* ================= OBAT ================= */
         elseif ($jenis === 'obat') {
             $query = DB::table('detail_resep')
