@@ -24,50 +24,59 @@
 
     {{-- MAIN CARD --}}
     <div class="detail-card">
-        
-        {{-- DATA PENDAFTARAN --}}
-        <h2 class="section-title">Data Pendaftaran Pasien</h2>
-        <div class="data-grid">
-            <div class="data-item">
-                <span class="data-label">No. Registrasi :</span>
-                <span class="data-value">{{ $pendaftaran->id_pendaftaran }}</span>
+    {{-- ================= DATA PENDAFTARAN ================= --}}
+        <div class="detail-card">
+
+            <div class="data-grid">
+                <div class="data-item">
+                    <span class="data-label">No. Registrasi</span>
+                    <span class="data-value">{{ $pendaftaran->id_pendaftaran }}</span>
+                </div>
+
+                <div class="data-item">
+                    <span class="data-label">Nama Pasien</span>
+                    <span class="data-value">
+                        {{ $pasien->nama_keluarga ?? $pasien->nama_pegawai ?? '-' }}
+                    </span>
+                </div>
+
+                <div class="data-item">
+                    <span class="data-label">Tanggal Periksa</span>
+                    <span class="data-value">
+                        {{ \Carbon\Carbon::parse($pendaftaran->tanggal)->translatedFormat('l, d F Y, H:i') }}
+                    </span>
+                </div>
+
+                <div class="data-item">
+                    <span class="data-label">Nama Pemeriksa</span>
+                    <span class="data-value">
+                        {{ $dokter->nama ?? $pemeriksa->nama_pemeriksa ?? '-' }}
+                    </span>
+                </div>
+
+                <div class="data-item">
+                    <span class="data-label">Hubungan Keluarga</span>
+                    <span class="data-value">
+                        {{ $pasien->hubungan_keluarga ?? 'pegawai' }}
+                    </span>
+                </div>
+
+                <div class="data-item">
+                    <span class="data-label">NIP</span>
+                    <span class="data-value">{{ $pegawai->nip ?? '-' }}</span>
+                </div>
+
+                <div class="data-item">
+                    <span class="data-label">Nama Pegawai</span>
+                    <span class="data-value">{{ $pegawai->nama_pegawai ?? '-' }}</span>
+                </div>
+
+                <div class="data-item">
+                    <span class="data-label">Bidang</span>
+                    <span class="data-value">{{ $pegawai->bagian ?? '-' }}</span>
+                </div>
             </div>
-            <div class="data-item">
-                <span class="data-label">Nama Pasien :</span>
-                <span class="data-value">{{ $pasien->nama_pasien }}</span>
-            </div>
-            <div class="data-item">
-                <span class="data-label">Tanggal Periksa :</span>
-                <span class="data-value">{{ \Carbon\Carbon::parse($pendaftaran->tanggal)->translatedFormat('l, d F Y, H:i') }}</span>
-            </div>
-            <div class="data-item">
-                <span class="data-label">Nama Pemeriksa :</span>
-                <span class="data-value">{{ $dokter->nama }}</span>
-            </div>
-            <div class="data-item">
-                <span class="data-label">Hubungan Keluarga :</span>
-                <span class="data-value">{{ ucfirst($pasien->hub_kel) }}</span>
-            </div>
-            <div class="data-item">
-                <span class="data-label">NIP :</span>
-                <span class="data-value">{{ $pegawai->nip ?? '-' }}</span>
-            </div>
-            <div class="data-item">
-                <span class="data-label">Tanggal Lahir :</span>
-                <span class="data-value">{{ \Carbon\Carbon::parse($pasien->tgl_lahir)->translatedFormat('d F Y') }}</span>
-            </div>
-            <div class="data-item">
-                <span class="data-label">Nama Pegawai :</span>
-                <span class="data-value">{{ $pegawai->nama_pegawai ?? '-' }}</span>
-            </div>
-            <div class="data-item">
-                <span class="data-label">Umur :</span>
-                <span class="data-value">{{ \Carbon\Carbon::parse($pasien->tgl_lahir)->age }} tahun</span>
-            </div>
-            <div class="data-item">
-                <span class="data-label">Bidang :</span>
-                <span class="data-value">{{ $pegawai->bidang ?? '-' }}</span>
-            </div>
+
         </div>
 
         {{-- PEMERIKSAAN KESEHATAN --}}

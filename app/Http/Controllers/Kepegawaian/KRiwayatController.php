@@ -11,12 +11,7 @@ class KRiwayatController extends Controller
     {
         $riwayat = DB::table('pemeriksaan')
             ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-
-            // ⛔ sebelumnya: join pasien
-            // ✅ sekarang: join keluarga
-            ->leftjoin('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
-
-            // tetap
+            ->leftJoin('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
             ->leftJoin('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
             ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
             ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
@@ -30,8 +25,8 @@ class KRiwayatController extends Controller
                 'pegawai.nip',
 
                 'pemeriksaan.created_at as tanggal',
-                'dokter.nama as dokter',
-                'pemeriksa.nama_pemeriksa as pemeriksa'
+                DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa) as nama_pemeriksa")
+
             )
             ->orderBy('pemeriksaan.created_at', 'desc')
             ->paginate(10);
