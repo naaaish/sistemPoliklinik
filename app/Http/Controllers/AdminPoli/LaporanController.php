@@ -119,9 +119,6 @@ class LaporanController extends Controller
             ->orderBy('p.id_pendaftaran')
             ->get();
 
-        // Tambahin diagnosa + obat per visit (biar format Excel bisa multi-line)
-        // NOTE: sesuaikan nama tabel relasi diagnosa & detail obat kalau beda.
-
         foreach ($visits as $v) {
             // diagnosa umum
             $v->diagnosa_list = DB::table('detail_pemeriksaan_penyakit as dp')
