@@ -119,6 +119,7 @@ class RiwayatController extends Controller
                     END as nama_pemeriksa
                 "),
                 'pendaftaran.keluhan'
+                
             )
             ->orderBy('pemeriksaan.created_at', 'desc')
             ->get();

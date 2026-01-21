@@ -25,7 +25,9 @@ class KRiwayatController extends Controller
                 'pegawai.nip',
 
                 'pemeriksaan.created_at as tanggal',
-                DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa) as nama_pemeriksa")
+                'dokter.nama as dokter',
+                'pemeriksa.nama_pemeriksa as pemeriksa',
+                // DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa) as nama_pemeriksa")
 
             )
             ->orderBy('pemeriksaan.created_at', 'desc')
