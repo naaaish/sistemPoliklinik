@@ -73,8 +73,8 @@ class PemeriksaanInputController extends Controller
             'diagnosa_k3_id'    => 'nullable|array',
             'diagnosa_k3_id.*'  => 'nullable|string',
 
-            'saran_id'    => 'nullable|array',
-            'saran_id.*'  => 'nullable|string',
+            'id_saran'    => 'nullable|array',
+            'id_saran.*'  => 'nullable|string',
 
             // resep
             'obat_id'        => 'nullable|array',
@@ -105,15 +105,27 @@ class PemeriksaanInputController extends Controller
         Pendaftaran::findOrFail($pendaftaranId);
 
         return DB::transaction(function () use ($validated, $pendaftaranId) {
-
             // ========= GENERATE ID (20 char) =========
             // 2(prefix) + 12(ymdHis) + 6(random) = 20
             $idPemeriksaan = 'PM' . date('ymdHis') . Str::upper(Str::random(6));
 
             $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
             $k3Ids       = array_values(array_filter($validated['diagnosa_k3_id'] ?? []));
-            $saranIds    = array_values(array_filter($validated['saran_id'] ?? []));
+            $saranIdsUI  = array_values(array_filter($validated['id_saran'] ?? []));
 
+            $autoSaranIds = [];
+            if (count($penyakitIds) > 0) {
+                // sesuaikan nama kolom jika beda: id_saran / saran_id
+                $autoSaranIds = Saran::whereIn('id_diagnosa', $penyakitIds)
+                    ->pluck('id_saran')
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all();
+            }
+
+            // gabung UI + auto, lalu unique
+            $saranIds = array_values(array_unique(array_merge($saranIdsUI, $autoSaranIds)));
             // ========= SIMPAN PEMERIKSAAN =========
             $pemeriksaan = Pemeriksaan::create([
                 'id_pemeriksaan' => $idPemeriksaan,

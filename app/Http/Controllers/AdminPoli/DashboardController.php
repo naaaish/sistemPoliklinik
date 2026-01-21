@@ -14,15 +14,6 @@ class DashboardController extends Controller
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
 
-        /**
-         * TODO: sesuaikan nama tabel & kolom sesuai DB kamu
-         * Asumsi dari ERD:
-         * - pendaftaran: id_pendaftaran, tanggal, id_pasien
-         * - pemeriksaan: id_pemeriksaan, id_pendaftaran (atau relasi ke pendaftaran)
-         * - pasien: id_pasien, nama_pasien, nip (atau relasi ke pegawai)
-         * - pegawai: nip
-         */
-
         // 1) Kunjungan hari ini = jumlah pendaftaran tanggal hari ini
         $kunjunganHariIni = DB::table('pendaftaran')
             ->whereDate('tanggal', $today)

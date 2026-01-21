@@ -234,6 +234,8 @@
     chip.querySelector('button').addEventListener('click', () => {
       chip.remove();
       hidden.remove();
+
+      if (inputName === 'penyakit_id') filterSaran();
     });
 
     chipContainer.appendChild(chip);
@@ -281,11 +283,11 @@
         inputName: 'penyakit_id'
     });
 
-    filterSaranByDiagnosa(sel.value);
+    filterSaran();
 
     sel.value = '';
   });
-
+ 
   // Diagnosa K3 (select)
   document.getElementById('btnAddDiagnosa').addEventListener('click', () => {
     const sel = document.getElementById('inpDiagnosa');
@@ -333,11 +335,14 @@
 
   function addObatRow(){
     const templateRow = document.querySelector('#obatTemplate .obat-row').cloneNode(true);
-
+    obatWrap.appendChild(templateRow);
     const select = templateRow.querySelector('.obat-select');
     const qtyEl = templateRow.querySelector('[name="jumlah[]"]');
     const satuanEl = templateRow.querySelector('[name="satuan[]"]');
     const hargaEl = templateRow.querySelector('[name="harga_satuan[]"]');
+
+    initObatSelect(select);
+    refreshObatOptions();
 
     select.addEventListener('change', () => {
       const opt = select.options[select.selectedIndex];
@@ -355,9 +360,71 @@
       hitungTotal();
     });
 
-    obatWrap.appendChild(templateRow);
     hitungTotal();
+    refreshObatOptions();
   }
+
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('.btnDel, .btn-del, .btn-hapus, .obat-del, button[data-del="obat"]');
+    if(!btn) return;
+
+    const row = btn.closest('.obat-row');
+    if(!row) return;
+
+    const sel = row.querySelector('.obat-select');
+    if(sel?.tomselect) sel.tomselect.destroy(); // penting biar gak nyisa
+
+    row.remove();
+    hitungTotal();
+    refreshObatOptions();
+  });
+
+  function getPickedObatValues(exceptRow=null){
+    const rows = [...document.querySelectorAll('#obatWrap .obat-row')];
+    return rows
+      .filter(r => r !== exceptRow)
+      .map(r => r.querySelector('.obat-select')?.value)
+      .filter(v => v);
+  }
+
+  document.addEventListener('change', function(e){
+    if(!e.target.classList.contains('obat-select')) return;
+
+    const row = e.target.closest('.obat-row');
+    const pickedOther = new Set(getPickedObatValues(row));
+    const val = e.target.value;
+
+    // kalau dobel, reset + kasih peringatan
+    if(val && pickedOther.has(val)){
+      if(e.target.tomselect){
+        e.target.tomselect.clear(true);
+      } else {
+        e.target.value = '';
+      }
+
+      // kosongin field row biar ga nyisa
+      row.querySelector('.obat-satuan') && (row.querySelector('.obat-satuan').value = '');
+      row.querySelector('.obat-harga-raw') && (row.querySelector('.obat-harga-raw').value = '');
+      row.querySelector('.obat-harga') && (row.querySelector('.obat-harga').value = '');
+      row.querySelector('.obat-subtotal-raw') && (row.querySelector('.obat-subtotal-raw').value = 0);
+      row.querySelector('.obat-subtotal') && (row.querySelector('.obat-subtotal').value = '');
+
+      hitungTotal();
+      refreshObatOptions();
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Obat sudah dipilih',
+        text: 'Obat yang sama tidak boleh dipilih dua kali.',
+        confirmButtonColor: '#316BA1',
+      });
+
+      return;
+    }
+
+    // normalnya: update hide options
+    refreshObatOptions();
+  });
 
   document.getElementById('btnAddObat').addEventListener('click', addObatRow);
 
@@ -423,7 +490,27 @@ document.getElementById('formPemeriksaan').addEventListener('submit', (e) => {
     if(!obat) continue; // baris kosong di-skip
 
     const satuanInput = row.querySelector('.obat-satuan');
+    const jumlahInput = row.querySelector('.obat-jumlah') || row.querySelector('[name="jumlah[]"]');
+    
     const satuan = satuanInput?.value?.trim();
+    const jumlahRaw = jumlahInput?.value;
+
+    const jumlah = Number(jumlahRaw || 0);
+    if (!jumlahInput || !jumlahRaw || isNaN(jumlah) || jumlah <= 0) {
+      e.preventDefault();
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Data Obat Belum Lengkap',
+        text: 'Jumlah obat wajib diisi.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#316BA1',
+      }).then(() => {
+        jumlahInput?.focus();
+      });
+
+      return;
+    }
 
     if(!satuan){
       e.preventDefault();
@@ -431,7 +518,7 @@ document.getElementById('formPemeriksaan').addEventListener('submit', (e) => {
       Swal.fire({
         icon: 'warning',
         title: 'Data Obat Belum Lengkap',
-        text: 'Satuan wajib diisi jika obat dipilih.',
+        text: 'Satuan wajib diisi.',
         confirmButtonText: 'OK',
         confirmButtonColor: '#316BA1',
       }).then(() => {
@@ -443,5 +530,43 @@ document.getElementById('formPemeriksaan').addEventListener('submit', (e) => {
   }
 });
 
+function refreshObatOptions(){
+  const selects = [...document.querySelectorAll('.obat-select')];
+  const picked = new Set(selects.map(s => s.value).filter(Boolean));
+
+  selects.forEach(sel => {
+    const current = sel.value;
+
+    [...sel.options].forEach((opt, idx) => {
+      if(idx === 0) return; // placeholder
+      if(!opt.value) return;
+      opt.hidden = picked.has(opt.value) && opt.value !== current;
+    });
+
+    // kalau pakai tomselect, refresh daftar option-nya
+    if(sel.tomselect){
+      sel.tomselect.refreshOptions(false);
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.obat-select').forEach(sel => initObatSelect(sel));
+  refreshObatOptions();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  // init tomselect untuk select obat yang sudah ada
+  function initObatSelect(selectEl){
+    if (selectEl.tomselect) return; // biar ga double init
+
+    new TomSelect(selectEl, {
+      create: false,
+      searchField: ['text'],
+      placeholder: 'Cari obat...',
+      allowEmptyOption: true,
+  });
+}
+});
 </script>
 @endsection
