@@ -147,60 +147,98 @@
                             <th>Total</th>
 
                         @else
-                            <th>Nama Pasien</th>
-                            <th>Tanggal</th>
+                            <tr>
+                                <th>No</th>
+                                <th>Tanggal</th>
+                                <th>Nama Pegawai</th>
+                                <th>Umur</th>
+                                <th>Bagian</th>
+                                <th>Nama Pasien</th>
+                                <th>Hub. Kel</th>
+                                <th>TD</th>
+                                <th>GDP</th>
+                                <th>GD 2 Jam</th>
+                                <th>GDS</th>
+                                <th>AU</th>
+                                <th>Chol</th>
+                                <th>TG</th>
+                                <th>Suhu</th>
+                                <th>BB</th>
+                                <th>TB</th>
+                                <th>Diagnosa</th>
+                                <th>Therapy</th>
+                                <th>Jml Obat</th>
+                                <th>Harga Obat</th>
+                                <th>Total Obat</th>
+                                <th>Pemeriksa</th>
+                                <th>Periksa Ke</th>
+                            </tr>
                         @endif
                     </tr>
                 </thead>
 
                 <tbody>
-                    @forelse($data as $item)
+                @php
+                    $grouped = $data->groupBy('id_pemeriksaan');
+                    $no = 1;
+                @endphp
+
+                @foreach($grouped as $rows)
+                    @php
+                        $rowspan = $rows->count();
+                        $first = true;
+                        $totalObat = $rows->sum('total_harga_obat');
+                    @endphp
+
+                    @foreach($rows as $item)
                         <tr>
-                            @if($jenis === 'obat')
-                                <td>{{ $item->nama_obat }}</td>
-                                <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</td>
-                                <td>{{ $item->jumlah }}</td>
-                                <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
-                                <td>Rp {{ number_format($item->total, 0, ',', '.') }}</td>
-
-                            @elseif($jenis === 'total')
-                                <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</td>
-                                <td>Rp {{ number_format($item->biaya_obat ?? 0, 0, ',', '.') }}</td>
-                                <td>{{ $item->biaya_dokter ?? 0 }}</td>
-                                <td>
-                                    <strong>
-                                        Rp {{ number_format($item->biaya_obat ?? 0, 0, ',', '.') }}
-                                    </strong>
+                            {{-- ===== DATA UTAMA (ROWSPAN) ===== --}}
+                            @if($first)
+                                <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
+                                <td rowspan="{{ $rowspan }}">
+                                    {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
                                 </td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->nama_pegawai }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->umur }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->bagian }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->nama_pasien }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ ucfirst($item->hub_kel) }}</td>
 
-                            @else
-                                <td>{{ $item->nama_pasien }}</td>
-                                <td>{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->sistol }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->gd_puasa }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->gd_duajam }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->gd_sewaktu }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->asam_urat }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->chol }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->tg }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->suhu }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->berat }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->tinggi }}</td>
+
+                                <td rowspan="{{ $rowspan }}">{{ $item->diagnosa }}</td>
+                            @endif
+
+                            {{-- ===== DATA OBAT (PER BARIS) ===== --}}
+                            <td>{{ $item->nama_obat }}</td>
+                            <td class="text-center">{{ $item->jumlah }} {{ $item->satuan }}</td>
+                            <td>Rp {{ number_format($item->harga,0,',','.') }}</td>
+
+                            {{-- ===== TOTAL OBAT (1 CELL, MERGE) ===== --}}
+                            @if($first)
+                                <td rowspan="{{ $rowspan }}" style="vertical-align: middle; font-weight: bold;">
+                                    Rp {{ number_format($totalObat,0,',','.') }}
+                                </td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->pemeriksa }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->periksa_ke }}</td>
                             @endif
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="10" class="empty">Tidak ada data</td>
-                        </tr>
-                    @endforelse
-                    
-                    {{-- Total Row --}}
-                    @if($jenis === 'obat' && $data->count() > 0)
-                        <tr style="background: #f8f9fa; font-weight: bold;">
-                            <td colspan="4" style="text-align: right;">TOTAL BIAYA</td>
-                            <td>Rp {{ number_format($data->sum('total'), 0, ',', '.') }}</td>
-                        </tr>
-                    @endif
-                    
-                    @if($jenis === 'total' && $data->count() > 0)
-                        <tr style="background: #f8f9fa; font-weight: bold;">
-                            <td>GRAND TOTAL</td>
-                            <td>Rp {{ number_format($data->sum('biaya_obat'), 0, ',', '.') }}</td>
-                            <td>{{ $data->sum('biaya_dokter') }}</td>
-                            <td>Rp {{ number_format($data->sum('biaya_obat'), 0, ',', '.') }}</td>
-                        </tr>
-                    @endif
+
+                        @php $first = false; @endphp
+                    @endforeach
+                @endforeach
                 </tbody>
+
+
             </table>
         @endif
     </div>
@@ -400,20 +438,70 @@ function downloadExcel() {
         
     } else {
         // Excel untuk jenis laporan lainnya (tetap seperti sebelumnya)
-        if (jenis === 'pegawai') {
-            fileName = 'Laporan_Pemeriksaan_Pegawai';
-            wsData.push(['No', 'Nama Pasien', 'Tanggal Pemeriksaan']);
+        if (jenis === 'pegawai' || jenis === 'pensiun') {
+            fileName = jenis === 'pegawai'
+                ? 'Laporan_Pemeriksaan_Pegawai'
+                : 'Laporan_Pemeriksaan_Pensiunan';
+
+            wsData.push([
+                'No',
+                'Tanggal',
+                'Nama Pegawai',
+                'Umur',
+                'Bagian',
+                'Nama Pasien',
+                'Hubungan',
+                'TD',
+                'GDP',
+                'GD 2 Jam',
+                'GDS',
+                'AU',
+                'Chol',
+                'TG',
+                'Suhu',
+                'BB',
+                'TB',
+                'Diagnosa',
+                'Terapi',
+                'Jumlah Obat',
+                'Harga Obat',
+                'Total Harga Obat',
+                'Pemeriksa',
+                'Periksa Ke',
+
+            ]);
+
             dataRaw.forEach((item, i) => {
-                wsData.push([i + 1, item.nama_pasien, formatTanggal(item.tanggal)]);
-            });
-        } 
-        else if (jenis === 'pensiun') {
-            fileName = 'Laporan_Pemeriksaan_Pensiunan';
-            wsData.push(['No', 'Nama Pasien', 'Tanggal Pemeriksaan']);
-            dataRaw.forEach((item, i) => {
-                wsData.push([i + 1, item.nama_pasien, formatTanggal(item.tanggal)]);
-            });
+            wsData.push([
+                i + 1,
+                formatTanggal(item.tanggal),
+                item.nama_pegawai,
+                item.umur,
+                item.bagian,
+                item.nama_pasien,
+                item.hub_kel,
+                item.sistol,
+                item.gd_puasa,
+                item.gd_duajam,
+                item.gd_sewaktu,
+                item.asam_urat,
+                item.chol,
+                item.tg,
+                item.suhu,
+                item.berat,
+                item.tinggi,
+                item.diagnosa,
+                item.nama_obat,
+                `${item.jumlah} ${item.satuan}`,
+                item.harga,
+                item.total_harga_obat,
+                item.pemeriksa,
+                item.periksa_ke
+            ]);
+        });
+
         }
+
         else if (jenis === 'obat') {
             fileName = 'Laporan_Penggunaan_Obat';
             wsData.push(['No', 'Nama Obat', 'Tanggal', 'Jumlah', 'Harga', 'Total']);

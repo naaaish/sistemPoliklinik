@@ -23,29 +23,40 @@ class LaporanController extends Controller
 
         $preview = [];
 
-        /* ================= PEGAWAI & PENSIUN ================= */
-        foreach (['pegawai','pensiun'] as $status) {
-            $preview[$status] = DB::table('pemeriksaan')
+        /* ================= PASIEN / PEGAWAI ================= */
+        foreach (['pegawai','pensiun'] as $tipe) {
+            $preview[$tipe] = DB::table('pemeriksaan')
                 ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
                 ->join('pegawai','pendaftaran.nip','=','pegawai.nip')
                 ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
-                ->where(function ($q) use ($status) {
-                    if ($status === 'pegawai') {
-                        // pegawai + keluarga pegawai
+                ->leftJoin('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
+                ->leftJoin('pemeriksa','pendaftaran.id_pemeriksa','=','pemeriksa.id_pemeriksa')
+
+                ->where(function ($q) use ($tipe) {
+                    if ($tipe === 'pegawai') {
                         $q->whereIn('pendaftaran.tipe_pasien', ['pegawai','keluarga']);
                     } else {
-                        // pensiunan (kalau ada)
                         $q->where('pegawai.status', 'pensiun');
                     }
                 })
+
                 ->select(
+                    'pemeriksaan.id_pemeriksaan',
                     DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
-                    DB::raw('DATE(pemeriksaan.created_at) as tanggal')
+                    DB::raw("DATE(pemeriksaan.created_at) as tanggal"),
+                    DB::raw("
+                        CASE
+                            WHEN dokter.id_dokter IS NOT NULL THEN dokter.nama
+                            WHEN pemeriksa.id_pemeriksa IS NOT NULL THEN pemeriksa.nama_pemeriksa
+                            ELSE '-'
+                        END as nama_pemeriksa 
+                        ")
                 )
                 ->orderByDesc('pemeriksaan.created_at')
                 ->limit(5)
                 ->get();
         }
+
 
         /* ================= DOKTER ================= */
         $preview['dokter'] = DB::table('pemeriksaan')
@@ -112,18 +123,67 @@ class LaporanController extends Controller
         $dari  = $request->dari;
         $sampai = $request->sampai;
 
+        
         /* ================= PEGAWAI / PENSIUN ================= */
-        if (in_array($jenis, ['pegawai','pensiun'])) {
+        if (in_array($jenis, ['pegawai', 'pensiun'])) {
+
             $query = DB::table('pemeriksaan')
-                ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-                ->join('pegawai','pendaftaran.nip','=','pegawai.nip')
-                ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
-                ->where('pegawai.status', $jenis)
+                ->leftJoin('resep', 'pemeriksaan.id_pemeriksaan', '=', 'resep.id_pemeriksaan')
+                ->leftJoin('detail_resep', 'resep.id_resep', '=', 'detail_resep.id_resep')
+                ->leftJoin('obat', 'detail_resep.id_obat', '=', 'obat.id_obat')
+
+                ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
+                ->join('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
+
+                ->leftJoin('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
+                ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
+                ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
+                ->leftJoin('diagnosa', 'pemeriksaan.id_diagnosa', '=', 'diagnosa.id_diagnosa')
+
+                ->whereNotNull('pendaftaran.nip')
+
+
                 ->select(
-                    DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
-                    DB::raw('DATE(pemeriksaan.created_at) as tanggal')
+                    'pemeriksaan.id_pemeriksaan',
+                    DB::raw('DATE(pemeriksaan.created_at) as tanggal'),
+
+                    'pegawai.nama_pegawai',
+                    DB::raw('TIMESTAMPDIFF(YEAR, pegawai.tgl_lahir, CURDATE()) as umur'),
+                    'pegawai.bagian',
+
+                    DB::raw('COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien'),
+                    DB::raw("COALESCE(keluarga.hubungan_keluarga, 'pegawai') as hub_kel"),
+
+                    'pemeriksaan.sistol',
+                    'pemeriksaan.gd_puasa',
+                    'pemeriksaan.gd_duajam',
+                    'pemeriksaan.gd_sewaktu',
+                    'pemeriksaan.asam_urat',
+                    'pemeriksaan.chol',
+                    'pemeriksaan.tg',
+                    'pemeriksaan.suhu',
+                    'pemeriksaan.berat',
+                    'pemeriksaan.tinggi',
+
+                    'diagnosa.diagnosa',
+
+                    // 🔥 INI KUNCI → SATU OBAT SATU BARIS
+                    'obat.nama_obat',
+                    'detail_resep.jumlah',
+                    'detail_resep.satuan',
+                    'obat.harga',
+                    DB::raw('(detail_resep.jumlah * obat.harga) as total_harga_obat'),
+
+                    DB::raw("
+                        CASE
+                            WHEN dokter.id_dokter IS NOT NULL THEN dokter.nama
+                            WHEN pemeriksa.id_pemeriksa IS NOT NULL THEN pemeriksa.nama_pemeriksa
+                            ELSE '-'
+                        END as pemeriksa
+                    ")
                 )
-                ->orderByDesc('pemeriksaan.created_at');
+                ->orderBy('pemeriksaan.created_at')
+                ->orderBy('resep.id_resep');
 
             if ($dari && $sampai) {
                 $query->whereBetween(
@@ -133,30 +193,25 @@ class LaporanController extends Controller
             }
 
             $data = $query->get();
-        }
 
-        /* ================= DOKTER ================= */
-        elseif ($jenis === 'dokter') {
-            $query = DB::table('dokter')
-                ->leftJoin('pendaftaran','dokter.id_dokter','=','pendaftaran.id_dokter')
-                ->leftJoin('pemeriksaan','pendaftaran.id_pendaftaran','=','pemeriksaan.id_pendaftaran')
-                ->select(
-                    'dokter.id_dokter',
-                    'dokter.nama as nama_dokter',
-                    'dokter.jenis_dokter',
-                    DB::raw('COUNT(DISTINCT pemeriksaan.id_pemeriksaan) as total_pasien')
-                )
-                ->groupBy('dokter.id_dokter','dokter.nama','dokter.jenis_dokter');
+            // =====================
+            // HITUNG PERIKSA KE
+            // =====================
+            $counter = [];
 
-            if ($dari && $sampai) {
-                $query->whereBetween(
-                    DB::raw('DATE(pemeriksaan.created_at)'),
-                    [$dari, $sampai]
-                );
+            foreach ($data as $row) {
+                $key = $row->id_pemeriksaan;
+
+                if (!isset($counter[$key])) {
+                    $counter[$key] = 1;
+                } else {
+                    $counter[$key]++;
+                }
+
+                $row->periksa_ke = $counter[$key];
             }
-
-            $data = $query->get();
         }
+
 
         /* ================= OBAT ================= */
         elseif ($jenis === 'obat') {
