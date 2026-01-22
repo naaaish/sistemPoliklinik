@@ -115,6 +115,63 @@ class KeluargaSeeder extends Seeder
                 'created_at'        => $now,
                 'updated_at'        => $now,
             ],
+            // istri budi santoso (pensiunan)
+            [
+                'id_keluarga'       => '198765432003-I-1',
+                'nip'               => '198765432003',
+                'hubungan_keluarga' => 'pasangan',
+                'urutan_anak'       => null,
+                'nama_keluarga'     => 'Sari Melati',
+                'tgl_lahir'         => '1965-03-22',
+                'jenis_kelamin'     => 'P',
+                'created_at'        => $now,
+                'updated_at'        => $now,
+            ],
+            // anak dari budi santoso (pensiunan)
+            [
+                'id_keluarga'       => '198765432003-A-1',
+                'nip'               => '198765432003',
+                'hubungan_keluarga' => 'anak',
+                'urutan_anak'       => 1,
+                'nama_keluarga'     => 'Indah Santoso',
+                'tgl_lahir'         => '2015-04-10',
+                'jenis_kelamin'     => 'P',
+                'created_at'        => $now,
+                'updated_at'        => $now,
+            ],
+            [
+                'id_keluarga'       => '198765432003-A-2',
+                'nip'               => '198765432003',
+                'hubungan_keluarga' => 'anak',
+                'urutan_anak'       => 2,
+                'nama_keluarga'     => 'Rani Santoso',
+                'tgl_lahir'         => '2018-09-15',
+                'jenis_kelamin'     => 'L',
+                'created_at'        => $now,
+                'updated_at'        => $now,
+            ],
+            [
+                'id_keluarga'       => '198765432003-A-3',
+                'nip'               => '198765432003',
+                'hubungan_keluarga' => 'anak',
+                'urutan_anak'       => 3,
+                'nama_keluarga'     => 'Dina Santoso',
+                'tgl_lahir'         => '2021-01-20',
+                'jenis_kelamin'     => 'P',
+                'created_at'        => $now,
+                'updated_at'        => $now,
+            ],
+            [
+                'id_keluarga'       => '198765432003-A-4',
+                'nip'               => '198765432003',
+                'hubungan_keluarga' => 'anak',
+                'urutan_anak'       => 4,
+                'nama_keluarga'     => 'Fajar Santoso',
+                'tgl_lahir'         => '2023-06-30',
+                'jenis_kelamin'     => 'L',
+                'created_at'        => $now,
+                'updated_at'        => $now,
+            ]
         ];
 
         DB::table('keluarga')->insert($data_keluarga);

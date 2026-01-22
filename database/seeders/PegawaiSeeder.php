@@ -100,6 +100,29 @@ class PegawaiSeeder extends Seeder
                 'thn_lulus' => '-',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
+            ],
+            [
+                // data pensiunan
+                'nip' => '198765432003',
+                'nama_pegawai' => 'Budi Santoso',
+                'nik' => '3275010303900003',
+                'agama' => 'Islam',
+                'jenis_kelamin' => 'Laki-laki',
+                'tgl_lahir' => '1985-03-03',
+                'tgl_masuk' => '2010-05-20',
+                'status' => 'Pensiun',
+                'status_pernikahan' => 'Menikah',
+                'no_telp' => '083456789012',
+                'email' => 'budi.santoso@poliklinik.test',
+                'alamat' => 'Jl. Gatot Subroto No. 8, Surabaya',
+                'jabatan' => '-',
+                'bagian' => 'Pensiunan',
+                'foto' => null,
+                'pendidikan_terakhir' => 'S2 Manajemen',
+                'institusi' => 'Institut Teknologi Bandung',
+                'thn_lulus' => '2010',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
             ]
         ]);
     }

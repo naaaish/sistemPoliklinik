@@ -109,14 +109,20 @@ class PendaftaranController extends Controller
         }
 
         $idKeluarga = null;
-        // pegawai/pensiunan => YBS, no keluarga
-        if (in_array($validated['tipe_pasien'], ['pegawai','pensiunan'], true)) {
+
+        // 1) Pegawai: wajib YBS
+        if ($validated['tipe_pasien'] === 'pegawai') {
             if ($validated['hub_kel'] !== 'YBS') {
-                return back()->withInput()->withErrors(['hub_kel' => 'Pegawai/Pensiunan harus YBS.']);
+                return back()->withInput()->withErrors(['hub_kel' => 'Tipe Pegawai harus YBS.']);
             }
             $idKeluarga = null;
-        } else {
-            // keluarga
+        }
+
+        // 2) Keluarga: wajib Pasangan/Anak + wajib id_keluarga
+        if ($validated['tipe_pasien'] === 'keluarga') {
+            if ($validated['hub_kel'] === 'YBS') {
+                return back()->withInput()->withErrors(['hub_kel' => 'Tipe Keluarga tidak boleh YBS.']);
+            }
             if (empty($validated['id_keluarga'])) {
                 return back()->withInput()->withErrors(['id_keluarga' => 'Pilih anggota keluarga.']);
             }
@@ -130,7 +136,6 @@ class PendaftaranController extends Controller
                 return back()->withInput()->withErrors(['id_keluarga' => 'Anggota keluarga tidak valid.']);
             }
 
-            // mapping UI hub_kel -> keluarga.hubungan_keluarga
             $expected = ($validated['hub_kel'] === 'Pasangan') ? 'pasangan' : 'anak';
             if ($kel->hubungan_keluarga !== $expected) {
                 return back()->withInput()->withErrors(['hub_kel' => 'Hubungan keluarga tidak sesuai data keluarga.']);
@@ -162,6 +167,56 @@ class PendaftaranController extends Controller
             $idKeluarga = $kel->id_keluarga;
         }
 
+        // 3) Pensiunan: boleh YBS atau keluarga (Pasangan/Anak)
+        if ($validated['tipe_pasien'] === 'pensiunan') {
+            if ($validated['hub_kel'] === 'YBS') {
+                $idKeluarga = null;
+            } else {
+                // sama kayak keluarga: wajib pilih id_keluarga + validasi covered anak
+                if (empty($validated['id_keluarga'])) {
+                    return back()->withInput()->withErrors(['id_keluarga' => 'Pilih anggota keluarga.']);
+                }
+
+                $kel = DB::table('keluarga')
+                    ->where('id_keluarga', $validated['id_keluarga'])
+                    ->where('nip', $pegawai->nip)
+                    ->first();
+
+                if (!$kel) {
+                    return back()->withInput()->withErrors(['id_keluarga' => 'Anggota keluarga tidak valid.']);
+                }
+
+                $expected = ($validated['hub_kel'] === 'Pasangan') ? 'pasangan' : 'anak';
+                if ($kel->hubungan_keluarga !== $expected) {
+                    return back()->withInput()->withErrors(['hub_kel' => 'Hubungan keluarga tidak sesuai data keluarga.']);
+                }
+
+                if ($kel->hubungan_keluarga === 'anak') {
+                    $anak = DB::table('keluarga')
+                        ->where('nip', $pegawai->nip)
+                        ->where('hubungan_keluarga', 'anak')
+                        ->orderBy('urutan_anak')
+                        ->get();
+
+                    $coveredIds = [];
+                    foreach ($anak as $a) {
+                        $umur = \Carbon\Carbon::parse($a->tgl_lahir)->age;
+                        if ($umur <= 23 && count($coveredIds) < 3) {
+                            $coveredIds[] = $a->id_keluarga;
+                        }
+                    }
+
+                    if (!in_array($kel->id_keluarga, $coveredIds, true)) {
+                        return back()->withInput()->withErrors([
+                            'id_keluarga' => 'Anak ini tidak termasuk tanggungan (max 3 anak umur <= 23).'
+                        ]);
+                    }
+                }
+
+                $idKeluarga = $kel->id_keluarga;
+            }
+        }
+
         // parse petugas: dokter:ID atau pemeriksa:ID
         $petugas = explode(':', $validated['petugas']);
         if (count($petugas) !== 2) {
@@ -169,8 +224,6 @@ class PendaftaranController extends Controller
         }
         [$petugasType, $petugasId] = $petugas;
         $petugasId = (string) $petugasId;
-
-        // [$tipe, $id] = explode(':', $request->petugas);
 
         $idDokter = null;
         $idPemeriksa = null;
