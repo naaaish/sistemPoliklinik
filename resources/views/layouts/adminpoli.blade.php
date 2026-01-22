@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="{{ asset('css/adminpoli/saran.css') }}?v={{ filemtime(public_path('css/adminpoli/saran.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/artikel.css') }}?v={{ filemtime(public_path('css/adminpoli/artikel.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/laporan.css') }}?v={{ filemtime(public_path('css/adminpoli/laporan.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/laporan_index.css') }}?v={{ filemtime(public_path('css/adminpoli/laporan_index.css')) }}">
 
     {{-- Sweet Alert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
