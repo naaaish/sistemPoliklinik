@@ -32,12 +32,17 @@ class LaporanController extends Controller
             ->whereBetween('p.tanggal', [$from, $to]);
 
         // filter tipe (kalau struktur tipe_pasien kamu beda, ganti di sini)
-        if (in_array($tipe, ['pegawai', 'pensiunan'])) {
-            $nipQuery->where('p.tipe_pasien', $tipe);
-        } elseif ($tipe === 'poliklinik') {
-            // sementara tetap kosong/placeholder kalau memang data alkes beda tabel
-            // (kalau tabel alkes sudah ada, nanti kita mapping khusus di sini)
-            $nipQuery->whereRaw('1=0');
+        // filter berdasarkan bidang/bagian pegawai
+        $poliklinikCond = "(pg.nip = '001' OR LOWER(COALESCE(pg.nama_pegawai,'')) = 'poliklinik')";
+
+        if ($tipe === 'poliklinik') {
+            $nipQuery->whereRaw($poliklinikCond);
+        } elseif ($tipe === 'pensiunan') {
+            $nipQuery->whereRaw("LOWER(COALESCE(pg.bagian,'')) = 'pensiunan'")
+                    ->whereRaw("NOT $poliklinikCond");
+        } else { // pegawai
+            $nipQuery->whereRaw("LOWER(COALESCE(pg.bagian,'')) NOT IN ('pensiunan')")
+                    ->whereRaw("NOT $poliklinikCond");
         }
 
         $nips = $nipQuery
@@ -59,21 +64,37 @@ class LaporanController extends Controller
             $nip = $row->nip;
 
             $pasienRows = DB::table('pendaftaran as p')
+                ->leftJoin('pegawai as pg', 'pg.nip', '=', 'p.nip')
                 ->leftJoin('keluarga as k', 'k.id_keluarga', '=', 'p.id_keluarga')
                 ->whereBetween('p.tanggal', [$from, $to])
                 ->where('p.nip', $nip);
 
-            if (in_array($tipe, ['pegawai', 'pensiunan'])) {
-                $pasienRows->where('p.tipe_pasien', $tipe);
+            $poliklinikCond = "(pg.nip = '001' OR LOWER(COALESCE(pg.nama_pegawai,'')) = 'poliklinik')";
+
+            if ($tipe === 'poliklinik') {
+                $pasienRows->whereRaw($poliklinikCond);
+            } elseif ($tipe === 'pensiunan') {
+                $pasienRows->whereRaw("LOWER(COALESCE(pg.bagian,'')) = 'pensiunan'")
+                        ->whereRaw("NOT $poliklinikCond");
+            } else {
+                $pasienRows->whereRaw("LOWER(COALESCE(pg.bagian,'')) <> 'pensiunan'")
+                        ->whereRaw("NOT $poliklinikCond");
             }
 
-            // Ambil list pasien + hubkel (unik) untuk ditampilin ringkas
-            $pairs = $pasienRows
-                ->select([
-                    DB::raw("CASE WHEN p.tipe_pasien = 'pegawai' THEN 'YBS' ELSE COALESCE(k.nama_keluarga,'-') END as nama_pasien"),
-                    DB::raw("CASE WHEN p.tipe_pasien = 'pegawai' THEN 'YBS' ELSE COALESCE(k.hubungan_keluarga,'-') END as hub_kel"),
-                ])
-                ->get();
+            $pairs = $pasienRows->select([
+                DB::raw("CASE
+                    WHEN $poliklinikCond THEN '-'
+                    WHEN p.id_keluarga IS NULL THEN 'YBS'
+                    ELSE COALESCE(k.nama_keluarga,'-')
+                END as nama_pasien"),
+                DB::raw("CASE
+                    WHEN $poliklinikCond THEN '-'
+                    WHEN p.id_keluarga IS NULL THEN 'YBS'
+                    WHEN k.hubungan_keluarga = 'pasangan' THEN 'Pasangan'
+                    WHEN k.hubungan_keluarga = 'anak' THEN 'Anak'
+                    ELSE '-'
+                END as hub_kel"),
+            ])->get();
 
             $namaList = [];
             $hubList  = [];
@@ -149,11 +170,16 @@ class LaporanController extends Controller
             ->leftJoin('pemeriksa as pr', 'pr.id_pemeriksa', '=', 'p.id_pemeriksa')
             ->whereBetween('p.tanggal', [$from, $to]);
 
-        if (in_array($tipe, ['pegawai', 'pensiunan'])) {
-            $q->where('p.tipe_pasien', $tipe);
-        } elseif ($tipe === 'poliklinik') {
-            // placeholder alkes
-            $q->whereRaw('1=0');
+        $poliklinikCond = "(pg.nip = '001' OR LOWER(COALESCE(pg.nama_pegawai,'')) = 'poliklinik')";
+
+        if ($tipe === 'poliklinik') {
+            $q->whereRaw($poliklinikCond);
+        } elseif ($tipe === 'pensiunan') {
+            $q->whereRaw("LOWER(COALESCE(pg.bagian,'')) = 'pensiunan'")
+            ->whereRaw("NOT $poliklinikCond");
+        } else {
+            $q->whereRaw("LOWER(COALESCE(pg.bagian,'')) <> 'pensiunan'")
+            ->whereRaw("NOT $poliklinikCond");
         }
 
         if ($nip) $q->where('p.nip', $nip);
@@ -181,13 +207,15 @@ class LaporanController extends Controller
 
                 DB::raw("COALESCE(pg.nama_pegawai,'-') as nama_pegawai"),
                 DB::raw("COALESCE(pg.bagian,'-') as bagian"),
-
-                DB::raw("CASE 
-                    WHEN p.tipe_pasien = 'pegawai' THEN 'YBS'
+                
+                DB::raw("CASE
+                    WHEN $poliklinikCond THEN '-'
+                    WHEN p.id_keluarga IS NULL THEN 'YBS'
                     ELSE COALESCE(k.nama_keluarga,'-')
                 END as nama_pasien"),
 
-                DB::raw("CASE 
+                DB::raw("CASE
+                    WHEN $poliklinikCond THEN '-'
                     WHEN p.id_keluarga IS NULL THEN 'YBS'
                     WHEN k.hubungan_keluarga = 'pasangan' THEN 'Pasangan'
                     WHEN k.hubungan_keluarga = 'anak' THEN 'Anak'
@@ -307,9 +335,6 @@ class LaporanController extends Controller
                     'BB' => $isFirst ? ($v->berat ?? '-') : '',
                     'TB' => $isFirst ? ($v->tinggi ?? '-') : '',
 
-                    // diagnosa per baris
-                    'DIAGNOSA' => $diag !== '' ? $diag : ($isFirst ? '-' : ''),
-
                     // TERAPHY = nama obat per baris
                     'DIAGNOSA' => $diag !== '' ? $diag : ($isFirst ? '-' : ''),
 
@@ -322,8 +347,7 @@ class LaporanController extends Controller
 
                     // NB: tetap hanya tampil untuk pegawai (sesuai code kamu)
                     'NB' => $isPegawai ? ($nbLine ?: '-') : '',
-
-                    'PERIKSA_KE' => $isPegawai ? ($periksaKe ?: '') : '',
+                    'PERIKSA_KE' => $isPegawai ? ($isFirst ? $periksaKe : '') : '',
                 ];
             }
 
