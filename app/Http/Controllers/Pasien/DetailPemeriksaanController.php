@@ -60,21 +60,34 @@ class DetailPemeriksaanController extends Controller
                 ->first();
         }
 
-        // ================= DIAGNOSA =================
-        $diagnosa = null;
-        if (!empty($pemeriksaan->id_diagnosa)) {
-            $diagnosa = DB::table('diagnosa')
-                ->where('id_diagnosa', $pemeriksaan->id_diagnosa)
-                ->first();
-        }
+        // =================================================
+        // DIAGNOSA NON-K3 (MANY TO MANY)
+        // =================================================
+        $diagnosa = DB::table('detail_pemeriksaan_penyakit as dpp')
+            ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dpp.id_diagnosa')
+            ->where('dpp.id_pemeriksaan', $id_pemeriksaan)
+            ->select('d.diagnosa as nama_diagnosa')
+            ->get();
 
-        // ================= SARAN =================
-        $saran = null;
-        if (!empty($pemeriksaan->id_saran)) {
-            $saran = DB::table('saran')
-                ->where('id_saran', $pemeriksaan->id_saran)
-                ->first();
-        }
+
+        // =================================================
+        // DIAGNOSA K3
+        // =================================================
+        $diagnosa_k3 = DB::table('detail_pemeriksaan_diagnosa_k3 as dpk3')
+            ->join('diagnosa_k3 as dk3', 'dk3.id_nb', '=', 'dpk3.id_nb')
+            ->where('dpk3.id_pemeriksaan', $id_pemeriksaan)
+            ->select('dk3.nama_penyakit')
+            ->get();
+
+        // =================================================
+        // SARAN (MANY TO MANY)
+        // =================================================
+        $saran = DB::table('detail_pemeriksaan_saran as dps')
+            ->join('saran as s', 's.id_saran', '=', 'dps.id_saran')
+            ->where('dps.id_pemeriksaan', $id_pemeriksaan)
+            ->select('s.saran as isi_saran')
+            ->get();
+
 
         // ================= RESEP =================
         $resep = DB::table('resep')
@@ -105,6 +118,7 @@ class DetailPemeriksaanController extends Controller
             'dokter',
             'pemeriksa',
             'diagnosa',
+            'diagnosa_k3',
             'saran',
             'detailResep'
         ));

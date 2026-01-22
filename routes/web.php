@@ -193,6 +193,7 @@ Route::middleware(['auth', 'ensureKepegawaian'])
     Route::get('/riwayat/{id}', [DetailRiwayatController::class, 'show'])
         ->name('riwayat.detail');
 
+
     /* ================= LAPORAN ================= */
     Route::get('/laporan', [LaporanController::class, 'index'])
         ->name('laporan');
@@ -262,6 +263,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pasien/pemeriksaan/{id}', 
         [DetailPemeriksaanController::class, 'show']
     )->name('pasien.pemeriksaan.detail');
+
+    Route::get('/riwayat/{id_pemeriksaan}', [RiwayatController::class, 'detail'])
+        ->name('riwayat.detail');
+
 });
 
 
