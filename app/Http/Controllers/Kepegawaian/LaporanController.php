@@ -205,25 +205,24 @@ class LaporanController extends Controller
                 ->get()
                 ->groupBy('id_pemeriksaan');
 
+                
             // =====================
-            // BENTUK DATA FINAL
+            // BENTUK DATA FINAL (FIX)
             // =====================
-
             $data = collect();
             $periksaCounter = [];
+            $totalObatPerPemeriksaan = [];
 
-            $groupedRaw = $dataRaw->groupBy('id_pemeriksaan');
+            foreach ($dataRaw as $row) {
+                $id = $row->id_pemeriksaan;
 
-            foreach ($groupedRaw as $id => $rows) {
-
-                $row = $rows->first(); // SATU PEMERIKSAAN = SATU HEADER
-                $periksaCounter[$id] = ($periksaCounter[$id] ?? 0) + 1;
-
+                // ===== Diagnosa & NB (INI PENGENDALI BARIS) =====
                 $diagnosaList = $diagnosaMap->get($id, collect())->pluck('diagnosa')->values();
                 $nbList       = $nbMap->get($id, collect())->pluck('id_nb')->values();
-                $saran        = $saranMap->get($id, collect())->pluck('saran')->implode(', ') ?: '-';
 
-                // ===== OBAT =====
+                $maxRow = max($diagnosaList->count(), $nbList->count(), 1);
+
+                // ===== Obat =====
                 $obatList = DB::table('resep')
                     ->join('detail_resep','resep.id_resep','=','detail_resep.id_resep')
                     ->join('obat','detail_resep.id_obat','=','obat.id_obat')
@@ -236,39 +235,41 @@ class LaporanController extends Controller
                     )
                     ->get();
 
-                $totalObatPasien = $obatList->sum(fn($o) => (int)$o->jumlah * (int)$o->harga);
+                // total obat per pasien
+                $totalObatPerPemeriksaan[$id] = $obatList->sum(function ($o) {
+                    return ((int)$o->jumlah) * ((int)$o->harga);
+                });
 
-                $max = max(
-                    $diagnosaList->count(),
-                    $nbList->count(),
-                    $obatList->count(),
-                    1
-                );
+                // periksa ke (NAIK 1 PER PEMERIKSAAN)
+                $periksaCounter[$id] = ($periksaCounter[$id] ?? 0) + 1;
 
-                for ($i = 0; $i < $max; $i++) {
-
+                for ($i = 0; $i < $maxRow; $i++) {
                     $clone = clone $row;
 
-                    // ===== DIAGNOSA & NB =====
+                    // ===== DIAGNOSA & NB (SEJAJAR) =====
                     $clone->diagnosa = $diagnosaList[$i] ?? '-';
                     $clone->nb       = $nbList[$i] ?? '-';
-                    $clone->saran    = $saran;
 
-                    // ===== OBAT =====
-                    $clone->nama_obat = $obatList[$i]->nama_obat ?? '-';
-                    $clone->jumlah    = isset($obatList[$i]->jumlah) ? (int)$obatList[$i]->jumlah : 0;
-                    $clone->satuan    = $obatList[$i]->satuan ?? '-';
-                    $clone->harga     = isset($obatList[$i]->harga) ? (int)$obatList[$i]->harga : 0;
-                    $clone->total_obat = $clone->jumlah * $clone->harga;
+                    // ===== OBAT (TAMPIL BARIS PERTAMA SAJA) =====
+                    if ($i === 0 && isset($obatList[0])) {
+                        $clone->nama_obat = $obatList[0]->nama_obat;
+                        $clone->jumlah    = (int)$obatList[0]->jumlah;
+                        $clone->satuan    = $obatList[0]->satuan;
+                        $clone->harga     = (int)$obatList[0]->harga;
+                        $clone->total_obat_pasien = $totalObatPerPemeriksaan[$id];
+                    } else {
+                        $clone->nama_obat = '-';
+                        $clone->jumlah    = '-';
+                        $clone->satuan    = '-';
+                        $clone->harga     = 0;
+                        $clone->total_obat_pasien = null;
+                    }
 
-                    // ===== TOTAL & PERIKSA KE =====
-                    $clone->total_obat_pasien = $totalObatPasien;
                     $clone->periksa_ke = $periksaCounter[$id];
 
                     $data->push($clone);
                 }
             }
-
         }
         /* ================= DOKTER ================= */
 

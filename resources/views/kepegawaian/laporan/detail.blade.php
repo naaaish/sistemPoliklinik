@@ -206,6 +206,7 @@
                                 <th>Bagian</th>
                                 <th>Nama Pasien</th>
                                 <th>Hub. Kel</th>
+
                                 <th>TD</th>
                                 <th>GDP</th>
                                 <th>GD 2 Jam</th>
@@ -216,14 +217,16 @@
                                 <th>Suhu</th>
                                 <th>BB</th>
                                 <th>TB</th>
+
                                 <th>Diagnosa</th>
+                                <th>NB</th>
                                 <th>Therapy</th>
                                 <th>Jml Obat</th>
                                 <th>Harga Obat</th>
                                 <th>Total Obat</th>
                                 <th>Pemeriksa</th>
-                                <th>NB</th>
                                 <th>Periksa Ke</th>
+
                             </tr>
                         @endif
                     </tr>
@@ -231,57 +234,65 @@
 
                 <tbody>
                 @php
+                    $grouped = $data->groupBy('id_pemeriksaan');
                     $no = 1;
-                    $lastId = null;
                 @endphp
 
-                @foreach($data as $item)
-                    <tr>
-                        {{-- ===== DATA UTAMA (ROWSPAN DARI CONTROLLER) ===== --}}
-                        @if($lastId !== $item->id_pemeriksaan)
-                            @php
-                                $rowspan = $data->where('id_pemeriksaan', $item->id_pemeriksaan)->count();
-                                $lastId = $item->id_pemeriksaan;
-                            @endphp
+                @foreach($grouped as $rows)
+                    @php
+                        $rowspan = $rows->count();
+                    @endphp
 
-                            <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
-                            <td rowspan="{{ $rowspan }}">
-                                {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}
+                    @foreach($rows as $item)
+                        <tr>
+                            @if($loop->first)
+                                <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->nama_pegawai }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->umur }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->bagian }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->nama_pasien }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ ucfirst($item->hub_kel) }}</td>
+
+                                <td rowspan="{{ $rowspan }}">{{ $item->sistol }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->gd_puasa }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->gd_duajam }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->gd_sewaktu }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->asam_urat }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->chol }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->tg }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->suhu }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->berat }}</td>
+                                <td rowspan="{{ $rowspan }}">{{ $item->tinggi }}</td>
+                            @endif
+
+                            {{-- DIAGNOSA --}}
+                            <td>{{ $item->diagnosa }}</td>
+
+                            {{-- NB --}}
+                            <td>{{ $item->nb }}</td>
+
+                            {{-- THERAPY / OBAT --}}
+                            <td>{{ $item->nama_obat }}</td>
+
+                            <td class="text-center">
+                                {{ $item->jumlah }} {{ $item->satuan }}
                             </td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->nama_pegawai }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->umur }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->bagian }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->nama_pasien }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ ucfirst($item->hub_kel) }}</td>
 
-                            <td rowspan="{{ $rowspan }}">{{ $item->sistol }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->gd_puasa }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->gd_duajam }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->gd_sewaktu }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->asam_urat }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->chol }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->tg }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->suhu }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->berat }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->tinggi }}</td>
+                            <td class="text-right">
+                                Rp {{ number_format($item->harga,0,',','.') }}
+                            </td>
 
-                            <td rowspan="{{ $rowspan }}">{{ $item->diagnosa }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->nb }}</td>
-                        @endif
-
-                        {{-- ===== DATA OBAT (PER BARIS) ===== --}}
-                        <td>{{ $item->nama_obat }}</td>
-                        <td class="text-center">{{ $item->jumlah }} {{ $item->satuan }}</td>
-                        <td class="text-right">Rp {{ number_format($item->harga,0,',','.') }}</td>
-
-                        @if($loop->first || ($loop->index > 0 && $data[$loop->index - 1]->id_pemeriksaan !== $item->id_pemeriksaan))
+                            @if($loop->first)
                             <td rowspan="{{ $rowspan }}" class="text-right fw-bold">
                                 Rp {{ number_format($item->total_obat_pasien,0,',','.') }}
                             </td>
                             <td rowspan="{{ $rowspan }}">{{ $item->pemeriksa }}</td>
                             <td rowspan="{{ $rowspan }}">{{ $item->periksa_ke }}</td>
-                        @endif
-                    </tr>
+                            @endif
+
+                        </tr>
+                    @endforeach
                 @endforeach
                 </tbody>
 
