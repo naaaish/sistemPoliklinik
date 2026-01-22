@@ -33,17 +33,13 @@
           Tampilkan
         </button>
       </div>
-
-      <div class="lapidx-filter">
-        <span class="lapidx-muted">Tampilkan</span>
-        <select name="per_page" class="lapidx-select" onchange="this.form.submit()">
-          @foreach([5,10,25,100] as $n)
-            <option value="{{ $n }}" {{ (int)$perPage===$n ? 'selected' : '' }}>{{ $n }}</option>
-          @endforeach
-        </select>
-        <span class="lapidx-muted">NIP</span>
+      <div class="lapidx-actions-top">
+        <a class="lapidx-btn-soft"
+          href="{{ route('adminpoli.laporan.export', request()->query()) }}">
+          <img class="lapidx-ic-sm" src="{{ asset('assets/adminPoli/download.png') }}" alt="">
+          Download Excel
+        </a>
       </div>
-
     </form>
 
     <div class="lapidx-info">
@@ -81,6 +77,20 @@
         @empty
           <div class="lapidx-empty">Tidak ada data pada filter ini.</div>
         @endforelse
+      </div>
+    </div>
+
+    <div class="lapidx-bottom">
+      <div class="lapidx-perpage">
+        <span>Tampilkan</span>
+        <select name="per_page"
+                onchange="this.form.submit()"
+                class="lapidx-select-sm">
+          <option value="5" {{ request('per_page') == 5 ? 'selected' : '' }}>5</option>
+          <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+          <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+        </select>
+        <span>NIP</span>
       </div>
     </div>
 
