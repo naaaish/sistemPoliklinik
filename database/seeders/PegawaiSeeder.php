@@ -78,6 +78,29 @@ class PegawaiSeeder extends Seeder
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
+            // untuk poliklinik
+            [
+                'nip' => '001',
+                'nama_pegawai' => 'Poliklinik',
+                'nik' => '-',
+                'agama' => '-',
+                'jenis_kelamin' => '-',
+                'tgl_lahir' => '2000-01-01',
+                'tgl_masuk' => '2000-01-01',
+                'status' => 'Aktif',
+                'status_pernikahan' => '-',
+                'no_telp' => '-',
+                'email' => '-',
+                'alamat' => '-',
+                'jabatan' => '-',
+                'bagian' => 'Poliklinik',
+                'foto' => null,
+                'pendidikan_terakhir' => '-',
+                'institusi' => '-',
+                'thn_lulus' => '-',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]
         ]);
     }
 }

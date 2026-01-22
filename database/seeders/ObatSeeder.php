@@ -27,7 +27,7 @@ class ObatSeeder extends Seeder
                 'id_obat'   => 'OBT-002',
                 'nama_obat' => 'Amoxicillin 500mg',
                 'harga'     => 12500.00,
-                'exp_date'  => '2025-10-20',
+                'exp_date'  => '2026-10-20',
                 'is_active' => true,
             ],
             [
@@ -44,6 +44,77 @@ class ObatSeeder extends Seeder
                 'exp_date'  => '2026-06-05',
                 'is_active' => true,
             ],
+            [
+                'id_obat'   => 'OBT-005',
+                'nama_obat' => 'Loperamide 2mg',
+                'harga'     => 8000.00,
+                'exp_date'  => '2027-11-11',
+                'is_active' => true,
+            ],
+            [
+                'id_obat'   => 'OBT-006',
+                'nama_obat' => 'Cetirizine 10mg',
+                'harga'     => 15000.00,
+                'exp_date'  => '2027-03-22',
+                'is_active' => true,
+            ],
+            [
+                'id_obat'   => 'OBT-007',
+                'nama_obat' => 'Metformin 500mg',
+                'harga'     => 20000.00,
+                'exp_date'  => '2026-09-30',
+                'is_active' => true,
+            ],
+            [
+                'id_obat'   => 'OBT-008',
+                'nama_obat' => 'Entrostop',
+                'harga'     => 9000.00,
+                'exp_date'  => '2026-12-12',
+                'is_active' => true,
+            ],
+            // alat kesehatan
+            [
+                'id_obat'   => 'OBT-009',
+                'nama_obat' => 'Masker Medis 50pcs',
+                'harga'     => 75000.00,
+                'exp_date'  => '2028-05-01',
+                'is_active' => true,
+            ],
+            [
+                'id_obat'   => 'OBT-010',
+                'nama_obat' => 'Sarung Tangan Latex 100pcs',
+                'harga'     => 120000.00,
+                'exp_date'  => '2028-08-15',
+                'is_active' => true,
+            ],
+            [
+                'id_obat'   => 'OBT-011',
+                'nama_obat' => 'Alkohol 70% 500ml',
+                'harga'     => 25000.00,
+                'exp_date'  => '2027-07-07',
+                'is_active' => true,
+            ],
+            [
+                'id_obat'   => 'OBT-012',
+                'nama_obat' => 'Plester Luka 10pcs',
+                'harga'     => 15000.00,
+                'exp_date'  => '2027-04-18',
+                'is_active' => true,
+            ],
+            [
+                'id_obat'   => 'OBT-013',
+                'nama_obat' => 'Thermometer Digital',
+                'harga'     => 85000.00,
+                'exp_date'  => '2030-01-01',
+                'is_active' => true,
+            ],
+            [
+                'id_obat'   => 'OBT-014',
+                'nama_obat' => 'Tensimeter Manual',
+                'harga'     => 150000.00,
+                'exp_date'  => '2030-01-01',
+                'is_active' => true,
+            ]
         ];
 
         // Masukkan data manual ke database

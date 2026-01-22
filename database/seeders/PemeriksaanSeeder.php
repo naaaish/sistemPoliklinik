@@ -60,12 +60,6 @@ class PemeriksaanSeeder extends Seeder
                 'berat'          => rand(50, 90),
                 'tinggi'         => rand(155, 180),
 
-                // Foreign Keys Opsional
-                // Ambil acak dari array jika $is_sakit true & array tidak kosong
-                'id_diagnosa'    => ($is_sakit && !empty($list_diagnosa)) ? $list_diagnosa[array_rand($list_diagnosa)] : null,
-                'id_saran'       => ($is_sakit && !empty($list_saran)) ? $list_saran[array_rand($list_saran)] : null,
-                'id_nb'          => ($is_sakit && !empty($list_k3)) ? $list_k3[array_rand($list_k3)] : null,
-
                 'created_at'     => $now,
                 'updated_at'     => $now,
             ];
