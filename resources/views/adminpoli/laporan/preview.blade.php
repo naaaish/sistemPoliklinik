@@ -3,15 +3,6 @@
 @section('title', 'Preview Laporan')
 
 @section('content')
-<!-- <div class="lapidx-page">
-  <div class="lapidx-topbar">
-    <div class="lapidx-left">
-      <a href="{{ route('adminpoli.dashboard') }}" class="lapidx-back-img" title="Kembali">
-        <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
-      </a>
-      <div class="lapidx-heading">Laporan</div>
-    </div>
-  </div> -->
 <div class="lap-page">
   <div class="lap-topbar">
     <a href="{{ route('adminpoli.laporan.index', ['tipe'=>$tipe,'from'=>$from,'to'=>$to]) }}" class="lap-back-img" title="Kembali">

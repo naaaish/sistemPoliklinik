@@ -70,6 +70,7 @@
                 <div class="ap-colon">:</div>
                 <div class="ap-input">
                     <select name="nama_pasien" id="nama_pasien" class="ap-select" required>
+                        <option value="-" selected>-</option>
                         <option value="">-- pilih nama pasien --</option>
                     </select>
                     <small class="ap-help" id="namaPasienHelp"></small>
@@ -336,11 +337,55 @@ tipeEl.addEventListener('change', () => {
 
 namaPasSelect.addEventListener('change', applySelectedPasien);
 
-// before submit: enable hub_kel biar terkirim
+function setPoliklinikMode(isPoli) {
+  const namaPasienEl = document.getElementById('nama_pasien');
+  const hubKelEl = document.getElementById('hub_kel');
+  const tglLahirEl = document.getElementById('tgl_lahir');
+
+  if (!namaPasienEl || !hubKelEl || !tglLahirEl) return;
+
+  if (isPoli) {
+    // set value ke "-"
+    namaPasienEl.value = '-';
+    hubKelEl.value = 'YBS';        // biar lolos validasi backend
+    tglLahirEl.value = '2000-01-01'; // dummy aman
+
+    // kunci field
+    namaPasienEl.disabled = true;
+    hubKelEl.disabled = true;
+    tglLahirEl.readOnly = true;
+  } else {
+    namaPasienEl.disabled = false;
+    hubKelEl.disabled = false;
+    tglLahirEl.readOnly = false;
+  }
+}
+
+function checkPoliklinik() {
+  const bagianEl = document.getElementById('bagian');
+  const nipEl = document.getElementById('nip');
+  const namaPegawaiEl = document.getElementById('nama_pegawai');
+
+  const bagian = (bagianEl?.value || '').toLowerCase().trim();
+  const nip = (nipEl?.value || '').trim();
+  const namaPegawai = (namaPegawaiEl?.value || '').toLowerCase().trim();
+
+  const isPoli = (bagian === 'poliklinik') || (nip === '001') || (namaPegawai === 'poliklinik');
+  setPoliklinikMode(isPoli);
+}
+
+// panggil saat halaman load & setelah autofill nip
+checkPoliklinik();
+
 document.getElementById('formPendaftaran').addEventListener('submit', () => {
   hubEl.disabled = false;
   tipeEl.disabled = false;
+
+  const namaPasienEl = document.getElementById('nama_pasien');
+  if (namaPasienEl) namaPasienEl.disabled = false;
 });
+
+
 </script>
 
 @endsection
