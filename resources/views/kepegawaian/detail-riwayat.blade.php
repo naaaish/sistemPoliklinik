@@ -131,17 +131,38 @@
             </div>
         </div>
 
-        {{-- DIAGNOSA & SARAN --}}
+        {{-- DIAGNOSA DOKTER --}}
         <div class="info-box">
-            <div class="info-header"><h3>Diagnosa Dokter</h3></div>
-            <div class="info-content"><p>{{ $diagnosa->diagnosa ?? '-' }}</p></div>
+            <div class="info-header">
+                <h3>Diagnosa Dokter</h3>
+            </div>
+            <div class="info-content">
+                @if($diagnosa->count())
+                    @foreach($diagnosa as $d)
+                        <p>• {{ $d->nama_diagnosa }}</p>
+                    @endforeach
+                @else
+                    <p>-</p>
+                @endif
+            </div>
         </div>
 
+        {{-- SARAN DOKTER --}}
         <div class="info-box">
-            <div class="info-header"><h3>Saran Dokter</h3></div>
-            <div class="info-content"><p>{{ $saran->saran ?? '-' }}</p></div>
+            <div class="info-header">
+                <h3>Saran Dokter</h3>
+            </div>
+            <div class="info-content">
+                @if($saran->count())
+                    @foreach($saran as $s)
+                        <p>• {{ $s->isi_saran }}</p>
+                    @endforeach
+                @else
+                    <p>-</p>
+                @endif
+            </div>
         </div>
-
+        
         {{-- DATA RESEP OBAT --}}
         <h2 class="section-title">Data Resep Obat</h2>
         <table class="resep-table">
