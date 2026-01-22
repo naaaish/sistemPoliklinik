@@ -34,10 +34,10 @@ class PemeriksaanController extends Controller
             ->leftJoin('dokter', 'dokter.id_dokter', '=', 'pendaftaran.id_dokter')
             ->leftJoin('pemeriksa', 'pemeriksa.id_pemeriksa', '=', 'pendaftaran.id_pemeriksa')
 
-            // search: input kamu "Masukkan nama dokter yang dicari"
+            // search: input kamu "Masukkan nama pegawai yang dicari"
             ->when($q, function ($query) use ($q) {
-                $query->where('dokter.nama', 'like', "%{$q}%")
-                    ->orWhere('pemeriksa.nama_pemeriksa', 'like', "%{$q}%");
+                $query->where('pegawai.nama_pegawai', 'like', "%{$q}%")
+                      ->orWhere('keluarga.nama_keluarga', 'like', "%{$q}%");
             })
 
             ->orderByDesc('pemeriksaan.created_at')
