@@ -166,7 +166,6 @@ class LaporanController extends Controller
                 'p.id_keluarga',
 
                 'pm.id_pemeriksaan',
-                'pm.id_nb',
 
                 'pm.sistol',
                 'pm.diastol',
@@ -189,8 +188,10 @@ class LaporanController extends Controller
                 END as nama_pasien"),
 
                 DB::raw("CASE 
-                    WHEN p.tipe_pasien = 'pegawai' THEN 'YBS'
-                    ELSE COALESCE(k.hubungan_keluarga,'-')
+                    WHEN p.id_keluarga IS NULL THEN 'YBS'
+                    WHEN k.hubungan_keluarga = 'pasangan' THEN 'Pasangan'
+                    WHEN k.hubungan_keluarga = 'anak' THEN 'Anak'
+                    ELSE '-'
                 END as hub_kel"),
 
                 DB::raw("COALESCE(d.nama, pr.nama_pemeriksa, '-') as pemeriksa"),
@@ -254,30 +255,14 @@ class LaporanController extends Controller
             }
 
             // ==== DIAGNOSA LINES (dipisah per baris) ====
-            // diagnosa umum: nb kosong
-            $diagnosaLines = [];
+            $diagUmum = $v->diagnosa_list ?? []; // array of string
 
-            $diagUmum = $v->diagnosa_list ?? [];
-            foreach ($diagUmum as $d) {
-                $diagnosaLines[] = [
-                    'diagnosa' => $d,
-                    'nb' => '', // diagnosa umum ga punya id_nb
-                ];
-            }
+            // ===== LIST NB (dari diagnosa_k3) =====
+            $nbItems = $v->diagnosa_k3_items ?? []; // array of object {id_nb, nama_penyakit}
 
-            // diagnosa k3: nb = id_nb
-            $diagK3Items = $v->diagnosa_k3_items ?? [];
-            foreach ($diagK3Items as $k3) {
-                $diagnosaLines[] = [
-                    'diagnosa' => $k3->nama_penyakit ?? '-',
-                    'nb' => $k3->id_nb ?? '',
-                ];
-            }
-
-            // kalau tidak ada diagnosa sama sekali, tetap 1 baris
-            if (count($diagnosaLines) === 0) {
-                $diagnosaLines[] = ['diagnosa' => '-', 'nb' => ''];
-            }
+            // kalau kosong, biar tetap ada 1 baris
+            if (count($diagUmum) === 0) $diagUmum = ['-'];
+            if (count($nbItems) === 0) $nbItems = []; // NB nanti jadi '-' per baris
 
             // ==== OBAT LIST ====
             $obatList = $v->obat_list ?? [];
@@ -288,14 +273,17 @@ class LaporanController extends Controller
                 $totalHarga += (int)($ob->subtotal ?? 0);
             }
 
-            // jumlah baris mengikuti yang paling banyak: diagnosa atau obat
-            $maxLines = max(count($diagnosaLines), count($obatList), 1);
+            // jumlah baris mengikuti yang paling banyak: diagnosa umum / nb / obat
+            $maxLines = max(count($diagUmum), count($nbItems), count($obatList), 1);
 
             for ($i = 0; $i < $maxLines; $i++) {
                 $isFirst = ($i === 0);
 
-                $diag = $diagnosaLines[$i]['diagnosa'] ?? '';
-                $nbLine = $diagnosaLines[$i]['nb'] ?? '';
+                // diagnosa hanya dari tabel diagnosa
+                $diag = $diagUmum[$i] ?? ($isFirst ? '-' : '');
+                
+                // NB hanya dari diagnosa_k3 (zip by index)
+                $nbLine = isset($nbItems[$i]) ? ($nbItems[$i]->id_nb ?? '-') : '-';
 
                 $ob = $obatList[$i] ?? null;
 
@@ -323,19 +311,19 @@ class LaporanController extends Controller
                     'DIAGNOSA' => $diag !== '' ? $diag : ($isFirst ? '-' : ''),
 
                     // TERAPHY = nama obat per baris
-                    'TERAPHY' => $ob ? ($ob->nama_obat ?? '-') : ($isFirst ? '-' : ''),
+                    'DIAGNOSA' => $diag !== '' ? $diag : ($isFirst ? '-' : ''),
 
+                    'TERAPHY' => $ob ? ($ob->nama_obat ?? '-') : ($isFirst ? '-' : ''),
                     'JUMLAH_OBAT' => $ob ? trim(($ob->jumlah ?? 0) . ' ' . ($ob->satuan ?? '')) : ($isFirst ? '-' : ''),
                     'HARGA_OBAT_SATUAN' => $ob ? ($ob->harga ?? 0) : ($isFirst ? '-' : ''),
                     'TOTAL_HARGA_OBAT' => $isFirst ? ($totalHarga ?: '-') : '',
 
-                    // pemeriksa dari join dokter/pemeriksa
                     'PEMERIKSA' => $isFirst ? ($v->pemeriksa ?? '-') : '',
 
-                    // NB: hanya pegawai, dan per baris (khusus diagnosa K3 ada id_nb)
-                    'NB' => $isPegawai ? ($nbLine ?: ($isFirst ? '-' : '')) : '',
+                    // NB: tetap hanya tampil untuk pegawai (sesuai code kamu)
+                    'NB' => $isPegawai ? ($nbLine ?: '-') : '',
 
-                    'PERIKSA_KE' => $isFirst ? $periksaKe : '',
+                    'PERIKSA_KE' => $isPegawai ? ($periksaKe ?: '') : '',
                 ];
             }
 

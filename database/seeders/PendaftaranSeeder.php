@@ -6,61 +6,51 @@ use Illuminate\Database\Seeder;
 use App\Models\Pendaftaran;
 use App\Models\Pegawai;
 use App\Models\Keluarga;
-use App\Models\Dokter;    // Pastikan Model Dokter di-import
-use App\Models\Pemeriksa; // Pastikan Model Pemeriksa di-import
+use App\Models\Dokter;
+use App\Models\Pemeriksa;
 
 class PendaftaranSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Ambil Data Referensi (Pegawai, Dokter, Pemeriksa)
-        $pegawai = Pegawai::where('nip', '198765432001')->first();
-        
-        // Ambil satu dokter dan satu pemeriksa secara acak/pertama
-        $dokter = Dokter::first(); 
-        $pemeriksa = Pemeriksa::first();
+        // Ambil Data Pendukung
+        $pegawai   = Pegawai::where('nip', '198765432001')->first();
+        $dokter    = Dokter::where('id_dokter', 'DOK001')->first(); // dr. Farah
+        $pemeriksa = Pemeriksa::where('id_pemeriksa', 'PMR001')->first(); // Sofia
 
         if (!$pegawai) return;
 
-        // ---------------------------------------------------------
-        // KASUS 1: Pegawai Cek Kesehatan (Ditangani Pemeriksa)
-        // ---------------------------------------------------------
+        // KASUS 1: Pegawai Sakit Kepala (Cek Kesehatan)
         Pendaftaran::updateOrCreate(
-            ['id_pendaftaran' => 'DFT001'],
+            ['id_pendaftaran' => 'DFT-001'],
             [
                 'tanggal'           => now()->toDateString(),
                 'jenis_pemeriksaan' => 'cek_kesehatan',
-                'keluhan'           => 'Pusing dan lemas',
+                'keluhan'           => 'Pusing berat, tengkuk kaku',
                 'tipe_pasien'       => 'pegawai',
                 'nip'               => $pegawai->nip,
                 'id_keluarga'       => null,
-                
-                // Isi ID Pemeriksa, kosongkan ID Dokter
                 'id_pemeriksa'      => $pemeriksa ? $pemeriksa->id_pemeriksa : null,
                 'id_dokter'         => null, 
             ]
         );
 
-        // ---------------------------------------------------------
-        // KASUS 2: Anak Pegawai Berobat (Ditangani Dokter)
-        // ---------------------------------------------------------
+        // KASUS 2: Anak Pegawai Demam (Berobat)
         $anak1 = Keluarga::where('nip', $pegawai->nip)
             ->where('hubungan_keluarga', 'anak')
             ->orderBy('urutan_anak')
-            ->first();
+            ->first(); // Budi Pratama
 
         if ($anak1) {
             Pendaftaran::updateOrCreate(
-                ['id_pendaftaran' => 'DFT002'],
+                ['id_pendaftaran' => 'DFT-002'],
                 [
                     'tanggal'           => now()->toDateString(),
                     'jenis_pemeriksaan' => 'berobat',
-                    'keluhan'           => 'Demam tinggi dan batuk',
+                    'keluhan'           => 'Demam tinggi, batuk pilek',
                     'tipe_pasien'       => 'keluarga',
                     'nip'               => $pegawai->nip,
                     'id_keluarga'       => $anak1->id_keluarga,
-
-                    // Isi ID Dokter, kosongkan ID Pemeriksa
                     'id_dokter'         => $dokter ? $dokter->id_dokter : null,
                     'id_pemeriksa'      => null,
                 ]

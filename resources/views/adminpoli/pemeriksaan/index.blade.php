@@ -21,7 +21,7 @@
         type="text"
         name="q"
         value="{{ request('q') }}"
-        placeholder="Masukkan nama dokter yang dicari"
+        placeholder="Masukkan nama pegawai yang dicari"
         class="periksa-search-input"
       >
       <button class="periksa-search-btn" type="submit">
