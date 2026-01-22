@@ -5,13 +5,15 @@
 @section('content')
 <div class="lap-page">
   <div class="lap-topbar">
-    <a href="{{ route('adminpoli.laporan.index', ['tipe'=>$tipe,'from'=>$from,'to'=>$to]) }}" class="lap-back-img" title="Kembali">
-      <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
-    </a>
-    <div class="lap-heading">Preview Laporan ({{ $nip }})</div>
+    <div class="lap-left">
+      <a href="{{ route('adminpoli.laporan.index', ['tipe'=>$tipe,'from'=>$from,'to'=>$to]) }}" class="lap-back-img" title="Kembali">
+        <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
+      </a>
+      <div class="lap-heading">Preview Laporan ({{ $nip }})</div>
+    </div>
   </div>
 
-  <div class="lap-card">
+  <div class="lap-card lap-preview-card">
     <form action="{{ route('adminpoli.laporan.index') }}" method="GET" class="lap-tools">
       <div class="lap-filter">
         <input type="hidden" name="tipe" value="{{ $tipe }}">
@@ -35,7 +37,7 @@
     </div>
 
     {{-- Table --}}
-    <div class="lap-table-wrap">
+    <div class="lap-table-wrap lap-preview-wrap">
       <div class="lap-table">
 
         {{-- Header --}}

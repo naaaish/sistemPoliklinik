@@ -12,6 +12,7 @@ body{ margin:0; }
   justify-content:space-between;
   margin-bottom: 14px;
 }
+
 .lapidx-left{
   display:flex;
   align-items:center;

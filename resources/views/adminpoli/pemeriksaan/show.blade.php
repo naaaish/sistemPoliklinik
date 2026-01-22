@@ -331,7 +331,9 @@ document.getElementById('formPemeriksaan').addEventListener('submit', function (
             icon: 'warning',
             title: 'Satuan belum diisi',
             text: 'Jika obat dipilih, satuan wajib diisi.',
-            confirmButtonText: 'OK'
+            confirmButtonText: 'OK',
+            heightAuto: false, 
+            scrollbarPadding: false 
         }).then(() => {
             if (firstInvalidSatuan) {
                 firstInvalidSatuan.focus();
@@ -500,6 +502,8 @@ document.getElementById('formPemeriksaan').addEventListener('submit', function (
           text: 'Obat yang sama tidak boleh dipilih dua kali.',
           confirmButtonText: 'OK',
           confirmButtonColor: '#316BA1',
+          heightAuto: false,
+          scrollbarPadding: false 
         }).then(() => {
           obatDuplicateAlertOpen = false;
           // fokus balik ke select biar user enak ganti

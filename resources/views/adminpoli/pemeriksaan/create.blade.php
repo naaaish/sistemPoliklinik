@@ -412,6 +412,8 @@
         title: 'Obat sudah dipilih',
         text: 'Obat yang sama tidak boleh dipilih dua kali.',
         confirmButtonColor: '#316BA1',
+        heightAuto: false,  
+        scrollbarPadding: false 
       });
 
       return;
@@ -492,6 +494,8 @@ document.getElementById('formPemeriksaan').addEventListener('submit', (e) => {
         text: 'Jumlah obat wajib diisi.',
         confirmButtonText: 'OK',
         confirmButtonColor: '#316BA1',
+        heightAuto: false,  
+        scrollbarPadding: false 
       }).then(() => {
         jumlahInput?.focus();
       });

@@ -10,17 +10,56 @@
   --lap-text:#1F2D3D;
 }
 
-.lap-page{
-  padding: 22px;
-  background: var(--lap-bg);
-}
+*{ box-sizing: border-box; }
+body{ margin:0; }
+
+.lap-page{ font-family: Poppins, sans-serif; }
 
 .lap-topbar{
   display:flex;
   align-items:center;
-  gap:12px;
-  margin-bottom:16px;
+  justify-content:space-between;
+  margin-bottom: 14px;
 }
+
+.lap-left{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.lap-right{
+  margin-left:auto;
+}
+
+.lap-back-img{
+  display:inline-flex;
+  width:40px; height:40px;
+  align-items:center; justify-content:center;
+  text-decoration:none;
+  transition: transform .15s ease, filter .15s ease;
+}
+.lap-back-img img{ width:40px; height:40px; object-fit:contain; }
+.lap-back-img:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+.lap-back-img:active{ transform: translateY(0); filter: brightness(0.95); }
+
+.lap-heading{
+  font-size: 22px;
+  font-weight: 700;
+  color:#3B5E8C;
+}
+
+.lap-card{
+  width: 920px;
+  max-width: 920px;
+  flex: 0 0 920px;
+  margin: 0 auto;
+  background:#fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  padding: 20px 22px;
+}
+
 
 .lap-back{
   width:46px;
@@ -33,8 +72,6 @@
   background:#fff;
   text-decoration:none;
 }
-
-.lap-back img{ width:22px; height:22px; }
 
 .lap-title{
   font-size:20px;
@@ -192,8 +229,7 @@
   font-size:13px;
   color:var(--lap-text);
   border-right:1px solid var(--lap-line);
-  line-height:1.25;
-  white-space:pre-wrap;   /* biar diagnosa panjang turun rapi */
+  line-height:1;
   word-break:break-word;
 }
 
@@ -208,7 +244,7 @@
   font-weight:800;
   color:var(--lap-muted);
 }
-
+/* 
 .lap-back-img{
   display:inline-flex;
   width:40px; height:40px;
@@ -218,10 +254,33 @@
 }
 .lap-back-img img{ width:40px; height:40px; object-fit:contain; }
 .lap-back-img:hover{ transform: translateY(-1px); filter: brightness(1.05); }
-.lap-back-img:active{ transform: translateY(0); filter: brightness(0.95); }
+.lap-back-img:active{ transform: translateY(0); filter: brightness(0.95); } */
 
-.lap-heading{
-  font-size: 22px;
-  font-weight: 700;
-  color:#3B5E8C;
+/* kartu preview ukurannya SAMA dengan index */
+.lap-preview-card{
+  width: 920px;        /* samain dengan lap-card */
+  max-width: 920px;
+  margin: 0 auto;
+  overflow: hidden;   /* cegah bocor */
+}
+
+/* SATU-SATUNYA area yang boleh scroll */
+.lap-preview-wrap{
+  margin-top: 12px;
+  max-height: calc(100vh - 260px); /* bebas adjust */
+  overflow-x: auto;
+  overflow-y: auto;
+  border-radius: 14px;
+  border: 1px solid var(--lap-line);
+}
+
+/* tabel boleh sepanjang apapun */
+.lap-preview-wrap .lap-table{
+  width: max-content;
+  min-width: max-content;
+}
+
+/* cegah body / page ikut melebar */
+html, body{
+  overflow-x: clip;
 }
