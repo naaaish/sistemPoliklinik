@@ -223,7 +223,7 @@ async function onNipDone(){
   // kalau pensiunan -> paksa tipe_pasien = pensiunan
   if (isPensiunan) {
     tipeEl.value = 'pensiunan';
-    tipeEl.disabled = true;       // optional: biar ga bisa ganti
+    tipeEl.disabled = false;
   } else {
     if (tipeEl.disabled) tipeEl.disabled = false;
     // kalau sebelumnya kepaksa pensiunan, balikin ke pegawai default
@@ -339,6 +339,7 @@ namaPasSelect.addEventListener('change', applySelectedPasien);
 // before submit: enable hub_kel biar terkirim
 document.getElementById('formPendaftaran').addEventListener('submit', () => {
   hubEl.disabled = false;
+  tipeEl.disabled = false;
 });
 </script>
 
