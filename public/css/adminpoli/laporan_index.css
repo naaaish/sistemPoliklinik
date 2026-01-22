@@ -1,0 +1,233 @@
+/* =========================
+   LAPORAN INDEX (STYLE CONSISTENT DIAGNOSA)
+========================= */
+*{ box-sizing: border-box; }
+body{ margin:0; }
+
+.lapidx-page{ font-family: Poppins, sans-serif; }
+
+.lapidx-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 14px;
+}
+.lapidx-left{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+.lapidx-back-img{
+  display:inline-flex;
+  width:40px; height:40px;
+  align-items:center; justify-content:center;
+  text-decoration:none;
+  transition: transform .15s ease, filter .15s ease;
+}
+.lapidx-back-img img{ width:40px; height:40px; object-fit:contain; }
+.lapidx-back-img:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+.lapidx-back-img:active{ transform: translateY(0); filter: brightness(0.95); }
+
+.lapidx-heading{
+  font-size: 22px;
+  font-weight: 700;
+  color:#3B5E8C;
+}
+
+.lapidx-card{
+  width: 920px;
+  max-width: 920px;
+  flex: 0 0 920px;
+  margin: 0 auto;
+  background:#fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  padding: 20px 22px;
+}
+
+.lapidx-ic{ width:16px; height:16px; object-fit:contain; }
+.lapidx-ic-sm{ width:14px; height:14px; object-fit:contain; }
+
+.lapidx-tools{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.lapidx-filter{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lapidx-select,
+.lapidx-date{
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #CFE0FF;
+  padding: 0 10px;
+  outline:none;
+  background:#fff;
+  font-weight:600;
+  color:#3B5E8C;
+}
+
+.lapidx-sep{
+  font-weight: 700;
+  color:#3B5E8C;
+}
+
+.lapidx-btn-search{
+  height: 38px;
+  border:none;
+  border-radius: 10px;
+  padding: 0 14px;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  background:#7FA6D9;
+  color:#fff;
+  font-weight: 600;
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.lapidx-btn-search:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+.lapidx-btn-search:active{ transform: translateY(0); filter: brightness(.98); }
+
+.lapidx-btn-soft{
+  height: 34px;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  background:#E7F0FF;
+  color:#3B5E8C;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-weight: 700;
+  text-decoration:none;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.lapidx-btn-soft:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 8px 18px rgba(0,0,0,.10);
+}
+.lapidx-btn-soft:active{ transform: translateY(0); filter: brightness(.98); }
+
+.lapidx-info{
+  margin: 8px 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(0,0,0,.55);
+}
+.lapidx-muted{ font-size:13px; font-weight:700; color: rgba(0,0,0,.55); }
+
+/* table grid */
+.lapidx-table{ width:100%; }
+
+
+/* TABLE GRID — lebih padet & ga out */
+.lapidx-thead,
+.lapidx-row{
+  display:grid;
+  /* NO | TGL | NAMA | NIP | NAMA PASIEN | HUB | AKSI */
+  grid-template-columns: 56px 120px 160px 130px 1.6fr .8fr 120px;
+  gap: 10px;
+  align-items: stretch; /* biar tinggi row ngikut content */
+}
+
+.lapidx-thead{
+  font-size: 14px;
+  padding: 4px 2px 10px;
+}
+
+/* cell: tinggi auto (ngikut tulisan), padding dipadetin */
+.lapidx-td{
+  min-height: 0;              /* <-- penting: jangan maksa tinggi */
+  height: auto;
+  padding: 8px 10px;
+  font-size: 13px;
+  line-height: 1.25;
+  overflow: hidden;           /* biar ga “nyembur” */
+}
+
+/* nama pasien & hub kel: kecilin + boleh wrap kebawah */
+.lapidx-pre{
+  white-space: normal;        /* <-- biar wrap */
+  word-break: break-word;
+}
+
+/* khusus kolom NAMA PASIEN biar lebih kecil & rapi */
+.lapidx-row .lapidx-td:nth-child(5){
+  font-size: 12px;
+  line-height: 1.2;
+  align-items: flex-start;     /* biar teks mulai dari atas */
+}
+
+/* khusus kolom HUB KEL (biasanya pendek) */
+.lapidx-row .lapidx-td:nth-child(6){
+  font-size: 12px;
+  justify-content: center;
+  text-align: center;
+}
+
+.lapidx-tbody{
+  border-top: 1px solid #EEF4FF;
+  padding-top: 12px;
+}
+
+.lapidx-row{
+  min-height: 50px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.lapidx-center{ justify-content:center; text-align:center; }
+
+.lapidx-pre{
+  white-space: pre-line; /* biar \n turun baris */
+}
+
+.lapidx-empty{
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #F6FAFF;
+  border: 1px solid #EEF4FF;
+  text-align:center;
+  font-weight:800;
+  color:#7B8DA8;
+}
+/* MODE GARIS (mirip Saran) */
+.lapidx-lines .lapidx-td{
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 10px 6px;
+}
+
+.lapidx-lines .lapidx-row{
+  border-bottom: 1px solid #E6EEF8;
+  padding: 6px 0;
+  margin-bottom: 0;
+}
+
+.lapidx-paginate{ margin-top: 14px; display:flex; justify-content:center; }
+
+.lapidx-foot{
+  margin-top: 18px;
+  text-align:center;
+  color: rgba(0,0,0,0.55);
+  font-size: 13px;
+  font-weight: 600;
+}

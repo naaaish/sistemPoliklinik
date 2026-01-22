@@ -208,3 +208,20 @@
   font-weight:800;
   color:var(--lap-muted);
 }
+
+.lap-back-img{
+  display:inline-flex;
+  width:40px; height:40px;
+  align-items:center; justify-content:center;
+  text-decoration:none;
+  transition: transform .15s ease, filter .15s ease;
+}
+.lap-back-img img{ width:40px; height:40px; object-fit:contain; }
+.lap-back-img:hover{ transform: translateY(-1px); filter: brightness(1.05); }
+.lap-back-img:active{ transform: translateY(0); filter: brightness(0.95); }
+
+.lap-heading{
+  font-size: 22px;
+  font-weight: 700;
+  color:#3B5E8C;
+}

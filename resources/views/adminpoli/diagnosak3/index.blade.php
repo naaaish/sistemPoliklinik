@@ -491,19 +491,17 @@ document.addEventListener('DOMContentLoaded', function(){
     Swal.fire({ icon: icon, title: msg, timer: 1600, showConfirmButton: false });
   }
 
-</script>
+  // @if(session('success'))
+  //   toast('success', "{{ addslashes(session('success')) }}");
+  // @endif
 
-  @if(session('success'))
-    toast('success', "{{ addslashes(session('success')) }}");
-  @endif
+  // @if(session('error'))
+  //   toast('error', "{{ addslashes(session('error')) }}");
+  // @endif
 
-  @if(session('error'))
-    toast('error', "{{ addslashes(session('error')) }}");
-  @endif
-
-  @if($errors->any())
-    toast('error', "{{ addslashes($errors->first()) }}");
-  @endif
+  // @if($errors->any())
+  //   toast('error', "{{ addslashes($errors->first()) }}");
+  // @endif
 });
 </script>
 

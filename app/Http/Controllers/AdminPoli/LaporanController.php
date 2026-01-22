@@ -10,73 +10,155 @@ class LaporanController extends Controller
 {
     public function index(Request $request)
     {
+        $tipe = $request->input('tipe', 'pegawai'); // pegawai | pensiunan | poliklinik
         $from = $request->input('from');
         $to   = $request->input('to');
 
-        // Default: hari ini kalau user belum pilih
         if (!$from || !$to) {
             $from = $from ?: now()->toDateString();
             $to   = $to   ?: now()->toDateString();
         }
 
-        $visits = $this->getVisits($from, $to);
-        $rows   = $this->buildReportRows($visits);
+        $perPage = (int) $request->input('per_page', 5);
+        $allowedPerPage = [5, 10, 25, 100];
+        if (!in_array($perPage, $allowedPerPage)) $perPage = 5;
+
+        /**
+         * INDEX = 1 ROW PER NIP (bukan per kunjungan)
+         * Ambil NIP unik + tanggal terakhir kunjungan di range tsb.
+         */
+        $nipQuery = DB::table('pendaftaran as p')
+            ->leftJoin('pegawai as pg', 'pg.nip', '=', 'p.nip')
+            ->whereBetween('p.tanggal', [$from, $to]);
+
+        // filter tipe (kalau struktur tipe_pasien kamu beda, ganti di sini)
+        if (in_array($tipe, ['pegawai', 'pensiunan'])) {
+            $nipQuery->where('p.tipe_pasien', $tipe);
+        } elseif ($tipe === 'poliklinik') {
+            // sementara tetap kosong/placeholder kalau memang data alkes beda tabel
+            // (kalau tabel alkes sudah ada, nanti kita mapping khusus di sini)
+            $nipQuery->whereRaw('1=0');
+        }
+
+        $nips = $nipQuery
+            ->select([
+                'p.nip',
+                DB::raw("MAX(p.tanggal) as last_tanggal"),
+                DB::raw("COALESCE(pg.nama_pegawai,'-') as nama_pegawai"),
+            ])
+            ->groupBy('p.nip', 'pg.nama_pegawai')
+            ->orderByDesc('last_tanggal')
+            ->paginate($perPage)
+            ->appends($request->query());
+
+        // Build ringkas pasien+hubkel per NIP (di range tanggal)
+        $items = [];
+        $noAwal = ($nips->currentPage() - 1) * $nips->perPage();
+
+        foreach ($nips as $idx => $row) {
+            $nip = $row->nip;
+
+            $pasienRows = DB::table('pendaftaran as p')
+                ->leftJoin('keluarga as k', 'k.id_keluarga', '=', 'p.id_keluarga')
+                ->whereBetween('p.tanggal', [$from, $to])
+                ->where('p.nip', $nip);
+
+            if (in_array($tipe, ['pegawai', 'pensiunan'])) {
+                $pasienRows->where('p.tipe_pasien', $tipe);
+            }
+
+            // Ambil list pasien + hubkel (unik) untuk ditampilin ringkas
+            $pairs = $pasienRows
+                ->select([
+                    DB::raw("CASE WHEN p.tipe_pasien = 'pegawai' THEN 'YBS' ELSE COALESCE(k.nama_keluarga,'-') END as nama_pasien"),
+                    DB::raw("CASE WHEN p.tipe_pasien = 'pegawai' THEN 'YBS' ELSE COALESCE(k.hubungan_keluarga,'-') END as hub_kel"),
+                ])
+                ->get();
+
+            $namaList = [];
+            $hubList  = [];
+            foreach ($pairs as $p) {
+                $namaList[] = $p->nama_pasien ?? '-';
+                $hubList[]  = $p->hub_kel ?? '-';
+            }
+            $namaList = array_values(array_unique($namaList));
+            $hubList  = array_values(array_unique($hubList));
+
+            // Biar ga kepanjangan: tampilkan max 3, sisanya jadi "+n"
+            $namaShown = array_slice($namaList, 0, 3);
+            $hubShown  = array_slice($hubList, 0, 3);
+
+            $namaTxt = implode("\n", $namaShown);
+            $hubTxt  = implode("\n", $hubShown);
+
+            if (count($namaList) > 3) $namaTxt .= "\n(+".(count($namaList)-3).")";
+            if (count($hubList) > 3)  $hubTxt  .= "\n(+".(count($hubList)-3).")";
+
+            $items[] = [
+                'no' => $noAwal + $idx + 1,
+                'tanggal' => $row->last_tanggal ?? '-',
+                'nama' => $row->nama_pegawai ?? '-',
+                'nip' => $nip ?? '-',
+                'nama_pasien' => $namaTxt ?: '-',
+                'hub_kel' => $hubTxt ?: '-',
+                'preview_url' => route('adminpoli.laporan.preview', [
+                    'nip' => $nip,
+                    'tipe' => $tipe,
+                    'from' => $from,
+                    'to' => $to,
+                ]),
+            ];
+        }
 
         return view('adminpoli.laporan.index', [
+            'tipe' => $tipe,
+            'from' => $from,
+            'to' => $to,
+            'perPage' => $perPage,
+            'nips' => $nips,
+            'items' => $items,
+        ]);
+    }
+
+    public function preview(Request $request, string $nip)
+    {
+        $tipe = $request->input('tipe', 'pegawai');
+        $from = $request->input('from') ?: now()->toDateString();
+        $to   = $request->input('to')   ?: now()->toDateString();
+
+        $visits = $this->getVisits($from, $to, $tipe, $nip);
+        $rows   = $this->buildReportRows($visits);
+
+        return view('adminpoli.laporan.preview', [
+            'tipe'  => $tipe,
             'from'  => $from,
             'to'    => $to,
+            'nip'   => $nip,
             'rows'  => $rows,
             'count' => count($rows),
         ]);
     }
 
-    public function exportExcel(Request $request)
+    private function getVisits(string $from, string $to, string $tipe = 'pegawai', ?string $nip = null)
     {
-        $from = $request->input('from');
-        $to   = $request->input('to');
-
-        if (!$from || !$to) {
-            abort(422, 'Rentang tanggal wajib diisi.');
-        }
-
-        $visits = $this->getVisits($from, $to);
-        $rows   = $this->buildReportRows($visits);
-
-        $fileName = "LAPORAN_KLINIK_{$from}_sd_{$to}.xls";
-
-        return response()
-            ->view('adminpoli.laporan.export_excel', [
-                'from' => $from,
-                'to'   => $to,
-                'rows' => $rows,
-            ])
-            ->header('Content-Type', 'application/vnd.ms-excel; charset=UTF-8')
-            ->header('Content-Disposition', 'attachment; filename="'.$fileName.'"');
-    }
-
-    /**
-     * Ambil data kunjungan dalam rentang tanggal.
-     * NOTE: BAGIAN INI yang paling mungkin kamu perlu sesuaikan nama tabel & kolomnya.
-     */
-    private function getVisits(string $from, string $to)
-    {
-        // ========= MAPPING ASUMSI TABEL =========
-        // pendaftaran: id_pendaftaran, tanggal (atau created_at), nip, id_keluarga, periksa_ke
-        // pegawai: nip, nama_pegawai, bagian
-        // keluarga: id_keluarga, nip, nama_keluarga, hubungan (Istri/Anak/Suami)
-        // pemeriksaan: id_pendaftaran, sistol, diastol, suhu, bb, tb, gd_puasa, gd_2jam_pp, gds, asam_urat, kolesterol, trigliserida, catatan/nb
-        // dokter/pemeriksa: bebas, nanti ditarik dari kolom nama pemeriksa kalau ada
-        //
-        // Kalau nama tabelmu beda: ganti di sini aja.
-
-        $visits = DB::table('pendaftaran as p')
+        $q = DB::table('pendaftaran as p')
             ->leftJoin('pegawai as pg', 'pg.nip', '=', 'p.nip')
             ->leftJoin('keluarga as k', 'k.id_keluarga', '=', 'p.id_keluarga')
             ->leftJoin('pemeriksaan as pm', 'pm.id_pendaftaran', '=', 'p.id_pendaftaran')
             ->leftJoin('dokter as d', 'd.id_dokter', '=', 'p.id_dokter')
             ->leftJoin('pemeriksa as pr', 'pr.id_pemeriksa', '=', 'p.id_pemeriksa')
-            ->whereBetween('p.tanggal', [$from, $to])
-            ->select([
+            ->whereBetween('p.tanggal', [$from, $to]);
+
+        if (in_array($tipe, ['pegawai', 'pensiunan'])) {
+            $q->where('p.tipe_pasien', $tipe);
+        } elseif ($tipe === 'poliklinik') {
+            // placeholder alkes
+            $q->whereRaw('1=0');
+        }
+
+        if ($nip) $q->where('p.nip', $nip);
+
+        $visits = $q->select([
                 'p.id_pendaftaran',
                 'p.tanggal',
                 'p.tipe_pasien',
@@ -102,15 +184,13 @@ class LaporanController extends Controller
                 DB::raw("COALESCE(pg.bagian,'-') as bagian"),
 
                 DB::raw("CASE 
-                    WHEN p.tipe_pasien = 'pegawai' 
-                    THEN 'YBS' 
-                    ELSE COALESCE(k.nama_keluarga,'-') 
+                    WHEN p.tipe_pasien = 'pegawai' THEN 'YBS'
+                    ELSE COALESCE(k.nama_keluarga,'-')
                 END as nama_pasien"),
 
                 DB::raw("CASE 
-                    WHEN p.tipe_pasien = 'pegawai' 
-                    THEN 'YBS' 
-                    ELSE COALESCE(k.hubungan_keluarga,'-') 
+                    WHEN p.tipe_pasien = 'pegawai' THEN 'YBS'
+                    ELSE COALESCE(k.hubungan_keluarga,'-')
                 END as hub_kel"),
 
                 DB::raw("COALESCE(d.nama, pr.nama_pemeriksa, '-') as pemeriksa"),
@@ -120,14 +200,12 @@ class LaporanController extends Controller
             ->get();
 
         foreach ($visits as $v) {
-            // diagnosa umum
             $v->diagnosa_list = DB::table('detail_pemeriksaan_penyakit as dp')
                 ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dp.id_diagnosa')
                 ->where('dp.id_pemeriksaan', $v->id_pemeriksaan)
                 ->pluck('d.diagnosa')
                 ->toArray();
 
-            // diagnosa K3
             $v->diagnosa_k3_items = DB::table('detail_pemeriksaan_diagnosa_k3 as dk')
                 ->join('diagnosa_k3 as k3', 'k3.id_nb', '=', 'dk.id_nb')
                 ->where('dk.id_pemeriksaan', $v->id_pemeriksaan)
@@ -135,37 +213,24 @@ class LaporanController extends Controller
                 ->get()
                 ->toArray();
 
-            // saran / teraphy
             $v->saran_list = DB::table('detail_pemeriksaan_saran as ds')
                 ->join('saran as s', 's.id_saran', '=', 'ds.id_saran')
                 ->where('ds.id_pemeriksaan', $v->id_pemeriksaan)
                 ->pluck('s.saran')
                 ->toArray();
 
-            // obat
             $v->obat_list = DB::table('resep as r')
                 ->join('detail_resep as dr', 'dr.id_resep', '=', 'r.id_resep')
                 ->join('obat as o', 'o.id_obat', '=', 'dr.id_obat')
                 ->where('r.id_pemeriksaan', $v->id_pemeriksaan)
-                ->select([
-                    'o.nama_obat',
-                    'o.harga',
-                    'dr.jumlah',
-                    'dr.satuan',
-                    'dr.subtotal',
-                ])
+                ->select(['o.nama_obat', 'o.harga', 'dr.jumlah', 'dr.satuan', 'dr.subtotal'])
                 ->get()
                 ->toArray();
         }
+
         return $visits;
     }
-
-    /**
-     * Bentuk baris seperti Excel "LAPORAN KLINIK":
-     * - Kolom tetap tampil di baris pertama kunjungan
-     * - Baris lanjutannya cuma isi diagnosa/teraphy/obat (kolom lain kosong)
-     * - Total harga obat hanya muncul di baris pertama kunjungan
-     */
+    
     private function buildReportRows($visits): array
     {
         $rows = [];

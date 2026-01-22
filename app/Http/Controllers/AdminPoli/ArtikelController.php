@@ -91,6 +91,13 @@ class ArtikelController extends Controller
             'cover'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
+        // blok judul duplikat (beda huruf besar/kecil tetap dianggap sama)
+        if ($this->judulSudahAda($request->judul_artikel)) {
+            return back()
+                ->withInput()
+                ->with('error', 'Judul artikel sudah ada. Ganti judul lain!!');
+        }
+
         $id = $this->nextIdArtikel();
         $coverPath = $this->saveCoverFile($request->file('cover'));
 
@@ -131,6 +138,13 @@ class ArtikelController extends Controller
             'isi_artikel'   => 'required|string',
             'cover'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
+
+        // blok judul duplikat (kecuali artikel ini sendiri)
+        if ($this->judulSudahAda($request->judul_artikel, $id)) {
+            return back()
+                ->withInput()
+                ->with('error', 'Judul artikel sudah ada. Ganti judul lain!!');
+        }
 
         $coverPath = $artikel->cover_path ?: $this->defaultCover();
 
@@ -182,6 +196,10 @@ class ArtikelController extends Controller
 
         $judul = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $judul = trim($judul) !== '' ? $judul : 'Artikel Baru';
+        
+        if ($this->judulSudahAda($judul)) {
+            return back()->with('error', 'Judul artikel sudah ada. Upload dibatalkan karena judulnya sama.');
+        }
 
         $isi = '';
 
@@ -207,22 +225,6 @@ class ArtikelController extends Controller
             }
         }
 
-        // ======= PDF parsing (butuh package kalau ada) =======
-        // if ($ext === 'pdf') {
-        //     // Best effort: kalau ada spatie/pdf-to-text
-        //     try {
-        //         if (class_exists(\Spatie\PdfToText\Pdf::class)) {
-        //             $isi = \Spatie\PdfToText\Pdf::getText($file->getRealPath());
-        //             $isi = trim((string)$isi);
-        //         }
-        //     } catch (\Throwable $e) {
-        //         // fallback di bawah
-        //     }
-        // }
-
-        // ======= DOC (legacy) → fallback =======
-        // .doc lama susah tanpa library. Jadi fallback aja.
-
         if (!$isi) {
             $isi = "## Draft dari file: {$file->getClientOriginalName()}\n\n"
                  . "(Isi belum berhasil diekstrak otomatis. Kamu bisa paste isi artikel di sini.)";
@@ -242,5 +244,23 @@ class ArtikelController extends Controller
 
         return redirect()->route('adminpoli.artikel.edit', $id)
             ->with('success', 'Draft artikel berhasil dibuat dari file. Silakan cek & rapikan di halaman edit.');
+    }
+
+    /**
+     * Cek judul artikel sudah ada (case-insensitive).
+     */
+    private function judulSudahAda(string $judul, ?string $exceptId = null): bool
+    {
+        $judul = trim($judul);
+        if ($judul === '') return false;
+
+        $q = DB::table('artikel')
+            ->whereRaw('LOWER(judul_artikel) = ?', [Str::lower($judul)]);
+
+        if ($exceptId) {
+            $q->where('id_artikel', '!=', $exceptId);
+        }
+
+        return $q->exists();
     }
 }

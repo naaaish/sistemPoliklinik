@@ -273,49 +273,19 @@
               </select>
 
               <input class="obat-jumlah" type="number" min="1" name="jumlah[]" value="{{ (int)$dr->jumlah }}">
-
               <input class="obat-satuan" type="text" name="satuan[]" value="{{ $dr->satuan ?? '' }}">
 
-              {{-- RAW (angka murni untuk perhitungan) --}}
               <input class="obat-harga-raw" type="hidden" name="harga_satuan[]" value="{{ (float)($dr->harga_satuan ?? 0) }}">
-              <input class="obat-subtotal-raw" type="hidden" value="{{ (float)$dr->subtotal }}">
+              <input class="obat-subtotal-raw" type="hidden" value="{{ (float)($dr->subtotal ?? 0) }}">
 
-              {{-- DISPLAY (rupiah) --}}
               <input class="obat-harga" type="text" value="" readonly>
               <input class="obat-subtotal" type="text" value="" readonly>
 
               <button class="obat-hapus" type="button">Hapus</button>
             </div>
           @endforeach
-        @else
-          {{-- kalau belum ada resep: tampilkan 1 baris kosong --}}
-          <input class="obat-harga-raw" type="hidden" name="harga_satuan[]" value="0">
-          <div class="obat-row">
-            <select class="obat-select" name="obat_id[]">
-              <option value="">-- pilih obat (boleh kosong) --</option>
-              @foreach($obat as $o)
-                <option value="{{ $o->id_obat }}"
-                        data-harga="{{ $o->harga }}"
-                        data-satuan="{{ $o->satuan ?? '' }}">
-                  {{ $o->nama_obat }}
-                </option>
-              @endforeach
-            </select>
-
-            <input class="obat-jumlah" type="number" min="1" name="jumlah[]" value="1">
-            <input class="obat-satuan" type="text" name="satuan[]" value="">
-
-            <input class="obat-harga-raw" type="hidden" value="0">
-            <input class="obat-subtotal-raw" type="hidden" value="0">
-
-            <input class="obat-harga" type="text" value="" readonly>
-            <input class="obat-subtotal" type="text" value="" readonly>
-
-            <button class="obat-hapus" type="button">Hapus</button>
-          </div>
         @endif
       </div>
-
 
       <button type="button" id="btnAddObat" class="ap-btn-small">Tambah Obat/Alkes</button>
 
@@ -346,7 +316,6 @@ document.getElementById('formPemeriksaan').addEventListener('submit', function (
         const obatVal = obatSelect.value;
         const satuanVal = satuanInput.value.trim();
 
-        // ❗ OBAT DIPILIH TAPI SATUAN KOSONG
         if (obatVal && satuanVal === '') {
             valid = false;
             if (!firstInvalidSatuan) {
@@ -474,5 +443,73 @@ document.getElementById('formPemeriksaan').addEventListener('submit', function (
     bindRowEvents(row);
     hitungTotal();
   });
+
+  // ambil semua value obat yang sudah kepilih (kecuali row yang sedang dicek)
+  function getPickedObatValues(exceptRow = null){
+    const vals = [];
+    document.querySelectorAll('#obatWrap .obat-row').forEach(r => {
+      if (exceptRow && r === exceptRow) return;
+      const sel = r.querySelector('select[name="obat_id[]"]');
+      const v = sel ? sel.value : '';
+      if (v) vals.push(v);
+    });
+    return vals;
+  }
+
+  // alert anti spam (biar ga kebuka berkali-kali kalau user klik cepat)
+  let obatDuplicateAlertOpen = false;
+
+  document.addEventListener('change', function(e){
+    if(!e.target.classList.contains('obat-select')) return;
+
+    const row = e.target.closest('.obat-row');
+    const pickedOther = new Set(getPickedObatValues(row));
+    const val = e.target.value;
+
+    // kalau dobel
+    if(val && pickedOther.has(val)){
+      // reset pilihan (support TomSelect & native)
+      if(e.target.tomselect){
+        e.target.tomselect.clear(true);
+      } else {
+        e.target.value = '';
+      }
+
+      // kosongin field row biar ga nyisa
+      const satuan = row.querySelector('.obat-satuan');
+      const hargaRaw = row.querySelector('.obat-harga-raw');
+      const harga = row.querySelector('.obat-harga');
+      const subRaw = row.querySelector('.obat-subtotal-raw');
+      const sub = row.querySelector('.obat-subtotal');
+
+      if(satuan) satuan.value = '';
+      if(hargaRaw) hargaRaw.value = 0;
+      if(harga) harga.value = '';
+      if(subRaw) subRaw.value = 0;
+      if(sub) sub.value = '';
+
+      // update total kalau fungsi kamu ada
+      if(typeof hitungTotal === 'function') hitungTotal();
+
+      // alert (SweetAlert)
+      if(!obatDuplicateAlertOpen){
+        obatDuplicateAlertOpen = true;
+        Swal.fire({
+          icon: 'warning',
+          title: 'Obat sudah dipilih',
+          text: 'Obat yang sama tidak boleh dipilih dua kali.',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#316BA1',
+        }).then(() => {
+          obatDuplicateAlertOpen = false;
+          // fokus balik ke select biar user enak ganti
+          setTimeout(() => e.target.focus(), 50);
+        });
+      }
+
+      return;
+    }
+  });
 </script>
+
 @endsection
