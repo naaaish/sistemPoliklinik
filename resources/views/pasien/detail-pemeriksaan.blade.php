@@ -149,7 +149,13 @@
                 <h3>Diagnosa Dokter</h3>
             </div>
             <div class="info-content">
-                <p>{{ $diagnosa->diagnosa ?? '-' }}</p>
+                @if($diagnosa->count())
+                    @foreach($diagnosa as $d)
+                        <p>• {{ $d->nama_diagnosa }}</p>
+                    @endforeach
+                @else
+                    <p>-</p>
+                @endif
             </div>
         </div>
 
@@ -159,7 +165,13 @@
                 <h3>Saran Dokter</h3>
             </div>
             <div class="info-content">
-                <p>{{ $saran->saran ?? '-' }}</p>
+                @if($saran->count())
+                    @foreach($saran as $s)
+                        <p>• {{ $s->isi_saran }}</p>
+                    @endforeach
+                @else
+                    <p>-</p>
+                @endif
             </div>
         </div>
 

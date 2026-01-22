@@ -42,5 +42,13 @@ class UserSeeder extends Seeder
             'nama_user' => 'Siti Aisyah',
             'nip'       => '198765432002', 
         ]);
+
+        User::create([
+            'username'  => '1234567890',
+            'password'  => Hash::make('vina'),
+            'role'      => 'pasien',
+            'nama_user' => 'Elvina Neila',
+            'nip'       => '1234567890', 
+        ]);
     }
 }

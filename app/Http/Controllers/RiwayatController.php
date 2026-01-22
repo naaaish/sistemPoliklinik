@@ -133,4 +133,65 @@ class RiwayatController extends Controller
             'keluargaAktifId'
         ));
     }
+
+    /**
+     * ==================================================
+     * DETAIL RIWAYAT PEMERIKSAAN
+     * (FETCH DIAGNOSA & SARAN DARI TABEL DETAIL)
+     * ==================================================
+     */
+    public function detail($id_pemeriksaan)
+    {
+        // =========================
+        // DATA PEMERIKSAAN
+        // =========================
+        $pemeriksaan = DB::table('pemeriksaan')
+            ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
+            ->where('pemeriksaan.id_pemeriksaan', $id_pemeriksaan)
+            ->first();
+
+        // =========================
+        // DIAGNOSA NON K3
+        // =========================
+        $diagnosa = DB::table('detail_pemeriksaan_penyakit as dpp')
+            ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dpp.id_diagnosa')
+            ->where('dpp.id_pemeriksaan', $id_pemeriksaan)
+            ->select('d.diagnosa as nama_diagnosa')
+            ->get();
+
+        // =========================
+        // DIAGNOSA K3
+        // =========================
+        $diagnosa_k3 = DB::table('detail_pemeriksaan_diagnosa_k3 as dk3')
+            ->join('diagnosa_k3 as k3', 'k3.id_nb', '=', 'dk3.id_nb')
+            ->where('dk3.id_pemeriksaan', $id_pemeriksaan)
+            ->select('k3.nama_penyakit')
+            ->get();
+
+        // =========================
+        // SARAN
+        // =========================
+        $saran = DB::table('detail_pemeriksaan_saran as dps')
+            ->join('saran as s', 's.id_saran', '=', 'dps.id_saran')
+            ->where('dps.id_pemeriksaan', $id_pemeriksaan)
+            ->select('s.saran as isi_saran')
+            ->get();
+
+        // =========================
+        // RESEP (TETAP)
+        // =========================
+        $resep = DB::table('detail_resep')
+            ->join('obat', 'obat.id_obat', '=', 'detail_resep.id_obat')
+            ->where('detail_resep.id_resep', $pemeriksaan->id_resep ?? null)
+            ->get();
+
+        return view('pasien.detail-pemeriksaan', compact(
+            'pemeriksaan',
+            'diagnosa',
+            'diagnosa_k3',
+            'saran',
+            'resep'
+        ));
+    }
+
 }
