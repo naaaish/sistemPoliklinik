@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Kepegawaian;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class PegawaiController extends Controller
 {
@@ -23,8 +24,25 @@ class PegawaiController extends Controller
         return view('kepegawaian.pegawai.index', compact('pegawai', 'q'));
     }
 
-    public function show($id) {
+    public function show($id)
+    {
         $pegawai = DB::table('pegawai')->where('nip', $id)->first();
-        return view('kepegawaian.pegawai.detail', compact('pegawai'));
+
+        $years = 0;
+        $months = 0;
+
+        if ($pegawai && $pegawai->tgl_masuk) {
+            $start = Carbon::parse($pegawai->tgl_masuk);
+            $now = now();
+
+            $years = $start->diffInYears($now);
+            $months = $start->copy()->addYears($years)->diffInMonths($now);
+        }
+
+        return view('kepegawaian.pegawai.detail', compact(
+            'pegawai',
+            'years',
+            'months'
+        ));
     }
 }

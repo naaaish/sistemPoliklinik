@@ -266,30 +266,30 @@
                                 <td rowspan="{{ $rowspan }}">{{ $item->tinggi }}</td>
                             @endif
 
-                            {{-- DIAGNOSA --}}
-                            <td>{{ $item->diagnosa }}</td>
+                        {{-- DIAGNOSA --}}
+                        <td>{{ $item->diagnosa }}</td>
 
-                            {{-- NB --}}
-                            <td>{{ $item->nb }}</td>
+                        {{-- NB --}}
+                        <td>{{ $item->nb }}</td>
 
-                            {{-- THERAPY / OBAT --}}
-                            <td>{{ $item->nama_obat }}</td>
+                        {{-- THERAPY / OBAT --}}
+                        <td>{{ $item->nama_obat }}</td>
 
-                            <td class="text-center">
-                                {{ $item->jumlah }} {{ $item->satuan }}
-                            </td>
+                        <td class="text-center">
+                            {{ $item->jumlah }} {{ $item->satuan }}
+                        </td>
 
-                            <td class="text-right">
-                                Rp {{ number_format($item->harga,0,',','.') }}
-                            </td>
+                        <td class="text-right">
+                            Rp {{ number_format($item->harga,0,',','.') }}
+                        </td>
 
-                            @if($loop->first)
-                            <td rowspan="{{ $rowspan }}" class="text-right fw-bold">
-                                Rp {{ number_format($item->total_obat_pasien,0,',','.') }}
-                            </td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->pemeriksa }}</td>
-                            <td rowspan="{{ $rowspan }}">{{ $item->periksa_ke }}</td>
-                            @endif
+                        @if($loop->first)
+                        <td rowspan="{{ $rowspan }}" class="text-right fw-bold">
+                            Rp {{ number_format($item->total_obat_pasien,0,',','.') }}
+                        </td>
+                        <td rowspan="{{ $rowspan }}">{{ $item->pemeriksa }}</td>
+                        <td rowspan="{{ $rowspan }}">{{ $item->periksa_ke }}</td>
+                        @endif
 
                         </tr>
                     @endforeach
