@@ -5,6 +5,13 @@ namespace App\Http\Controllers\Kepegawaian;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PegawaiExport;
+use App\Exports\PensiunanExport;
+use App\Exports\DokterExport;
+
+
+
 
 class LaporanController extends Controller
 {
@@ -220,7 +227,6 @@ class LaporanController extends Controller
                 $diagnosaList = $diagnosaMap->get($id, collect())->pluck('diagnosa')->values();
                 $nbList       = $nbMap->get($id, collect())->pluck('id_nb')->values();
 
-                $maxRow = max($diagnosaList->count(), $nbList->count(), 1);
 
                 // ===== Obat =====
                 $obatList = DB::table('resep')
@@ -235,6 +241,14 @@ class LaporanController extends Controller
                     )
                     ->get();
 
+                    
+                $maxRow = max(
+                    $diagnosaList->count(),
+                    $nbList->count(),
+                    $obatList->count(),
+                    1
+                );
+
                 // total obat per pasien
                 $totalObatPerPemeriksaan[$id] = $obatList->sum(function ($o) {
                     return ((int)$o->jumlah) * ((int)$o->harga);
@@ -246,116 +260,114 @@ class LaporanController extends Controller
                 for ($i = 0; $i < $maxRow; $i++) {
                     $clone = clone $row;
 
-                    // ===== DIAGNOSA & NB (SEJAJAR) =====
+                    // Diagnosa & NB
                     $clone->diagnosa = $diagnosaList[$i] ?? '-';
                     $clone->nb       = $nbList[$i] ?? '-';
 
-                    // ===== OBAT (TAMPIL BARIS PERTAMA SAJA) =====
-                    if ($i === 0 && isset($obatList[0])) {
-                        $clone->nama_obat = $obatList[0]->nama_obat;
-                        $clone->jumlah    = (int)$obatList[0]->jumlah;
-                        $clone->satuan    = $obatList[0]->satuan;
-                        $clone->harga     = (int)$obatList[0]->harga;
-                        $clone->total_obat_pasien = $totalObatPerPemeriksaan[$id];
+                    // Obat
+                    if (isset($obatList[$i])) {
+                        $clone->nama_obat = $obatList[$i]->nama_obat;
+                        $clone->jumlah    = (int)$obatList[$i]->jumlah;
+                        $clone->satuan    = $obatList[$i]->satuan;
+                        $clone->harga     = (int)$obatList[$i]->harga;
                     } else {
                         $clone->nama_obat = '-';
                         $clone->jumlah    = '-';
                         $clone->satuan    = '-';
                         $clone->harga     = 0;
-                        $clone->total_obat_pasien = null;
                     }
+
+                    // Total obat per pasien (1x saja)
+                    $clone->total_obat_pasien = ($i === 0)
+                        ? $totalObatPerPemeriksaan[$id]
+                        : null;
 
                     $clone->periksa_ke = $periksaCounter[$id];
 
                     $data->push($clone);
                 }
+
             }
         }
         /* ================= DOKTER ================= */
 
-            elseif ($jenis === 'dokter') {
+        elseif ($jenis === 'dokter') {
 
-            $tarifPoliklinik = 100000;   // bayar per pasien
-            $gajiPerusahaan  = 8000000;  // gaji bulanan tetap
+            $tarifPoliklinik = 100000;
+            $gajiPerusahaan  = 8000000;
 
-            /* =========================
-            DOKTER POLIKLINIK (PER PASIEN)
-            ========================= */
-            $queryPoli = DB::table('pemeriksaan')
-                ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-                ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
-                ->leftJoin('pegawai','pendaftaran.nip','=','pegawai.nip')
-                ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
+            $query = DB::table('pemeriksaan')
+                ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
+                ->join('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
+                ->leftJoin('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
+                ->leftJoin('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
                 ->whereNotNull('pendaftaran.id_dokter')
-                ->whereIn('dokter.jenis_dokter',['umum','poliklinik'])
                 ->select(
                     'dokter.id_dokter',
                     'dokter.nama as nama_dokter',
+                    'dokter.jenis_dokter',
+
+                    // 🔑 INI PENTING
+                    'pendaftaran.nip',
+
                     DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
-                    DB::raw('DATE(pemeriksaan.created_at) as tanggal')
-                )
-                ->orderBy('dokter.nama')
-                ->orderBy('pemeriksaan.created_at');
+                    DB::raw("DATE(pemeriksaan.created_at) as tanggal")
+                );
 
             if ($dari && $sampai) {
-                $queryPoli->whereBetween(
+                $query->whereBetween(
                     DB::raw('DATE(pemeriksaan.created_at)'),
                     [$dari, $sampai]
                 );
             }
 
-            $dokterPoliRaw = $queryPoli->get()->groupBy('id_dokter');
+            $rows = $query->get();
 
-            $dokterPoli = [];
+            // =======================
+            // DOKTER POLIKLINIK
+            // =======================
+            $dokterPoli = $rows
+                ->where('jenis_dokter', 'Dokter Poliklinik')
+                ->groupBy('id_dokter')
+                ->map(function ($items) use ($tarifPoliklinik) {
+                    return (object) [
+                        'id_dokter'    => $items->first()->id_dokter,
+                        'nama_dokter'  => $items->first()->nama_dokter,
+                        'pasien'       => $items->map(function ($p) {
+                            return (object) [
+                                'nip'          => $p->nip,
+                                'nama_pasien'  => $p->nama_pasien,
+                                'tanggal'      => $p->tanggal,
+                            ];
+                        }),
+                        'total_pasien' => $items->count(),
+                        'total_biaya'  => $items->count() * $tarifPoliklinik
+                    ];
+                })
+                ->values();
 
-            foreach ($dokterPoliRaw as $id => $rows) {
-                $dokterPoli[] = (object) [
-                    'id_dokter'    => $id,
-                    'nama_dokter'  => $rows->first()->nama_dokter,
-                    'pasien'       => $rows,                 // list pasien
-                    'total_pasien' => $rows->count(),        // jumlah pasien
-                    'total_biaya'  => $rows->count() * $tarifPoliklinik
-                ];
-            }
-
-            /* =========================
-            DOKTER PERUSAHAAN (GAJI TETAP)
-            ========================= */
-            $queryPerusahaan = DB::table('pemeriksaan')
-                ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-                ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
-                ->join('pegawai','pendaftaran.nip','=','pegawai.nip')
-                ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
-                ->where('dokter.jenis_dokter','perusahaan')
-                ->select(
-                    'dokter.id_dokter',
-                    'dokter.nama as nama_dokter',
-                    DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
-                    DB::raw('DATE(pemeriksaan.created_at) as tanggal')
-                )
-                ->orderBy('dokter.nama')
-                ->orderBy('pemeriksaan.created_at');
-
-            if ($dari && $sampai) {
-                $queryPerusahaan->whereBetween(
-                    DB::raw('DATE(pemeriksaan.created_at)'),
-                    [$dari, $sampai]
-                );
-            }
-
-            $dokterPerusahaanRaw = $queryPerusahaan->get()->groupBy('id_dokter');
-
-            $dokterPerusahaan = [];
-
-            foreach ($dokterPerusahaanRaw as $id => $rows) {
-                $dokterPerusahaan[] = (object) [
-                    'id_dokter'    => $id,
-                    'nama_dokter'  => $rows->first()->nama_dokter,
-                    'pasien'       => $rows,          // list pasien
-                    'total_pasien' => $rows->count(),
-                    'gaji'         => $gajiPerusahaan
-                ];
-            }
+            // =======================
+            // DOKTER PERUSAHAAN
+            // =======================
+            $dokterPerusahaan = $rows
+                ->where('jenis_dokter', 'Dokter Perusahaan')
+                ->groupBy('id_dokter')
+                ->map(function ($items) use ($gajiPerusahaan) {
+                    return (object) [
+                        'id_dokter'    => $items->first()->id_dokter,
+                        'nama_dokter'  => $items->first()->nama_dokter,
+                        'pasien'       => $items->map(function ($p) {
+                            return (object) [
+                                'nip'          => $p->nip,
+                                'nama_pasien'  => $p->nama_pasien,
+                                'tanggal'      => $p->tanggal,
+                            ];
+                        }),
+                        'total_pasien' => $items->count(),
+                        'gaji'         => $gajiPerusahaan
+                    ];
+                })
+                ->values();
 
             return view('kepegawaian.laporan.detail', compact(
                 'judul',
@@ -368,8 +380,6 @@ class LaporanController extends Controller
         }
 
 
-
-        
 
         /* ================= OBAT ================= */
         elseif ($jenis === 'obat') {
@@ -438,6 +448,89 @@ class LaporanController extends Controller
         ));
     }
 
+
+    /* =========================
+       LOGIC UTAMA (DIPAKAI ULANG)
+    ========================= */
+    private function getLaporanData($jenis, $dari, $sampai)
+    {
+        /* ================= PEGAWAI / PENSIUN ================= */
+        if (in_array($jenis, ['pegawai','pensiun'])) {
+
+            $query = DB::table('pemeriksaan')
+                ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+                ->join('pegawai','pendaftaran.nip','=','pegawai.nip')
+                ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
+                ->leftJoin('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
+                ->leftJoin('pemeriksa','pendaftaran.id_pemeriksa','=','pemeriksa.id_pemeriksa')
+                ->where(function ($q) use ($jenis) {
+                    if ($jenis === 'pegawai') {
+                        $q->where('pegawai.status','!=','pensiun');
+                    } else {
+                        $q->where('pegawai.status','pensiun');
+                    }
+                })
+                ->select(
+                    DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
+                    DB::raw("DATE(pemeriksaan.created_at) as tanggal")
+                );
+
+            if ($dari && $sampai) {
+                $query->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari,$sampai]);
+            }
+
+            return $query->get();
+        }
+
+        /* ================= DOKTER ================= */
+        if ($jenis === 'dokter') {
+
+            $tarifPoli = 100000;
+            $gaji      = 8000000;
+
+            $rows = DB::table('pemeriksaan')
+                ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+                ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
+                ->leftJoin('pegawai','pendaftaran.nip','=','pegawai.nip')
+                ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
+                ->select(
+                    'dokter.id_dokter',
+                    'dokter.nama as nama_dokter',
+                    'dokter.jenis_dokter',
+                    'pendaftaran.nip',
+                    DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
+                    DB::raw("DATE(pemeriksaan.created_at) as tanggal")
+                )
+                ->when($dari && $sampai, fn($q) =>
+                    $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari,$sampai])
+                )
+                ->get();
+
+            $dokterPoli = $rows->where('jenis_dokter','Dokter Poliklinik')
+                ->groupBy('id_dokter')
+                ->map(fn($r)=> (object)[
+                    'nama_dokter'=>$r->first()->nama_dokter,
+                    'jenis_dokter'=>'umum',
+                    'total_pasien'=>$r->count(),
+                    'detail_pasien'=>$r
+                ]);
+
+            $dokterPerusahaan = $rows->where('jenis_dokter','Dokter Perusahaan')
+                ->groupBy('id_dokter')
+                ->map(fn($r)=> (object)[
+                    'nama_dokter'=>$r->first()->nama_dokter,
+                    'jenis_dokter'=>'perusahaan',
+                    'total_pasien'=>$r->count(),
+                ]);
+
+            return [
+                'data' => $dokterPoli->merge($dokterPerusahaan)
+            ];
+        }
+
+        return collect();
+    }
+
     private function getJudul($jenis)
     {
         return match ($jenis) {
@@ -449,4 +542,44 @@ class LaporanController extends Controller
             default    => 'Rekapan Laporan',
         };
     }
+
+    /* =========================
+       DOWNLOAD EXCEL (XLS VIA BLADE)
+    ========================= */
+    public function downloadExcel(Request $request, $jenis)
+    {
+        $dari   = $request->dari;
+        $sampai = $request->sampai;
+
+        $data = $this->detail($request, $jenis)->getData()['data'] ?? collect();
+
+        $filename = 'laporan_'.$jenis.'_'.date('Y-m-d').'.csv';
+
+        $headers = [
+            "Content-Type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=$filename",
+        ];
+
+        $callback = function () use ($data, $jenis) {
+            $file = fopen('php://output', 'w');
+
+            // HEADER
+            if (in_array($jenis, ['pegawai','pensiun'])) {
+                fputcsv($file, ['No','Nama Pasien','Tanggal']);
+                foreach ($data as $i => $row) {
+                    fputcsv($file, [
+                        $i+1,
+                        $row->nama_pasien,
+                        $row->tanggal
+                    ]);
+                }
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+
 }
