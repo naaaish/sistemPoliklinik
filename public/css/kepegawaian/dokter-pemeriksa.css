@@ -522,7 +522,7 @@ body{ margin:0; }
 .dp-jinput{
   height: 38px;
   border: 1px solid #CFE0FF;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 0 10px;
   outline:none;
   font-weight: 600;
@@ -533,11 +533,11 @@ body{ margin:0; }
 /* ← INI YANG DIPERBAIKI! */
 .dp-jinput[type="text"]{ 
   flex: 1;              
-  min-width: 100px;     
+  min-width: 90px;     
 }
 
 .dp-jinput[type="time"]{ 
-  width: 110px;         
+  width: 85px;         
 }
 
 .dp-jsep{ 
@@ -546,7 +546,7 @@ body{ margin:0; }
 }
 
 .dp-jremove{
-  width: 38px;
+  width: 42px;
   height: 38px;
   border-radius: 10px;
   border: 1px solid #FFA3A3;
