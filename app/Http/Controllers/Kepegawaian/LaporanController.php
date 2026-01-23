@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
 
 
@@ -299,6 +299,27 @@ class LaporanController extends Controller
     }
 
 
+    private function hitungBulanGaji($dari, $sampai)
+{
+    $start = \Carbon\Carbon::parse($dari)->startOfMonth();
+    $end   = \Carbon\Carbon::parse($sampai)->startOfMonth();
+
+    $bulan = collect();
+
+    while ($start <= $end) {
+        $tglGajian = $start->copy()->day(25);
+
+        if ($tglGajian >= $dari && $tglGajian <= $sampai) {
+            $bulan->push($start->translatedFormat('F Y'));
+        }
+
+        $start->addMonth();
+    }
+
+    return $bulan;
+}
+
+
     /* =========================
        LOGIC UTAMA (DIPAKAI ULANG)
     ========================= */
@@ -417,6 +438,7 @@ class LaporanController extends Controller
     }
 
 
+
     private function getJudul($jenis)
     {
         return match ($jenis) {
@@ -434,130 +456,189 @@ class LaporanController extends Controller
     ========================= */
     public function downloadExcel(Request $request, $jenis)
     {
+        if ($jenis !== 'dokter') {
+            abort(404);
+        }
+
         $dari   = $request->dari;
         $sampai = $request->sampai;
 
-        // ambil data SAMA PERSIS kaya halaman
-        $data = $this->buildPegawaiPensiunData($jenis, $dari, $sampai);
+        $tarifPoliklinik = 100000;
+        $gajiPerusahaan  = 8000000;
 
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        $rows = DB::table('pemeriksaan')
+            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+            ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
+            ->leftJoin('pegawai','pendaftaran.nip','=','pegawai.nip')
+            ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
+            ->select(
+                'dokter.id_dokter',
+                'dokter.nama as nama_dokter',
+                'dokter.jenis_dokter',
+                'pendaftaran.nip',
+                DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
+                DB::raw("DATE(pemeriksaan.created_at) as tanggal")
+            );
 
-        // =====================
-        // HEADER
-        // =====================
-        $sheet->setCellValue('A1', 'Rekapan Pemeriksaan Pegawai');
-        $sheet->mergeCells('A1:Z1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-
-        $sheet->setCellValue(
-            'A2',
-            'Periode: ' . ($dari && $sampai
-                ? \Carbon\Carbon::parse($dari)->translatedFormat('d F Y').' - '.\Carbon\Carbon::parse($sampai)->translatedFormat('d F Y')
-                : 'Semua Data')
-        );
-        $sheet->mergeCells('A2:Z2');
-
-        // =====================
-        // HEADER KOLOM (SAMA KAYA UI)
-        // =====================
-        $row = 4;
-        $headers = [
-            'No','Tanggal','Nama Pegawai','Umur','Bagian',
-            'Nama Pasien','Hub. Kel','TD','GDP','GD 2 Jam',
-            'GDS','AU','Chol','TG','Suhu','BB','TB',
-            'Diagnosa','NB','Therapy',
-            'Jml Obat','Harga Obat','Total Obat',
-            'Pemeriksa','Periksa Ke'
-        ];
-
-        $col = 'A';
-        foreach ($headers as $h) {
-            $sheet->setCellValue($col.$row, $h);
-            $sheet->getStyle($col.$row)->getFont()->setBold(true);
-            $col++;
+        if ($dari && $sampai) {
+            $rows->whereBetween(
+                DB::raw('DATE(pemeriksaan.created_at)'),
+                [$dari, $sampai]
+            );
         }
 
-        // =====================
-        // DATA + MERGE
-        // =====================
-        $row = 5;
-        $no  = 1;
+        $rows = $rows->get();
 
-        $grouped = $data->groupBy('id_pemeriksaan');
+        // =============================
+        // GROUP DATA
+        // =============================
+        $dokterPoli = $rows->where('jenis_dokter','Dokter Poliklinik')
+            ->groupBy('id_dokter');
 
-        foreach ($grouped as $rows) {
-            $startRow = $row;
-            $rowspan  = $rows->count();
+        $dokterPerusahaan = $rows->where('jenis_dokter','Dokter Perusahaan')
+            ->groupBy('id_dokter');
 
-            foreach ($rows as $i => $d) {
-                if ($i === 0) {
-                    $sheet->setCellValue('A'.$row, $no++);
-                    $sheet->setCellValue('B'.$row, $d->tanggal);
-                    $sheet->setCellValue('C'.$row, $d->nama_pegawai);
-                    $sheet->setCellValue('D'.$row, $d->umur);
-                    $sheet->setCellValue('E'.$row, $d->bagian);
-                    $sheet->setCellValue('F'.$row, $d->nama_pasien);
-                    $sheet->setCellValue('G'.$row, $d->hub_kel);
-                    $sheet->setCellValue('H'.$row, $d->sistol);
-                    $sheet->setCellValue('I'.$row, $d->gd_puasa);
-                    $sheet->setCellValue('J'.$row, $d->gd_duajam);
-                    $sheet->setCellValue('K'.$row, $d->gd_sewaktu);
-                    $sheet->setCellValue('L'.$row, $d->asam_urat);
-                    $sheet->setCellValue('M'.$row, $d->chol);
-                    $sheet->setCellValue('N'.$row, $d->tg);
-                    $sheet->setCellValue('O'.$row, $d->suhu);
-                    $sheet->setCellValue('P'.$row, $d->berat);
-                    $sheet->setCellValue('Q'.$row, $d->tinggi);
-                }
+        // =============================
+        // EXCEL
+        // =============================
+        $spreadsheet = new Spreadsheet();
 
-                // ❗ TIDAK DI-MERGE
-                $sheet->setCellValue('R'.$row, $d->diagnosa);
-                $sheet->setCellValue('S'.$row, $d->nb);
-                $sheet->setCellValue('T'.$row, $d->nama_obat);
-                $sheet->setCellValue('U'.$row, $d->jumlah.' '.$d->satuan);
-                $sheet->setCellValue('V'.$row, $d->harga);
+        /* =====================================================
+        SHEET 1 — DOKTER POLIKLINIK
+        ===================================================== */
+        $sheetPoli = $spreadsheet->getActiveSheet();
+        $sheetPoli->setTitle('Dokter Poliklinik');
 
-                if ($i === 0) {
-                    $sheet->setCellValue('W'.$row, $d->total_obat_pasien);
-                    $sheet->setCellValue('X'.$row, $d->pemeriksa);
-                    $sheet->setCellValue('Y'.$row, $d->periksa_ke);
-                }
+        $row = 1;
+        $sheetPoli->setCellValue("A$row",'DOKTER POLIKLINIK (BAYAR PER PASIEN)');
+        $sheetPoli->mergeCells("A$row:D$row");
+        $sheetPoli->getStyle("A$row")->getFont()->setBold(true)->setSize(14);
+        $row += 2;
 
+        $grandTotal = 0;
+        $startRow = $row;
+
+
+        foreach ($dokterPoli as $items) {
+            $dokter = $items->first()->nama_dokter;
+            $totalPasien = $items->count();
+            $totalBiaya  = $totalPasien * $tarifPoliklinik;
+            $grandTotal += $totalBiaya;
+
+            // Nama dokter
+            $sheetPoli->setCellValue("A$row",$dokter);
+            $sheetPoli->mergeCells("A$row:D$row");
+            $sheetPoli->getStyle("A$row")->getFont()->setBold(true);
+            $row++;
+
+            // Header tabel pasien
+            $sheetPoli->fromArray(
+                ['No','NIP','Nama Pasien','Tanggal Periksa'],
+                null,
+                "A$row"
+            );
+            $sheetPoli->getStyle("A$row:D$row")->getFont()->setBold(true);
+            $row++;
+
+            $no = 1;
+            foreach ($items as $p) {
+                $sheetPoli->setCellValue("A$row",$no++);
+                $sheetPoli->setCellValueExplicit(
+                    "B$row",
+                    (string) $p->nip,
+                    DataType::TYPE_STRING
+                );
+
+                $sheetPoli->setCellValue("C$row",$p->nama_pasien);
+                $sheetPoli->setCellValue("D$row",\Carbon\Carbon::parse($p->tanggal)->translatedFormat('d F Y'));
                 $row++;
             }
 
-            // =====================
-            // MERGE PER PEMERIKSAAN
-            // =====================
-            if ($rowspan > 1) {
-                foreach (['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','W','X','Y'] as $col) {
-                    $sheet->mergeCells(
-                        $col.$startRow . ':' . $col.($row - 1)
-                    );
-                }
+            $row++;
+        }
+
+        if ($row - 1 > $startRow) {
+            $sheetPoli->mergeCells("A$startRow:A".($row-1));
+        }
+
+        // TOTAL POLI
+        $sheetPoli->setCellValue("A$row",'TOTAL DOKTER POLIKLINIK');
+        $sheetPoli->mergeCells("A$row:C$row");
+        $sheetPoli->setCellValue("D$row",$grandTotal);
+        $sheetPoli->getStyle("A$row:D$row")->getFont()->setBold(true);
+
+        foreach (range('A','D') as $c) {
+            $sheetPoli->getColumnDimension($c)->setAutoSize(true);
+        }
+
+        /* =====================================================
+        SHEET 2 — DOKTER PERUSAHAAN (GAJI BULANAN)
+        ===================================================== */
+
+        $dokterPerusahaanList = $rows
+            ->where('jenis_dokter','Dokter Perusahaan')
+            ->groupBy('id_dokter');
+
+        $sheetPer = $spreadsheet->createSheet();
+        $sheetPer->setTitle('Dokter Perusahaan');
+
+        $row = 1;
+        $sheetPer->setCellValue("A$row",'DOKTER PERUSAHAAN (GAJI BULANAN)');
+        $sheetPer->mergeCells("A$row:B$row");
+        $sheetPer->getStyle("A$row")->getFont()->setBold(true)->setSize(14);
+        $row += 2;
+
+        $bulanGaji = $this->hitungBulanGaji($dari, $sampai);
+
+        foreach ($dokterPerusahaanList as $items) {
+
+            $namaDokter = $items->first()->nama_dokter;
+
+            // ===================
+            // NAMA DOKTER
+            // ===================
+            $sheetPer->setCellValue("A$row",$namaDokter);
+            $sheetPer->mergeCells("A$row:B$row");
+            $sheetPer->getStyle("A$row")->getFont()->setBold(true);
+            $row++;
+
+            // Header
+            $sheetPer->setCellValue("A$row",'Periode');
+            $sheetPer->setCellValue("B$row",'Gaji');
+            $sheetPer->getStyle("A$row:B$row")->getFont()->setBold(true);
+            $row++;
+
+            $totalGaji = 0;
+
+            foreach ($bulanGaji as $bulan) {
+                $sheetPer->setCellValue("A$row",'Bulan '.$bulan);
+                $sheetPer->setCellValue("B$row",$gajiPerusahaan);
+                $totalGaji += $gajiPerusahaan;
+                $row++;
             }
+
+            // TOTAL PER DOKTER
+            $sheetPer->setCellValue("A$row",'TOTAL');
+            $sheetPer->setCellValue("B$row",$totalGaji);
+            $sheetPer->getStyle("A$row:B$row")->getFont()->setBold(true);
+            $row += 2; // jarak antar dokter
         }
 
-
-        // autosize kolom
-        foreach (range('A','Y') as $c) {
-            $sheet->getColumnDimension($c)->setAutoSize(true);
+        // Autosize
+        foreach (range('A','B') as $c) {
+            $sheetPer->getColumnDimension($c)->setAutoSize(true);
         }
 
-        // =====================
-        // OUTPUT
-        // =====================
+        // =============================
+        // DOWNLOAD
+        // =============================
         $writer = new Xlsx($spreadsheet);
-        $filename = 'Rekapan_Pemeriksaan_Pegawai.xlsx';
+        $filename = 'Rekapan_Pemeriksaan_Dokter.xlsx';
+        $path = storage_path('app/'.$filename);
+        $writer->save($path);
 
-        return response()->streamDownload(function () use ($writer) {
-            $writer->save('php://output');
-        }, $filename, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        ]);
+        return response()->download($path)->deleteFileAfterSend(true);
     }
-
 
 
 }
