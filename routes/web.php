@@ -161,8 +161,14 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
 
     // Laporan
     Route::get('/laporan', [AdminPoliLaporanController::class, 'index'])->name('laporan.index');
-    Route::get('/laporan/preview/{nip}', [AdminPoliLaporanController::class, 'preview'])->name('laporan.preview');
-    Route::get('/laporan/export', [AdminPoliLaporanController::class, 'exportExcel'])->name('laporan.export');
+    Route::get('/laporan/preview', [AdminPoliLaporanController::class, 'preview'])->name('laporan.preview');
+    // export excel (PREVIEW: single sheet sesuai tipe yg dipreview)
+    Route::get('/laporan/export', [AdminPoliLaporanController::class, 'exportExcel'])
+    ->name('laporan.export');
+
+    // export excel (INDEX: all tipe -> multi sheets)
+    Route::get('/laporan/export-all', [AdminPoliLaporanController::class, 'exportExcelAll'])
+    ->name('laporan.exportAll');
 });
 /*
 |--------------------------------------------------------------------------
