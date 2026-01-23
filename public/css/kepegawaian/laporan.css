@@ -1,3 +1,108 @@
+.filter-form {
+    display: flex;
+    gap: 15px;
+    align-items: end;
+    margin-bottom: 20px;
+}
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+.filter-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+.form-control {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.btn-primary {
+    padding: 8px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn-primary:hover {
+    background: #0056b3;
+}
+.btn-success {
+    padding: 10px 24px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+.btn-success:hover {
+    background: #218838;
+}
+.text-center {
+    text-align: center;
+}
+
+/* Styling untuk detail dokter */
+.dokter-summary h4 {
+    margin-bottom: 15px;
+    color: #333;
+}
+.btn-expand {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 8px;
+    margin-left: 8px;
+    color: #007bff;
+}
+.btn-expand:hover {
+    color: #0056b3;
+}
+.detail-container {
+    padding: 15px 30px;
+    background: #f8f9fa;
+}
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.detail-table thead {
+    background: #e9ecef;
+}
+.detail-table th {
+    padding: 8px;
+    text-align: left;
+    font-size: 0.9em;
+}
+.detail-table td {
+    padding: 8px;
+    border-bottom: 1px solid #dee2e6;
+}
+.badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+.badge-blue {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+.badge-green {
+    background: #e8f5e9;
+    color: #388e3c;
+}
+.expandable-row {
+    cursor: pointer;
+}
+.detail-row td {
+    padding: 0 !important;
+}
 .laporan-page{
     padding:40px;
 }
@@ -95,4 +200,51 @@
     padding:10px 18px;
     border-radius:8px;
     text-decoration:none;
+}
+
+.dokter-name .toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: #316BA1;
+}
+
+.dokter-row:hover {
+    background: #f5faff;
+}
+
+.detail-row {
+    display: none;
+    background: #fafcff;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.detail-table th {
+    background: #f0f6fc;
+    padding: 10px;
+    font-size: 13px;
+}
+
+.detail-table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.total-row {
+    background: #f0fff0;
+}
+
+.total-box{
+    margin-top:12px;
+    padding:12px 16px;
+    background:#eaffea;
+    border-radius:8px;
+    font-weight:600;
+    text-align:right;
 }

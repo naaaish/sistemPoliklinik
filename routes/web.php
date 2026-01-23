@@ -242,6 +242,12 @@ Route::middleware(['auth', 'ensureKepegawaian'])
 
     Route::get('/dokter-pemeriksa/{tipe}/{id}/jadwal-view', [DokterPemeriksaController::class, 'jadwalView'])
         ->name('dokter_pemeriksa.jadwal_view');
+
+    Route::get(
+        '/kepegawaian/laporan/{jenis}/excel',
+        [LaporanController::class, 'exportExcel']
+    )->name('laporan.excel');
+
 });
 
 
@@ -280,6 +286,10 @@ Route::prefix('kepegawaian')->middleware('auth')->group(function () {
     Route::get('/laporan/{jenis}', [LaporanController::class, 'detail'])
         ->name('kepegawaian.laporan.detail');
 
+    Route::get(
+        '/laporan/{jenis}/excel',
+        [\App\Http\Controllers\Kepegawaian\LaporanController::class, 'downloadExcel']
+    )->name('laporan.excel');
 
     Route::get('/laporan/{jenis}/pdf', [LaporanController::class, 'downloadPdf'])
        ->name('laporan.pdf');
