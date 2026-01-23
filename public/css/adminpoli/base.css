@@ -696,3 +696,8 @@ body{
   #obatWrap .obat-row .obat-select{ grid-column: 1 / -1; }
   #obatWrap .obat-row .obat-hapus{ grid-column: 1 / -1; }
 }
+
+html.swal2-height-auto,
+body.swal2-height-auto{
+  height: 100% !important;
+}

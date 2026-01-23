@@ -5,6 +5,9 @@ namespace App\Http\Controllers\AdminPoli;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\LaporanMultiTipeExport;
+use App\Exports\LaporanSingleTipeExport;
 
 class LaporanController extends Controller
 {
@@ -23,16 +26,11 @@ class LaporanController extends Controller
         $allowedPerPage = [5, 10, 25, 100];
         if (!in_array($perPage, $allowedPerPage)) $perPage = 5;
 
-        /**
-         * INDEX = 1 ROW PER NIP (bukan per kunjungan)
-         * Ambil NIP unik + tanggal terakhir kunjungan di range tsb.
-         */
+        // Ambil daftar NIP yang ada di pendaftaran pada range tanggal
         $nipQuery = DB::table('pendaftaran as p')
             ->leftJoin('pegawai as pg', 'pg.nip', '=', 'p.nip')
             ->whereBetween('p.tanggal', [$from, $to]);
 
-        // filter tipe (kalau struktur tipe_pasien kamu beda, ganti di sini)
-        // filter berdasarkan bidang/bagian pegawai
         $poliklinikCond = "(pg.nip = '001' OR LOWER(COALESCE(pg.nama_pegawai,'')) = 'poliklinik')";
 
         if ($tipe === 'poliklinik') {
@@ -40,7 +38,7 @@ class LaporanController extends Controller
         } elseif ($tipe === 'pensiunan') {
             $nipQuery->whereRaw("LOWER(COALESCE(pg.bagian,'')) = 'pensiunan'")
                     ->whereRaw("NOT $poliklinikCond");
-        } else { // pegawai
+        } else {
             $nipQuery->whereRaw("LOWER(COALESCE(pg.bagian,'')) NOT IN ('pensiunan')")
                     ->whereRaw("NOT $poliklinikCond");
         }
@@ -122,12 +120,6 @@ class LaporanController extends Controller
                 'nip' => $nip ?? '-',
                 'nama_pasien' => $namaTxt ?: '-',
                 'hub_kel' => $hubTxt ?: '-',
-                'preview_url' => route('adminpoli.laporan.preview', [
-                    'nip' => $nip,
-                    'tipe' => $tipe,
-                    'from' => $from,
-                    'to' => $to,
-                ]),
             ];
         }
 
@@ -141,20 +133,19 @@ class LaporanController extends Controller
         ]);
     }
 
-    public function preview(Request $request, string $nip)
+    public function preview(Request $request)
     {
         $tipe = $request->input('tipe', 'pegawai');
         $from = $request->input('from') ?: now()->toDateString();
         $to   = $request->input('to')   ?: now()->toDateString();
 
-        $visits = $this->getVisits($from, $to, $tipe, $nip);
+        $visits = $this->getVisits($from, $to, $tipe);
         $rows   = $this->buildReportRows($visits);
 
         return view('adminpoli.laporan.preview', [
             'tipe'  => $tipe,
             'from'  => $from,
             'to'    => $to,
-            'nip'   => $nip,
             'rows'  => $rows,
             'count' => count($rows),
         ]);
@@ -373,4 +364,45 @@ class LaporanController extends Controller
         }
         return false;
     }
-}
+
+    public function exportExcel(Request $request)
+    {
+        // === untuk PREVIEW: 1 sheet sesuai tipe yg dipilih ===
+        $tipe = $request->input('tipe', 'pegawai');
+        $from = $request->input('from') ?: now()->toDateString();
+        $to   = $request->input('to')   ?: now()->toDateString();
+
+        // ambil semua kunjungan sesuai tipe + rentang tanggal
+        $visits = $this->getVisits($from, $to, $tipe, null);   // nip = null (semua)
+        $rows   = $this->buildReportRows($visits);
+
+        $filename = "Laporan_{$tipe}_{$from}_sd_{$to}.xlsx";
+        return Excel::download(new LaporanSingleTipeExport($tipe, $from, $to, $rows), $filename);
+    }
+
+    public function exportExcelAll(Request $request)
+    {
+        // === untuk INDEX: 1 file, 3 sheet: pegawai/pensiunan/poliklinik ===
+        $from = $request->input('from') ?: now()->toDateString();
+        $to   = $request->input('to')   ?: now()->toDateString();
+
+        $types = ['pegawai', 'pensiunan', 'poliklinik'];
+        $data = [];
+
+        foreach ($types as $tipe) {
+            $visits = $this->getVisits($from, $to, $tipe, null); // semua nip utk tipe tsb
+            $rows   = $this->buildReportRows($visits);
+
+            $data[] = [
+                'sheet' => ucfirst($tipe),
+                'tipe'  => $tipe,
+                'from'  => $from,
+                'to'    => $to,
+                'rows'  => $rows,
+            ];
+        }
+
+        $filename = "Laporan_ALL_{$from}_sd_{$to}.xlsx";
+        return Excel::download(new LaporanMultiTipeExport($data), $filename);
+    }
+    }

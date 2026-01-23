@@ -112,6 +112,11 @@
         @yield('content')
     </main>
     <script>
+        const SwalFix = Swal.mixin({
+        heightAuto: false,
+        scrollbarPadding: false
+        });
+
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -143,7 +148,5 @@
     </script>
     @endif
 </div>
-
-
 </body>
 </html>

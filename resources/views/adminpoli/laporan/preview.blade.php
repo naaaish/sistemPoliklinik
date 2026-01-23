@@ -5,37 +5,30 @@
 @section('content')
 <div class="lap-page">
   <div class="lap-topbar">
-    <a href="{{ route('adminpoli.laporan.index', ['tipe'=>$tipe,'from'=>$from,'to'=>$to]) }}" class="lap-back-img" title="Kembali">
-      <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
-    </a>
-    <div class="lap-heading">Preview Laporan ({{ $nip }})</div>
+    <div class="lap-left">
+      <a href="{{ route('adminpoli.laporan.index', ['tipe'=>$tipe,'from'=>$from,'to'=>$to]) }}" class="lap-back-img" title="Kembali">
+        <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
+      </a>
+      <div class="lap-heading">Preview Laporan</div>
+    </div>
   </div>
 
-  <div class="lap-card">
-    <form action="{{ route('adminpoli.laporan.index') }}" method="GET" class="lap-tools">
-      <div class="lap-filter">
-        <input type="hidden" name="tipe" value="{{ $tipe }}">
-        <input type="date" name="from" value="{{ $from }}" required>
-        <span class="lap-sep">s/d</span>
-        <input type="date" name="to" value="{{ $to }}" required>
-        <button type="submit" class="lap-btn">Tampilkan</button>
-      </div>
+  <div class="lap-card lap-preview-card">
+    <form action="{{ route('adminpoli.laporan.preview') }}" method="GET" class="lap-tools">
+      <div class="lap-tools">
+        <div class="lap-info">
+          <b>{{ $count ?? 0 }}</b> baris ({{ $from }} s/d {{ $to }})
+        </div>
 
-      <div class="lap-filter">
         <a class="lap-btn"
-           href="{{ route('adminpoli.laporan.export', ['tipe'=>$tipe,'nip'=>$nip,'from'=>$from,'to'=>$to]) }}">
-          <img src="{{ asset('assets/adminPoli/download.png') }}" alt="Download">
+           href="{{ route('adminpoli.laporan.export', request()->query()) }}">
           Download Excel
         </a>
       </div>
     </form>
 
-    <div class="lap-info">
-      <b>{{ $count ?? 0 }}</b> baris ({{ $from }} s/d {{ $to }})
-    </div>
-
     {{-- Table --}}
-    <div class="lap-table-wrap">
+    <div class="lap-table-wrap lap-preview-wrap">
       <div class="lap-table">
 
         {{-- Header --}}

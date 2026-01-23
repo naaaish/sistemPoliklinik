@@ -10,6 +10,12 @@
         <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
       </a>
       <div class="lapidx-heading">Laporan</div>
+
+      <a class="lapidx-btn-soft"
+        href="{{ route('adminpoli.laporan.exportAll', request()->query()) }}">
+        <img class="lapidx-ic-sm" src="{{ asset('assets/adminPoli/download.png') }}" alt="">
+        Download Excel
+      </a>
     </div>
   </div>
 
@@ -33,23 +39,14 @@
           Tampilkan
         </button>
       </div>
-
-      <div class="lapidx-filter">
-        <span class="lapidx-muted">Tampilkan</span>
-        <select name="per_page" class="lapidx-select" onchange="this.form.submit()">
-          @foreach([5,10,25,100] as $n)
-            <option value="{{ $n }}" {{ (int)$perPage===$n ? 'selected' : '' }}>{{ $n }}</option>
-          @endforeach
-        </select>
-        <span class="lapidx-muted">NIP</span>
+      <div class="lapidx-actions-top">
+        <a class="lapidx-btn-soft"
+            href="{{ route('adminpoli.laporan.preview', ['tipe'=>$tipe,'from'=>$from,'to'=>$to]) }}">
+          <img class="lapidx-ic-sm" src="{{ asset('assets/adminPoli/eye.png') }}" alt="">
+          Preview
+        </a>
       </div>
-
     </form>
-
-    <div class="lapidx-info">
-      Menampilkan <b>{{ $nips->count() }}</b> dari <b>{{ $nips->total() }}</b> data
-      ({{ $from }} s/d {{ $to }})
-    </div>
 
     <div class="lapidx-table">
       <div class="lapidx-thead">
@@ -57,9 +54,6 @@
         <div class="lapidx-th">TANGGAL</div>
         <div class="lapidx-th">NAMA</div>
         <div class="lapidx-th">NIP</div>
-        <div class="lapidx-th">NAMA PASIEN</div>
-        <div class="lapidx-th">HUB KEL</div>
-        <div class="lapidx-th">AKSI</div>
       </div>
 
       <div class="lapidx-tbody">
@@ -69,14 +63,6 @@
             <div class="lapidx-td lapidx-center">{{ $it['tanggal'] }}</div>
             <div class="lapidx-td">{{ $it['nama'] }}</div>
             <div class="lapidx-td lapidx-center">{{ $it['nip'] }}</div>
-            <div class="lapidx-td lapidx-pre">{{ $it['nama_pasien'] }}</div>
-            <div class="lapidx-td lapidx-pre lapidx-center">{{ $it['hub_kel'] }}</div>
-            <div class="lapidx-td lapidx-center">
-              <a class="lapidx-btn-soft" href="{{ $it['preview_url'] }}">
-                <img class="lapidx-ic-sm" src="{{ asset('assets/adminPoli/eye.png') }}" alt="">
-                Preview
-              </a>
-            </div>
           </div>
         @empty
           <div class="lapidx-empty">Tidak ada data pada filter ini.</div>
@@ -84,10 +70,37 @@
       </div>
     </div>
 
-    <div class="lapidx-paginate">
-      {{ $nips->links() }}
-    </div>
+    <div class="lapidx-bottom-full">
+      {{-- kiri: total --}}
+      <div class="lapidx-total">
+        Total <strong>{{ $nips->total() }}</strong>
+      </div>
 
+      {{-- tengah: lines per page --}}
+      <form method="GET"
+            action="{{ route('adminpoli.laporan.index') }}"
+            class="lapidx-lines">
+
+        {{-- keep filter --}}
+        <input type="hidden" name="tipe" value="{{ $tipe }}">
+        <input type="hidden" name="from" value="{{ $from }}">
+        <input type="hidden" name="to" value="{{ $to }}">
+
+        <span>Lines per page</span>
+        <select name="per_page" onchange="this.form.submit()">
+          @foreach([5,10,15,25,50] as $n)
+            <option value="{{ $n }}" {{ (int)$perPage === $n ? 'selected' : '' }}>
+              {{ $n }}
+            </option>
+          @endforeach
+        </select>
+      </form>
+
+      {{-- kanan: pagination --}}
+      <div class="lapidx-paginate">
+        {{ $nips->links() }}
+      </div>
+    </div>
   </div>
 
   <div class="lapidx-foot">
