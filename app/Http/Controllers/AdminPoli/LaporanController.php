@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\LaporanMultiTipeExport;
 use App\Exports\LaporanSingleTipeExport;
+use Carbon\Carbon;
 
 class LaporanController extends Controller
 {
@@ -140,7 +141,7 @@ class LaporanController extends Controller
         $to   = $request->input('to')   ?: now()->toDateString();
 
         $visits = $this->getVisits($from, $to, $tipe);
-        $rows   = $this->buildReportRows($visits);
+        $rows   = $this->buildReportRows($visits, $tipe);
 
         return view('adminpoli.laporan.preview', [
             'tipe'  => $tipe,
@@ -181,6 +182,8 @@ class LaporanController extends Controller
                 'p.tipe_pasien',
                 'p.nip',
                 'p.id_keluarga',
+                'pg.tgl_lahir as pegawai_tgl_lahir',
+                'k.tgl_lahir as keluarga_tgl_lahir',
 
                 'pm.id_pemeriksaan',
 
@@ -251,11 +254,12 @@ class LaporanController extends Controller
         return $visits;
     }
     
-    private function buildReportRows($visits): array
+    private function buildReportRows($visits, string $tipe): array
     {
         $rows = [];
         $no = 1;
-        $counter = []; // nip => urutan tes darah
+        $counter = [];
+        
 
         foreach ($visits as $v) {
 
@@ -273,26 +277,31 @@ class LaporanController extends Controller
                 $periksaKe = $counter[$v->nip];
             }
 
-            // ==== DIAGNOSA LINES (dipisah per baris) ====
-            $diagUmum = $v->diagnosa_list ?? []; // array of string
+            $umur = null;
+            if ($tipe === 'poliklinik') {
+                $umur = null;
+            }
+            elseif (!empty($v->id_keluarga)) {
+                // pasien keluarga
+                $umur = $this->hitungUmur($v->keluarga_tgl_lahir);
+            }
+            else {
+                // pasien pegawai
+                $umur = $this->hitungUmur($v->pegawai_tgl_lahir);
+            }
 
-            // ===== LIST NB (dari diagnosa_k3) =====
-            $nbItems = $v->diagnosa_k3_items ?? []; // array of object {id_nb, nama_penyakit}
-
-            // kalau kosong, biar tetap ada 1 baris
-            if (count($diagUmum) === 0) $diagUmum = ['-'];
-            if (count($nbItems) === 0) $nbItems = []; // NB nanti jadi '-' per baris
-
-            // ==== OBAT LIST ====
+            $diagUmum = $v->diagnosa_list ?? [];
+            $nbItems = $v->diagnosa_k3_items ?? [];
             $obatList = $v->obat_list ?? [];
 
-            // total harga obat per pendaftaran (sum subtotal)
+            if (count($diagUmum) === 0) $diagUmum = ['-'];
+            if (count($nbItems) === 0) $nbItems = []; 
+            
             $totalHarga = 0;
             foreach ($obatList as $ob) {
                 $totalHarga += (int)($ob->subtotal ?? 0);
             }
-
-            // jumlah baris mengikuti yang paling banyak: diagnosa umum / nb / obat
+            
             $maxLines = max(count($diagUmum), count($nbItems), count($obatList), 1);
 
             for ($i = 0; $i < $maxLines; $i++) {
@@ -310,7 +319,7 @@ class LaporanController extends Controller
                     'NO' => $isFirst ? $no : '',
                     'TANGGAL' => $isFirst ? ($v->tanggal ?? '-') : '',
                     'NAMA' => $isFirst ? ($v->nama_pegawai ?? '-') : '',
-                    'UMUR' => $isFirst ? '-' : '',
+                    'UMUR' => $umur,
                     'BAGIAN' => $isFirst ? ($v->bagian ?? '-') : '',
                     'NAMA_PASIEN' => $isFirst ? ($v->nama_pasien ?? '-') : '',
                     'HUB_KEL' => $isFirst ? ($v->hub_kel ?? '-') : '',
@@ -326,7 +335,6 @@ class LaporanController extends Controller
                     'BB' => $isFirst ? ($v->berat ?? '-') : '',
                     'TB' => $isFirst ? ($v->tinggi ?? '-') : '',
 
-                    // TERAPHY = nama obat per baris
                     'DIAGNOSA' => $diag !== '' ? $diag : ($isFirst ? '-' : ''),
 
                     'TERAPHY' => $ob ? ($ob->nama_obat ?? '-') : ($isFirst ? '-' : ''),
@@ -336,7 +344,6 @@ class LaporanController extends Controller
 
                     'PEMERIKSA' => $isFirst ? ($v->pemeriksa ?? '-') : '',
 
-                    // NB: tetap hanya tampil untuk pegawai (sesuai code kamu)
                     'NB' => $isPegawai ? ($nbLine ?: '-') : '',
                     'PERIKSA_KE' => $isPegawai ? ($isFirst ? $periksaKe : '') : '',
                 ];
@@ -348,7 +355,7 @@ class LaporanController extends Controller
         return $rows;
     }
 
-    private function hasBloodTest($v): bool
+    public function hasBloodTest($v): bool
     {
         $fields = [
             $v->gd_puasa ?? null,
@@ -374,7 +381,7 @@ class LaporanController extends Controller
 
         // ambil semua kunjungan sesuai tipe + rentang tanggal
         $visits = $this->getVisits($from, $to, $tipe, null);   // nip = null (semua)
-        $rows   = $this->buildReportRows($visits);
+        $rows   = $this->buildReportRows($visits, $tipe);
 
         $filename = "Laporan_{$tipe}_{$from}_sd_{$to}.xlsx";
         return Excel::download(new LaporanSingleTipeExport($tipe, $from, $to, $rows), $filename);
@@ -391,7 +398,7 @@ class LaporanController extends Controller
 
         foreach ($types as $tipe) {
             $visits = $this->getVisits($from, $to, $tipe, null); // semua nip utk tipe tsb
-            $rows   = $this->buildReportRows($visits);
+            $rows = $this->buildReportRows($visits, $tipe);
 
             $data[] = [
                 'sheet' => ucfirst($tipe),
@@ -405,4 +412,11 @@ class LaporanController extends Controller
         $filename = "Laporan_ALL_{$from}_sd_{$to}.xlsx";
         return Excel::download(new LaporanMultiTipeExport($data), $filename);
     }
+
+    private function hitungUmur($tglLahir)
+    {
+        if (!$tglLahir) return null;
+        return Carbon::parse($tglLahir)->age;
     }
+
+}

@@ -172,6 +172,58 @@ body{
   padding-top: 15px;
 }
 
+.ap-nip-wrap{
+  position: relative;
+  width: 100%;
+}
+
+.ap-suggest{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  background: #fff;
+  border: 1px solid #CFE0FF;
+  border-radius: 12px;
+  box-shadow: 0px 10px 22px rgba(0,0,0,.12);
+  z-index: 99999 !important;
+}
+
+.ap-suggest .item{
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #5C6E9A;
+  border-bottom: 1px solid #F3F3F3;
+}
+
+.ap-suggest .item:last-child{
+  border-bottom: none;
+}
+
+.ap-suggest .item:hover{
+  background: rgba(49,107,161,.08);
+}
+
+.ap-suggest .meta{
+  display:block;
+  font-size: 12px;
+  opacity: .75;
+  margin-top: 2px;
+}
+
+.ap-suggest .item.is-active{
+  background: rgba(49,107,161,.12);
+}
+
+.ap-card-form,
+.ap-card,
+.ap-form,
+.ap-page,
+.ap-container{
+  overflow: visible !important;
+}
+
 /* CARDS */
 .ap-cards{
   display: grid;

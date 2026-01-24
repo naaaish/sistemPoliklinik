@@ -31,7 +31,10 @@
                 <div class="ap-label">NIP Pegawai</div>
                 <div class="ap-colon">:</div>
                 <div class="ap-input">
-                    <input type="text" name="nip" id="nip" value="{{ old('nip') }}" placeholder="NIP Pegawai" required>
+                    <div class="ap-nip-wrap">
+                      <input type="text" name="nip" id="nip" value="{{ old('nip') }}" placeholder="Ketik NIP / Nama..." autocomplete="off" required>
+                      <div id="nipSuggest" class="ap-suggest" style="display:none;"></div>
+                    </div>
                     <small class="ap-help" id="nipHelp"></small>
                 </div>
             </div>
@@ -148,6 +151,7 @@
 </div>
 <script>
 const nipEl = document.getElementById('nip');
+const nipSuggestEl = document.getElementById('nipSuggest');
 const tipeEl = document.getElementById('tipe_pasien');
 
 const namaPegEl = document.getElementById('nama_pegawai');
@@ -161,6 +165,212 @@ const idKelEl = document.getElementById('id_keluarga');
 // cache
 let pegawaiData = null;
 let keluargaData = [];
+let searchTimer = null;
+let lastQuery = '';
+let suggestItems = [];
+let activeIdx = -1;
+
+function isSuggestOpen(){
+  return nipSuggestEl && nipSuggestEl.style.display !== 'none' && suggestItems.length > 0;
+}
+
+function setActive(idx){
+  if(!suggestItems.length) { activeIdx = -1; return; }
+
+  // wrap around
+  if(idx < 0) idx = suggestItems.length - 1;
+  if(idx >= suggestItems.length) idx = 0;
+
+  activeIdx = idx;
+
+  // update class
+  [...nipSuggestEl.querySelectorAll('.item')].forEach((el, i) => {
+    el.classList.toggle('is-active', i === activeIdx);
+  });
+
+  // auto scroll into view
+  const activeEl = nipSuggestEl.querySelector(`.item[data-idx="${activeIdx}"]`);
+  if(activeEl) activeEl.scrollIntoView({ block: 'nearest' });
+}
+
+function closeSuggest(){
+  nipSuggestEl.style.display = 'none';
+  nipSuggestEl.innerHTML = '';
+  suggestItems = [];
+}
+
+function renderSuggest(items){
+  if(!items || items.length === 0){
+    closeSuggest();
+    return;
+  }
+
+  nipSuggestEl.innerHTML = items.map((it, idx) => {
+    const nip = escapeHtml(it.nip);
+    const nama = escapeHtml(it.nama_pegawai || '');
+    const bagian = escapeHtml(it.bagian || '');
+    return `
+      <div class="item" data-idx="${idx}">
+        <strong>${nip}</strong> — ${nama}
+        <span class="meta">${bagian}</span>
+      </div>
+    `;
+  }).join('');
+
+  nipSuggestEl.style.display = 'block';
+  suggestItems = items;
+  setActive(0);
+}
+
+async function searchPegawai(q){
+  const res = await fetch(`/adminpoli/api/pegawai/search?q=${encodeURIComponent(q)}`);
+  const j = await res.json().catch(()=> null);
+
+  console.log('SEARCH RESP:', j);
+
+  if(!res.ok || !j) return [];
+
+  if (Array.isArray(j)) return j;
+
+  if (Array.isArray(j.data)) return j.data;
+
+  return [];
+}
+
+// dipanggil kalau user sudah “fix” memilih pegawai
+async function applyPegawaiSelected(p){
+  closeSuggest();
+
+  pegawaiData = p;
+  keluargaData = [];
+  resetNamaPasien();
+
+  // set value input nip biar ikut terkirim
+  nipEl.value = p.nip || '';
+
+  namaPegEl.value = p.nama_pegawai || '';
+  bagianEl.value = p.bagian ?? '';
+
+  // AUTO pensiunan dari bagian (kode kamu tetap)
+  const bagianVal = (bagianEl.value || '').trim().toLowerCase();
+  const isPensiunan = bagianVal === 'pensiunan';
+
+  if (isPensiunan) {
+    tipeEl.value = 'pensiunan';
+    tipeEl.disabled = false;
+  } else {
+    if (tipeEl.disabled) tipeEl.disabled = false;
+    if (tipeEl.value === 'pensiunan') tipeEl.value = 'pegawai';
+  }
+
+  if (tipeEl.value) {
+    onTipeChange().catch(()=>{});
+  }
+
+  // kalau kamu punya mode poliklinik
+  checkPoliklinik();
+}
+
+// typing handler (debounce)
+nipEl.addEventListener('input', () => {
+  const q = (nipEl.value || '').trim();
+
+  // reset kalau user ngubah nip
+  pegawaiData = null;
+  namaPegEl.value = '';
+  bagianEl.value = '';
+  resetNamaPasien();
+
+  if (searchTimer) clearTimeout(searchTimer);
+
+  searchTimer = setTimeout(async () => {
+    // hindari request sama berulang
+    if(q === lastQuery) return;
+    lastQuery = q;
+
+    const items = await searchPegawai(q);
+    renderSuggest(items);
+  }, 250);
+});
+
+nipEl.addEventListener('focus', async () => {
+  const q = (nipEl.value || '').trim();
+
+  // kalau kosong
+  const items = await searchPegawai(q.length ? q : '1');
+  renderSuggest(items);
+});
+
+
+// klik item suggestion
+nipSuggestEl.addEventListener('click', (e) => {
+  const item = e.target.closest('.item');
+  if(!item) return;
+  const idx = parseInt(item.dataset.idx, 10);
+  const p = suggestItems[idx];
+  if(!p) return;
+
+  // langsung apply tanpa fetch lagi (lebih ringan)
+  applyPegawaiSelected(p).catch(()=>{});
+});
+
+// kalau user klik di luar, tutup dropdown
+document.addEventListener('click', (e) => {
+  if(e.target === nipEl) return;
+  if(nipSuggestEl.contains(e.target)) return;
+  closeSuggest();
+});
+
+nipEl.addEventListener('keydown', async (e) => {
+  // kalau dropdown terbuka, keyboard control
+  if(isSuggestOpen()){
+    if(e.key === 'ArrowDown'){
+      e.preventDefault();
+      setActive(activeIdx + 1);
+      return;
+    }
+
+    if(e.key === 'ArrowUp'){
+      e.preventDefault();
+      setActive(activeIdx - 1);
+      return;
+    }
+
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      const p = suggestItems[activeIdx];
+      if(p) await applyPegawaiSelected(p);
+      return;
+    }
+
+    if(e.key === 'Escape'){
+      e.preventDefault();
+      closeSuggest();
+      return;
+    }
+  }
+
+  // fallback Enter: kalau dropdown tidak terbuka, coba fetch exact NIP
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    const nip = (nipEl.value || '').trim();
+    if(!nip) return;
+
+    try{
+      const p = await fetchPegawai(nip);
+      await applyPegawaiSelected(p);
+    }catch(err){
+      alert(err.message);
+    }
+  }
+});
+
+nipSuggestEl.addEventListener('mousemove', (e) => {
+  const item = e.target.closest('.item');
+  if(!item) return;
+  const idx = parseInt(item.dataset.idx, 10);
+  if(!Number.isNaN(idx)) setActive(idx);
+});
 
 // === helpers ===
 function resetNamaPasien(){
@@ -316,17 +526,6 @@ function escapeHtml(str){
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
   }[m]));
 }
-
-// listeners
-nipEl.addEventListener('blur', () => {
-  onNipDone().catch(err => {
-    // kalau gagal, kosongin pegawai/bagian biar jelas
-    namaPegEl.value = '';
-    bagianEl.value = '';
-    resetNamaPasien();
-    alert(err.message);
-  });
-});
 
 tipeEl.addEventListener('change', () => {
   onTipeChange().catch(err => {

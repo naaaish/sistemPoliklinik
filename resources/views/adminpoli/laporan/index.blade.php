@@ -10,11 +10,13 @@
         <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
       </a>
       <div class="lapidx-heading">Laporan</div>
+    </div>
 
+    <div class="lapidx-right">
       <a class="lapidx-btn-soft"
         href="{{ route('adminpoli.laporan.exportAll', request()->query()) }}">
         <img class="lapidx-ic-sm" src="{{ asset('assets/adminPoli/download.png') }}" alt="">
-        Download Excel
+        Download Semua
       </a>
     </div>
   </div>
