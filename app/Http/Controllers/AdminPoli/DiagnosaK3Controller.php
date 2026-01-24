@@ -167,6 +167,8 @@ class DiagnosaK3Controller extends Controller
         DB::transaction(function() use ($id_nb){
             DB::table('diagnosa_k3')->where('tipe','penyakit')->where('parent_id',$id_nb)->delete();
             DB::table('diagnosa_k3')->where('tipe','kategori')->where('id_nb',$id_nb)->delete();
+            
+            $this->renumberAllCategories();
         });
 
         return back()->with('success','Kategori dan seluruh isinya berhasil dihapus.');
@@ -298,92 +300,53 @@ class DiagnosaK3Controller extends Controller
         }
     }
 
-    // ================= REORDER (drag-drop) =================
-    // payload:
-    // categories: ["3","1","2"]
-    // children: { "3":["3.2","3.1"], "1":["1.1"], "2":[] }
-    public function reorder(Request $request)
+    private function renumberAllCategories(): void
     {
-        $request->validate([
-            'categories' => ['required','array'],
-            'categories.*' => ['string','max:10'],
-            'children' => ['nullable','array'],
-        ]);
+        $cats = DB::table('diagnosa_k3')
+            ->where('tipe','kategori')
+            ->orderByRaw("CAST(id_nb AS UNSIGNED) ASC")
+            ->get();
 
-        $catOrder = $request->input('categories', []);
-        $children = $request->input('children', []);   
+        // 1) TEMP rename kategori + parent_id anak (hindari collision)
+        foreach ($cats as $i => $c) {
+            $tmp = 'c' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT); // c000000001
+            DB::table('diagnosa_k3')
+                ->where('tipe','kategori')
+                ->where('id_nb', $c->id_nb)
+                ->update(['id_nb' => $tmp, 'updated_at' => now()]);
 
-        DB::transaction(function() use ($catOrder, $children){
+            DB::table('diagnosa_k3')
+                ->where('tipe','penyakit')
+                ->where('parent_id', $c->id_nb)
+                ->update(['parent_id' => $tmp, 'updated_at' => now()]);
+        }
 
-            // 1) TEMP rename kategori + update parent_id anak
-            foreach ($catOrder as $i => $oldCatId) {
-                $tmpCatId = 'c' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT); // 10 char
+        // 2) FINAL rename kategori => 1..n
+        foreach ($cats as $i => $c) {
+            $tmp   = 'c' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT);
+            $final = (string)($i+1);
 
-                DB::table('diagnosa_k3')
-                    ->where('tipe','kategori')
-                    ->where('id_nb',$oldCatId)
-                    ->update(['id_nb'=>$tmpCatId, 'updated_at'=>now()]);
+            DB::table('diagnosa_k3')
+                ->where('tipe','kategori')
+                ->where('id_nb', $tmp)
+                ->update(['id_nb' => $final, 'updated_at' => now()]);
 
-                DB::table('diagnosa_k3')
-                    ->where('tipe','penyakit')
-                    ->where('parent_id',$oldCatId)
-                    ->update(['parent_id'=>$tmpCatId, 'updated_at'=>now()]);
-            }
+            DB::table('diagnosa_k3')
+                ->where('tipe','penyakit')
+                ->where('parent_id', $tmp)
+                ->update(['parent_id' => $final, 'updated_at' => now()]);
+        }
 
-            // 2) Final rename kategori jadi 1..n
-            $tmpToFinal = []; // tmp => final
-            foreach ($catOrder as $i => $oldCatId) {
-                $tmp = 'c' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT);
-                $final = (string)($i+1);
-                $tmpToFinal[$tmp] = $final;
+        // 3) setelah kategori rapih, rapihin penyakit per kategori
+        $finalCats = DB::table('diagnosa_k3')
+            ->where('tipe','kategori')
+            ->orderByRaw("CAST(id_nb AS UNSIGNED) ASC")
+            ->pluck('id_nb')
+            ->toArray();
 
-                DB::table('diagnosa_k3')->where('tipe','kategori')->where('id_nb',$tmp)->update([
-                    'id_nb'=>$final,
-                    'updated_at'=>now()
-                ]);
-
-                DB::table('diagnosa_k3')->where('tipe','penyakit')->where('parent_id',$tmp)->update([
-                    'parent_id'=>$final,
-                    'updated_at'=>now()
-                ]);
-            }
-
-            // 3) Renumber penyakit per kategori berdasarkan urutan drag
-            foreach ($tmpToFinal as $finalCatId) {
-                $list = $children[$finalCatId] ?? [];
-
-                // kalau front-end belum kirim urutan, fallback ke urutan existing
-                if (empty($list)) {
-                    $list = DB::table('diagnosa_k3')
-                        ->where('tipe','penyakit')
-                        ->where('parent_id',$finalCatId)
-                        ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',-1) AS UNSIGNED) ASC")
-                        ->pluck('id_nb')
-                        ->toArray();
-                }
-
-                // temp rename anak
-                foreach ($list as $i => $oldChildId) {
-                    $tmp = 'p' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT);
-                    DB::table('diagnosa_k3')->where('tipe','penyakit')->where('id_nb',$oldChildId)->update([
-                        'id_nb'=>$tmp,
-                        'updated_at'=>now()
-                    ]);
-                }
-
-                // final rename anak
-                foreach ($list as $i => $oldChildId) {
-                    $tmp = 'p' . str_pad((string)($i+1), 9, '0', STR_PAD_LEFT);
-                    $new = $finalCatId . '.' . ($i+1);
-                    DB::table('diagnosa_k3')->where('tipe','penyakit')->where('id_nb',$tmp)->update([
-                        'id_nb'=>$new,
-                        'updated_at'=>now()
-                    ]);
-                }
-            }
-        });
-
-        return response()->json(['ok'=>true]);
+        foreach ($finalCats as $catId) {
+            $this->renumberChildren((string)$catId);
+        }
     }
 
     // ================= import/export kamu boleh tetap, tapi pastikan filter tipe penyakit =================

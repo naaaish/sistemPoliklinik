@@ -21,7 +21,9 @@
         <th>BAGIAN</th>
         <th>NAMA PASIEN</th>
         <th>HUB KEL</th>
-        <th>TD</th>
+        <th>S</th>
+        <th>D</th>
+        <th>N</th>
         <th>GDP</th>
         <th>GD 2jam PP</th>
         <th>GDS</th>
@@ -36,6 +38,7 @@
         <th>JUMLAH OBAT</th>
         <th>HARGA OBAT (SATUAN)</th>
         <th>TOTAL HARGA OBAT</th>
+        <th>SARAN</th>
         <th>PEMERIKSA</th>
         <th>NB</th>
         <th>PERIKSA KE :</th>
@@ -44,31 +47,34 @@
     <tbody>
       @forelse($rows as $r)
         <tr>
-          <td>{{ $r['NO'] }}</td>
-          <td>{{ $r['TANGGAL'] }}</td>
-          <td>{{ $r['NAMA'] }}</td>
-          <td>{{ $r['UMUR'] }}</td>
-          <td>{{ $r['BAGIAN'] }}</td>
-          <td>{{ $r['NAMA_PASIEN'] }}</td>
-          <td>{{ $r['HUB_KEL'] }}</td>
-          <td>{{ $r['TD'] }}</td>
-          <td>{{ $r['GDP'] }}</td>
-          <td>{{ $r['GD_2JAM_PP'] }}</td>
-          <td>{{ $r['GDS'] }}</td>
-          <td>{{ $r['AU'] }}</td>
-          <td>{{ $r['CHOL'] }}</td>
-          <td>{{ $r['TG'] }}</td>
-          <td>{{ $r['SUHU'] }}</td>
-          <td>{{ $r['BB'] }}</td>
-          <td>{{ $r['TB'] }}</td>
-          <td>{{ $r['DIAGNOSA'] }}</td>
-          <td>{{ $r['TERAPHY'] }}</td>
-          <td>{{ $r['JUMLAH_OBAT'] }}</td>
-          <td>{{ $r['HARGA_OBAT_SATUAN'] }}</td>
-          <td>{{ $r['TOTAL_HARGA_OBAT'] }}</td>
-          <td>{{ $r['PEMERIKSA'] }}</td>
-          <td>{{ $r['NB'] }}</td>
-          <td>{{ $r['PERIKSA_KE'] }}</td>
+          <td>{{ $r['NO'] ?? '-' }}</td>
+          <td>{{ $r['TANGGAL'] ?? '-' }}</td>
+          <td>{{ $r['NAMA'] ?? '-' }}</td>
+          <td>{{ $r['UMUR'] ?? '-' }}</td>
+          <td>{{ $r['BAGIAN'] ?? '-' }}</td>
+          <td>{{ $r['NAMA_PASIEN'] ?? '-' }}</td>
+          <td>{{ $r['HUB_KEL'] ?? '-' }}</td>
+          <td>{{ $r['S'] ?? '-' }}</td>
+          <td>{{ $r['D'] ?? '-' }}</td>
+          <td>{{ $r['N'] ?? '-' }}</td>
+          <td>{{ $r['GDP'] ?? '-' }}</td>
+          <td>{{ $r['GD_2JAM_PP'] ?? '-' }}</td>
+          <td>{{ $r['GDS'] ?? '-' }}</td>
+          <td>{{ $r['AU'] ?? '-' }}</td>
+          <td>{{ $r['CHOL'] ?? '-' }}</td>
+          <td>{{ $r['TG'] ?? '-' }}</td>
+          <td>{{ $r['SUHU'] ?? '-' }}</td>
+          <td>{{ $r['BB'] ?? '-' }}</td>
+          <td>{{ $r['TB'] ?? '-' }}</td>
+          <td>{{ $r['DIAGNOSA'] ?? '-' }}</td>
+          <td>{{ $r['TERAPHY'] ?? '-' }}</td>
+          <td>{{ $r['JUMLAH_OBAT'] ?? '-' }}</td>
+          <td>{{ $r['HARGA_OBAT_SATUAN'] ?? '-' }}</td>
+          <td>{{ $r['TOTAL_HARGA_OBAT'] ?? '-' }}</td>
+          <td>{{ $r['SARAN'] ?? '-' }}</td>
+          <td>{{ $r['PEMERIKSA'] ?? '-' }}</td>
+          <td>{{ $r['NB'] ?? '-' }}</td>
+          <td>{{ $r['PERIKSA_KE'] ?? '-' }}</td>
         </tr>
       @empty
         <tr>
