@@ -18,90 +18,87 @@
             </div>
 
             {{-- TABLE --}}
-            <table class="laporan-table">
-                <thead>
-                    <tr>
-                        @if($key === 'dokter')
-                            <th>Nama Dokter</th>
-                            <th>Jenis Dokter</th>
-                            <th>Total Pasien</th>
+            <div class="table-wrapper">
+                <table class="laporan-table">
 
-                        @elseif($key === 'obat')
-                            <th>Nama Obat</th>
-                            <th>Tanggal</th>
-                            <th>Jumlah</th>
-                            <th>Total</th>
-
-                        @elseif($key === 'total')
-                            <th>Total Dokter</th>
-                            <th>Total Obat</th>
-                            <th>Grand Total</th>
-
-                        @else
-                            <th>ID Pemeriksaan</th>
-                            <th>Nama Pasien</th>
-                            <th>Tanggal</th>
-                            <th>Nama Pemeriksa</th>
-                        @endif
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {{-- ================= TOTAL (BUKAN LOOP) ================= --}}
-                    @if($key === 'total')
+                    <thead>
                         <tr>
-                            <td>
-                                Rp {{ number_format($preview['total']['total_dokter'] ?? 0, 0, ',', '.') }}
-                            </td>
-                            <td>
-                                Rp {{ number_format($preview['total']['total_obat'] ?? 0, 0, ',', '.') }}
-                            </td>
-                            <td>
-                                <strong>
-                                    Rp {{ number_format($preview['total']['grand_total'] ?? 0, 0, ',', '.') }}
-                                </strong>
-                            </td>
+                            @if($key === 'dokter')
+                                <th>Nama Dokter</th>
+                                <th>Jenis Dokter</th>
+                                <th>Total Pasien</th>
+
+                            @elseif($key === 'obat')
+                                <th>Nama Obat</th>
+                                <th>Tanggal</th>
+                                <th>Jumlah</th>
+                                <th>Total</th>
+
+                            @elseif($key === 'total')
+                                <th>Nama</th>
+                                <th>Total</th>
+
+                            @else
+                                <th>ID Pemeriksaan</th>
+                                <th>Nama Pasien</th>
+                                <th>Tanggal</th>
+                                <th>Nama Pemeriksa</th>
+                            @endif
                         </tr>
+                    </thead>
+                    <tbody>
 
-                    {{-- ================= YANG LAIN (LOOP) ================= --}}
-                    @else
-                        @forelse($preview[$key] ?? [] as $p)
+                    {{-- ================= TOTAL OPERASIONAL ================= --}}
+                    @if($key === 'total')
+                        @foreach($preview['total'] as $row)
                             <tr>
-                                @if($key === 'dokter')
-                                    <td>{{ $p->nama_dokter }}</td>
-                                    <td>{{ ucfirst($p->jenis_dokter) }}</td>
-                                    <td>{{ $p->total_pasien }}</td>
+                                <td>{{ $row->nama }}</td>
+                                <td>Rp {{ number_format($row->total,0,',','.') }}</td>
+                            </tr>
+                        @endforeach
 
-                                @elseif($key === 'obat')
-                                    <td>{{ $p->nama_obat }}</td>
-                                    <td>
-                                        {{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d F Y') }}
-                                    </td>
-                                    <td>{{ $p->jumlah }}</td>
-                                    <td>
-                                        Rp {{ number_format($p->total, 0, ',', '.') }}
-                                    </td>
-
-                                @else
-                                    <td>{{ $p->id_pemeriksaan }}</td>
-                                    <td>{{ $p->nama_pasien }}</td>
-                                    <td>
-                                        {{ \Carbon\Carbon::parse($p->tanggal)->translatedFormat('d F Y') }}
-                                    </td>
-                                    <td>
-                                        {{ $p->nama_dokter ?? $p->nama_pemeriksa ?? '-' }}
-                                @endif
+                    {{-- ================= DOKTER ================= --}}
+                    @elseif($key === 'dokter')
+                        @forelse($preview['dokter'] as $p)
+                            <tr>
+                                <td>{{ $p->nama_dokter }}</td>
+                                <td>{{ $p->jenis_dokter }}</td>
+                                <td>{{ $p->total_pasien }}</td>
                             </tr>
                         @empty
+                            <tr><td colspan="3">Tidak ada data</td></tr>
+                        @endforelse
+
+                    {{-- ================= OBAT ================= --}}
+                    @elseif($key === 'obat')
+                        @forelse($preview['obat'] as $p)
                             <tr>
-                                <td colspan="5" class="empty">
-                                    Tidak ada data
-                                </td>
+                                <td>{{ $p->nama_obat }}</td>
+                                <td>{{ $p->tanggal }}</td>
+                                <td>{{ $p->jumlah }}</td>
+                                <td>Rp {{ number_format($p->total,0,',','.') }}</td>
                             </tr>
+                        @empty
+                            <tr><td colspan="4">Tidak ada data</td></tr>
+                        @endforelse
+
+                    {{-- ================= PEGAWAI / PENSIUN ================= --}}
+                    @else
+                        @forelse($preview[$key] as $p)
+                            <tr>
+                                <td>{{ $p->id_pemeriksaan }}</td>
+                                <td>{{ $p->nama_pasien }}</td>
+                                <td>{{ $p->tanggal }}</td>
+                                <td>{{ $p->nama_pemeriksa }}</td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="3">Tidak ada data</td></tr>
                         @endforelse
                     @endif
-                </tbody>
-            </table>
+
+                    </tbody>
+                </table>
+            </div>
         </div>
     @endforeach
 </div>

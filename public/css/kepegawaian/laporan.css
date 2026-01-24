@@ -248,3 +248,61 @@
     font-weight:600;
     text-align:right;
 }
+
+/* =============================
+   FIX TABLE OFFSIDE / OVERFLOW
+============================= */
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Biar tabel ga maksa ngecil */
+.laporan-table {
+    min-width: 1200px; 
+    border-collapse: collapse;
+}
+
+/* Sticky header  */
+.laporan-table thead th {
+    position: sticky;
+    top: 0;
+    background: #f4f8ff;
+    z-index: 2;
+}
+
+/* Supaya teks ga bikin kolom mekar */
+.laporan-table th,
+.laporan-table td {
+    white-space: nowrap;
+    text-align: center;
+    padding: 10px 12px;
+}
+
+/* ===== FIX CONTENT KETUTUP SIDEBAR ===== */
+.laporan-page {
+    margin-left: 0px; /* SESUAI LEBAR SIDEBAR */
+    padding: 24px;
+    max-width: calc(100vw - 260px);
+}
+
+/* card biar konsisten */
+.laporan-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+/* table wrapper */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.laporan-table {
+    width: 100%;
+    border-collapse: collapse;
+}
