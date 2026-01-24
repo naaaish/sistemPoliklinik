@@ -400,7 +400,7 @@ async function fetchPegawai(nip){
   const res = await fetch(`/adminpoli/api/pegawai/${encodeURIComponent(nip)}`);
   const j = await res.json().catch(()=> ({}));
   if(!res.ok || !j.ok) throw new Error(j.message || 'NIP tidak ditemukan');
-  return j.data; // { nip, nama_pegawai, bidang/bagian, tgl_lahir }
+  return j.data; // { nip, nama_pegawai, bagian, tgl_lahir }
 }
 
 async function fetchKeluarga(nip){
@@ -423,8 +423,8 @@ async function onNipDone(){
   pegawaiData = p;
 
   namaPegEl.value = p.nama_pegawai || '';
-  // kamu nyebutnya BAGIAN (bukan bidang)
-  bagianEl.value = p.bagian ?? p.bidang ?? '';
+
+  bagianEl.value = p.bagian ?? p.bagian ?? '';
 
   // IMPORTANT: di sini STOP. Jangan isi nama_pasien dulu.
   // === AUTO pensiunan dari bagian ===

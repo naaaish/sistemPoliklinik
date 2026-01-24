@@ -1,9 +1,14 @@
 @extends('layouts.kepegawaian')
 
 @section('content')
-<div class="pegawai-header">
-    <h2 class="pegawai-title">Data Pegawai</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Data Pegawai</h4>
+
+    <a href="{{ route('pegawai.create') }}" class="btn btn-primary">
+        + Tambah Pegawai
+    </a>
 </div>
+
 
 <div class="table-box">
     {{-- Search Form --}}

@@ -12,27 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pegawai', function (Blueprint $table) {
-            $table->string('nip',20)->primary();
+            $table->string('nip', 20)->primary();
             $table->string('nama_pegawai');
-            $table->string('nik',20);
-            $table->string('agama');
-            $table->string('jenis_kelamin');
-            $table->date('tgl_lahir');
-            $table->date('tgl_masuk');
-            $table->string('status');
-            $table->string('status_pernikahan');
-            $table->string('no_telp');
-            $table->string('email');
-            $table->text('alamat');
+            $table->string('nik', 20)->nullable();
+            $table->string('agama')->nullable();
+            $table->string('jenis_kelamin')->nullable();
+            $table->date('tgl_lahir')->nullable();
+            $table->date('tgl_masuk')->nullable();
+            $table->string('status')->nullable();
+            $table->string('status_pernikahan')->nullable();
+            $table->string('no_telp')->nullable();
+            $table->string('email')->nullable();
+            $table->text('alamat')->nullable();
             $table->string('jabatan');
             $table->string('bagian');
             $table->string('foto')->nullable();
-            $table->string('pendidikan_terakhir');
-            $table->string('institusi');
-            $table->string('thn_lulus',4);
+            $table->string('pendidikan_terakhir')->nullable();
+            $table->string('institusi')->nullable();
+            $table->string('thn_lulus', 4)->nullable();
+            $table->boolean('is_active')->default(1);
             $table->timestamps();
-    });
-
+        });
     }
 
     /**
