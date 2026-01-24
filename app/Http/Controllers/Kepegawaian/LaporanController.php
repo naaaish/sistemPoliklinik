@@ -20,16 +20,16 @@ class LaporanController extends Controller
     public function index()
     {
         $rekapan = [
-            'pegawai'  => 'Rekapan Pemeriksaan Pegawai',
-            'pensiun'  => 'Rekapan Pemeriksaan Pensiunan',
-            'dokter'   => 'Rekapan Pemeriksaan Dokter',
-            'obat'     => 'Rekapan Penggunaan Obat',
-            'total'    => 'Rekapan Total Operasional',
+            'pegawai' => 'Rekapan Pemeriksaan Pegawai',
+            'pensiun' => 'Rekapan Pemeriksaan Pensiunan',
+            'dokter'  => 'Rekapan Pemeriksaan Dokter',
+            'obat'    => 'Rekapan Penggunaan Obat',
+            'total'   => 'Rekapan Total Operasional',
         ];
 
         $preview = [];
 
-        /* ================= PASIEN / PEGAWAI ================= */
+        // ================= PEGAWAI & PENSIUN =================
         foreach (['pegawai','pensiun'] as $tipe) {
             $preview[$tipe] = DB::table('pemeriksaan')
                 ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
@@ -37,47 +37,37 @@ class LaporanController extends Controller
                 ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
                 ->leftJoin('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
                 ->leftJoin('pemeriksa','pendaftaran.id_pemeriksa','=','pemeriksa.id_pemeriksa')
-
-                ->where(function ($q) use ($tipe) {
-                    if ($tipe === 'pegawai') {
-                        $q->whereIn('pendaftaran.tipe_pasien', ['pegawai','keluarga']);
-                    } else {
-                        $q->where('pegawai.status', 'pensiun');
-                    }
-                })
-
+                ->where($tipe === 'pegawai'
+                    ? fn($q)=>$q->whereIn('pendaftaran.tipe_pasien',['pegawai','keluarga'])
+                    : fn($q)=>$q->where('pegawai.status','pensiun')
+                )
                 ->select(
                     'pemeriksaan.id_pemeriksaan',
                     DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
                     DB::raw("DATE(pemeriksaan.created_at) as tanggal"),
                     DB::raw("
-                        CASE
-                            WHEN dokter.id_dokter IS NOT NULL THEN dokter.nama
-                            WHEN pemeriksa.id_pemeriksa IS NOT NULL THEN pemeriksa.nama_pemeriksa
-                            ELSE '-'
-                        END as nama_pemeriksa 
-                        ")
+                        COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as nama_pemeriksa
+                    ")
                 )
                 ->orderByDesc('pemeriksaan.created_at')
                 ->limit(5)
                 ->get();
         }
 
-
-        /* ================= DOKTER ================= */
+        // ================= DOKTER =================
         $preview['dokter'] = DB::table('pemeriksaan')
             ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
             ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
             ->select(
                 'dokter.nama as nama_dokter',
                 'dokter.jenis_dokter',
-                DB::raw('COUNT(pemeriksaan.id_pemeriksaan) as total_pasien')
+                DB::raw('COUNT(*) as total_pasien')
             )
             ->groupBy('dokter.nama','dokter.jenis_dokter')
             ->limit(5)
             ->get();
 
-        /* ================= OBAT ================= */
+        // ================= OBAT =================
         $preview['obat'] = DB::table('detail_resep')
             ->join('resep','detail_resep.id_resep','=','resep.id_resep')
             ->join('obat','detail_resep.id_obat','=','obat.id_obat')
@@ -86,36 +76,14 @@ class LaporanController extends Controller
                 'obat.nama_obat',
                 DB::raw('DATE(pemeriksaan.created_at) as tanggal'),
                 'detail_resep.jumlah',
-                'obat.harga',
                 DB::raw('(detail_resep.jumlah * obat.harga) as total')
             )
             ->orderByDesc('pemeriksaan.created_at')
             ->limit(5)
             ->get();
 
-        /* ================= TOTAL ================= */
-        $preview['total'] = DB::table('pemeriksaan')
-            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-            ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
-            ->leftJoin('resep','pemeriksaan.id_pemeriksaan','=','resep.id_pemeriksaan')
-            ->leftJoin('detail_resep','resep.id_resep','=','detail_resep.id_resep')
-            ->leftJoin('obat','detail_resep.id_obat','=','obat.id_obat')
-            ->select(
-                DB::raw('DATE(pemeriksaan.created_at) as tanggal'),
-                DB::raw('COALESCE(SUM(detail_resep.jumlah * obat.harga),0) as biaya_obat'),
-                DB::raw("
-                    SUM(
-                        CASE 
-                            WHEN dokter.jenis_dokter = 'perusahaan' THEN 1
-                            ELSE 0
-                        END
-                    ) as biaya_dokter
-                ")
-            )
-            ->groupBy(DB::raw('DATE(pemeriksaan.created_at)'))
-            ->orderByDesc('tanggal')
-            ->limit(5)
-            ->get();
+        // ================= TOTAL =================
+        $preview['total'] = $this->buildTotalOperasional();
 
         return view('kepegawaian.laporan.index', compact('rekapan','preview'));
     }
@@ -257,37 +225,12 @@ class LaporanController extends Controller
         }
 
         /* ================= TOTAL ================= */
+
         elseif ($jenis === 'total') {
-            $query = DB::table('pemeriksaan')
-                ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-                ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
-                ->leftJoin('resep','pemeriksaan.id_pemeriksaan','=','resep.id_pemeriksaan')
-                ->leftJoin('detail_resep','resep.id_resep','=','detail_resep.id_resep')
-                ->leftJoin('obat','detail_resep.id_obat','=','obat.id_obat')
-                ->select(
-                    DB::raw('DATE(pemeriksaan.created_at) as tanggal'),
-                    DB::raw('COALESCE(SUM(detail_resep.jumlah * obat.harga),0) as biaya_obat'),
-                    DB::raw("
-                        SUM(
-                            CASE 
-                                WHEN dokter.jenis_dokter = 'perusahaan' THEN 1
-                                ELSE 0
-                            END
-                        ) as biaya_dokter
-                    ")
-                )
-                ->groupBy(DB::raw('DATE(pemeriksaan.created_at)'))
-                ->orderByDesc('tanggal');
-
-            if ($dari && $sampai) {
-                $query->whereBetween(
-                    DB::raw('DATE(pemeriksaan.created_at)'),
-                    [$dari, $sampai]
-                );
-            }
-
-            $data = $query->get();
+            $data = $this->buildTotalOperasional($dari, $sampai);
         }
+
+
 
         else {
             $data = collect();
@@ -296,7 +239,8 @@ class LaporanController extends Controller
         return view('kepegawaian.laporan.detail', compact(
             'judul','jenis','data','dari','sampai'
         ));
-    }
+        }
+
 
 
     private function hitungBulanGaji($dari, $sampai)
@@ -437,6 +381,97 @@ class LaporanController extends Controller
         return $final;
     }
 
+    private function buildTotalOperasional($dari = null, $sampai = null)
+    {
+        // ================= OBAT PEGAWAI =================
+        $obatPegawai = DB::table('detail_resep')
+            ->join('resep','detail_resep.id_resep','=','resep.id_resep')
+            ->join('pemeriksaan','resep.id_pemeriksaan','=','pemeriksaan.id_pemeriksaan')
+            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+            ->join('obat','detail_resep.id_obat','=','obat.id_obat')
+            ->where('pendaftaran.tipe_pasien','pegawai')
+            ->when($dari && $sampai, fn($q) =>
+                $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari,$sampai])
+            )
+            ->sum(DB::raw('detail_resep.jumlah * obat.harga'));
+
+
+        // ================= OBAT PENSIUNAN =================
+        $obatPensiunan = DB::table('detail_resep')
+            ->join('resep','detail_resep.id_resep','=','resep.id_resep')
+            ->join('pemeriksaan','resep.id_pemeriksaan','=','pemeriksaan.id_pemeriksaan')
+            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+            ->join('obat','detail_resep.id_obat','=','obat.id_obat')
+            ->where('pendaftaran.tipe_pasien','keluarga')
+            ->when($dari && $sampai, fn($q) =>
+                $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari,$sampai])
+            )
+            ->sum(DB::raw('detail_resep.jumlah * obat.harga'));
+
+
+        // ================= ALAT KESEHATAN =================
+        $alkes = DB::table('detail_resep')
+            ->join('resep','detail_resep.id_resep','=','resep.id_resep')
+            ->join('pemeriksaan','resep.id_pemeriksaan','=','pemeriksaan.id_pemeriksaan')
+            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+            ->join('obat','detail_resep.id_obat','=','obat.id_obat')
+
+            // 🔑 LOGIC ALKES
+            ->whereNull('pendaftaran.nip')
+            ->whereNull('pendaftaran.id_keluarga')
+
+            ->when($dari && $sampai, function ($q) use ($dari,$sampai) {
+                $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari,$sampai]);
+            })
+
+            ->sum(DB::raw('detail_resep.jumlah * obat.harga'));
+
+
+        // ================= DOKTER POLI =================
+        $dokterPoli = DB::table('pemeriksaan')
+            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+            ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
+            ->where('dokter.jenis_dokter','Dokter Poliklinik')
+            ->when($dari && $sampai, fn($q) =>
+                $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari,$sampai])
+            )
+            ->count() * 100000;
+
+
+        // ================= DOKTER PERUSAHAAN =================
+        $dokterPerusahaan = 0;
+
+        if ($dari && $sampai) {
+            $bulan = $this->hitungBulanGaji($dari,$sampai)->count();
+
+            $jumlahDokter = DB::table('dokter')
+                ->where('jenis_dokter','Dokter Perusahaan')
+                ->count();
+
+            $dokterPerusahaan = $bulan * $jumlahDokter * 8000000;
+        }
+
+        
+        $totalAll =
+            $obatPegawai +
+            $obatPensiunan +
+            $alkes +
+            $dokterPerusahaan +
+            $dokterPoli;
+
+        $data = collect([
+            (object)['nama'=>'Obat Pegawai','total'=>$obatPegawai],
+            (object)['nama'=>'Obat Pensiunan','total'=>$obatPensiunan],
+            (object)['nama'=>'Alat Kesehatan','total'=>$alkes],
+            (object)['nama'=>'Dokter Perusahaan','total'=>$dokterPerusahaan],
+            (object)['nama'=>'Dokter Poliklinik','total'=>$dokterPoli],
+
+            // 🔑 TOTAL AKHIR
+            (object)['nama'=>'TOTAL','total'=>$totalAll],
+        ]);
+
+        return $data;
+    }
 
 
     private function getJudul($jenis)
@@ -451,15 +486,206 @@ class LaporanController extends Controller
         };
     }
 
-    /* =========================
-       DOWNLOAD EXCEL (XLS VIA BLADE)
-    ========================= */
-    public function downloadExcel(Request $request, $jenis)
+        // ===========================================================
+        // ===== LAPORAN PEGAWAI / PENSIUNAN =========================
+        // ===========================================================
+    public function downloadExcelPegawaiPensiun(Request $request, $jenis)
     {
-        if ($jenis !== 'dokter') {
-            abort(404);
+        if (!in_array($jenis,['pegawai','pensiun'])) abort(404);
+
+        $dari   = $request->dari;
+        $sampai = $request->sampai;
+
+        $data = $this->buildPegawaiPensiunData($jenis, $dari, $sampai);
+        $totalTagihan = $data->sum('total_obat_pasien');
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1',$this->getJudul($jenis));
+        $sheet->mergeCells('A1:Y1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+
+        $sheet->setCellValue(
+            'A2',
+            'Periode: '.(
+                $dari && $sampai
+                    ? \Carbon\Carbon::parse($dari)->translatedFormat('d F Y').' - '.
+                    \Carbon\Carbon::parse($sampai)->translatedFormat('d F Y')
+                    : 'Semua Data'
+            )
+        );
+        $sheet->mergeCells('A2:Y2');
+
+        $row = 4;
+        $headers = [
+            'No','Tanggal','Nama Pegawai','Umur','Bagian',
+            'Nama Pasien','Hub. Kel','TD','GDP','GD 2 Jam',
+            'GDS','AU','Chol','TG','Suhu','BB','TB',
+            'Diagnosa','NB','Therapy','Jml Obat','Harga Obat',
+            'Total Obat','Pemeriksa','Periksa Ke'
+        ];
+
+        $col = 'A';
+        foreach ($headers as $h) {
+            $sheet->setCellValue($col.$row,$h);
+            $sheet->getStyle($col.$row)->getFont()->setBold(true);
+            $col++;
         }
 
+        $row++;
+        $no = 1;
+
+        foreach ($data as $d) {
+            $sheet->fromArray([
+                $no++,
+                $d->tanggal,
+                $d->nama_pegawai,
+                $d->umur,
+                $d->bagian,
+                $d->nama_pasien,
+                $d->hub_kel,
+                $d->sistol,
+                $d->gd_puasa,
+                $d->gd_duajam,
+                $d->gd_sewaktu,
+                $d->asam_urat,
+                $d->chol,
+                $d->tg,
+                $d->suhu,
+                $d->berat,
+                $d->tinggi,
+                $d->diagnosa,
+                $d->nb,
+                $d->nama_obat,
+                $d->jumlah.' '.$d->satuan,
+                $d->harga,
+                $d->total_obat_pasien,
+                $d->pemeriksa,
+                $d->periksa_ke
+            ],null,"A$row");
+            $row++;
+        }
+
+        $row++;
+        $sheet->setCellValue("A$row",'TOTAL TAGIHAN PERIODE');
+        $sheet->mergeCells("A$row:W$row");
+        $sheet->setCellValue("X$row",$totalTagihan);
+        $sheet->getStyle("A$row:X$row")->getFont()->setBold(true);
+
+        foreach (range('A','Y') as $c) $sheet->getColumnDimension($c)->setAutoSize(true);
+
+        $writer = new Xlsx($spreadsheet);
+        $path = storage_path('app/Laporan_'.$jenis.'.xlsx');
+        $writer->save($path);
+
+        return response()->download($path)->deleteFileAfterSend(true);
+    }
+
+
+        // ===========================================================
+        // ===== LAPORAN OBAT ========================================
+        // ===========================================================
+    public function downloadExcelObat(Request $request)
+    {
+        $dari   = $request->dari;
+        $sampai = $request->sampai;
+
+        $query = DB::table('detail_resep')
+            ->join('resep','detail_resep.id_resep','=','resep.id_resep')
+            ->join('obat','detail_resep.id_obat','=','obat.id_obat')
+            ->join('pemeriksaan','resep.id_pemeriksaan','=','pemeriksaan.id_pemeriksaan')
+            ->select(
+                'obat.nama_obat',
+                DB::raw('DATE(pemeriksaan.created_at) as tanggal'),
+                'detail_resep.jumlah',
+                'obat.harga',
+                DB::raw('(detail_resep.jumlah * obat.harga) as total')
+            )
+            ->orderBy('pemeriksaan.created_at');
+
+        if ($dari && $sampai) {
+            $query->whereBetween(
+                DB::raw('DATE(pemeriksaan.created_at)'),
+                [$dari, $sampai]
+            );
+        }
+
+        $data = $query->get();
+        $totalTagihan = $data->sum('total');
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Laporan Obat');
+
+        // JUDUL
+        $sheet->setCellValue('A1', 'Rekapan Penggunaan Obat');
+        $sheet->mergeCells('A1:F1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+
+        $sheet->setCellValue(
+            'A2',
+            'Periode: '.(
+                $dari && $sampai
+                    ? \Carbon\Carbon::parse($dari)->translatedFormat('d F Y').' - '.
+                    \Carbon\Carbon::parse($sampai)->translatedFormat('d F Y')
+                    : 'Semua Data'
+            )
+        );
+        $sheet->mergeCells('A2:F2');
+
+        // HEADER
+        $row = 4;
+        $headers = ['No','Nama Obat','Tanggal','Jumlah','Harga','Total'];
+        $col = 'A';
+
+        foreach ($headers as $h) {
+            $sheet->setCellValue($col.$row, $h);
+            $sheet->getStyle($col.$row)->getFont()->setBold(true);
+            $col++;
+        }
+
+        // DATA
+        $row++;
+        $no = 1;
+
+        foreach ($data as $item) {
+            $sheet->setCellValue("A$row", $no++);
+            $sheet->setCellValue("B$row", $item->nama_obat);
+            $sheet->setCellValue(
+                "C$row",
+                \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y')
+            );
+            $sheet->setCellValue("D$row", $item->jumlah);
+            $sheet->setCellValue("E$row", $item->harga);
+            $sheet->setCellValue("F$row", $item->total);
+            $row++;
+        }
+
+        // TOTAL
+        $row++;
+        $sheet->setCellValue("A$row", 'TOTAL TAGIHAN PERIODE');
+        $sheet->mergeCells("A$row:E$row");
+        $sheet->getStyle("A$row")->getFont()->setBold(true);
+        $sheet->setCellValue("F$row", $totalTagihan);
+        $sheet->getStyle("F$row")->getFont()->setBold(true);
+
+        foreach (range('A','F') as $c) {
+            $sheet->getColumnDimension($c)->setAutoSize(true);
+        }
+
+        $writer = new Xlsx($spreadsheet);
+        $path = storage_path('app/Laporan_Obat.xlsx');
+        $writer->save($path);
+
+        return response()->download($path)->deleteFileAfterSend(true);
+    }
+
+        // ===========================================================
+        // ===== LAPORAN DOKTER ======================================
+        // ===========================================================
+    public function downloadExcelDokter(Request $request)
+    {
         $dari   = $request->dari;
         $sampai = $request->sampai;
 
@@ -481,104 +707,60 @@ class LaporanController extends Controller
             );
 
         if ($dari && $sampai) {
-            $rows->whereBetween(
-                DB::raw('DATE(pemeriksaan.created_at)'),
-                [$dari, $sampai]
-            );
+            $rows->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari, $sampai]);
         }
 
         $rows = $rows->get();
 
-        // =============================
-        // GROUP DATA
-        // =============================
-        $dokterPoli = $rows->where('jenis_dokter','Dokter Poliklinik')
-            ->groupBy('id_dokter');
-
-        $dokterPerusahaan = $rows->where('jenis_dokter','Dokter Perusahaan')
-            ->groupBy('id_dokter');
-
-        // =============================
-        // EXCEL
-        // =============================
         $spreadsheet = new Spreadsheet();
 
-        /* =====================================================
-        SHEET 1 — DOKTER POLIKLINIK
-        ===================================================== */
+        /* ================= SHEET 1 — DOKTER POLIKLINIK ================= */
         $sheetPoli = $spreadsheet->getActiveSheet();
         $sheetPoli->setTitle('Dokter Poliklinik');
 
         $row = 1;
-        $sheetPoli->setCellValue("A$row",'DOKTER POLIKLINIK (BAYAR PER PASIEN)');
+        $sheetPoli->setCellValue("A$row", 'DOKTER POLIKLINIK (BAYAR PER PASIEN)');
         $sheetPoli->mergeCells("A$row:D$row");
         $sheetPoli->getStyle("A$row")->getFont()->setBold(true)->setSize(14);
         $row += 2;
 
+        $dokterPoli = $rows->where('jenis_dokter','Dokter Poliklinik')->groupBy('id_dokter');
         $grandTotal = 0;
-        $startRow = $row;
-
 
         foreach ($dokterPoli as $items) {
             $dokter = $items->first()->nama_dokter;
             $totalPasien = $items->count();
-            $totalBiaya  = $totalPasien * $tarifPoliklinik;
+            $totalBiaya = $totalPasien * $tarifPoliklinik;
             $grandTotal += $totalBiaya;
 
-            // Nama dokter
             $sheetPoli->setCellValue("A$row",$dokter);
             $sheetPoli->mergeCells("A$row:D$row");
             $sheetPoli->getStyle("A$row")->getFont()->setBold(true);
             $row++;
 
-            // Header tabel pasien
-            $sheetPoli->fromArray(
-                ['No','NIP','Nama Pasien','Tanggal Periksa'],
-                null,
-                "A$row"
-            );
+            $sheetPoli->fromArray(['No','NIP','Nama Pasien','Tanggal Periksa'],null,"A$row");
             $sheetPoli->getStyle("A$row:D$row")->getFont()->setBold(true);
             $row++;
 
             $no = 1;
             foreach ($items as $p) {
                 $sheetPoli->setCellValue("A$row",$no++);
-                $sheetPoli->setCellValueExplicit(
-                    "B$row",
-                    (string) $p->nip,
-                    DataType::TYPE_STRING
-                );
-
+                $sheetPoli->setCellValueExplicit("B$row",(string)$p->nip,DataType::TYPE_STRING);
                 $sheetPoli->setCellValue("C$row",$p->nama_pasien);
                 $sheetPoli->setCellValue("D$row",\Carbon\Carbon::parse($p->tanggal)->translatedFormat('d F Y'));
                 $row++;
             }
-
             $row++;
         }
 
-        if ($row - 1 > $startRow) {
-            $sheetPoli->mergeCells("A$startRow:A".($row-1));
-        }
-
-        // TOTAL POLI
         $sheetPoli->setCellValue("A$row",'TOTAL DOKTER POLIKLINIK');
         $sheetPoli->mergeCells("A$row:C$row");
         $sheetPoli->setCellValue("D$row",$grandTotal);
         $sheetPoli->getStyle("A$row:D$row")->getFont()->setBold(true);
 
-        foreach (range('A','D') as $c) {
-            $sheetPoli->getColumnDimension($c)->setAutoSize(true);
-        }
+        foreach (range('A','D') as $c) $sheetPoli->getColumnDimension($c)->setAutoSize(true);
 
-        /* =====================================================
-        SHEET 2 — DOKTER PERUSAHAAN (GAJI BULANAN)
-        ===================================================== */
-
-        $dokterPerusahaanList = $rows
-            ->where('jenis_dokter','Dokter Perusahaan')
-            ->groupBy('id_dokter');
-
+        /* ================= SHEET 2 — DOKTER PERUSAHAAN ================= */
         $sheetPer = $spreadsheet->createSheet();
         $sheetPer->setTitle('Dokter Perusahaan');
 
@@ -589,27 +771,22 @@ class LaporanController extends Controller
         $row += 2;
 
         $bulanGaji = $this->hitungBulanGaji($dari, $sampai);
+        $dokterPerusahaan = $rows->where('jenis_dokter','Dokter Perusahaan')->groupBy('id_dokter');
 
-        foreach ($dokterPerusahaanList as $items) {
-
+        foreach ($dokterPerusahaan as $items) {
             $namaDokter = $items->first()->nama_dokter;
 
-            // ===================
-            // NAMA DOKTER
-            // ===================
             $sheetPer->setCellValue("A$row",$namaDokter);
             $sheetPer->mergeCells("A$row:B$row");
             $sheetPer->getStyle("A$row")->getFont()->setBold(true);
             $row++;
 
-            // Header
             $sheetPer->setCellValue("A$row",'Periode');
             $sheetPer->setCellValue("B$row",'Gaji');
             $sheetPer->getStyle("A$row:B$row")->getFont()->setBold(true);
             $row++;
 
             $totalGaji = 0;
-
             foreach ($bulanGaji as $bulan) {
                 $sheetPer->setCellValue("A$row",'Bulan '.$bulan);
                 $sheetPer->setCellValue("B$row",$gajiPerusahaan);
@@ -617,28 +794,72 @@ class LaporanController extends Controller
                 $row++;
             }
 
-            // TOTAL PER DOKTER
             $sheetPer->setCellValue("A$row",'TOTAL');
             $sheetPer->setCellValue("B$row",$totalGaji);
             $sheetPer->getStyle("A$row:B$row")->getFont()->setBold(true);
-            $row += 2; // jarak antar dokter
+            $row += 2;
         }
 
-        // Autosize
-        foreach (range('A','B') as $c) {
-            $sheetPer->getColumnDimension($c)->setAutoSize(true);
-        }
+        foreach (range('A','B') as $c) $sheetPer->getColumnDimension($c)->setAutoSize(true);
 
-        // =============================
-        // DOWNLOAD
-        // =============================
         $writer = new Xlsx($spreadsheet);
-        $filename = 'Rekapan_Pemeriksaan_Dokter.xlsx';
-        $path = storage_path('app/'.$filename);
+        $path = storage_path('app/Laporan_Dokter.xlsx');
         $writer->save($path);
 
         return response()->download($path)->deleteFileAfterSend(true);
     }
 
+    public function downloadExcelTotal(Request $request)
+    {
+        $dari   = $request->dari;
+        $sampai = $request->sampai;
+
+        $data = $this->buildTotalOperasional($dari,$sampai);
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setCellValue('A1','REKAPAN TOTAL OPERASIONAL');
+        $sheet->mergeCells('A1:B1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+
+        $sheet->setCellValue('A2','Periode: '.(
+            $dari && $sampai
+                ? \Carbon\Carbon::parse($dari)->translatedFormat('d F Y').' - '.
+                \Carbon\Carbon::parse($sampai)->translatedFormat('d F Y')
+                : 'Semua Data'
+        ));
+        $sheet->mergeCells('A2:B2');
+
+        $row = 4;
+        $sheet->setCellValue("A$row",'Nama Biaya');
+        $sheet->setCellValue("B$row",'Total');
+        $sheet->getStyle("A$row:B$row")->getFont()->setBold(true);
+
+        $row++;
+        $grandTotal = 0;
+
+        foreach ($data as $item) {
+            $sheet->setCellValue("A$row", $item->nama);
+            $sheet->setCellValue("B$row", $item->total);
+
+            $grandTotal += $item->total;
+            $row++;
+        }
+
+        $sheet->setCellValue("A$row",'TOTAL');
+        $sheet->setCellValue("B$row",$grandTotal);
+        $sheet->getStyle("A$row:B$row")->getFont()->setBold(true);
+
+        foreach (['A','B'] as $c) {
+            $sheet->getColumnDimension($c)->setAutoSize(true);
+        }
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $path = storage_path('app/Laporan_Total_Operasional.xlsx');
+        $writer->save($path);
+
+        return response()->download($path)->deleteFileAfterSend(true);
+    }
 
 }

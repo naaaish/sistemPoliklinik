@@ -278,19 +278,27 @@ Route::middleware(['auth'])->group(function () {
 
 // LAPORAN
 
-Route::prefix('kepegawaian')->middleware('auth')->group(function () {
+Route::prefix('kepegawaian/laporan')
+    ->middleware(['auth', 'ensureKepegawaian'])
+    ->group(function () {
 
-    Route::get('/laporan', [LaporanController::class, 'index'])
-        ->name('kepegawaian.laporan');
+        Route::get('/', [LaporanController::class, 'index'])
+            ->name('kepegawaian.laporan');
 
-    Route::get('/laporan/{jenis}', [LaporanController::class, 'detail'])
-        ->name('kepegawaian.laporan.detail');
+        Route::get('/{jenis}', [LaporanController::class, 'detail'])
+            ->name('kepegawaian.laporan.detail');
 
-    Route::get(
-        '/laporan/{jenis}/excel',
-        [\App\Http\Controllers\Kepegawaian\LaporanController::class, 'downloadExcel']
-    )->name('laporan.excel');
+        Route::get('/kepegawaian/laporan/{jenis}/excel', 
+            [LaporanController::class, 'downloadExcelPegawaiPensiun']
+        )->name('laporan.excel.pegawai-pensiun');
 
-    Route::get('/laporan/{jenis}/pdf', [LaporanController::class, 'downloadPdf'])
-       ->name('laporan.pdf');
-});
+        Route::get('/dokter/excel', [LaporanController::class, 'downloadExcelDokter'])
+            ->name('laporan.excel.dokter');
+
+        Route::get('/obat/excel', [LaporanController::class, 'downloadExcelObat'])
+            ->name('laporan.excel.obat');
+
+        Route::get('/laporan/total/excel', [LaporanController::class, 'downloadExcelTotal'])
+            ->name('laporan.excel.total');
+
+    });
