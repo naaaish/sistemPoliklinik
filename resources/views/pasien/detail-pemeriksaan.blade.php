@@ -72,7 +72,7 @@
                 </div>
 
                 <div class="data-item">
-                    <span class="data-label">Bidang</span>
+                    <span class="data-label">Bagian</span>
                     <span class="data-value">{{ $pegawai->bagian ?? '-' }}</span>
                 </div>
             </div>

@@ -38,3 +38,65 @@ tbody tr:hover{
     justify-content:center;
     text-decoration:none;
 }
+
+
+/* === STATUS DROPDOWN & BADGE === */
+
+.status-form {
+    margin: 0;
+}
+
+.status-dropdown {
+    min-width: 140px;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 8px 12px;
+    border: 2px solid;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.status-dropdown.status-active {
+    background: #d1fae5;
+    border-color: #10b981;
+    color: #065f46;
+}
+
+.status-dropdown.status-inactive {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+}
+
+.status-dropdown:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Badge Styling */
+.badge-inactive {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.badge-active {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Alert Success */
+.alert-success {
+    border-radius: 12px;
+    background: #d1fae5;
+    border: 1px solid #10b981;
+    color: #065f46;
+    margin-bottom: 20px;
+}

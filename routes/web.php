@@ -303,10 +303,17 @@ Route::prefix('kepegawaian/laporan')
         Route::get('/dokter/excel', [LaporanController::class, 'downloadExcelDokter'])
             ->name('laporan.excel.dokter');
 
-        Route::get('/obat/excel', [LaporanController::class, 'downloadExcelObat'])
-            ->name('laporan.excel.obat');
+    Route::get('/laporan/{jenis}/pdf', [LaporanController::class, 'downloadPdf'])
+       ->name('laporan.pdf');
+});
 
-        Route::get('/laporan/total/excel', [LaporanController::class, 'downloadExcelTotal'])
-            ->name('laporan.excel.total');
 
-    });
+// CRUD PEGAWAI
+Route::prefix('pegawai')->group(function () {
+    Route::get('/', [PegawaiController::class, 'index'])->name('pegawai.index');
+    Route::get('/create', [PegawaiController::class, 'create'])->name('pegawai.create');
+    Route::post('/store', [PegawaiController::class, 'store'])->name('pegawai.store');
+    Route::get('/{nip}', [PegawaiController::class, 'show'])->name('pegawai.show');
+    Route::get('/{nip}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
+    Route::post('/{nip}/update', [PegawaiController::class, 'update'])->name('pegawai.update');
+});

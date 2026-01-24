@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/riwayat.css') }}?v={{ filemtime(public_path('css/kepegawaian/riwayat.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/dokter-pemeriksa.css') }}?v={{ filemtime(public_path('css/kepegawaian/dokter-pemeriksa.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/modal.css') }}?v={{ filemtime(public_path('css/kepegawaian/modal.css')) }}">
-    
+    <link rel="stylesheet" href="{{ asset('css/kepegawaian/pegawai.css') }}?v={{ filemtime(public_path('css/kepegawaian/pegawai.css')) }}">
     
     {{-- Sweet Alert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
