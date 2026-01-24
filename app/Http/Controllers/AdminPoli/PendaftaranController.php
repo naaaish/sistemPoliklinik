@@ -18,6 +18,29 @@ class PendaftaranController extends Controller
         return view('adminpoli.pendaftaran.create', compact('dokter', 'pemeriksa'));
     }
 
+    public function searchPegawai(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+        $query = DB::table('pegawai');
+
+        if ($q === '') {
+            $rows = $query->select('nip', 'nama_pegawai', 'bagian', 'tgl_lahir')
+                ->orderBy('nip')
+                ->limit(5)
+                ->get();
+
+            return response()->json(['ok' => true, 'data' => $rows]);
+        }
+
+        $rows = $query->select('nip', 'nama_pegawai', 'bagian', 'tgl_lahir')
+            ->where('nip', 'like', "%{$q}%")
+            ->orWhere('nama_pegawai', 'like', "%{$q}%")
+            ->limit(5)
+            ->get();
+
+        return response()->json(['ok' => true, 'data' => $rows]);
+    }
+
     public function getPegawaiByNip($nip)
     {
         $pegawai = DB::table('pegawai')

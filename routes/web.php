@@ -90,6 +90,8 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     // pendaftaran
     Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
     Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
+    Route::get('/api/pegawai/search', [\App\Http\Controllers\AdminPoli\PendaftaranController::class, 'searchPegawai']);
+
     // pemeriksaan (HARUS bawa id pendaftaran)
     Route::get('/pemeriksaan/{pendaftaranId}/create', [PemeriksaanInputController::class, 'create'])
         ->name('pemeriksaan.create');
