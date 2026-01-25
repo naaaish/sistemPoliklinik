@@ -7,7 +7,7 @@ use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PegawaiController extends Controller
 {
@@ -39,7 +39,6 @@ class PegawaiController extends Controller
             'agama' => 'nullable',
             'tgl_lahir' => 'nullable|date',
             'tgl_masuk' => 'nullable|date',
-            'status' => 'nullable',
             'status_pernikahan' => 'nullable',
             'no_telp' => 'nullable',
             'email' => 'nullable|email',
@@ -57,13 +56,9 @@ class PegawaiController extends Controller
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
             $filename = time() . '_' . $foto->getClientOriginalName();
-
-            // pindahkan ke public/profile-pegawai
-            $foto->move(public_path('profile-pegawai'), $filename);
-
+            $foto->storeAs('public/foto_pegawai', $filename);
             $data['foto'] = $filename;
         }
-
 
         // Set default is_active jika tidak ada
         $data['is_active'] = $request->input('is_active', 1);
@@ -77,14 +72,14 @@ class PegawaiController extends Controller
     public function show($nip)
     {
         $pegawai = Pegawai::where('nip', $nip)->firstOrFail();
-
-        $masaKerja = Carbon::parse($pegawai->tgl_masuk)->diff(Carbon::now());
+        
+        // Hitung masa kerja
+        $masaKerja = \Carbon\Carbon::parse($pegawai->tgl_masuk)->diff(\Carbon\Carbon::now());
         $years = $masaKerja->y;
         $months = $masaKerja->m;
 
         return view('kepegawaian.pegawai.detail', compact('pegawai', 'years', 'months'));
     }
-
 
     public function edit($nip)
     {
@@ -142,15 +137,16 @@ class PegawaiController extends Controller
 
         // Handle foto upload
         if ($request->hasFile('foto')) {
+            // Hapus foto lama jika ada
+            if ($pegawai->foto) {
+                Storage::delete('public/foto_pegawai/' . $pegawai->foto);
+            }
+
             $foto = $request->file('foto');
             $filename = time() . '_' . $foto->getClientOriginalName();
-
-            // pindahkan ke public/profile-pegawai
-            $foto->move(public_path('profile-pegawai'), $filename);
-
+            $foto->storeAs('public/foto_pegawai', $filename);
             $data['foto'] = $filename;
         }
-
 
         // Update is_active
         if ($request->has('is_active')) {
@@ -177,4 +173,47 @@ class PegawaiController extends Controller
         return redirect()->route('pegawai.index')
             ->with('success', 'Data pegawai berhasil dihapus!');
     }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:csv,txt'
+        ]);
+
+        $file = fopen($request->file('file')->getRealPath(), 'r');
+        fgetcsv($file); // Lewati header
+
+        $rowCount = 0;
+        while (($row = fgetcsv($file, 2000, ",")) !== false) {
+            if (empty($row[0])) continue;
+
+            // Kita petakan kolom satu per satu agar tidak tertukar
+            // Asumsi urutan CSV mengikuti urutan Database kamu
+            DB::table('pegawai')->updateOrInsert(
+                ['nip' => $row[0]], 
+                [
+                    'nama_pegawai'      => $row[1] ?? '',
+                    'nik'               => $row[2] ?? '-',
+                    'agama'             => $row[3] ?? '-',
+                    'jenis_kelamin'     => $row[4] ?? '-',
+                    'tgl_lahir'         => $row[5] ?? null,
+                    'tgl_masuk'         => $row[6] ?? null,
+                    'status_pernikahan' => $row[7] ?? '-',
+                    'no_telp'           => $row[8] ?? '-',
+                    'email'             => $row[9] ?? '-',
+                    'alamat'            => $row[10] ?? '-',
+                    'jabatan'           => $row[11] ?? '-',
+                    'bagian'            => $row[12] ?? '-',
+                    'is_active'         => 1,
+                    'updated_at'        => now(),
+                ]
+            );
+            $rowCount++;
+        }
+        fclose($file);
+
+        return redirect()->route('kepegawaian.pegawai')
+            ->with('success', "Berhasil mengimport $rowCount data pegawai!");
+    }
+
 }

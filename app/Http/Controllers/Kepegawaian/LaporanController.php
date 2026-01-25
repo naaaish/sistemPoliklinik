@@ -37,10 +37,16 @@ class LaporanController extends Controller
                 ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
                 ->leftJoin('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
                 ->leftJoin('pemeriksa','pendaftaran.id_pemeriksa','=','pemeriksa.id_pemeriksa')
-                ->where($tipe === 'pegawai'
-                    ? fn($q)=>$q->whereIn('pendaftaran.tipe_pasien',['pegawai','keluarga'])
-                    : fn($q)=>$q->where('pegawai.status','pensiun')
-                )
+                ->where(function($q) use ($tipe) {
+                            if ($tipe === 'pegawai') {
+                                // Ambil yang tipe pasien pegawai/keluarga, TAPI bagiannya bukan Pensiunan
+                                $q->whereIn('pendaftaran.tipe_pasien', ['pegawai','keluarga'])
+                                ->where('pegawai.bagian', '!=', 'Pensiunan');
+                            } else {
+                                // Khusus untuk tab Pensiunan
+                                $q->where('pegawai.bagian', 'Pensiunan');
+                            }
+                        })
                 ->select(
                     'pemeriksaan.id_pemeriksaan',
                     DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
@@ -279,9 +285,9 @@ class LaporanController extends Controller
             ->where(function ($q) use ($jenis) {
                 if ($jenis === 'pegawai') {
                     $q->whereIn('pendaftaran.tipe_pasien', ['pegawai','keluarga'])
-                    ->where('pegawai.status','!=','pensiun');
+                    ->where('pegawai.bagian', '!=', 'Pensiunan'); 
                 } else {
-                    $q->where('pegawai.status','pensiun');
+                    $q->where('pegawai.bagian', 'Pensiunan'); 
                 }
             })
             ->select(
@@ -383,96 +389,50 @@ class LaporanController extends Controller
 
     private function buildTotalOperasional($dari = null, $sampai = null)
     {
-        // ================= OBAT PEGAWAI =================
-        $obatPegawai = DB::table('detail_resep')
-            ->join('resep','detail_resep.id_resep','=','resep.id_resep')
-            ->join('pemeriksaan','resep.id_pemeriksaan','=','pemeriksaan.id_pemeriksaan')
-            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-            ->join('obat','detail_resep.id_obat','=','obat.id_obat')
-            ->where('pendaftaran.tipe_pasien','pegawai')
+        // ================= TOTAL SEMUA OBAT (Pegawai + Keluarga + Alkes) =================
+        // Menggabungkan semua obat menjadi satu kategori "Obat-obatan"
+        $totalObatObatan = DB::table('detail_resep')
+            ->join('resep', 'detail_resep.id_resep', '=', 'resep.id_resep')
+            ->join('pemeriksaan', 'resep.id_pemeriksaan', '=', 'pemeriksaan.id_pemeriksaan')
+            ->join('obat', 'detail_resep.id_obat', '=', 'obat.id_obat')
             ->when($dari && $sampai, fn($q) =>
-                $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari,$sampai])
+                $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari, $sampai])
             )
             ->sum(DB::raw('detail_resep.jumlah * obat.harga'));
-
-
-        // ================= OBAT PENSIUNAN =================
-        $obatPensiunan = DB::table('detail_resep')
-            ->join('resep','detail_resep.id_resep','=','resep.id_resep')
-            ->join('pemeriksaan','resep.id_pemeriksaan','=','pemeriksaan.id_pemeriksaan')
-            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-            ->join('obat','detail_resep.id_obat','=','obat.id_obat')
-            ->where('pendaftaran.tipe_pasien','keluarga')
-            ->when($dari && $sampai, fn($q) =>
-                $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari,$sampai])
-            )
-            ->sum(DB::raw('detail_resep.jumlah * obat.harga'));
-
-
-        // ================= ALAT KESEHATAN =================
-        $alkes = DB::table('detail_resep')
-            ->join('resep','detail_resep.id_resep','=','resep.id_resep')
-            ->join('pemeriksaan','resep.id_pemeriksaan','=','pemeriksaan.id_pemeriksaan')
-            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-            ->join('obat','detail_resep.id_obat','=','obat.id_obat')
-
-            // 🔑 LOGIC ALKES
-            ->whereNull('pendaftaran.nip')
-            ->whereNull('pendaftaran.id_keluarga')
-
-            ->when($dari && $sampai, function ($q) use ($dari,$sampai) {
-                $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari,$sampai]);
-            })
-
-            ->sum(DB::raw('detail_resep.jumlah * obat.harga'));
-
 
         // ================= DOKTER POLI =================
         $dokterPoli = DB::table('pemeriksaan')
-            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-            ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
-            ->where('dokter.jenis_dokter','Dokter Poliklinik')
+            ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
+            ->join('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
+            ->where('dokter.jenis_dokter', 'Dokter Poliklinik')
             ->when($dari && $sampai, fn($q) =>
-                $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari,$sampai])
+                $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari, $sampai])
             )
             ->count() * 100000;
 
-
         // ================= DOKTER PERUSAHAAN =================
         $dokterPerusahaan = 0;
-
         if ($dari && $sampai) {
-            $bulan = $this->hitungBulanGaji($dari,$sampai)->count();
-
+            $bulan = $this->hitungBulanGaji($dari, $sampai)->count();
             $jumlahDokter = DB::table('dokter')
-                ->where('jenis_dokter','Dokter Perusahaan')
+                ->where('jenis_dokter', 'Dokter Perusahaan')
                 ->count();
-
             $dokterPerusahaan = $bulan * $jumlahDokter * 8000000;
         }
 
-        
-        $totalAll =
-            $obatPegawai +
-            $obatPensiunan +
-            $alkes +
-            $dokterPerusahaan +
-            $dokterPoli;
+        // Hitung Total Akhir
+        $totalAll = $totalObatObatan + $dokterPerusahaan + $dokterPoli;
 
+        // Susun data koleksi untuk view
         $data = collect([
-            (object)['nama'=>'Obat Pegawai','total'=>$obatPegawai],
-            (object)['nama'=>'Obat Pensiunan','total'=>$obatPensiunan],
-            (object)['nama'=>'Alat Kesehatan','total'=>$alkes],
-            (object)['nama'=>'Dokter Perusahaan','total'=>$dokterPerusahaan],
-            (object)['nama'=>'Dokter Poliklinik','total'=>$dokterPoli],
-
-            // 🔑 TOTAL AKHIR
-            (object)['nama'=>'TOTAL','total'=>$totalAll],
+            (object)['nama' => 'Obat-obatan', 'total' => $totalObatObatan],
+            (object)['nama' => 'Dokter Perusahaan', 'total' => $dokterPerusahaan],
+            (object)['nama' => 'Dokter Poliklinik', 'total' => $dokterPoli],
+            (object)['nama' => 'TOTAL', 'total' => $totalAll],
         ]);
 
         return $data;
     }
-
 
     private function getJudul($jenis)
     {

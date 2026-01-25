@@ -12,25 +12,9 @@ class Pegawai extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'nip',
-        'nama_pegawai',
-        'nik',
-        'agama',
-        'jenis_kelamin',
-        'tgl_lahir',
-        'tgl_masuk',
-        'status',
-        'status_pernikahan',
-        'no_telp',
-        'email',
-        'alamat',
-        'jabatan',
-        'bagian',
-        'foto',
-        'pendidikan_terakhir',
-        'institusi',
-        'thn_lulus',
-        'is_active',
+        'nip', 'nama_pegawai', 'nik', 'jenis_kelamin', 'agama', 
+        'tgl_lahir', 'tgl_masuk', 'status_pernikahan', 'no_telp', 
+        'email', 'alamat', 'jabatan', 'bagian', 'foto', 'is_active'
     ];
 
     protected $casts = [

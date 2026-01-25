@@ -29,24 +29,19 @@
     
     {{-- Sweet Alert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-    window.AdminPoliToast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        iconColor: '#2ecc71',
-        customClass: {
-        popup: 'admin-toast'
-        },
-        didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer)
-        toast.addEventListener('mouseleave', Swal.resumeTimer)
-        }
-    });
-    </script>
+
+<script>
+setTimeout(function() {
+        const alerts = document.querySelectorAll('.custom-alert');
+        alerts.forEach(function(alert) {
+            alert.style.transition = 'opacity 0.5s ease';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 4000); // Hilang dalam 4 detik
+</script>
 
     {{-- Sweet Alert --}}
     @stack('styles')
@@ -92,6 +87,79 @@
         font-size: 12px;
         opacity: 0.85;
     }
+
+.notification-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .toast-alert {
+        background: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        min-width: 300px;
+        animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        border: 1px solid #f0f0f0;
+    }
+
+    .toast-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* Versi Berhasil (Hijau) */
+    .toast-success .toast-icon {
+        background-color: #ECFDF5;
+        border: 2px solid #D1FAE5;
+    }
+    
+    .toast-success svg {
+        color: #10B981;
+    }
+
+    .toast-content {
+        color: #1E293B;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    .fade-out {
+        opacity: 0;
+        transform: translateX(20px);
+        transition: all 0.5s ease;
+    }
+
+.admin-toast {
+            background: #ffffff !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+            padding: 10px 15px !important;
+        }
+        .swal2-html-container {
+            font-family: 'Poppins', sans-serif !important;
+            font-weight: 500 !important;
+            color: #1e293b !important;
+        }
 </style>
 
 <body>
@@ -142,11 +210,44 @@
     </div>
 
     {{-- ================= MAIN CONTENT ================= --}}
-    <div class="main">
-        @yield('content')
-    </div>
+<div class="notification-container">
+    @if(session('success'))
+        <div class="toast-alert toast-success">
+            <div class="toast-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <div class="toast-content">
+                {{ session('success') }}
+            </div>
+        </div>
+    @endif
+</div>
+
+<div class="main">
+    @yield('content')
+</div>
 
     {{-- ================= SCRIPTS STACK  ================= --}}
     @stack('scripts')
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                window.AdminPoliToast.fire({
+                    icon: 'success',
+                    title: "{{ session('success') }}"
+                });
+            @endif
+
+            @if(session('error'))
+                window.AdminPoliToast.fire({
+                    icon: 'error',
+                    title: "{{ session('error') }}",
+                    iconColor: '#e74c3c'
+                });
+            @endif
+        });
+    </script>
 </body>
 </html>

@@ -48,7 +48,9 @@
                 <td>{{ \Carbon\Carbon::parse($r->tanggal)->translatedFormat('d M Y H:i') }}</td>
                 <td>{{ $r->nama_pemeriksa ?? '-' }}</td>
                 <td>
-                    <a href="{{ route('kepegawaian.riwayat.detail', $r->id_pemeriksaan) }}" class="view-btn">+</a>
+                    <a href="{{ route('kepegawaian.riwayat.detail', $r->id_pemeriksaan) }}" class="view-btn">
+                        <img src="{{ asset('assets/adminPoli/eye.png') }}" alt="Lihat">
+                    </a>
                 </td>
             </tr>
             @endforeach
