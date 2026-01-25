@@ -7,6 +7,7 @@ use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class PegawaiController extends Controller
 {
@@ -56,9 +57,13 @@ class PegawaiController extends Controller
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
             $filename = time() . '_' . $foto->getClientOriginalName();
-            $foto->storeAs('public/foto_pegawai', $filename);
+
+            // pindahkan ke public/profile-pegawai
+            $foto->move(public_path('profile-pegawai'), $filename);
+
             $data['foto'] = $filename;
         }
+
 
         // Set default is_active jika tidak ada
         $data['is_active'] = $request->input('is_active', 1);
@@ -72,14 +77,14 @@ class PegawaiController extends Controller
     public function show($nip)
     {
         $pegawai = Pegawai::where('nip', $nip)->firstOrFail();
-        
-        // Hitung masa kerja
-        $masaKerja = \Carbon\Carbon::parse($pegawai->tgl_masuk)->diff(\Carbon\Carbon::now());
+
+        $masaKerja = Carbon::parse($pegawai->tgl_masuk)->diff(Carbon::now());
         $years = $masaKerja->y;
         $months = $masaKerja->m;
 
         return view('kepegawaian.pegawai.detail', compact('pegawai', 'years', 'months'));
     }
+
 
     public function edit($nip)
     {
@@ -137,16 +142,15 @@ class PegawaiController extends Controller
 
         // Handle foto upload
         if ($request->hasFile('foto')) {
-            // Hapus foto lama jika ada
-            if ($pegawai->foto) {
-                Storage::delete('public/foto_pegawai/' . $pegawai->foto);
-            }
-
             $foto = $request->file('foto');
             $filename = time() . '_' . $foto->getClientOriginalName();
-            $foto->storeAs('public/foto_pegawai', $filename);
+
+            // pindahkan ke public/profile-pegawai
+            $foto->move(public_path('profile-pegawai'), $filename);
+
             $data['foto'] = $filename;
         }
+
 
         // Update is_active
         if ($request->has('is_active')) {

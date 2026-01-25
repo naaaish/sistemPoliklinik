@@ -389,3 +389,67 @@ select.status-akun option[value="0"] {
     color: #065f46;
     margin-bottom: 20px;
 }
+/* Header Form Pegawai */
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Judul */
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+/* Tombol Back */
+.btn-back-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #eaf2ff;
+    transition: all 0.2s ease;
+}
+
+.btn-back-icon img {
+    width: 35px;
+    height: 35px;
+}
+
+.btn-back-icon:hover {
+    background: #dbeafe;
+    transform: translateX(-2px);
+}
+
+.view-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #e8faff;
+    cursor: pointer;
+    position: relative;
+    z-index: 10;
+}
+
+.view-btn img {
+    width: 18px;
+    height: 18px;
+    pointer-events: none; 
+}
+
+.view-btn:hover {
+    background: #1d4ed8;
+    transform: scale(1.05);
+}
