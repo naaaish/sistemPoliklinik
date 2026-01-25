@@ -223,10 +223,20 @@ setTimeout(function() {
             </div>
         </div>
     @endif
+
+
+
 </div>
 
 <div class="main">
-    @yield('content')
+    <div class="content-wrapper">
+        @yield('content')
+    </div>
+
+    {{-- FOOTER BARU --}}
+    <div class="page-footer">
+        Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
+    </div>
 </div>
 
     {{-- ================= SCRIPTS STACK  ================= --}}
@@ -249,5 +259,7 @@ setTimeout(function() {
             @endif
         });
     </script>
+
+
 </body>
 </html>

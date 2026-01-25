@@ -43,8 +43,4 @@
 </div>
 </div>
 
-<div class="page-footer">
-    Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
-</div>
-
 @endsection
