@@ -247,25 +247,35 @@ tbody tr:last-child {
 /* BUTTON */
 /* ============================= */
 .view-btn {
-    width: 28px;
-    height: 28px;
-    background: #316BA1;
-    color: white;
+    width: 35px;
+    height: 35px;
+    background: #e8faff;
     border-radius: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
-    text-decoration: none;
     transition: all 0.2s ease;
     border: none;
     cursor: pointer;
+    text-decoration: none;
+}
+
+/* Tambahkan ini untuk mengecilkan icon matanya */
+.view-btn img {
+    width: 20px; /* Ukuran icon yang ideal untuk tombol 35px */
+    height: auto;
+    object-fit: contain;
+    opacity: 0.8; /* Opsional: agar tidak terlalu kontras */
 }
 
 .view-btn:hover {
-    background: #28598A;
+    background: #d1f4ff;
+    transform: translateY(-1px);
 }
 
+.view-btn:hover img {
+    opacity: 1;
+}
 /* ============================= */
 /* FOOTER */
 /* ============================= */

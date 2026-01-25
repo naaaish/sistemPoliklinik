@@ -148,7 +148,6 @@ class DetailRiwayatController extends Controller
             'pendaftaran',
             'pasien',
             'pegawai',
-            'dokter',
             'namaPemeriksa',
             'diagnosa',
             'diagnosa_k3',

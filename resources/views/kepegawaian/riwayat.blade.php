@@ -26,7 +26,9 @@
                 <td>{{ $r->dokter ?? '-' }}</td>
                 <td>{{ $r->pemeriksa ?? '-' }}</td>
                 <td>
-                    <a href="{{ route('kepegawaian.riwayat.detail', $r->id_pemeriksaan) }}" class="view-btn">+</a>
+                    <a href="{{ route('kepegawaian.riwayat.detail', $r->id_pemeriksaan) }}" class="view-btn">
+                        <img src="{{ asset('assets/adminPoli/eye.png') }}" alt="Lihat">
+                    </a>
                 </td>
             </tr>
             @empty
@@ -39,10 +41,6 @@
         </tbody>
     </table>
 </div>
-</div>
-
-<div class="page-footer">
-    Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
 </div>
 
 @endsection

@@ -317,4 +317,18 @@ Route::prefix('pegawai')->group(function () {
     Route::get('/{nip}', [PegawaiController::class, 'show'])->name('pegawai.show');
     Route::get('/{nip}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
     Route::post('/{nip}/update', [PegawaiController::class, 'update'])->name('pegawai.update');
+
+    Route::post('/kepegawaian/pegawai/import-csv',
+        [PegawaiController::class, 'importCsv']
+    )->name('pegawai.import.csv');
+
+    Route::post('/pegawai/kepegawaian/pegawai/import', 
+        [PegawaiController::class, 'import']
+    )->name('pegawai.import');
+
+    Route::get('/laporan/excel/pegawai-pensiun/{jenis}', [LaporanController::class, 'downloadExcelPegawaiPensiun'])->name('laporan.excel.pegawai-pensiun');
+    Route::get('/laporan/excel/dokter', [LaporanController::class, 'downloadExcelDokter'])->name('laporan.excel.dokter');
+    Route::get('/laporan/excel/obat', [LaporanController::class, 'downloadExcelObat'])->name('laporan.excel.obat');
+    Route::get('/laporan/excel/total', [LaporanController::class, 'downloadExcelTotal'])->name('laporan.excel.total');
+
 });
