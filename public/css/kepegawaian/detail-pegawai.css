@@ -1,5 +1,9 @@
-* { box-sizing: border-box; }
+/* =================== GLOBAL =================== */
+* { 
+    box-sizing: border-box; 
+}
 
+/* =================== DETAIL PEGAWAI PAGE =================== */
 .detail-pegawai-container {
     padding: 28px 60px;
     background: #F1F8FF;
@@ -8,16 +12,24 @@
 /* PAGE HEADER */
 .page-header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 14px;
     margin-bottom: 24px;
+    padding: 0;
 }
 
-.page-header h1 {
-    font-size: 22px;
-    font-weight: 500;
-    color: #316BA1;
+.page-header h1,
+.page-header h4 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
     margin: 0;
+}
+
+.page-header .d-flex {
+    display: flex;
+    gap: 12px;
+    align-items: center;
 }
 
 .btn-back {
@@ -26,7 +38,62 @@
     color: #316BA1;
 }
 
-/* PROFILE */
+/* Edit Button */
+.btn-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white !important;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+}
+
+.btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4);
+    color: white !important;
+    text-decoration: none;
+}
+
+.btn-edit svg {
+    width: 16px;
+    height: 16px;
+}
+
+.page-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #f6f9fc;
+    padding-top: 4px;
+}
+
+.btn-tambah {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2563eb;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.btn-tambah:hover {
+    background: #1d4ed8;
+    color: #fff;
+}
+
+
+/* PROFILE CARD */
 .profile-card {
     background: #fff;
     border-radius: 14px;
@@ -45,12 +112,15 @@
 }
 
 .profile-avatar {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
-    border: 4px solid #6B93B8;
-    background: #fff;
-    margin: -50px auto 10px;
+    overflow: hidden;
+    margin: -60px auto 0;
+    border: 5px solid white;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    position: relative;
+    z-index: 10;
 }
 
 .profile-avatar img {
@@ -71,6 +141,7 @@
     margin-bottom: 10px;
 }
 
+/* Profile Meta - Status Dropdown Inline */
 .profile-meta {
     display: flex;
     justify-content: center;
@@ -78,20 +149,72 @@
     align-items: center;
 }
 
-.badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 12px;
+.status-form-inline {
+    margin: 0;
 }
 
-.badge-active {
-    background: #DFF7EA;
-    color: #2F7A53;
+.status-dropdown-inline {
+    min-width: 120px;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 6px 14px;
+    border: 2px solid;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.status-dropdown-inline.status-active {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-color: #10b981;
+    color: #065f46;
+}
+
+.status-dropdown-inline.status-inactive {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    color: #991b1b;
+}
+
+.status-dropdown-inline:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .nip {
     font-size: 13px;
     color: #666;
+    font-weight: 500;
+}
+
+/* Badge Status */
+.badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.badge-active {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+    border: 2px solid #10b981;
+}
+
+.badge-inactive {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #991b1b;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+    border: 2px solid #ef4444;
 }
 
 /* DATA CARD */
@@ -165,8 +288,240 @@
     color: #111;
 }
 
+/* Alert Success */
+.alert-success {
+    border-radius: 12px;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border: none;
+    border-left: 4px solid #10b981;
+    color: #065f46;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    animation: slideDown 0.4s ease-out;
+}
+
+.alert-danger {
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: none;
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+    animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =================== FORM PEGAWAI (CREATE/EDIT) =================== */
+
+/* Layout Form Pegawai */
+.pegawai-form-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.pegawai-form-card {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.pegawai-form-card .card-body {
+    padding: 32px;
+}
+
+/* Foto Preview */
+.foto-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.foto-preview {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: #eef3f9;
+    border: 3px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #64748b;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.foto-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.foto-preview span {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Form Row Custom - Horizontal Layout */
+.form-row-custom {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.form-label-custom {
+    font-weight: 600;
+    font-size: 14px;
+    color: #334155;
+    margin-bottom: 0;
+    text-align: right;
+    padding-right: 8px;
+}
+
+.form-control-custom {
+    width: 100%;
+    border-radius: 8px;
+    padding: 10px 14px;
+    border: 2px solid #e2e8f0;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.form-control-custom:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59,130,246,.1);
+    outline: none;
+}
+
+textarea.form-control-custom {
+    resize: vertical;
+    min-height: 70px;
+}
+
+/* Status Akun Dropdown */
+.status-akun {
+    font-size: 15px;
+    font-weight: 600;
+    padding: 12px 14px;
+    background: #f8fafc;
+}
+
+select.status-akun option[value="1"] {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+select.status-akun option[value="0"] {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Buttons */
+.btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.btn-secondary {
+    background: #64748b;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #475569;
+    transform: translateY(-2px);
+}
+
 /* RESPONSIVE */
 @media (max-width: 900px) {
-    .detail-pegawai-container { padding: 20px; }
-    .grid-2 { grid-template-columns: 1fr; }
+    .detail-pegawai-container { 
+        padding: 20px; 
+    }
+    .grid-2 { 
+        grid-template-columns: 1fr; 
+    }
+}
+
+@media (max-width: 768px) {
+    .pegawai-form-card .card-body {
+        padding: 20px;
+    }
+    
+    .form-row-custom {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    
+    .form-label-custom {
+        text-align: left;
+        padding-right: 0;
+    }
+}
+
+
+/* =================== INDEX PEGAWAI PAGE =================== */
+
+/* Tombol Tambah Pegawai */
+.btn-tambah {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white !important;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-tambah:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white !important;
+    text-decoration: none;
+}
+
+.btn-tambah svg {
+    width: 18px;
+    height: 18px;
 }

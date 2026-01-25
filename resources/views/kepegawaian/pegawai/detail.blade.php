@@ -7,6 +7,7 @@
 @endpush
 
 @section('content')
+
 <div class="detail-pegawai-container">
 
     {{-- PAGE HEADER --}}
@@ -14,14 +15,6 @@
         <h4>Detail Pegawai</h4>
 
         <div class="d-flex gap-2 align-items-center">
-            <form action="{{ route('pegawai.update', $pegawai->nip) }}" method="POST" class="status-form">
-                @csrf
-                <select name="is_active" onchange="this.form.submit()" class="form-select status-dropdown {{ $pegawai->is_active ? 'status-active' : 'status-inactive' }}">
-                    <option value="1" {{ $pegawai->is_active == 1 ? 'selected' : '' }}>🟢 Aktif</option>
-                    <option value="0" {{ $pegawai->is_active == 0 ? 'selected' : '' }}>🔴 Non Aktif</option>
-                </select>
-            </form>
-
             <a href="{{ route('pegawai.edit', $pegawai->nip) }}" class="btn btn-edit">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -46,7 +39,7 @@
         <div class="profile-body">
             <div class="profile-avatar">
                 @if(!empty($pegawai->foto))
-                    <img src="{{ asset('storage/foto_pegawai/'.$pegawai->foto) }}" alt="Foto {{ $pegawai->nama_pegawai }}">
+                    <img src="{{ asset('profile-pegawai/'.$pegawai->foto) }}" alt="Foto {{ $pegawai->nama_pegawai }}">
                 @else
                     <img src="{{ asset('assets/default-avatar.png') }}" alt="Avatar Default">
                 @endif
@@ -56,9 +49,13 @@
             <p class="profile-bagian">{{ $pegawai->bagian }}</p>
 
             <div class="profile-meta">
-                <span class="badge {{ $pegawai->is_active ? 'badge-active' : 'badge-inactive' }}">
-                    {{ $pegawai->is_active ? 'Aktif' : 'Non Aktif' }}
-                </span>
+                <form action="{{ route('pegawai.update', $pegawai->nip) }}" method="POST" class="status-form-inline">
+                    @csrf
+                    <select name="is_active" onchange="this.form.submit()" class="form-select status-dropdown-inline {{ $pegawai->is_active ? 'status-active' : 'status-inactive' }}">
+                        <option value="1" {{ $pegawai->is_active == 1 ? 'selected' : '' }}>🟢 Aktif</option>
+                        <option value="0" {{ $pegawai->is_active == 0 ? 'selected' : '' }}>🔴 Non Aktif</option>
+                    </select>
+                </form>
                 <span class="nip">NIP : {{ $pegawai->nip }}</span>
             </div>
         </div>
