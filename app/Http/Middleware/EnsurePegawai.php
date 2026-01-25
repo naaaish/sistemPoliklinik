@@ -19,10 +19,6 @@ class EnsurePegawai
             return $next($request);
         }
 
-        if ($role === 'adminpoli') {
-            return redirect()->route('poliklinik.dashboard');
-        }
-
         if ($role === 'adminkepegawaian') {
             return redirect()->route('kepegawaian.dashboard');
         }

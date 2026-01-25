@@ -83,93 +83,96 @@ Route::middleware(['ensurePegawai'])->group(function () {
 |  ADMIN POLI ROUTES
 |--------------------------------------------------------------------------
 */
+Route::prefix('adminpoli')
+    ->name('adminpoli.')
+    ->middleware(['auth', 'ensureAdminPoli'])
+    ->group(function () {
+        Route::get('/dashboard', [AdminPoliDashboardController::class, 'index'])->name('dashboard');
 
-Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
-    Route::get('/dashboard', [AdminPoliDashboardController::class, 'index'])->name('dashboard');
+        // pendaftaran
+        Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
+        Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
+        Route::get('/api/pegawai/search', [\App\Http\Controllers\AdminPoli\PendaftaranController::class, 'searchPegawai']);
 
-    // pendaftaran
-    Route::get('/pendaftaran/create', [PendaftaranController::class, 'create'])->name('pendaftaran.create');
-    Route::post('/pendaftaran', [PendaftaranController::class, 'store'])->name('pendaftaran.store');
-    Route::get('/api/pegawai/search', [\App\Http\Controllers\AdminPoli\PendaftaranController::class, 'searchPegawai']);
+        // pemeriksaan (HARUS bawa id pendaftaran)
+        Route::get('/pemeriksaan/{pendaftaranId}/create', [PemeriksaanInputController::class, 'create'])
+            ->name('pemeriksaan.create');
 
-    // pemeriksaan (HARUS bawa id pendaftaran)
-    Route::get('/pemeriksaan/{pendaftaranId}/create', [PemeriksaanInputController::class, 'create'])
-        ->name('pemeriksaan.create');
+        Route::post('/pemeriksaan/{pendaftaranId}', [PemeriksaanInputController::class, 'store'])
+            ->name('pemeriksaan.store');
 
-    Route::post('/pemeriksaan/{pendaftaranId}', [PemeriksaanInputController::class, 'store'])
-        ->name('pemeriksaan.store');
+        // (optional untuk autofill)
+        Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
+        Route::get('/api/pegawai/{nip}/keluarga', [PendaftaranController::class, 'getKeluargaByNip']);
 
-    // (optional untuk autofill)
-    Route::get('/api/pegawai/{nip}', [PendaftaranController::class, 'getPegawaiByNip'])->name('api.pegawai');
-    Route::get('/api/pegawai/{nip}/keluarga', [PendaftaranController::class, 'getKeluargaByNip']);
+        Route::resource('obat', ObatController::class)->except(['show']);
+        Route::post('obat/import', [\App\Http\Controllers\AdminPoli\ObatController::class, 'import'])->name('obat.import');
+        Route::get('obat/export', [\App\Http\Controllers\AdminPoli\ObatController::class, 'export'])->name('obat.export');
 
-    Route::resource('obat', ObatController::class)->except(['show']);
-    Route::post('obat/import', [\App\Http\Controllers\AdminPoli\ObatController::class, 'import'])->name('obat.import');
-    Route::get('obat/export', [\App\Http\Controllers\AdminPoli\ObatController::class, 'export'])->name('obat.export');
+        // Diagnosa
+        Route::post('diagnosa/import', [DiagnosaController::class, 'import'])->name('diagnosa.import');
+        Route::get('diagnosa/export', [DiagnosaController::class, 'export'])->name('diagnosa.export');
+        Route::resource('diagnosa', DiagnosaController::class)->except(['show']);
 
-    // Diagnosa
-    Route::post('diagnosa/import', [DiagnosaController::class, 'import'])->name('diagnosa.import');
-    Route::get('diagnosa/export', [DiagnosaController::class, 'export'])->name('diagnosa.export');
-    Route::resource('diagnosa', DiagnosaController::class)->except(['show']);
+        // Diagnosa K3
+        Route::get('/diagnosak3', [DiagnosaK3Controller::class,'index'])->name('diagnosak3.index');
 
-    // Diagnosa K3
-    Route::get('/diagnosak3', [DiagnosaK3Controller::class,'index'])->name('diagnosak3.index');
+        Route::post('/diagnosak3/kategori', [DiagnosaK3Controller::class,'storeKategori'])->name('diagnosak3.kategori.store');
+        Route::put('/diagnosak3/kategori/{id_nb}', [DiagnosaK3Controller::class,'updateKategori'])->name('diagnosak3.kategori.update');
+        Route::delete('/diagnosak3/kategori/{id_nb}', [DiagnosaK3Controller::class,'destroyKategori'])->name('diagnosak3.kategori.destroy');
 
-    Route::post('/diagnosak3/kategori', [DiagnosaK3Controller::class,'storeKategori'])->name('diagnosak3.kategori.store');
-    Route::put('/diagnosak3/kategori/{id_nb}', [DiagnosaK3Controller::class,'updateKategori'])->name('diagnosak3.kategori.update');
-    Route::delete('/diagnosak3/kategori/{id_nb}', [DiagnosaK3Controller::class,'destroyKategori'])->name('diagnosak3.kategori.destroy');
+        Route::post('/diagnosak3/penyakit', [DiagnosaK3Controller::class,'storePenyakit'])->name('diagnosak3.penyakit.store');
+        Route::put('/diagnosak3/penyakit/{id_nb}', [DiagnosaK3Controller::class,'updatePenyakit'])->name('diagnosak3.penyakit.update');
+        Route::delete('/diagnosak3/penyakit/{id_nb}', [DiagnosaK3Controller::class,'destroyPenyakit'])->name('diagnosak3.penyakit.destroy');
 
-    Route::post('/diagnosak3/penyakit', [DiagnosaK3Controller::class,'storePenyakit'])->name('diagnosak3.penyakit.store');
-    Route::put('/diagnosak3/penyakit/{id_nb}', [DiagnosaK3Controller::class,'updatePenyakit'])->name('diagnosak3.penyakit.update');
-    Route::delete('/diagnosak3/penyakit/{id_nb}', [DiagnosaK3Controller::class,'destroyPenyakit'])->name('diagnosak3.penyakit.destroy');
+        Route::post('/diagnosak3/import', [DiagnosaK3Controller::class,'import'])->name('diagnosak3.import');
+        Route::get('/diagnosak3/export', [DiagnosaK3Controller::class,'export'])->name('diagnosak3.export');
 
-    Route::post('/diagnosak3/import', [DiagnosaK3Controller::class,'import'])->name('diagnosak3.import');
-    Route::get('/diagnosak3/export', [DiagnosaK3Controller::class,'export'])->name('diagnosak3.export');
+        // Saran
+        Route::resource('saran', SaranController::class)->except(['show']);
+        Route::post('saran/import', [SaranController::class, 'import'])->name('saran.import');
+        Route::get('saran/export', [SaranController::class, 'export'])->name('saran.export');
 
-    // Saran
-    Route::resource('saran', SaranController::class)->except(['show']);
-    Route::post('saran/import', [SaranController::class, 'import'])->name('saran.import');
-    Route::get('saran/export', [SaranController::class, 'export'])->name('saran.export');
+        // MENU PEMERIKSAAN PASIEN
+        Route::get('/pemeriksaan',
+            [PemeriksaanController::class, 'index']
+        )->name('pemeriksaan.index');
 
-    // MENU PEMERIKSAAN PASIEN
-    Route::get('/pemeriksaan',
-        [PemeriksaanController::class, 'index']
-    )->name('pemeriksaan.index');
+        Route::get('/pemeriksaan/{pendaftaranId}',
+            [PemeriksaanController::class, 'show']
+        )->name('pemeriksaan.show');
 
-    Route::get('/pemeriksaan/{pendaftaranId}',
-        [PemeriksaanController::class, 'show']
-    )->name('pemeriksaan.show');
+        Route::get('/pemeriksaan/{pendaftaranId}/edit',
+            [PemeriksaanController::class, 'edit']
+        )->name('pemeriksaan.edit');
 
-    Route::get('/pemeriksaan/{pendaftaranId}/edit',
-        [PemeriksaanController::class, 'edit']
-    )->name('pemeriksaan.edit');
+        Route::put('/pemeriksaan/{pendaftaranId}',
+            [PemeriksaanController::class, 'update']
+        )->name('pemeriksaan.update');
 
-    Route::put('/pemeriksaan/{pendaftaranId}',
-        [PemeriksaanController::class, 'update']
-    )->name('pemeriksaan.update');
+        // Artikel
+        Route::get('/artikel', [AdminPoliArtikelController::class, 'index'])->name('artikel.index');
+        Route::get('/artikel/create', [AdminPoliArtikelController::class, 'create'])->name('artikel.create');
+        Route::post('/artikel', [AdminPoliArtikelController::class, 'store'])->name('artikel.store');
+        Route::get('/artikel/{id}/edit', [AdminPoliArtikelController::class, 'edit'])->name('artikel.edit');
+        Route::put('/artikel/{id}', [AdminPoliArtikelController::class, 'update'])->name('artikel.update');
+        Route::delete('/artikel/{id}', [AdminPoliArtikelController::class, 'destroy'])->name('artikel.destroy');
 
-    // Artikel
-    Route::get('/artikel', [AdminPoliArtikelController::class, 'index'])->name('artikel.index');
-    Route::get('/artikel/create', [AdminPoliArtikelController::class, 'create'])->name('artikel.create');
-    Route::post('/artikel', [AdminPoliArtikelController::class, 'store'])->name('artikel.store');
-    Route::get('/artikel/{id}/edit', [AdminPoliArtikelController::class, 'edit'])->name('artikel.edit');
-    Route::put('/artikel/{id}', [AdminPoliArtikelController::class, 'update'])->name('artikel.update');
-    Route::delete('/artikel/{id}', [AdminPoliArtikelController::class, 'destroy'])->name('artikel.destroy');
+        // upload from pdf/word → create draft → redirect edit
+        Route::post('/artikel/import', [AdminPoliArtikelController::class, 'importDoc'])->name('artikel.import');
 
-    // upload from pdf/word → create draft → redirect edit
-    Route::post('/artikel/import', [AdminPoliArtikelController::class, 'importDoc'])->name('artikel.import');
+        // Laporan
+        Route::get('/laporan', [AdminPoliLaporanController::class, 'index'])->name('laporan.index');
+        Route::get('/laporan/preview', [AdminPoliLaporanController::class, 'preview'])->name('laporan.preview');
+        // export excel (PREVIEW: single sheet sesuai tipe yg dipreview)
+        Route::get('/laporan/export', [AdminPoliLaporanController::class, 'exportExcel'])
+        ->name('laporan.export');
 
-    // Laporan
-    Route::get('/laporan', [AdminPoliLaporanController::class, 'index'])->name('laporan.index');
-    Route::get('/laporan/preview', [AdminPoliLaporanController::class, 'preview'])->name('laporan.preview');
-    // export excel (PREVIEW: single sheet sesuai tipe yg dipreview)
-    Route::get('/laporan/export', [AdminPoliLaporanController::class, 'exportExcel'])
-    ->name('laporan.export');
-
-    // export excel (INDEX: all tipe -> multi sheets)
-    Route::get('/laporan/export-all', [AdminPoliLaporanController::class, 'exportExcelAll'])
-    ->name('laporan.exportAll');
-});
+        // export excel (INDEX: all tipe -> multi sheets)
+        Route::get('/laporan/export-all', [AdminPoliLaporanController::class, 'exportExcelAll'])
+        ->name('laporan.exportAll');
+    }
+);
 /*
 |--------------------------------------------------------------------------
 | ADMIN KEPEGAWAIAN ROUTES 

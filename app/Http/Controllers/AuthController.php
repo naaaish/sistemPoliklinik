@@ -35,7 +35,7 @@ class AuthController extends Controller
             }
 
             if ($role === 'adminpoli') {
-                return redirect()->route('poliklinik.dashboard');
+                return redirect()->route('adminpoli.dashboard');
             }
 
             if ($role === 'adminkepegawaian') {
@@ -61,7 +61,7 @@ class AuthController extends Controller
         }
 
         if ($role === 'adminpoli') {
-            return redirect()->route('poliklinik.dashboard');
+            return redirect()->route('adminpoli.dashboard');
         }
 
         if ($role === 'adminkepegawaian') {
