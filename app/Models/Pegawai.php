@@ -7,4 +7,35 @@ use Illuminate\Database\Eloquent\Model;
 class Pegawai extends Model
 {
     protected $table = 'pegawai';
+    protected $primaryKey = 'nip';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    protected $fillable = [
+        'nip',
+        'nama_pegawai',
+        'nik',
+        'agama',
+        'jenis_kelamin',
+        'tgl_lahir',
+        'tgl_masuk',
+        'status',
+        'status_pernikahan',
+        'no_telp',
+        'email',
+        'alamat',
+        'jabatan',
+        'bagian',
+        'foto',
+        'pendidikan_terakhir',
+        'institusi',
+        'thn_lulus',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'tgl_lahir' => 'date',
+        'tgl_masuk' => 'date',
+    ];
 }

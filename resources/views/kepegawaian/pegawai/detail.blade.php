@@ -2,14 +2,42 @@
 
 @section('title','Rincian Data Pegawai')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/pegawai-detail.css') }}">
+@endpush
+
 @section('content')
 <div class="detail-pegawai-container">
 
     {{-- PAGE HEADER --}}
     <div class="page-header">
-        <a href="{{ url()->previous() }}" class="btn-back">←</a>
-        <h1>Rincian Data Pegawai</h1>
+        <h4>Detail Pegawai</h4>
+
+        <div class="d-flex gap-2 align-items-center">
+            <form action="{{ route('pegawai.update', $pegawai->nip) }}" method="POST" class="status-form">
+                @csrf
+                <select name="is_active" onchange="this.form.submit()" class="form-select status-dropdown {{ $pegawai->is_active ? 'status-active' : 'status-inactive' }}">
+                    <option value="1" {{ $pegawai->is_active == 1 ? 'selected' : '' }}>🟢 Aktif</option>
+                    <option value="0" {{ $pegawai->is_active == 0 ? 'selected' : '' }}>🔴 Non Aktif</option>
+                </select>
+            </form>
+
+            <a href="{{ route('pegawai.edit', $pegawai->nip) }}" class="btn btn-edit">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+                Edit
+            </a>
+        </div>
     </div>
+
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>✓ Berhasil!</strong> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    @endif
 
     {{-- PROFIL --}}
     <div class="profile-card">
@@ -17,14 +45,20 @@
 
         <div class="profile-body">
             <div class="profile-avatar">
-                <img src="{{ asset('assets/default-avatar.png') }}" alt="Avatar">
+                @if(!empty($pegawai->foto))
+                    <img src="{{ asset('storage/foto_pegawai/'.$pegawai->foto) }}" alt="Foto {{ $pegawai->nama_pegawai }}">
+                @else
+                    <img src="{{ asset('assets/default-avatar.png') }}" alt="Avatar Default">
+                @endif
             </div>
 
             <h2>{{ $pegawai->nama_pegawai }}</h2>
             <p class="profile-bagian">{{ $pegawai->bagian }}</p>
 
             <div class="profile-meta">
-                <span class="badge badge-active">{{ $pegawai->status ?? 'Aktif' }}</span>
+                <span class="badge {{ $pegawai->is_active ? 'badge-active' : 'badge-inactive' }}">
+                    {{ $pegawai->is_active ? 'Aktif' : 'Non Aktif' }}
+                </span>
                 <span class="nip">NIP : {{ $pegawai->nip }}</span>
             </div>
         </div>
@@ -46,7 +80,7 @@
             <div><label>Tanggal Lahir</label><p>{{ $pegawai->tgl_lahir ? \Carbon\Carbon::parse($pegawai->tgl_lahir)->translatedFormat('d F Y') : '-' }}</p></div>
             <div><label>Umur</label><p>{{ $pegawai->tgl_lahir ? \Carbon\Carbon::parse($pegawai->tgl_lahir)->age.' Tahun' : '-' }}</p></div>
             <div><label>Agama</label><p>{{ $pegawai->agama ?? '-' }}</p></div>
-            <div><label>Status Perkawinan</label><p>{{ $pegawai->status_perkawinan ?? '-' }}</p></div>
+            <div><label>Status Perkawinan</label><p>{{ $pegawai->status_pernikahan ?? '-' }}</p></div>
         </div>
     </div>
 
@@ -62,14 +96,19 @@
             <div><label>NIP</label><p>{{ $pegawai->nip }}</p></div>
             <div><label>Jabatan</label><p>{{ $pegawai->jabatan ?? '-' }}</p></div>
             <div><label>Bagian</label><p>{{ $pegawai->bagian }}</p></div>
-            <div><label>Status</label><p>{{ $pegawai->status ?? 'Aktif' }}</p></div>
+            <div>
+                <label>Status</label>
+                <p>
+                    <span class="badge {{ $pegawai->is_active ? 'badge-active' : 'badge-inactive' }}">
+                        {{ $pegawai->is_active ? 'Aktif' : 'Non Aktif' }}
+                    </span>
+                </p>
+            </div>
             <div><label>Tanggal Masuk</label><p>{{ $pegawai->tgl_masuk ? \Carbon\Carbon::parse($pegawai->tgl_masuk)->translatedFormat('d F Y') : '-' }}</p></div>
             <div>
                 <label>Masa Kerja</label>
                 <p>{{ (int) $years }} Tahun {{ (int) $months }} Bulan</p>
             </div>
-
-
         </div>
     </div>
 
@@ -82,7 +121,7 @@
             </div>
         </div>
         <div class="card-body grid-1">
-            <div><label>No. Telepon</label><p>{{ $pegawai->no_telepon ?? '-' }}</p></div>
+            <div><label>No. Telepon</label><p>{{ $pegawai->no_telp ?? '-' }}</p></div>
             <div><label>Email</label><p>{{ $pegawai->email ?? '-' }}</p></div>
             <div><label>Alamat</label><p>{{ $pegawai->alamat ?? '-' }}</p></div>
         </div>
@@ -99,9 +138,24 @@
         <div class="card-body grid-1">
             <div><label>Pendidikan Terakhir</label><p>{{ $pegawai->pendidikan_terakhir ?? '-' }}</p></div>
             <div><label>Institusi</label><p>{{ $pegawai->institusi ?? '-' }}</p></div>
-            <div><label>Tahun Lulus</label><p>{{ $pegawai->tahun_lulus ?? '-' }}</p></div>
+            <div><label>Tahun Lulus</label><p>{{ $pegawai->thn_lulus ?? '-' }}</p></div>
         </div>
     </div>
 
 </div>
+
+<script>
+// Auto-hide alert after 5 seconds
+setTimeout(function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+        alert.style.transition = 'opacity 0.5s ease-out';
+        alert.style.opacity = '0';
+        setTimeout(function() {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }, 500);
+    });
+}, 5000);
+</script>
 @endsection

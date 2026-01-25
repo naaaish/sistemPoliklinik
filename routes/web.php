@@ -284,19 +284,34 @@ Route::middleware(['auth'])->group(function () {
 
 // LAPORAN
 
-Route::prefix('kepegawaian')->middleware('auth')->group(function () {
+Route::prefix('kepegawaian/laporan')
+    ->middleware(['auth', 'ensureKepegawaian'])
+    ->group(function () {
 
-    Route::get('/laporan', [LaporanController::class, 'index'])
-        ->name('kepegawaian.laporan');
+        Route::get('/', [LaporanController::class, 'index'])
+            ->name('kepegawaian.laporan');
 
-    Route::get('/laporan/{jenis}', [LaporanController::class, 'detail'])
-        ->name('kepegawaian.laporan.detail');
+        Route::get('/{jenis}', [LaporanController::class, 'detail'])
+            ->name('kepegawaian.laporan.detail');
 
-    Route::get(
-        '/laporan/{jenis}/excel',
-        [\App\Http\Controllers\Kepegawaian\LaporanController::class, 'downloadExcel']
-    )->name('laporan.excel');
+        Route::get('/kepegawaian/laporan/{jenis}/excel', 
+            [LaporanController::class, 'downloadExcelPegawaiPensiun']
+        )->name('laporan.excel.pegawai-pensiun');
+
+        Route::get('/dokter/excel', [LaporanController::class, 'downloadExcelDokter'])
+            ->name('laporan.excel.dokter');
 
     Route::get('/laporan/{jenis}/pdf', [LaporanController::class, 'downloadPdf'])
        ->name('laporan.pdf');
+});
+
+
+// CRUD PEGAWAI
+Route::prefix('pegawai')->group(function () {
+    Route::get('/', [PegawaiController::class, 'index'])->name('pegawai.index');
+    Route::get('/create', [PegawaiController::class, 'create'])->name('pegawai.create');
+    Route::post('/store', [PegawaiController::class, 'store'])->name('pegawai.store');
+    Route::get('/{nip}', [PegawaiController::class, 'show'])->name('pegawai.show');
+    Route::get('/{nip}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
+    Route::post('/{nip}/update', [PegawaiController::class, 'update'])->name('pegawai.update');
 });
