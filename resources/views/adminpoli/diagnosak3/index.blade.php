@@ -425,30 +425,35 @@ document.addEventListener('DOMContentLoaded', function(){
     // fallback
     Swal.fire({ icon: icon, title: msg, timer: 1600, showConfirmButton: false });
   }
-});
 
-document.addEventListener('DOMContentLoaded', function(){
-  function toast(icon, msg){
+  
+
+
+});
+document.addEventListener('DOMContentLoaded', function () {
+  function toast(icon, msg) {
     if (!msg) return;
+
     if (window.AdminPoliToast) {
       AdminPoliToast.fire({ icon: icon, title: msg });
-      return;
+    } else {
+      Swal.fire({
+        icon: icon,
+        title: msg,
+        timer: 1600,
+        showConfirmButton: false
+      });
     }
-    Swal.fire({ icon: icon, title: msg, timer: 1600, showConfirmButton: false });
   }
 
-  @if(session('success'))
-    toast('success', {!! json_encode(session('success')) !!});
-  @endif
+  const flash = window.__FLASH__ || {};
 
-  @if(session('error'))
-    toast('error', {!! json_encode(session('error')) !!});
-  @endif
-
-  @if($errors->any())
-    toast('error', {!! json_encode($errors->first()) !!});
-  @endif
+  toast('success', flash.success);
+  toast('error', flash.error);
+  toast('error', flash.validation);
 });
+
+
 
 </script>
 
