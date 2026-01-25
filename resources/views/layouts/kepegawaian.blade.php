@@ -1,4 +1,9 @@
 <!DOCTYPE html>
+
+@php
+    $mode = $mode ?? null;
+@endphp
+
 <html lang="id">
 <head>
     <meta charset="UTF-8">

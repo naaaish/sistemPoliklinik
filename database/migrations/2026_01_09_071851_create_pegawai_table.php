@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('jenis_kelamin')->nullable();
             $table->date('tgl_lahir')->nullable();
             $table->date('tgl_masuk')->nullable();
-            $table->string('status')->nullable();
             $table->string('status_pernikahan')->nullable();
             $table->string('no_telp')->nullable();
             $table->string('email')->nullable();
