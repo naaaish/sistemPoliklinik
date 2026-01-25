@@ -112,27 +112,28 @@
         @yield('content')
     </main>
     <script>
-        const SwalFix = Swal.mixin({
+    // untuk konfirmasi (tengah layar)
+    window.SwalFix = Swal.mixin({
         heightAuto: false,
         scrollbarPadding: false
-        });
+    });
 
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 1800,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
-        });
+    window.AdminPoliToast = SwalFix.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1800,
+        timerProgressBar: true,
+        didOpen: (t) => {
+        t.addEventListener('mouseenter', Swal.stopTimer);
+        t.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
     </script>
 
     @if(session('success'))
     <script>
-        Toast.fire({
+        AdminPoliToast.fire({
             icon: 'success',
             title: "{{ session('success') }}"
         });
@@ -141,7 +142,7 @@
 
     @if(session('error'))
     <script>
-        Toast.fire({
+        AdminPoliToast.fire({
             icon: 'error',
             title: "{{ session('error') }}"
         });

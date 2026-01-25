@@ -84,7 +84,6 @@
           <div class="k3-cat-left">
             <button type="button" class="k3-toggle" onclick="toggleChildren('{{ $cat->id_nb }}')">-</button>
             <div class="k3-cat-title">
-              <b class="k3-handle" style="cursor:grab;">☰</b>
               <span style="margin-left:8px;">[{{ $cat->id_nb }}] {{ $cat->nama_penyakit }}</span>
             </div>
           </div>
@@ -117,7 +116,7 @@
           <div class="k3-children-list">
             @forelse($kids as $k)
               <div class="k3-child-row" data-child-id="{{ $k->id_nb }}">
-                <div class="k3-id"><b class="k3-child-handle" style="cursor:grab;">☰</b> {{ $k->id_nb }}</div>
+                <div class="k3-id">{{ $k->id_nb }}</div>
                 <div class="k3-name">{{ $k->nama_penyakit }}</div>
                 <div class="k3-child-actions">
                   <button type="button"
@@ -252,8 +251,6 @@
 </div>
 @endsection
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
-
 <script>
 function openModal(id){
   var el = document.getElementById(id);
@@ -328,58 +325,6 @@ function toggleChildren(catId){
   if (btn) btn.textContent = hidden ? '-' : '+';
 }
 
-// ===== REORDER (tanpa JSON) =====
-async function saveOrder() {
-  var categories = Array.from(document.querySelectorAll('.k3-cat-row'))
-    .map(function(el){ return el.getAttribute('data-cat-id'); })
-    .filter(Boolean);
-
-  var childrenMap = {};
-  document.querySelectorAll('.k3-children').forEach(function(box){
-    var parent = box.getAttribute('data-parent');
-    var ids = Array.from(box.querySelectorAll('.k3-child-row'))
-      .map(function(el){ return el.getAttribute('data-child-id'); })
-      .filter(Boolean);
-    childrenMap[parent] = ids;
-  });
-
-  var fd = new FormData();
-  categories.forEach(function(id){ fd.append('categories[]', id); });
-
-  Object.keys(childrenMap).forEach(function(parentId){
-    childrenMap[parentId].forEach(function(childId){
-      fd.append('children[' + parentId + '][]', childId);
-    });
-  });
-
-  try {
-    var res = await fetch("{{ route('adminpoli.diagnosak3.reorder') }}", {
-      method: 'POST',
-      headers: {
-        'X-CSRF-TOKEN': "{{ csrf_token() }}",
-        'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: fd
-    });
-
-    if (!res.ok) throw new Error('Gagal simpan urutan');
-
-    Swal.fire({
-      icon:'success',
-      title:'Urutan berhasil disimpan',
-      timer: 1200,
-      showConfirmButton:false
-    }).then(function(){ location.reload(); });
-
-  } catch (err) {
-    Swal.fire({
-      icon:'error',
-      title:'Urutan gagal disimpan',
-      text: (err && err.message) ? err.message : ''
-    });
-  }
-}
-
 document.addEventListener('DOMContentLoaded', function(){
 
   // ===== Bind tombol edit (kategori & penyakit) =====
@@ -433,7 +378,21 @@ document.addEventListener('DOMContentLoaded', function(){
       if (nameEl) nameEl.textContent = file.name;
       if (btnUp) btnUp.disabled = false;
     });
-  }
+    document.querySelectorAll('.js-k3-confirm-submit').forEach(function(form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      Swal.fire({
+        icon: 'question',
+        title: 'Simpan data ini?',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, simpan',
+        cancelButtonText: 'Batal'
+      }).then(function(r){
+        if (r.isConfirmed) form.submit();
+      });
+    });
+  });
+}
 
   // ===== SweetAlert confirm delete =====
   document.querySelectorAll('.js-k3-delete').forEach(function(form){
@@ -451,30 +410,6 @@ document.addEventListener('DOMContentLoaded', function(){
       });
     });
   });
-
-  // ===== Sortable kategori =====
-  var catList = document.getElementById('k3CategoryList');
-  if (catList){
-    new Sortable(catList, {
-      handle: '.k3-handle',
-      animation: 150,
-      draggable: '.k3-cat-row',
-      onEnd: saveOrder
-    });
-  }
-
-  // ===== Sortable penyakit per kategori =====
-  document.querySelectorAll('.k3-children').forEach(function(box){
-    var list = box.querySelector('.k3-children-list');
-    if (!list) return;
-    new Sortable(list, {
-      handle: '.k3-child-handle',
-      animation: 150,
-      draggable: '.k3-child-row',
-      onEnd: saveOrder
-    });
-  });
-
 });
 
 document.addEventListener('DOMContentLoaded', function(){
@@ -491,18 +426,35 @@ document.addEventListener('DOMContentLoaded', function(){
     Swal.fire({ icon: icon, title: msg, timer: 1600, showConfirmButton: false });
   }
 
-  // @if(session('success'))
-  //   toast('success', "{{ addslashes(session('success')) }}");
-  // @endif
+  
 
-  // @if(session('error'))
-  //   toast('error', "{{ addslashes(session('error')) }}");
-  // @endif
 
-  // @if($errors->any())
-  //   toast('error', "{{ addslashes($errors->first()) }}");
-  // @endif
 });
+document.addEventListener('DOMContentLoaded', function () {
+  function toast(icon, msg) {
+    if (!msg) return;
+
+    if (window.AdminPoliToast) {
+      AdminPoliToast.fire({ icon: icon, title: msg });
+    } else {
+      Swal.fire({
+        icon: icon,
+        title: msg,
+        timer: 1600,
+        showConfirmButton: false
+      });
+    }
+  }
+
+  const flash = window.__FLASH__ || {};
+
+  toast('success', flash.success);
+  toast('error', flash.error);
+  toast('error', flash.validation);
+});
+
+
+
 </script>
 
 @endpush

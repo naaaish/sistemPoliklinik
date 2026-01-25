@@ -40,7 +40,9 @@
           <div class="lap-th">BAGIAN</div>
           <div class="lap-th">NAMA PASIEN</div>
           <div class="lap-th">HUB KEL</div>
-          <div class="lap-th">TD</div>
+          <div class="lap-th">S</div>
+          <div class="lap-th">D</div>
+          <div class="lap-th">N</div>
           <div class="lap-th">GDP</div>
           <div class="lap-th">GD 2JAM PP</div>
           <div class="lap-th">GDS</div>
@@ -55,6 +57,7 @@
           <div class="lap-th">JUMLAH OBAT</div>
           <div class="lap-th">HARGA OBAT (SATUAN)</div>
           <div class="lap-th">TOTAL HARGA OBAT</div>
+          <div class="lap-th">SARAN</div>
           <div class="lap-th">PEMERIKSA</div>
           <div class="lap-th">NB</div>
           <div class="lap-th">PERIKSA KE</div>
@@ -70,7 +73,9 @@
             <div class="lap-td">{{ $r['BAGIAN'] }}</div>
             <div class="lap-td">{{ $r['NAMA_PASIEN'] }}</div>
             <div class="lap-td lap-center">{{ $r['HUB_KEL'] }}</div>
-            <div class="lap-td lap-center">{{ $r['TD'] }}</div>
+            <div class="lap-td lap-center">{{ $r['S'] }}</div>
+            <div class="lap-td lap-center">{{ $r['D'] }}</div>
+            <div class="lap-td lap-center">{{ $r['N'] }}</div>
             <div class="lap-td lap-center">{{ $r['GDP'] }}</div>
             <div class="lap-td lap-center">{{ $r['GD_2JAM_PP'] }}</div>
             <div class="lap-td lap-center">{{ $r['GDS'] }}</div>
@@ -95,14 +100,14 @@
               @endphp
               {{ is_numeric($tt) ? number_format($tt, 0, ',', '.') : $tt }}
             </div>
-            <div class="lap-td">{{ $r['PEMERIKSA'] }}</div>
+            <div class="lap-td lap-center">{{ $r['SARAN'] }}</div>
+            <div class="lap-td lap-center">{{ $r['PEMERIKSA'] }}</div>
             <div class="lap-td lap-center">{{ $r['NB'] }}</div>
             <div class="lap-td lap-center">{{ $r['PERIKSA_KE'] }}</div>
           </div>
         @empty
           <div class="lap-empty">Tidak ada data pada rentang ini.</div>
         @endforelse
-
       </div>
     </div>
 

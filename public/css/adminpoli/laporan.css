@@ -163,11 +163,12 @@ body{ margin:0; }
   overflow:auto;
   border-radius:14px;
   border:1px solid var(--lap-line);
+  overflow-x: auto;
 }
 
 /* Biar tabel panjang tetap rapi */
 .lap-table{
-  min-width: 1700px;  /* boleh kamu naikkan kalau kolom banyak */
+  min-width: max-content;  /* boleh kamu naikkan kalau kolom banyak */
   background:#fff;
 }
 
@@ -276,4 +277,47 @@ body{ margin:0; }
 /* cegah body / page ikut melebar */
 html, body{
   overflow-x: clip;
+}
+
+/* KHUSUS PREVIEW LAPORAN */
+.lap-preview-wrap .lap-thead,
+.lap-preview-wrap .lap-row {
+  display: grid;
+  grid-auto-flow: column;
+  min-width: max-content;
+  align-items: stretch;
+
+  grid-template-columns:
+    56px
+    120px
+    180px
+    64px
+    120px
+    200px
+    90px
+
+    54px
+    54px
+    54px
+
+    70px
+    100px
+    70px
+    70px
+    80px
+    70px
+    70px
+    70px
+    70px
+
+    240px
+    240px
+    110px
+    150px
+    150px
+    220px
+
+    160px
+    70px
+    100px;
 }

@@ -123,8 +123,6 @@ Route::prefix('adminpoli')->name('adminpoli.')->group(function () {
     Route::put('/diagnosak3/penyakit/{id_nb}', [DiagnosaK3Controller::class,'updatePenyakit'])->name('diagnosak3.penyakit.update');
     Route::delete('/diagnosak3/penyakit/{id_nb}', [DiagnosaK3Controller::class,'destroyPenyakit'])->name('diagnosak3.penyakit.destroy');
 
-    Route::post('/diagnosak3/reorder', [DiagnosaK3Controller::class,'reorder'])->name('diagnosak3.reorder');
-
     Route::post('/diagnosak3/import', [DiagnosaK3Controller::class,'import'])->name('diagnosak3.import');
     Route::get('/diagnosak3/export', [DiagnosaK3Controller::class,'export'])->name('diagnosak3.export');
 

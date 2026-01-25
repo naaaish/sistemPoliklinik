@@ -189,6 +189,7 @@ class LaporanController extends Controller
 
                 'pm.sistol',
                 'pm.diastol',
+                'pm.nadi',
                 'pm.gd_puasa',
                 'pm.gd_duajam',
                 'pm.gd_sewaktu',
@@ -267,7 +268,9 @@ class LaporanController extends Controller
             $isPensiunan = false; // kalau ada kolom pensiun, isi di sini
             $allowPeriksaKe = $isPegawai && !$isPensiunan;
 
-            $td = ($v->sistol && $v->diastol) ? ($v->sistol . '/' . $v->diastol) : '-';
+            $s = ($v->sistol !== null && $v->sistol !== '') ? $v->sistol : '-';
+            $d = ($v->diastol !== null && $v->diastol !== '') ? $v->diastol : '-';
+            $n = ($v->nadi !== null && $v->nadi !== '') ? $v->nadi : '-';
 
             // periksa ke: hanya pegawai + hanya jika ada tes darah
             $hasLab = $this->hasBloodTest($v);
@@ -315,6 +318,15 @@ class LaporanController extends Controller
 
                 $ob = $obatList[$i] ?? null;
 
+                $saranText = '-';
+                if (!empty($v->saran_list) && count($v->saran_list) > 0) {
+                    $items = [];
+                    foreach ($v->saran_list as $sr) {
+                        $items[] = $sr->nama_saran ?? (string)$sr;
+                    }
+                    $saranText = implode("\n", $items);
+                }
+
                 $rows[] = [
                     'NO' => $isFirst ? $no : '',
                     'TANGGAL' => $isFirst ? ($v->tanggal ?? '-') : '',
@@ -323,7 +335,9 @@ class LaporanController extends Controller
                     'BAGIAN' => $isFirst ? ($v->bagian ?? '-') : '',
                     'NAMA_PASIEN' => $isFirst ? ($v->nama_pasien ?? '-') : '',
                     'HUB_KEL' => $isFirst ? ($v->hub_kel ?? '-') : '',
-                    'TD' => $isFirst ? $td : '',
+                    'S' => $isFirst ? ($v->sistol ?? '-') : '',
+                    'D' => $isFirst ? ($v->diastol ?? '-') : '',
+                    'N' => $isFirst ? ($v->nadi ?? '-') : '',
 
                     'GDP' => $isFirst ? ($v->gd_puasa ?? '-') : '',
                     'GD_2JAM_PP' => $isFirst ? ($v->gd_duajam ?? '-') : '',
@@ -341,7 +355,7 @@ class LaporanController extends Controller
                     'JUMLAH_OBAT' => $ob ? trim(($ob->jumlah ?? 0) . ' ' . ($ob->satuan ?? '')) : ($isFirst ? '-' : ''),
                     'HARGA_OBAT_SATUAN' => $ob ? ($ob->harga ?? 0) : ($isFirst ? '-' : ''),
                     'TOTAL_HARGA_OBAT' => $isFirst ? ($totalHarga ?: '-') : '',
-
+                    'SARAN' => $isFirst ? $saranText : '',
                     'PEMERIKSA' => $isFirst ? ($v->pemeriksa ?? '-') : '',
 
                     'NB' => $isPegawai ? ($nbLine ?: '-') : '',
