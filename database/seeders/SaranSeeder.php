@@ -2,134 +2,84 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class SaranSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $now = Carbon::now();
 
+        // Data saran disesuaikan dengan DiagnosaSeeder (DG-001 s/d DG-040)
         $data_saran = [
-            // DG-001: Influenza
-            [
-                'id_saran'    => 'SRN-001',
-                'id_diagnosa' => 'DG-001', 
-                'saran'       => 'Istirahat total minimal 3 hari, perbanyak minum air hangat, dan konsumsi vitamin C.',
-                'is_active'  => '1',
-            ],
-            // DG-002: Hipertensi
-            [
-                'id_saran'    => 'SRN-002',
-                'id_diagnosa' => 'DG-002', 
-                'saran'       => 'Kurangi konsumsi garam/asinan, hindari kopi/rokok, dan kelola stres dengan baik.',
-                'is_active'  => '1',
-            ],
-            // DG-003: Diabetes
-            [
-                'id_saran'    => 'SRN-003',
-                'id_diagnosa' => 'DG-003', 
-                'saran'       => 'Batasi asupan gula dan karbohidrat, rutin olahraga ringan, dan periksa gula darah berkala.',
-                'is_active'  => '1',
-            ],
-            // DG-004: Gastritis (Maag)
-            [
-                'id_saran'    => 'SRN-004',
-                'id_diagnosa' => 'DG-004', 
-                'saran'       => 'Makan teratur (sedikit tapi sering), hindari makanan pedas, asam, dan bersantan.',
-                'is_active'  => '1',
-            ],
-            // DG-005: Tipes
-            [
-                'id_saran'    => 'SRN-005',
-                'id_diagnosa' => 'DG-005', 
-                'saran'       => 'Bed rest total, konsumsi makanan lunak (bubur), dan hindari jajanan tidak higienis.',
-                'is_active'  => '1',
-            ],
-            // DG-006: ISPA
-            [
-                'id_saran'    => 'SRN-006',
-                'id_diagnosa' => 'DG-006', 
-                'saran'       => 'Gunakan masker, hindari debu/asap rokok, dan jaga ventilasi udara di kamar.',
-                'is_active'  => '1',
-            ],
-            // DG-007: DBD
-            [
-                'id_saran'    => 'SRN-007',
-                'id_diagnosa' => 'DG-007', 
-                'saran'       => 'Minum cairan elektrolit/jus jambu yang banyak untuk menaikkan trombosit, pantau suhu tubuh.',
-                'is_active'  => '1',
-            ],
-            // DG-008: Diare
-            [
-                'id_saran'    => 'SRN-008',
-                'id_diagnosa' => 'DG-008', 
-                'saran'       => 'Minum oralit setiap buang air besar, hindari susu dan makanan berserat tinggi sementara waktu.',
-                'is_active'  => '1',
-            ],
-            // DG-009: Asma
-            [
-                'id_saran'    => 'SRN-009',
-                'id_diagnosa' => 'DG-009', 
-                'saran'       => 'Hindari pemicu alergi (debu/dingin), selalu sedia inhaler kemanapun pergi.',
-                'is_active'  => '1',
-            ],
-            // DG-010: Dermatitis (Alergi Kulit)
-            [
-                'id_saran'    => 'SRN-010',
-                'id_diagnosa' => 'DG-010', 
-                'saran'       => 'Jangan digaruk agar tidak infeksi, gunakan sabun bayi/lembut, cari tahu pemicu alergi.',
-                'is_active'  => '1',
-            ],
-            // DG-011: Dispepsia
-            [
-                'id_saran'    => 'SRN-011',
-                'id_diagnosa' => 'DG-011', 
-                'saran'       => 'Hindari makan terlalu cepat, jangan langsung berbaring setelah makan.',
-                'is_active'  => '1',
-            ],
-            // DG-012: Sakit Kepala/Migrain
-            [
-                'id_saran'    => 'SRN-012',
-                'id_diagnosa' => 'DG-012', 
-                'saran'       => 'Istirahat di ruangan gelap dan hening, pijat area leher perlahan, perbaiki posisi tidur.',
-                'is_active'  => '1',
-            ],
-            // DG-013: Anemia
-            [
-                'id_saran'    => 'SRN-013',
-                'id_diagnosa' => 'DG-013', 
-                'saran'       => 'Konsumsi makanan tinggi zat besi (bayam/daging merah), hindari minum teh setelah makan.',
-                'is_active'  => '1',
-            ],
-            // DG-014: Vertigo
-            [
-                'id_saran'    => 'SRN-014',
-                'id_diagnosa' => 'DG-014', 
-                'saran'       => 'Hindari gerakan kepala mendadak, tidur dengan bantal agak tinggi.',
-                'is_active'  => '1',
-            ],
-            // DG-015: Radang Tenggorokan
-            [
-                'id_saran'    => 'SRN-015',
-                'id_diagnosa' => 'DG-015', 
-                'saran'       => 'Sering kumur air garam hangat, hindari gorengan dan minuman dingin (es).',
-                'is_active'  => '1',
-            ],
+            // --- SALURAN PERNAFASAN ---
+            ['id_saran' => 'SRN-001', 'id_diagnosa' => 'DG-001', 'saran' => 'Istirahat total, banyak minum air hangat, dan konsumsi vitamin C.', 'is_active' => true],
+            ['id_saran' => 'SRN-002', 'id_diagnosa' => 'DG-002', 'saran' => 'Hindari gorengan/es, sering kumur air garam hangat.', 'is_active' => true],
+            ['id_saran' => 'SRN-003', 'id_diagnosa' => 'DG-003', 'saran' => 'Istirahatkan suara (jangan banyak bicara), minum air jahe.', 'is_active' => true],
+            ['id_saran' => 'SRN-004', 'id_diagnosa' => 'DG-004', 'saran' => 'Hindari asap rokok/debu, gunakan masker, perbanyak air putih.', 'is_active' => true],
+            ['id_saran' => 'SRN-005', 'id_diagnosa' => 'DG-005', 'saran' => 'Lakukan irigasi hidung dengan larutan saline, kompres hangat di wajah.', 'is_active' => true],
+            ['id_saran' => 'SRN-006', 'id_diagnosa' => 'DG-006', 'saran' => 'Hindari pemicu alergi (debu/dingin), jaga kebersihan rumah.', 'is_active' => true],
+            ['id_saran' => 'SRN-007', 'id_diagnosa' => 'DG-007', 'saran' => 'Istirahat cukup, hindari polusi udara, minum obat pengencer dahak.', 'is_active' => true],
+            ['id_saran' => 'SRN-008', 'id_diagnosa' => 'DG-008', 'saran' => 'Segera rujuk ke spesialis paru, istirahat total.', 'is_active' => true],
+            ['id_saran' => 'SRN-009', 'id_diagnosa' => 'DG-009', 'saran' => 'Habiskan antibiotik sesuai resep dokter, bed rest total.', 'is_active' => true],
+            ['id_saran' => 'SRN-010', 'id_diagnosa' => 'DG-010', 'saran' => 'Selalu sedia inhaler, hindari aktivitas fisik berat saat kambuh.', 'is_active' => true],
+            ['id_saran' => 'SRN-011', 'id_diagnosa' => 'DG-011', 'saran' => 'Minum obat rutin tanpa putus selama 6 bulan, pakai masker, ventilasi rumah harus bagus.', 'is_active' => true],
+            ['id_saran' => 'SRN-012', 'id_diagnosa' => 'DG-012', 'saran' => 'Minum antibiotik jika diresepkan, kumur antiseptik.', 'is_active' => true],
+
+            // --- SALURAN PENCERNAAN ---
+            ['id_saran' => 'SRN-013', 'id_diagnosa' => 'DG-013', 'saran' => 'Makan sedikit tapi sering, hindari pedas/asam/kopi.', 'is_active' => true],
+            ['id_saran' => 'SRN-014', 'id_diagnosa' => 'DG-014', 'saran' => 'Rehidrasi segera dengan oralit/infus, jaga kebersihan air minum.', 'is_active' => true],
+            ['id_saran' => 'SRN-015', 'id_diagnosa' => 'DG-015', 'saran' => 'Minum oralit setiap BAB, makan makanan rendah serat sementara.', 'is_active' => true],
+            ['id_saran' => 'SRN-016', 'id_diagnosa' => 'DG-016', 'saran' => 'Jaga kebersihan tangan, minum antibiotik sesuai anjuran.', 'is_active' => true],
+            ['id_saran' => 'SRN-017', 'id_diagnosa' => 'DG-017', 'saran' => 'Bed rest total, makan bubur halus, hindari jajanan luar.', 'is_active' => true],
+            ['id_saran' => 'SRN-018', 'id_diagnosa' => 'DG-018', 'saran' => 'Istirahat total, jaga kebersihan makanan.', 'is_active' => true],
+            ['id_saran' => 'SRN-019', 'id_diagnosa' => 'DG-019', 'saran' => 'Hindari alkohol dan makanan berlemak, istirahat cukup.', 'is_active' => true],
+            ['id_saran' => 'SRN-020', 'id_diagnosa' => 'DG-020', 'saran' => 'Jangan langsung berbaring setelah makan, kunyah makanan perlahan.', 'is_active' => true],
+            ['id_saran' => 'SRN-021', 'id_diagnosa' => 'DG-021', 'saran' => 'Tahan napas sebentar, minum air dingin perlahan.', 'is_active' => true],
+            ['id_saran' => 'SRN-022', 'id_diagnosa' => 'DG-022', 'saran' => 'Minum obat cacing rutin 6 bulan sekali, potong kuku pendek.', 'is_active' => true],
+            ['id_saran' => 'SRN-023', 'id_diagnosa' => 'DG-023', 'saran' => 'Kompres hangat pada perut, hindari makanan gas (kol/ubi).', 'is_active' => true],
+            ['id_saran' => 'SRN-024', 'id_diagnosa' => 'DG-024', 'saran' => 'Perbanyak makan sayur/buah (serat), banyak minum air putih.', 'is_active' => true],
+
+            // --- GINJAL & KEMIH ---
+            ['id_saran' => 'SRN-025', 'id_diagnosa' => 'DG-025', 'saran' => 'Jangan menahan buang air kecil, perbanyak minum air putih, jaga kebersihan area intim.', 'is_active' => true],
+            ['id_saran' => 'SRN-026', 'id_diagnosa' => 'DG-026', 'saran' => 'Minum minimal 2-3 liter air per hari, kurangi konsumsi garam dan jeroan.', 'is_active' => true],
+
+            // --- JANTUNG & DARAH ---
+            ['id_saran' => 'SRN-027', 'id_diagnosa' => 'DG-027', 'saran' => 'Kurangi garam, rutin cek tensi, kelola stres.', 'is_active' => true],
+            ['id_saran' => 'SRN-028', 'id_diagnosa' => 'DG-028', 'saran' => 'Minum yang cukup, bangun dari tidur secara perlahan, olahraga ringan.', 'is_active' => true],
+            ['id_saran' => 'SRN-029', 'id_diagnosa' => 'DG-029', 'saran' => 'Pola makan rendah kolesterol, rutin olahraga kardio ringan, stop merokok.', 'is_active' => true],
+
+            // --- PEMBULUH DARAH ---
+            ['id_saran' => 'SRN-030', 'id_diagnosa' => 'DG-030', 'saran' => 'Perbanyak serat agar BAB lunak, jangan mengejan terlalu kuat.', 'is_active' => true],
+            ['id_saran' => 'SRN-031', 'id_diagnosa' => 'DG-031', 'saran' => 'Gunakan stoking kompresi, angkat kaki lebih tinggi saat tidur.', 'is_active' => true],
+            ['id_saran' => 'SRN-032', 'id_diagnosa' => 'DG-032', 'saran' => 'Kompres hangat pada area bengkak, istirahatkan lengan/kaki.', 'is_active' => true],
+            ['id_saran' => 'SRN-033', 'id_diagnosa' => 'DG-033', 'saran' => 'Perbanyak cairan elektrolit/jus jambu, pantau suhu tubuh tiap 4 jam.', 'is_active' => true],
+
+            // --- KELAINAN DARAH ---
+            ['id_saran' => 'SRN-034', 'id_diagnosa' => 'DG-034', 'saran' => 'Konsumsi suplemen zat besi, makan daging merah/bayam/ati ayam.', 'is_active' => true],
+
+            // --- OTOT & RANGKA ---
+            ['id_saran' => 'SRN-035', 'id_diagnosa' => 'DG-035', 'saran' => 'Istirahatkan otot yang sakit, kompres hangat, pijat ringan.', 'is_active' => true],
+            ['id_saran' => 'SRN-036', 'id_diagnosa' => 'DG-036', 'saran' => 'Hindari aktivitas berat pada sendi, kompres dingin jika bengkak.', 'is_active' => true],
+            ['id_saran' => 'SRN-037', 'id_diagnosa' => 'DG-037', 'saran' => 'Latihan gerak sendi ringan, rutin minum obat antiradang dari dokter.', 'is_active' => true],
+            ['id_saran' => 'SRN-038', 'id_diagnosa' => 'DG-038', 'saran' => 'Hindari emping, jeroan, kacang-kacangan, dan makanan laut.', 'is_active' => true],
+            ['id_saran' => 'SRN-039', 'id_diagnosa' => 'DG-039', 'saran' => 'Jaga postur tubuh tegak, hindari mengangkat beban berat membungkuk, fisioterapi.', 'is_active' => true],
+            ['id_saran' => 'SRN-040', 'id_diagnosa' => 'DG-040', 'saran' => 'Kurangi berat badan ideal, olahraga berenang atau bersepeda statis.', 'is_active' => true],
         ];
 
-        // Loop untuk tambah timestamp
+        // Tambah Timestamps
         foreach ($data_saran as &$data) {
             $data['created_at'] = $now;
             $data['updated_at'] = $now;
         }
 
-        DB::table('saran')->insert($data_saran);
+        // Gunakan upsert agar aman
+        DB::table('saran')->upsert(
+            $data_saran,
+            ['id_saran'], // Unique key
+            ['id_diagnosa', 'saran', 'is_active', 'updated_at'] // Kolom yang diupdate jika id sama
+        );
     }
 }
