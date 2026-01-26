@@ -204,6 +204,9 @@ class PegawaiController extends Controller
                     'alamat'            => $row[10] ?? '-',
                     'jabatan'           => $row[11] ?? '-',
                     'bagian'            => $row[12] ?? '-',
+                    'pendidikan_terakhir' => $row[13] ?? '-',
+                    'institusi'         => $row[14] ?? '-',
+                    'thn_lulus'         => $row[15] ?? null,
                     'is_active'         => 1,
                     'updated_at'        => now(),
                 ]
