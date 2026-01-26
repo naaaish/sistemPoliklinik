@@ -54,18 +54,19 @@ class PegawaiController extends Controller
 
         // Handle foto upload
         if ($request->hasFile('foto')) {
-            $foto = $request->file('foto');
-            $filename = time() . '_' . $foto->getClientOriginalName();
-            $foto->storeAs('public/foto_pegawai', $filename);
-            $data['foto'] = $filename;
+            $file = $request->file('foto');
+            $namaFile = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('profile-pegawai'), $namaFile); // Pindahkan langsung ke public
+            $data['foto'] = $namaFile;
         }
+
 
         // Set default is_active jika tidak ada
         $data['is_active'] = $request->input('is_active', 1);
 
         Pegawai::create($data);
 
-        return redirect()->route('pegawai.index')
+        return redirect()->route('pegawai.show', $data['nip']) 
             ->with('success', 'Data pegawai berhasil ditambahkan!');
     }
 
@@ -73,14 +74,19 @@ class PegawaiController extends Controller
     {
         $pegawai = Pegawai::where('nip', $nip)->firstOrFail();
         
-        // Hitung masa kerja
+        // Ambil data keluarga berdasarkan NIP pegawai
+        $keluarga = DB::table('keluarga')
+            ->where('nip', $nip)
+            ->orderBy('hubungan_keluarga', 'asc')
+            ->get();
+        
         $masaKerja = \Carbon\Carbon::parse($pegawai->tgl_masuk)->diff(\Carbon\Carbon::now());
         $years = $masaKerja->y;
         $months = $masaKerja->m;
 
-        return view('kepegawaian.pegawai.detail', compact('pegawai', 'years', 'months'));
+        return view('kepegawaian.pegawai.detail', compact('pegawai', 'years', 'months', 'keluarga'));
     }
-
+    
     public function edit($nip)
     {
         $pegawai = Pegawai::where('nip', $nip)->firstOrFail();
@@ -137,15 +143,14 @@ class PegawaiController extends Controller
 
         // Handle foto upload
         if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $namaFile = time() . '_' . $file->getClientOriginalName();
             // Hapus foto lama jika ada
-            if ($pegawai->foto) {
-                Storage::delete('public/foto_pegawai/' . $pegawai->foto);
+            if ($pegawai->foto && file_exists(public_path('profile-pegawai/' . $pegawai->foto))) {
+                unlink(public_path('profile-pegawai/' . $pegawai->foto));
             }
-
-            $foto = $request->file('foto');
-            $filename = time() . '_' . $foto->getClientOriginalName();
-            $foto->storeAs('public/foto_pegawai', $filename);
-            $data['foto'] = $filename;
+            $file->move(public_path('profile-pegawai'), $namaFile); // Simpan foto baru
+            $data['foto'] = $namaFile;
         }
 
         // Update is_active
@@ -155,7 +160,7 @@ class PegawaiController extends Controller
 
         $pegawai->update($data);
 
-        return redirect()->route('pegawai.index')
+        return redirect()->route('pegawai.show', $pegawai->nip) 
             ->with('success', 'Data pegawai berhasil diperbarui!');
     }
 

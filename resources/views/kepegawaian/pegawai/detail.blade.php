@@ -12,8 +12,15 @@
 
     {{-- PAGE HEADER --}}
     <div class="page-header">
-        <h4>Detail Pegawai</h4>
+        {{-- Sisi Kiri: Icon Back + Judul --}}
+        <div class="d-flex align-items-center">
+            <a href="{{ route('kepegawaian.pegawai') }}" class="btn-back-icon me-3">
+                <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Back" style="width: 38px; height: 38px;">
+            </a>
+            <h4 class="mb-0">Detail Pegawai</h4>
+        </div>
 
+        {{-- Sisi Kanan: Tombol Edit --}}
         <div class="d-flex gap-2 align-items-center">
             <a href="{{ route('pegawai.edit', $pegawai->nip) }}" class="btn btn-edit">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -33,7 +40,8 @@
         <div class="profile-body">
             <div class="profile-avatar">
                 @if(!empty($pegawai->foto))
-                    <img src="{{ asset('profile-pegawai/'.$pegawai->foto) }}" alt="Foto {{ $pegawai->nama_pegawai }}">
+                    {{-- Hapus 'storage/' karena file ada di public/profile-pegawai --}}
+                    <img src="{{ asset('profile-pegawai/' . $pegawai->foto) }}" alt="Foto Pegawai">
                 @else
                     <img src="{{ asset('assets/default-avatar.png') }}" alt="Avatar Default">
                 @endif
@@ -132,7 +140,72 @@
             <div><label>Tahun Lulus</label><p>{{ $pegawai->thn_lulus ?? '-' }}</p></div>
         </div>
     </div>
-
+    
+    {{-- DAFTAR KELUARGA --}}
+    <div class="data-card">
+        <div class="card-header" style="background: #316BA1; display: flex; justify-content: space-between; align-items: center;">
+            <div class="card-header-inner">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span>Daftar Keluarga</span>
+            </div>
+            {{-- Tombol Tambah Keluarga yang lebih rapi --}}
+            <a href="{{ route('keluarga.create', $pegawai->nip) }}" class="btn-tambah-sm">
+                <span>+</span> Tambah Keluarga
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 20%">Hubungan</th>
+                            <th style="width: 30%">Nama</th>
+                            <th style="width: 20%">Tgl Lahir</th>
+                            <th style="width: 20%">Jenis Kelamin</th>
+                            <th style="width: 10%" class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($keluarga as $k)
+                        <tr>
+                            <td class="fw-bold text-secondary">
+                                {{ ucfirst($k->hubungan_keluarga) }} 
+                                @if($k->urutan_anak)
+                                    <small class="d-block fw-normal text-muted">(Anak ke-{{ $k->urutan_anak }})</small>
+                                @endif
+                            </td>
+                            <td>{{ $k->nama_keluarga }}</td>
+                            <td>{{ \Carbon\Carbon::parse($k->tgl_lahir)->translatedFormat('d F Y') }}</td>
+                            <td>{{ $k->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
+                            <td class="text-center">
+                                {{-- Tombol Edit Saja --}}
+                                <a href="{{ route('keluarga.edit', $k->id_keluarga) }}" class="btn-edit-sm" title="Edit Data Keluarga">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <img src="{{ asset('assets/adminPoli/no-data.png') }}" alt="" style="width: 40px; opacity: 0.5; display: block; margin: 0 auto 10px;">
+                                Belum ada data keluarga terdaftar.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>

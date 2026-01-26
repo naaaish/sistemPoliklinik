@@ -23,6 +23,7 @@ use App\Http\Controllers\Pasien\DetailPemeriksaanController;
 use App\Http\Controllers\Kepegawaian\DokterPemeriksaController;
 use App\Http\Controllers\Kepegawaian\DetailRiwayatController;
 use App\Http\Controllers\Pasien\ArtikelController;
+use App\Http\Controllers\Kepegawaian\KeluargaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -333,4 +334,10 @@ Route::prefix('pegawai')->group(function () {
     Route::get('/laporan/excel/obat', [LaporanController::class, 'downloadExcelObat'])->name('laporan.excel.obat');
     Route::get('/laporan/excel/total', [LaporanController::class, 'downloadExcelTotal'])->name('laporan.excel.total');
 
+    // Route Keluarga
+    Route::get('/keluarga/create/{nip}', [KeluargaController::class, 'create'])->name('keluarga.create');
+    Route::post('/keluarga/store', [KeluargaController::class, 'store'])->name('keluarga.store');
+    Route::get('/keluarga/edit/{id}', [KeluargaController::class, 'edit'])->name('keluarga.edit');
+    Route::put('/keluarga/update/{id}', [KeluargaController::class, 'update'])->name('keluarga.update');
+    Route::delete('/keluarga/destroy/{id}', [KeluargaController::class, 'destroy'])->name('keluarga.destroy');
 });

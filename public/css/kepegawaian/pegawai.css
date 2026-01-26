@@ -13,9 +13,16 @@
 .page-header {
     display: flex;
     justify-content: space-between;
+    text-align: left;
     align-items: center;
     margin-bottom: 24px;
     padding: 0;
+}
+
+.page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .page-header h1,
@@ -305,6 +312,27 @@
     margin: 0 auto;
 }
 
+.btn-back-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;        
+    height: 42px;       
+    border-radius: 50%;
+}
+
+.btn-back-icon img {
+    width: 42px;        
+    height: 42px;
+}
+
+.page-title {
+    margin: 0;            
+    font-size: 1.25rem;   
+    font-weight: 600;
+}
+
+
 .pegawai-form-card {
     border-radius: 16px;
     border: none;
@@ -428,7 +456,7 @@ select.status-akun option[value="0"] {
 }
 
 .btn-secondary {
-    background: #64748b;
+    background: #cf7e7e;
     border: none;
     border-radius: 10px;
     padding: 12px 24px;
@@ -437,7 +465,7 @@ select.status-akun option[value="0"] {
 }
 
 .btn-secondary:hover {
-    background: #475569;
+    background: #e63838;
     transform: translateY(-2px);
 }
 
@@ -695,4 +723,82 @@ select.status-akun option[value="0"] {
 .csv-modal-footer .btn svg {
     width: 16px;
     height: 16px;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Memastikan foto tetap proporsional dalam lingkaran */
+    border-radius: 50%;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative; 
+}
+
+.btn-light {
+    background: #fff;
+    color: #316BA1;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 6px 12px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-light:hover {
+    background: #f1f5f9;
+    color: #25537d;
+}
+
+/* Tombol Tambah di Header Biru */
+.btn-tambah-sm {
+    background: white;
+    color: #316BA1 !important;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.btn-tambah-sm:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Tombol Edit di Dalam Tabel */
+.btn-edit-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background: #fff9eb;
+    color: #d97706 !important;
+    border: 1.5px solid #fde68a;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-edit-sm:hover {
+    background: #fef3c7;
+    border-color: #fbbf24;
+    transform: scale(1.05);
+}
+
+/* Tabel Adjustments */
+.table-hover tbody tr:hover {
+    background-color: #f8fbff;
 }
