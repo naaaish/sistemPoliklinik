@@ -30,20 +30,27 @@ class PemeriksaanInputController extends Controller
         $pendaftaran = Pendaftaran::findOrFail($pendaftaranId);
 
         // kolom sesuai migration: obat.nama_obat, diagnosa_k3.nama_penyakit, saran.isi
-        $penyakit   = Diagnosa::orderBy('diagnosa')->get();
-        $obat = Obat::orderBy('nama_obat', 'asc')->get();
-        $saran = Saran::orderBy('saran', 'asc')->get();
-        $diagnosaK3 = DiagnosaK3::where('tipe', 'penyakit')
-            ->orderBy('nama_penyakit', 'asc')
+        $penyakit = DB::table('diagnosa')
+            ->leftJoin('diagnosa_k3', 'diagnosa.id_nb', '=', 'diagnosa_k3.id_nb')
+            ->select(
+                'diagnosa.id_diagnosa',
+                'diagnosa.diagnosa',
+                'diagnosa.id_nb',
+                'diagnosa_k3.nama_penyakit as nama_k3'
+            )
+            ->orderBy('diagnosa.diagnosa')
             ->get();
+
+        $obat  = Obat::orderBy('nama_obat', 'asc')->get();
+        $saran = Saran::orderBy('saran', 'asc')->get();
 
         return view('adminpoli.pemeriksaan.create', compact(
             'pendaftaran',
             'obat',
-            'diagnosaK3',
             'saran',
             'penyakit',
         ));
+
     }
 
     public function store(Request $request, $pendaftaranId)
@@ -69,10 +76,6 @@ class PemeriksaanInputController extends Controller
             // pilihan (UI kamu kirim array via chips)
             'penyakit_id'     => 'nullable|array',
             'penyakit_id.*'   => 'nullable|string',
-
-            'diagnosa_k3_id'    => 'nullable|array',
-            'diagnosa_k3_id.*'  => 'nullable|string',
-
             'id_saran'    => 'nullable|array',
             'id_saran.*'  => 'nullable|string',
 
@@ -110,7 +113,15 @@ class PemeriksaanInputController extends Controller
             $idPemeriksaan = 'PM' . date('ymdHis') . Str::upper(Str::random(6));
 
             $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
-            $k3Ids       = array_values(array_filter($validated['diagnosa_k3_id'] ?? []));
+
+            // AUTO ambil NB K3 dari tabel diagnosa
+            $k3Ids = Diagnosa::whereIn('id_diagnosa', $penyakitIds)
+                ->pluck('id_nb')
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+
             $saranIdsUI  = array_values(array_filter($validated['id_saran'] ?? []));
 
             $autoSaranIds = [];
