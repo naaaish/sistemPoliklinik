@@ -74,14 +74,19 @@ class PegawaiController extends Controller
     {
         $pegawai = Pegawai::where('nip', $nip)->firstOrFail();
         
-        // Hitung masa kerja
+        // Ambil data keluarga berdasarkan NIP pegawai
+        $keluarga = DB::table('keluarga')
+            ->where('nip', $nip)
+            ->orderBy('hubungan_keluarga', 'asc')
+            ->get();
+        
         $masaKerja = \Carbon\Carbon::parse($pegawai->tgl_masuk)->diff(\Carbon\Carbon::now());
         $years = $masaKerja->y;
         $months = $masaKerja->m;
 
-        return view('kepegawaian.pegawai.detail', compact('pegawai', 'years', 'months'));
+        return view('kepegawaian.pegawai.detail', compact('pegawai', 'years', 'months', 'keluarga'));
     }
-
+    
     public function edit($nip)
     {
         $pegawai = Pegawai::where('nip', $nip)->firstOrFail();

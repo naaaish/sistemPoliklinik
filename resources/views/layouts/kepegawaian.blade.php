@@ -210,7 +210,7 @@ setTimeout(function() {
     </div>
 
     {{-- ================= MAIN CONTENT ================= --}}
-<div class="notification-container">
+{{-- <div class="notification-container">
     @if(session('success'))
         <div class="toast-alert toast-success">
             <div class="toast-icon">
@@ -222,44 +222,45 @@ setTimeout(function() {
                 {{ session('success') }}
             </div>
         </div>
-    @endif
+    @endif --}}
 
 
 
 </div>
-
 <div class="main">
     <div class="content-wrapper">
         @yield('content')
     </div>
 
-    {{-- FOOTER BARU --}}
     <div class="page-footer">
         Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
     </div>
 </div>
 
-    {{-- ================= SCRIPTS STACK  ================= --}}
-    @stack('scripts')
 <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            @if(session('success'))
-                window.AdminPoliToast.fire({
-                    icon: 'success',
-                    title: "{{ session('success') }}"
-                });
-            @endif
+document.addEventListener('DOMContentLoaded', function() {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 4000, // Hilang otomatis dalam 4 detik
+        timerProgressBar: true,
+        background: '#ffffff',
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
 
-            @if(session('error'))
-                window.AdminPoliToast.fire({
-                    icon: 'error',
-                    title: "{{ session('error') }}",
-                    iconColor: '#e74c3c'
-                });
-            @endif
-        });
-    </script>
+    @if(session('success'))
+        Toast.fire({ icon: 'success', title: "{{ session('success') }}" });
+    @endif
 
+    @if(session('error'))
+        Toast.fire({ icon: 'error', title: 'Gagal!', text: "{{ session('error') }}" });
+    @endif
+});
+</script>
 
 </body>
 </html>
