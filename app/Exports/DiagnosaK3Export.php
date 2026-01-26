@@ -114,7 +114,6 @@ class DiagnosaK3Export extends StringValueBinder implements FromCollection, With
     }
     public function bindValue(Cell $cell, $value)
     {
-        // Kolom A = Nomor → paksa TEXT biar 7.1 tetap 7.1 (nggak jadi 7,1)
         if ($cell->getColumn() === 'A' && $cell->getRow() >= 2) {
             $cell->setValueExplicit((string)$value, DataType::TYPE_STRING);
             return true;
