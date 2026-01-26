@@ -16,12 +16,10 @@ return new class extends Migration {
             $table->text('nama_penyakit');
             $table->string('kategori_penyakit');
             $table->boolean('is_active')->default(true);
-            $table->string('id_diagnosa', 20)->nullable();
             $table->timestamps();
 
             $table->index(['tipe']);
             $table->index(['parent_id']);
-            $table->foreign('parent_id')->references('id_nb')->on('diagnosa_k3')->nullOnDelete();
         });
     }
 

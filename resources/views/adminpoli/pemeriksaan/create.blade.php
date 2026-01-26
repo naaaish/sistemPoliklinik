@@ -95,40 +95,25 @@
       {{-- ===== DIAGNOSA ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Diagnosa</div>
         <div class="ap-row">
-        <div class="ap-label">Penyakit</div><div class="ap-colon">:</div>
-        <div class="ap-input">
-            <select id="inpPenyakit" class="ap-select">
-            <option value="">-- pilih (boleh kosong) --</option>
-            @foreach($penyakit as $p)
-                <option value="{{ $p->id_diagnosa }}">{{ $p->diagnosa }}</option>
-            @endforeach
-            </select>
+          <div class="ap-label">Penyakit</div><div class="ap-colon">:</div>
+          <div class="ap-input">
+              <select id="inpPenyakit" class="ap-select">
+              <option value="">-- pilih (boleh kosong) --</option>
+              @foreach($penyakit as $p)
+                  <option value="{{ $p->id_diagnosa }}"
+                          data-nb="{{ $p->id_nb ?? '' }}"
+                          data-k3="{{ $p->nama_k3 ?? '' }}">
+                          {{ $p->diagnosa }}
+                  </option>
+              @endforeach
+              </select>
 
-            <button type="button" id="btnAddPenyakit" class="ap-btn-small">Tambah Penyakit</button>
+              <button type="button" id="btnAddPenyakit" class="ap-btn-small">Tambah Penyakit</button>
 
-            <div id="chipPenyakit" style="margin-top:10px;"></div>
-            <div id="hiddenPenyakit"></div>
+              <div id="chipPenyakit" style="margin-top:10px;"></div>
+              <div id="hiddenPenyakit"></div>
+          </div>
         </div>
-        </div>
-
-      <div class="ap-row">
-        <div class="ap-label">Diagnosa</div><div class="ap-colon">:</div>
-        <div class="ap-input">
-          <select id="inpDiagnosa" class="ap-select">
-            <option value="">-- pilih (boleh kosong) --</option>
-            @foreach($diagnosaK3 as $d)
-              <option value="{{ $d->id_nb }}">{{ $d->nama_penyakit }}</option>
-            @endforeach
-          </select>
-
-          <button type="button" class="ap-btn-small" id="btnAddDiagnosa" style="width:auto;padding:8px 12px;margin-top:8px;">
-            Tambah Diagnosa
-          </button>
-
-          <div id="chipDiagnosa" style="margin-top:10px;"></div>
-          <div id="hiddenDiagnosa"></div>
-        </div>
-      </div>
 
       <div class="ap-row">
         <div class="ap-label">Saran</div><div class="ap-colon">:</div>
@@ -285,21 +270,7 @@
     filterSaran();
 
     sel.value = '';
-  });
- 
-  // Diagnosa K3 (select)
-  document.getElementById('btnAddDiagnosa').addEventListener('click', () => {
-    const sel = document.getElementById('inpDiagnosa');
-    if(!sel.value) return;
-    addChip({
-      value: sel.value,
-      label: sel.options[sel.selectedIndex].text,
-      chipContainer: document.getElementById('chipDiagnosa'),
-      hiddenContainer: document.getElementById('hiddenDiagnosa'),
-      inputName: 'diagnosa_k3_id'
-    });
-    sel.value = '';
-  });
+  }); 
 
   // Saran (select)
   document.getElementById('btnAddSaran').addEventListener('click', () => {
@@ -310,56 +281,56 @@
       label: sel.options[sel.selectedIndex].text,
       chipContainer: document.getElementById('chipSaran'),
       hiddenContainer: document.getElementById('hiddenSaran'),
-      inputName: 'saran_id'
+      inputName: 'id_saran'
     });
     sel.value = '';
   });
 
   // ===== OBAT LOGIC (TANPA JSON) =====
-  const obatWrap = document.getElementById('obatWrap');
-  const totalText = document.getElementById('totalText');
+  // const obatWrap = document.getElementById('obatWrap');
+  // const totalText = document.getElementById('totalText');
 
-  function hitungTotal(){
-    let total = 0;
-    obatWrap.querySelectorAll('.obat-row').forEach(row => {
-      const qty = Number(row.querySelector('[name="jumlah[]"]').value || 0);
-      const harga = Number(row.querySelector('[name="harga_satuan[]"]').value || 0);
-      const subtotal = qty * harga;
+  // function hitungTotal(){
+  //   let total = 0;
+  //   obatWrap.querySelectorAll('.obat-row').forEach(row => {
+  //     const qty = Number(row.querySelector('[name="jumlah[]"]').value || 0);
+  //     const harga = Number(row.querySelector('[name="harga_satuan[]"]').value || 0);
+  //     const subtotal = qty * harga;
 
-      row.querySelector('.subtotal').value = subtotal ? subtotal : '';
-      total += subtotal;
-    });
-    totalText.textContent = rupiah(total);
-  }
+  //     row.querySelector('.subtotal').value = subtotal ? subtotal : '';
+  //     total += subtotal;
+  //   });
+  //   totalText.textContent = rupiah(total);
+  // }
 
-  function addObatRow(){
-    const templateRow = document.querySelector('#obatTemplate .obat-row').cloneNode(true);
-    obatWrap.appendChild(templateRow);
-    const select = templateRow.querySelector('.obat-select');
-    const qtyEl = templateRow.querySelector('[name="jumlah[]"]');
-    const satuanEl = templateRow.querySelector('[name="satuan[]"]');
-    const hargaEl = templateRow.querySelector('[name="harga_satuan[]"]');
+  // function addObatRow(){
+  //   const templateRow = document.querySelector('#obatTemplate .obat-row').cloneNode(true);
+  //   obatWrap.appendChild(templateRow);
+  //   const select = templateRow.querySelector('.obat-select');
+  //   const qtyEl = templateRow.querySelector('[name="jumlah[]"]');
+  //   const satuanEl = templateRow.querySelector('[name="satuan[]"]');
+  //   const hargaEl = templateRow.querySelector('[name="harga_satuan[]"]');
 
-    initObatSelect(select);
+  //   initObatSelect(select);
 
-    select.addEventListener('change', () => {
-      const opt = select.options[select.selectedIndex];
-      hargaEl.value = opt.dataset.harga || '';
-      satuanEl.value = opt.dataset.satuan || '';
-      if(!qtyEl.value) qtyEl.value = 1;
-      hitungTotal();
-    });
+  //   select.addEventListener('change', () => {
+  //     const opt = select.options[select.selectedIndex];
+  //     hargaEl.value = opt.dataset.harga || '';
+  //     satuanEl.value = opt.dataset.satuan || '';
+  //     if(!qtyEl.value) qtyEl.value = 1;
+  //     hitungTotal();
+  //   });
 
-    qtyEl.addEventListener('input', hitungTotal);
-    hargaEl.addEventListener('input', hitungTotal);
+  //   qtyEl.addEventListener('input', hitungTotal);
+  //   hargaEl.addEventListener('input', hitungTotal);
 
-    templateRow.querySelector('.btnDel').addEventListener('click', () => {
-      templateRow.remove();
-      hitungTotal();
-    });
+  //   templateRow.querySelector('.btnDel').addEventListener('click', () => {
+  //     templateRow.remove();
+  //     hitungTotal();
+  //   });
 
-    hitungTotal();
-  }
+  //   hitungTotal();
+  // }
 
   document.addEventListener('click', function(e){
     const btn = e.target.closest('.btnDel, .btn-del, .btn-hapus, .obat-del, button[data-del="obat"]');
@@ -525,50 +496,19 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.obat-select').forEach(sel => initObatSelect(sel));
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  // init tomselect untuk select obat yang sudah ada
-  function initObatSelect(selectEl){
-    if (selectEl.tomselect) return; // biar ga double init
+function initObatSelect(selectEl){
+  if (!selectEl || selectEl.tomselect) return;
 
-    new TomSelect(selectEl, {
-      create: false,
-      searchField: ['text'],
-      placeholder: 'Cari obat...',
-      allowEmptyOption: true,
+  new TomSelect(selectEl, {
+    create: false,
+    searchField: ['text'],
+    placeholder: 'Cari obat...',
+    allowEmptyOption: true,
   });
 }
-});
-</script>
-<script>
+
 document.addEventListener('DOMContentLoaded', () => {
-  const penyakit = document.querySelector('select[name="penyakit[]"], select[name="penyakit"]');
-  const diagnosaK3 = document.querySelector('select[name="diagnosa[]"], select[name="diagnosa"]');
-
-  if (!penyakit || !diagnosaK3) return;
-
-  penyakit.addEventListener('change', async () => {
-    const idDiagnosa = penyakit.value;
-    if (!idDiagnosa) {
-      diagnosaK3.value = '';
-      return;
-    }
-
-    try {
-      const res = await fetch(`/adminpoli/api/diagnosa/${encodeURIComponent(idDiagnosa)}/nb`);
-      const data = await res.json();
-
-      if (data && data.id_nb) {
-        diagnosaK3.value = data.id_nb;   // ✅ auto isi NB (Diagnosa K3)
-        diagnosaK3.dispatchEvent(new Event('change'));
-      } else {
-        diagnosaK3.value = '';
-        // optional: kasih alert/info kecil
-        // alert('Diagnosa ini belum punya mapping NB K3');
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  });
+  document.querySelectorAll('.obat-select').forEach(sel => initObatSelect(sel));
 });
 </script>
 @endsection
