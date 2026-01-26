@@ -149,7 +149,6 @@
         </form>
       </div>
     </div>
-
   </div>
 
   <div class="diag-foot">
@@ -160,9 +159,6 @@
 
 @push('scripts')
 <script>
-  // table grid 2 kolom (override)
-  // cukup via CSS class diag-head/diag-row (lihat CSS di bawah)
-
   function openTambahDiagnosa(){
     document.getElementById('modalTambahDiagnosa').style.display = 'flex';
   }
@@ -180,7 +176,6 @@
       });
     });
 
-    // confirm delete (SweetAlert2)
     document.querySelectorAll('form.js-diag-delete').forEach((form) => {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -196,7 +191,6 @@
       });
     });
 
-    // upload: tampilkan nama file + validasi size/ext + enable tombol
     const input = document.getElementById('diagFileInput');
     const nameEl = document.getElementById('diagFileName');
     const labelEl = document.getElementById('diagFileLabel');
@@ -268,8 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function isInvalidRange(){
     const from = fromEl?.value;
     const to = toEl?.value;
-    if (!from || !to) return false; // required sudah handle
-    return from > to; // aman karena format YYYY-MM-DD
+    if (!from || !to) return false;
+    return from > to;
   }
 
   // validasi saat submit (preview atau download)

@@ -260,7 +260,6 @@ class LaporanController extends Controller
         $rows = [];
         $no = 1;
         $counter = [];
-        
 
         foreach ($visits as $v) {
 
@@ -331,7 +330,7 @@ class LaporanController extends Controller
                     'NO' => $isFirst ? $no : '',
                     'TANGGAL' => $isFirst ? ($v->tanggal ?? '-') : '',
                     'NAMA' => $isFirst ? ($v->nama_pegawai ?? '-') : '',
-                    'UMUR' => $umur,
+                    'UMUR' => $isFirst ? $umur : '',
                     'BAGIAN' => $isFirst ? ($v->bagian ?? '-') : '',
                     'NAMA_PASIEN' => $isFirst ? ($v->nama_pasien ?? '-') : '',
                     'HUB_KEL' => $isFirst ? ($v->hub_kel ?? '-') : '',
@@ -411,7 +410,7 @@ class LaporanController extends Controller
         $data = [];
 
         foreach ($types as $tipe) {
-            $visits = $this->getVisits($from, $to, $tipe, null); // semua nip utk tipe tsb
+            $visits = $this->getVisits($from, $to, $tipe, null);
             $rows = $this->buildReportRows($visits, $tipe);
 
             $data[] = [

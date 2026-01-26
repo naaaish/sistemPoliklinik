@@ -539,4 +539,36 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const penyakit = document.querySelector('select[name="penyakit[]"], select[name="penyakit"]');
+  const diagnosaK3 = document.querySelector('select[name="diagnosa[]"], select[name="diagnosa"]');
+
+  if (!penyakit || !diagnosaK3) return;
+
+  penyakit.addEventListener('change', async () => {
+    const idDiagnosa = penyakit.value;
+    if (!idDiagnosa) {
+      diagnosaK3.value = '';
+      return;
+    }
+
+    try {
+      const res = await fetch(`/adminpoli/api/diagnosa/${encodeURIComponent(idDiagnosa)}/nb`);
+      const data = await res.json();
+
+      if (data && data.id_nb) {
+        diagnosaK3.value = data.id_nb;   // ✅ auto isi NB (Diagnosa K3)
+        diagnosaK3.dispatchEvent(new Event('change'));
+      } else {
+        diagnosaK3.value = '';
+        // optional: kasih alert/info kecil
+        // alert('Diagnosa ini belum punya mapping NB K3');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  });
+});
+</script>
 @endsection

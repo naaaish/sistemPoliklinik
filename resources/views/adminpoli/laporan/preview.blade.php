@@ -17,7 +17,7 @@
     <form action="{{ route('adminpoli.laporan.preview') }}" method="GET" class="lap-tools">
       <div class="lap-tools">
         <div class="lap-info">
-          <b>{{ $count ?? 0 }}</b> baris ({{ $from }} s/d {{ $to }})
+          <b></b>
         </div>
 
         <a class="lap-btn"
