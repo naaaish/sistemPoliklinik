@@ -33,7 +33,8 @@
         <div class="profile-body">
             <div class="profile-avatar">
                 @if(!empty($pegawai->foto))
-                    <img src="{{ asset('profile-pegawai/'.$pegawai->foto) }}" alt="Foto {{ $pegawai->nama_pegawai }}">
+                    {{-- Hapus 'storage/' karena file ada di public/profile-pegawai --}}
+                    <img src="{{ asset('profile-pegawai/' . $pegawai->foto) }}" alt="Foto Pegawai">
                 @else
                     <img src="{{ asset('assets/default-avatar.png') }}" alt="Avatar Default">
                 @endif
@@ -133,6 +134,7 @@
         </div>
     </div>
 
+    
 </div>
 
 <script>
