@@ -114,6 +114,8 @@ Route::prefix('adminpoli')
         Route::get('diagnosa/export', [DiagnosaController::class, 'export'])->name('diagnosa.export');
         Route::resource('diagnosa', DiagnosaController::class)->except(['show']);
 
+        Route::get('/api/diagnosa/{id}/nb', [PemeriksaanController::class, 'getNbByDiagnosa']);
+
         // Diagnosa K3
         Route::get('/diagnosak3', [DiagnosaK3Controller::class,'index'])->name('diagnosak3.index');
 

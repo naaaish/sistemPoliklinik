@@ -410,7 +410,7 @@ class LaporanController extends Controller
         $data = [];
 
         foreach ($types as $tipe) {
-            $visits = $this->getVisits($from, $to, $tipe, null); // semua nip utk tipe tsb
+            $visits = $this->getVisits($from, $to, $tipe, null);
             $rows = $this->buildReportRows($visits, $tipe);
 
             $data[] = [

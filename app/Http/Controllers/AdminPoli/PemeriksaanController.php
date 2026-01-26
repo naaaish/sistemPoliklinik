@@ -301,19 +301,16 @@ class PemeriksaanController extends Controller
                 ->with('success', 'Hasil pemeriksaan berhasil diupdate.');
         });
     }
-
     
-    private function parseIds($val): array
+    public function getNbByDiagnosa($id)
     {
-        if (!$val) return [];
+        $row = DB::table('diagnosa_k3')
+            ->where('tipe','penyakit')
+            ->where('is_active',1)
+            ->where('id_diagnosa',$id)
+            ->select('id_nb')
+            ->first();
 
-        // kalau JSON array
-        if (is_string($val) && strlen($val) && $val[0] === '[') {
-            $arr = json_decode($val, true);
-            return is_array($arr) ? array_values(array_filter($arr)) : [];
-        }
-
-        // default CSV
-        return array_values(array_filter(array_map('trim', explode(',', (string)$val))));
+        return response()->json($row);
     }
 }

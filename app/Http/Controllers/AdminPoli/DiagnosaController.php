@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -13,11 +14,13 @@ class DiagnosaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DB::table('diagnosa');
+        $query = DB::table('diagnosa')
+            ->where('is_active', 1);
 
         // search
         if ($request->filled('q')) {
-            $query->where('diagnosa', 'like', '%' . $request->q . '%');
+            $q = mb_strtolower($request->q);
+            $query->whereRaw('LOWER(diagnosa) LIKE ?', ["%{$q}%"]);
         }
 
         $diagnosa = $query
@@ -29,6 +32,7 @@ class DiagnosaController extends Controller
         $previewCount = null;
         if ($request->filled('from') && $request->filled('to')) {
             $previewCount = DB::table('diagnosa')
+                ->where('is_active', 1)
                 ->whereBetween('created_at', [
                     $request->from . ' 00:00:00',
                     $request->to   . ' 23:59:59',
@@ -41,15 +45,16 @@ class DiagnosaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'diagnosa' => ['required', 'string'],
+            'diagnosa' => ['required',
+            Rule::unique('diagnosa', 'diagnosa')->where(fn ($q) => $q->where('is_active', 1)),
+            ],
         ]);
 
         $text = trim($request->diagnosa);
-
-        // unik untuk diagnosa aktif? (di tabel diagnosa kamu tidak ada is_active)
-        // jadi kita anggap: boleh sama? kalau kamu mau dilarang duplicate, aktifkan ini:
+        
         $exists = DB::table('diagnosa')
             ->whereRaw('LOWER(diagnosa) = ?', [mb_strtolower($text)])
+            ->where('is_active', 1)
             ->exists();
 
         if ($exists) {
@@ -58,18 +63,18 @@ class DiagnosaController extends Controller
                 ->with('error', 'Diagnosa sudah ada.');
         }
 
-        // generate ID: DGS-001, DGS-002, ...
         $last = DB::table('diagnosa')
             ->select('id_diagnosa')
             ->orderByRaw("CAST(SUBSTRING(id_diagnosa, 5) AS UNSIGNED) DESC")
             ->value('id_diagnosa');
 
         $nextNum = $last ? ((int)substr($last, 4) + 1) : 1;
-        $newId = 'DGS-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+        $newId = 'DG-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
 
         DB::table('diagnosa')->insert([
             'id_diagnosa' => $newId,
             'diagnosa'    => $text,
+            'is_active'   => 1,
             'created_at'  => now(),
             'updated_at'  => now(),
         ]);
@@ -90,12 +95,16 @@ class DiagnosaController extends Controller
     {
         $request->validate([
             'diagnosa' => ['required', 'string'],
+            Rule::unique('diagnosa', 'diagnosa')
+                ->where(fn ($q) => $q->where('is_active', 1))
+                ->ignore($id, 'id_diagnosa')
         ]);
 
         $text = trim($request->diagnosa);
 
         $exists = DB::table('diagnosa')
             ->whereRaw('LOWER(diagnosa) = ?', [mb_strtolower($text)])
+            ->where('is_active', 1)
             ->where('id_diagnosa', '!=', $id)
             ->exists();
 
@@ -118,7 +127,12 @@ class DiagnosaController extends Controller
 
     public function destroy($id)
     {
-        DB::table('diagnosa')->where('id_diagnosa', $id)->delete();
+        DB::table('diagnosa')
+            ->where('id_diagnosa', $id)
+            ->update([
+                'is_active' => 0,
+                'updated_at' => now()
+            ]);
 
         return redirect()->route('adminpoli.diagnosa.index')
             ->with('success', 'Diagnosa berhasil dihapus');
@@ -152,6 +166,7 @@ class DiagnosaController extends Controller
 
             $exists = DB::table('diagnosa')
                 ->whereRaw('LOWER(diagnosa) = ?', [mb_strtolower($text)])
+                ->where('is_active', 1)
                 ->exists();
 
             if ($exists) { $skipped++; continue; }
@@ -166,6 +181,7 @@ class DiagnosaController extends Controller
             DB::table('diagnosa')->insert([
                 'id_diagnosa' => $newId,
                 'diagnosa'    => $text,
+                'is_active'   => 1,
                 'created_at'  => now(),
                 'updated_at'  => now(),
             ]);
@@ -192,6 +208,7 @@ class DiagnosaController extends Controller
         $data = DB::table('diagnosa')
             ->select('id_diagnosa', 'diagnosa', 'created_at')
             ->whereBetween('created_at', [$from, $to])
+            ->where('is_active', 1)
             ->orderBy('diagnosa')
             ->get();
 

@@ -293,6 +293,7 @@ class DiagnosaK3Controller extends Controller
                     'id_nb' => $id,
                     'tipe' => 'penyakit',
                     'parent_id' => $parent,
+                    'id_diagnosa' => $request->id_diagnosa,
                     'nama_penyakit' => $nama,
                     'kategori_penyakit' => $cat->nama_penyakit,
                     'is_active' => 1,
