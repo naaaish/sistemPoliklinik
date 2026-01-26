@@ -287,50 +287,50 @@
   });
 
   // ===== OBAT LOGIC (TANPA JSON) =====
-  // const obatWrap = document.getElementById('obatWrap');
-  // const totalText = document.getElementById('totalText');
+  const obatWrap = document.getElementById('obatWrap');
+  const totalText = document.getElementById('totalText');
 
-  // function hitungTotal(){
-  //   let total = 0;
-  //   obatWrap.querySelectorAll('.obat-row').forEach(row => {
-  //     const qty = Number(row.querySelector('[name="jumlah[]"]').value || 0);
-  //     const harga = Number(row.querySelector('[name="harga_satuan[]"]').value || 0);
-  //     const subtotal = qty * harga;
+  function hitungTotal(){
+    let total = 0;
+    obatWrap.querySelectorAll('.obat-row').forEach(row => {
+      const qty = Number(row.querySelector('[name="jumlah[]"]').value || 0);
+      const harga = Number(row.querySelector('[name="harga_satuan[]"]').value || 0);
+      const subtotal = qty * harga;
 
-  //     row.querySelector('.subtotal').value = subtotal ? subtotal : '';
-  //     total += subtotal;
-  //   });
-  //   totalText.textContent = rupiah(total);
-  // }
+      row.querySelector('.subtotal').value = subtotal ? subtotal : '';
+      total += subtotal;
+    });
+    totalText.textContent = rupiah(total);
+  }
 
-  // function addObatRow(){
-  //   const templateRow = document.querySelector('#obatTemplate .obat-row').cloneNode(true);
-  //   obatWrap.appendChild(templateRow);
-  //   const select = templateRow.querySelector('.obat-select');
-  //   const qtyEl = templateRow.querySelector('[name="jumlah[]"]');
-  //   const satuanEl = templateRow.querySelector('[name="satuan[]"]');
-  //   const hargaEl = templateRow.querySelector('[name="harga_satuan[]"]');
+  function addObatRow(){
+    const templateRow = document.querySelector('#obatTemplate .obat-row').cloneNode(true);
+    obatWrap.appendChild(templateRow);
+    const select = templateRow.querySelector('.obat-select');
+    const qtyEl = templateRow.querySelector('[name="jumlah[]"]');
+    const satuanEl = templateRow.querySelector('[name="satuan[]"]');
+    const hargaEl = templateRow.querySelector('[name="harga_satuan[]"]');
 
-  //   initObatSelect(select);
+    initObatSelect(select);
 
-  //   select.addEventListener('change', () => {
-  //     const opt = select.options[select.selectedIndex];
-  //     hargaEl.value = opt.dataset.harga || '';
-  //     satuanEl.value = opt.dataset.satuan || '';
-  //     if(!qtyEl.value) qtyEl.value = 1;
-  //     hitungTotal();
-  //   });
+    select.addEventListener('change', () => {
+      const opt = select.options[select.selectedIndex];
+      hargaEl.value = opt.dataset.harga || '';
+      satuanEl.value = opt.dataset.satuan || '';
+      if(!qtyEl.value) qtyEl.value = 1;
+      hitungTotal();
+    });
 
-  //   qtyEl.addEventListener('input', hitungTotal);
-  //   hargaEl.addEventListener('input', hitungTotal);
+    qtyEl.addEventListener('input', hitungTotal);
+    hargaEl.addEventListener('input', hitungTotal);
 
-  //   templateRow.querySelector('.btnDel').addEventListener('click', () => {
-  //     templateRow.remove();
-  //     hitungTotal();
-  //   });
+    templateRow.querySelector('.btnDel').addEventListener('click', () => {
+      templateRow.remove();
+      hitungTotal();
+    });
 
-  //   hitungTotal();
-  // }
+    hitungTotal();
+  }
 
   document.addEventListener('click', function(e){
     const btn = e.target.closest('.btnDel, .btn-del, .btn-hapus, .obat-del, button[data-del="obat"]');
