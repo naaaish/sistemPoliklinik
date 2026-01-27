@@ -30,67 +30,65 @@
         {{-- BARIS 1 --}}
         <div class="ap-vital-item">
           <div class="ap-vital-label">Sistol</div>
-          <input class="ap-vital-input" name="sistol">
+          <input class="ap-vital-input" type="number" step="any" name="sistol">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Diastol</div>
-          <input class="ap-vital-input" name="diastol">
+          <input class="ap-vital-input" type="number" step="any" name="diastol">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Denyut Nadi</div>
-          <input class="ap-vital-input" name="nadi">
+          <input class="ap-vital-input" type="number" step="any" name="nadi">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Gula Darah<br>Puasa</div>
-          <input class="ap-vital-input" name="gula_puasa">
+          <input class="ap-vital-input" type="number" step="any" name="gula_puasa">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Gula Darah<br>2 jam PP</div>
-          <input class="ap-vital-input" name="gula_2jam_pp">
+          <input class="ap-vital-input" type="number" step="any" name="gula_2jam_pp">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Gula Darah<br>Sewaktu</div>
-          <input class="ap-vital-input" name="gula_sewaktu">
+          <input class="ap-vital-input" type="number" step="any" name="gula_sewaktu">
         </div>
 
         {{-- BARIS 2 --}}
         <div class="ap-vital-item">
           <div class="ap-vital-label">Asam Urat</div>
-          <input class="ap-vital-input" name="asam_urat">
+          <input class="ap-vital-input" type="number" step="any" name="asam_urat">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Cholesterol</div>
-          <input class="ap-vital-input" name="cholesterol">
+          <input class="ap-vital-input" type="number" step="any" name="cholesterol">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Trigliseride</div>
-          <input class="ap-vital-input" name="trigliseride">
+          <input class="ap-vital-input" type="number" step="any" name="trigliseride">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Suhu</div>
-          <input class="ap-vital-input" name="suhu">
+          <input class="ap-vital-input" type="number" step="any" name="suhu">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Berat Badan</div>
-          <input class="ap-vital-input" name="berat_badan">
+          <input class="ap-vital-input" type="number" step="any" name="berat_badan">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Tinggi Badan</div>
-          <input class="ap-vital-input" name="tinggi_badan">
+          <input class="ap-vital-input" type="number" step="any" name="tinggi_badan">
         </div>
       </div>
-
-
 
       {{-- ===== DIAGNOSA ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Diagnosa</div>
@@ -193,6 +191,11 @@
     return 'Rp' + n.toLocaleString('id-ID');
   }
 
+  // ===== Helper Numeric =====
+  function isNumeric(val){
+    return val !== '' && !isNaN(val) && isFinite(val);
+  }
+
   // ===== CHIP UTILITY =====
   function addChip({value, label, chipContainer, hiddenContainer, inputName}) {
     if(!value) return;
@@ -287,72 +290,122 @@
   });
 
   // ===== OBAT LOGIC (TANPA JSON) =====
+    // helper rupiah kamu
+  function rupiah(n){
+    n = Number(n || 0);
+    return 'Rp' + n.toLocaleString('id-ID');
+  }
+
   const obatWrap = document.getElementById('obatWrap');
-  const totalText = document.getElementById('totalText');
+  const totalHarga = document.getElementById('totalHarga'); // pastikan id ini ada
+
+  function hitungSubtotal(row){
+    const qty = Number(row.querySelector('.obat-jumlah')?.value || 0);
+
+    const hargaRawEl = row.querySelector('.obat-harga-raw');
+    const subRawEl   = row.querySelector('.obat-subtotal-raw');
+
+    const harga = Number(hargaRawEl?.value || 0);
+    const subtotal = qty * harga;
+
+    if (subRawEl) subRawEl.value = subtotal;
+
+    const hargaEl = row.querySelector('.obat-harga');
+    const subEl   = row.querySelector('.obat-subtotal');
+
+    if (hargaEl) hargaEl.value = rupiah(harga);
+    if (subEl) subEl.value = rupiah(subtotal);
+  }
 
   function hitungTotal(){
     let total = 0;
     obatWrap.querySelectorAll('.obat-row').forEach(row => {
-      const qty = Number(row.querySelector('[name="jumlah[]"]').value || 0);
-      const harga = Number(row.querySelector('[name="harga_satuan[]"]').value || 0);
-      const subtotal = qty * harga;
-
-      row.querySelector('.subtotal').value = subtotal ? subtotal : '';
-      total += subtotal;
+      total += Number(row.querySelector('.obat-subtotal-raw')?.value || 0);
     });
-    totalText.textContent = rupiah(total);
+    if (totalHarga) totalHarga.textContent = rupiah(total);
   }
 
-  function addObatRow(){
-    const templateRow = document.querySelector('#obatTemplate .obat-row').cloneNode(true);
-    obatWrap.appendChild(templateRow);
-    const select = templateRow.querySelector('.obat-select');
-    const qtyEl = templateRow.querySelector('[name="jumlah[]"]');
-    const satuanEl = templateRow.querySelector('[name="satuan[]"]');
-    const hargaEl = templateRow.querySelector('[name="harga_satuan[]"]');
+  function bindRowEvents(row){
+    const select = row.querySelector('.obat-select');
+    const qtyEl  = row.querySelector('.obat-jumlah');
+    const satuanEl = row.querySelector('.obat-satuan');
 
-    initObatSelect(select);
+    // saat pilih obat: isi harga + satuan dari option data-*
+    if(select){
+      select.addEventListener('change', () => {
+        const opt = select.options[select.selectedIndex];
+        const harga = Number(opt?.dataset?.harga || 0);
+        const satuan = opt?.dataset?.satuan || '';
 
-    select.addEventListener('change', () => {
-      const opt = select.options[select.selectedIndex];
-      hargaEl.value = opt.dataset.harga || '';
-      satuanEl.value = opt.dataset.satuan || '';
-      if(!qtyEl.value) qtyEl.value = 1;
+        row.querySelector('.obat-harga-raw').value = harga;
+
+        // satuan auto isi kalau belum diisi atau mau kamu paksa overwrite
+        if(satuanEl && !satuanEl.value){
+          satuanEl.value = satuan;
+        }
+
+        hitungSubtotal(row);
+        hitungTotal();
+      });
+    }
+
+    // saat qty berubah
+    if(qtyEl){
+      qtyEl.addEventListener('input', () => {
+        hitungSubtotal(row);
+        hitungTotal();
+      });
+    }
+
+    // hapus row
+    row.querySelector('.obat-hapus')?.addEventListener('click', () => {
+      row.remove();
       hitungTotal();
     });
 
-    qtyEl.addEventListener('input', hitungTotal);
-    hargaEl.addEventListener('input', hitungTotal);
-
-    templateRow.querySelector('.btnDel').addEventListener('click', () => {
-      templateRow.remove();
-      hitungTotal();
-    });
-
-    hitungTotal();
+    // format awal (buat row dari DB)
+    hitungSubtotal(row);
   }
 
-  document.addEventListener('click', function(e){
-    const btn = e.target.closest('.btnDel, .btn-del, .btn-hapus, .obat-del, button[data-del="obat"]');
-    if(!btn) return;
+  // bind semua row yang sudah dirender blade
+  document.querySelectorAll('#obatWrap .obat-row').forEach(bindRowEvents);
+  hitungTotal();
 
-    const row = btn.closest('.obat-row');
-    if(!row) return;
+  // tombol tambah
+  document.getElementById('btnAddObat')?.addEventListener('click', () => {
+    const tpl = document.querySelector('#obatTemplate .obat-row');
+    if(!tpl) return;
 
-    const sel = row.querySelector('.obat-select');
-    if(sel?.tomselect) sel.tomselect.destroy(); // penting biar gak nyisa
+    const row = tpl.cloneNode(true);
 
-    row.remove();
+    // reset default
+    row.querySelector('.obat-select').value = '';
+    row.querySelector('.obat-jumlah').value = 1;
+    row.querySelector('.obat-satuan').value = '';
+    row.querySelector('.obat-harga-raw').value = 0;
+    row.querySelector('.obat-subtotal-raw').value = 0;
+    row.querySelector('.obat-harga').value = '';
+    row.querySelector('.obat-subtotal').value = '';
+
+    obatWrap.appendChild(row);
+    bindRowEvents(row);
     hitungTotal();
   });
 
-  function getPickedObatValues(exceptRow=null){
-    const rows = [...document.querySelectorAll('#obatWrap .obat-row')];
-    return rows
-      .filter(r => r !== exceptRow)
-      .map(r => r.querySelector('.obat-select')?.value)
-      .filter(v => v);
+  // ambil semua value obat yang sudah kepilih (kecuali row yang sedang dicek)
+  function getPickedObatValues(exceptRow = null){
+    const vals = [];
+    document.querySelectorAll('#obatWrap .obat-row').forEach(r => {
+      if (exceptRow && r === exceptRow) return;
+      const sel = r.querySelector('select[name="obat_id[]"]');
+      const v = sel ? sel.value : '';
+      if (v) vals.push(v);
+    });
+    return vals;
   }
+
+  // alert anti spam (biar ga kebuka berkali-kali kalau user klik cepat)
+  let obatDuplicateAlertOpen = false;
 
   document.addEventListener('change', function(e){
     if(!e.target.classList.contains('obat-select')) return;
@@ -361,8 +414,9 @@
     const pickedOther = new Set(getPickedObatValues(row));
     const val = e.target.value;
 
-    // kalau dobel, reset + kasih peringatan
+    // kalau dobel
     if(val && pickedOther.has(val)){
+      // reset pilihan (support TomSelect & native)
       if(e.target.tomselect){
         e.target.tomselect.clear(true);
       } else {
@@ -370,145 +424,118 @@
       }
 
       // kosongin field row biar ga nyisa
-      row.querySelector('.obat-satuan') && (row.querySelector('.obat-satuan').value = '');
-      row.querySelector('.obat-harga-raw') && (row.querySelector('.obat-harga-raw').value = '');
-      row.querySelector('.obat-harga') && (row.querySelector('.obat-harga').value = '');
-      row.querySelector('.obat-subtotal-raw') && (row.querySelector('.obat-subtotal-raw').value = 0);
-      row.querySelector('.obat-subtotal') && (row.querySelector('.obat-subtotal').value = '');
+      const satuan = row.querySelector('.obat-satuan');
+      const hargaRaw = row.querySelector('.obat-harga-raw');
+      const harga = row.querySelector('.obat-harga');
+      const subRaw = row.querySelector('.obat-subtotal-raw');
+      const sub = row.querySelector('.obat-subtotal');
 
-      hitungTotal();
+      if(satuan) satuan.value = '';
+      if(hargaRaw) hargaRaw.value = 0;
+      if(harga) harga.value = '';
+      if(subRaw) subRaw.value = 0;
+      if(sub) sub.value = '';
 
-      Swal.fire({
-        icon: 'warning',
-        title: 'Obat sudah dipilih',
-        text: 'Obat yang sama tidak boleh dipilih dua kali.',
-        confirmButtonColor: '#316BA1',
-        heightAuto: false,  
-        scrollbarPadding: false 
-      });
+      // update total kalau fungsi kamu ada
+      if(typeof hitungTotal === 'function') hitungTotal();
+
+      // alert (SweetAlert)
+      if(!obatDuplicateAlertOpen){
+        obatDuplicateAlertOpen = true;
+        Swal.fire({
+          icon: 'warning',
+          title: 'Obat sudah dipilih',
+          text: 'Obat yang sama tidak boleh dipilih dua kali.',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#316BA1',
+          heightAuto: false,
+          scrollbarPadding: false 
+        }).then(() => {
+          obatDuplicateAlertOpen = false;
+          // fokus balik ke select biar user enak ganti
+          setTimeout(() => e.target.focus(), 50);
+        });
+      }
 
       return;
     }
   });
 
-  document.getElementById('btnAddObat').addEventListener('click', addObatRow);
+  document.getElementById('formPemeriksaan')?.addEventListener('submit', function (e) {
+    const fields = [
+      { name: 'sistol', label: 'Sistol' },
+      { name: 'diastol', label: 'Diastol' },
+      { name: 'nadi', label: 'Denyut Nadi' },
+      { name: 'gula_puasa', label: 'Gula Darah Puasa' },
+      { name: 'gula_2jam_pp', label: 'Gula Darah 2 Jam PP' },
+      { name: 'gula_sewaktu', label: 'Gula Darah Sewaktu' },
+      { name: 'asam_urat', label: 'Asam Urat' },
+      { name: 'cholesterol', label: 'Cholesterol' },
+      { name: 'trigliseride', label: 'Trigliseride' },
+      { name: 'suhu', label: 'Suhu' },
+      { name: 'berat_badan', label: 'Berat Badan' },
+      { name: 'tinggi_badan', label: 'Tinggi Badan' },
+    ];
 
-  document.addEventListener('change', function(e){
-  if(!e.target.classList.contains('obat-select')) return;
+    for (const f of fields) {
+      const el = this.querySelector(`[name="${f.name}"]`);
+      if (!el) continue;
 
-  const row = e.target.closest('.obat-row');
-  const opt = e.target.selectedOptions[0];
+      const val = (el.value ?? '').toString().trim();
+      if (val === '') continue;
 
-  const harga = Number(opt?.dataset?.harga || 0);
-  const satuan = opt?.dataset?.satuan || '';
+      if (!isFinite(Number(val))) {
+        e.preventDefault();
 
-  row.querySelector('.obat-harga-raw').value = harga;
-  row.querySelector('.obat-harga').value = rupiah(harga);
-  row.querySelector('.obat-satuan').value = satuan;
+        Swal.fire({
+          icon: 'warning',
+          title: 'Input Tidak Valid',
+          text: `${f.label} harus berupa angka.`,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#316BA1',
+          heightAuto: false,
+          scrollbarPadding: false
+        }).then(() => el.focus());
 
-  hitungSubtotal(row);
-});
-document.addEventListener('input', function(e){
-  if(!e.target.classList.contains('obat-jumlah')) return;
-
-  const row = e.target.closest('.obat-row');
-  hitungSubtotal(row);
-});
-function hitungSubtotal(row){
-  const qty = Number(row.querySelector('.obat-jumlah').value || 0);
-  const harga = Number(row.querySelector('.obat-harga-raw').value || 0);
-
-  const subtotal = qty * harga;
-
-  row.querySelector('.obat-subtotal-raw').value = subtotal;
-  row.querySelector('.obat-subtotal').value = rupiah(subtotal);
-
-  hitungTotal();
-}
-function hitungTotal(){
-  let total = 0;
-  document.querySelectorAll('.obat-subtotal-raw').forEach(i => {
-    total += Number(i.value || 0);
+        return;
+      }
+    }
   });
 
-  document.getElementById('totalHarga').innerText = rupiah(total);
-}
-document.addEventListener('change', function(e){
-  if(!e.target.classList.contains('obat-select')) return;
+  // ===== NAVIGASI KEYBOARD INPUT PEMERIKSAAN =====
+  document.addEventListener('DOMContentLoaded', () => {
+    const vitals = Array.from(
+      document.querySelectorAll('.ap-vital-input')
+    );
 
-  const row = e.target.closest('.obat-row');
-  const opt = e.target.selectedOptions[0];
+    if (vitals.length === 0) return;
 
-  const satuan = opt?.dataset?.satuan || '';
-  row.querySelector('.obat-satuan').value = satuan;
-});
-document.getElementById('formPemeriksaan').addEventListener('submit', (e) => {
-  const rows = document.querySelectorAll('#obatWrap .obat-row');
+    vitals.forEach((input, idx) => {
+      input.addEventListener('keydown', (e) => {
 
-  for (const row of rows) {
-    const obat = row.querySelector('.obat-select')?.value?.trim();
-    if(!obat) continue; // baris kosong di-skip
+        // ENTER → pindah ke input berikutnya (bukan submit)
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          vitals[idx + 1]?.focus();
+          return;
+        }
 
-    const satuanInput = row.querySelector('.obat-satuan');
-    const jumlahInput = row.querySelector('.obat-jumlah') || row.querySelector('[name="jumlah[]"]');
-    
-    const satuan = satuanInput?.value?.trim();
-    const jumlahRaw = jumlahInput?.value;
+        // PANAH BAWAH → ke input berikutnya
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight'){
+          e.preventDefault();
+          vitals[idx + 1]?.focus();
+          return;
+        }
 
-    const jumlah = Number(jumlahRaw || 0);
-    if (!jumlahInput || !jumlahRaw || isNaN(jumlah) || jumlah <= 0) {
-      e.preventDefault();
-
-      Swal.fire({
-        icon: 'warning',
-        title: 'Data Obat Belum Lengkap',
-        text: 'Jumlah obat wajib diisi.',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#316BA1',
-        heightAuto: false,  
-        scrollbarPadding: false 
-      }).then(() => {
-        jumlahInput?.focus();
+        // PANAH ATAS → ke input sebelumnya
+        if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          vitals[idx - 1]?.focus();
+          return;
+        }
       });
-
-      return;
-    }
-
-    if(!satuan){
-      e.preventDefault();
-
-      Swal.fire({
-        icon: 'warning',
-        title: 'Data Obat Belum Lengkap',
-        text: 'Satuan wajib diisi.',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#316BA1',
-      }).then(() => {
-        satuanInput?.focus();
-      });
-
-      return;
-    }
-  }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.obat-select').forEach(sel => initObatSelect(sel));
-});
-
-function initObatSelect(selectEl){
-  if (!selectEl || selectEl.tomselect) return;
-
-  new TomSelect(selectEl, {
-    create: false,
-    searchField: ['text'],
-    placeholder: 'Cari obat...',
-    allowEmptyOption: true,
+    });
   });
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.obat-select').forEach(sel => initObatSelect(sel));
-});
 </script>
 @endsection
