@@ -15,7 +15,7 @@ class DiagnosaController extends Controller
     public function index(Request $request)
     {
         $query = DB::table('diagnosa')
-            ->where('is_active', 1);
+            ->where('diagnosa.is_active', 1);
 
         // search
         if ($request->filled('q')) {
@@ -24,9 +24,26 @@ class DiagnosaController extends Controller
         }
 
         $diagnosa = $query
-            ->select('id_diagnosa', 'diagnosa', 'created_at')
-            ->orderBy('diagnosa')
+            ->leftJoin('diagnosa_k3', function ($join) {
+                $join->on('diagnosa.id_nb', '=', 'diagnosa_k3.id_nb')
+                    ->where('diagnosa_k3.is_active', 1)
+                    ->where('diagnosa_k3.tipe', 'penyakit');
+            })
+            ->select(       
+                'diagnosa.id_diagnosa',
+                'diagnosa.diagnosa',
+                'diagnosa.id_nb',
+                'diagnosa.created_at',
+                'diagnosa_k3.nama_penyakit as nama_k3'
+            )
+            ->orderBy('diagnosa.diagnosa')
             ->get();
+
+        $k3Options = DB::table('diagnosa_k3')
+            ->where('diagnosa_k3.is_active', 1)
+            ->where('tipe', 'penyakit')
+            ->orderBy('nama_penyakit')
+            ->get(['id_nb', 'nama_penyakit']);
 
         // preview count by created_at range (untuk download)
         $previewCount = null;
@@ -39,7 +56,7 @@ class DiagnosaController extends Controller
                 ])->count();
         }
 
-        return view('adminpoli.diagnosa.index', compact('diagnosa', 'previewCount'));
+        return view('adminpoli.diagnosa.index', compact('diagnosa', 'previewCount', 'k3Options'));
     }
 
     public function store(Request $request)
@@ -47,6 +64,10 @@ class DiagnosaController extends Controller
         $request->validate([
             'diagnosa' => ['required',
             Rule::unique('diagnosa', 'diagnosa')->where(fn ($q) => $q->where('is_active', 1)),
+            ],
+            'id_nb' => [
+                'required',
+                Rule::exists('diagnosa_k3', 'id_nb')->where(fn ($q) => $q->where('is_active', 1)->where('tipe', 'penyakit')),
             ],
         ]);
 
@@ -74,30 +95,32 @@ class DiagnosaController extends Controller
         DB::table('diagnosa')->insert([
             'id_diagnosa' => $newId,
             'diagnosa'    => $text,
+            'id_nb'       => $request->id_nb,
             'is_active'   => 1,
             'created_at'  => now(),
             'updated_at'  => now(),
         ]);
-
+        
         return redirect()->route('adminpoli.diagnosa.index')
             ->with('success', 'Diagnosa berhasil ditambahkan');
-    }
-
-    public function edit($id)
-    {
-        $row = DB::table('diagnosa')->where('id_diagnosa', $id)->first();
-        if (!$row) return redirect()->route('adminpoli.diagnosa.index')->with('error', 'Data tidak ditemukan.');
-
-        return view('adminpoli.diagnosa.edit', compact('row'));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
-            'diagnosa' => ['required', 'string'],
-            Rule::unique('diagnosa', 'diagnosa')
+            'diagnosa' => [
+                'required',
+                'string',
+                Rule::unique('diagnosa', 'diagnosa')
                 ->where(fn ($q) => $q->where('is_active', 1))
-                ->ignore($id, 'id_diagnosa')
+                ->ignore($id, 'id_diagnosa'),
+            ],
+            'id_nb' => [
+                'required',
+                Rule::exists('diagnosa_k3', 'id_nb')->where(fn ($q) =>
+                $q->where('is_active', 1)->where('tipe', 'penyakit')
+                ),
+            ],
         ]);
 
         $text = trim($request->diagnosa);
@@ -118,8 +141,27 @@ class DiagnosaController extends Controller
             ->where('id_diagnosa', $id)
             ->update([
                 'diagnosa'   => $text,
+                'id_nb'      => $request->input('id_nb'),
                 'updated_at' => now(),
             ]);
+
+        // reset semua link diagnosa_k3 yg sebelumnya mengarah ke diagnosa ini
+        DB::table('diagnosa_k3')
+            ->where('id_diagnosa', $id)
+            ->update([
+                'id_diagnosa' => null,
+                'updated_at'  => now(),
+            ]);
+
+        // link baru (kalau dipilih)
+        if ($request->filled('id_nb')) {
+            DB::table('diagnosa_k3')
+                ->where('id_nb', $request->id_nb)
+                ->update([
+                    'id_diagnosa' => $id,
+                    'updated_at'  => now(),
+                ]);
+        }
 
         return redirect()->route('adminpoli.diagnosa.index')
             ->with('success', 'Diagnosa berhasil diperbarui');
@@ -176,7 +218,7 @@ class DiagnosaController extends Controller
                 ->value('id_diagnosa');
 
             $nextNum = $last ? ((int)substr($last, 4) + 1) : 1;
-            $newId = 'DGS-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+            $newId = 'DG-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
 
             DB::table('diagnosa')->insert([
                 'id_diagnosa' => $newId,

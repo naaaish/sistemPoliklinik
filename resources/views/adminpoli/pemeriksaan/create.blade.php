@@ -167,7 +167,36 @@
         </div>
       </div>
 
-      <div id="obatWrap"></div>
+      <div id="obatWrap">
+        @if(isset($detailResep) && $detailResep->count())
+          @foreach($detailResep as $dr)
+            <div class="obat-row">
+              <select class="obat-select" name="obat_id[]">
+                <option value="">-- pilih obat (boleh kosong) --</option>
+                @foreach($obat as $o)
+                  <option value="{{ $o->id_obat }}"
+                          data-harga="{{ $o->harga }}"
+                          data-satuan="{{ $o->satuan ?? '' }}"
+                          {{ $o->id_obat == $dr->id_obat ? 'selected' : '' }}>
+                    {{ $o->nama_obat }}
+                  </option>
+                @endforeach
+              </select>
+
+              <input class="obat-jumlah" type="number" min="1" name="jumlah[]" value="{{ (int)$dr->jumlah }}">
+              <input class="obat-satuan" type="text" name="satuan[]" value="{{ $dr->satuan ?? '' }}">
+
+              <input class="obat-harga-raw" type="hidden" name="harga_satuan[]" value="{{ (float)($dr->harga_satuan ?? 0) }}">
+              <input class="obat-subtotal-raw" type="hidden" value="{{ (float)($dr->subtotal ?? 0) }}">
+
+              <input class="obat-harga" type="text" value="" readonly>
+              <input class="obat-subtotal" type="text" value="" readonly>
+
+              <button class="obat-hapus" type="button">Hapus</button>
+            </div>
+          @endforeach
+        @endif
+      </div>
 
       <button type="button" id="btnAddObat" class="ap-btn-small">Tambah Obat/Alkes</button>
 
@@ -257,7 +286,7 @@
     sel.value = ""; // reset pilihan
   }
 
-    // Penyakit (text)
+  // Penyakit (text)
   document.getElementById('btnAddPenyakit').addEventListener('click', () => {
     const sel = document.getElementById('inpPenyakit');
     if(!sel.value) return;
@@ -461,7 +490,48 @@
     }
   });
 
+  function showWarn(title, text, cb) {
+    if (window.Swal && Swal.fire) {
+      Swal.fire({
+        icon: 'warning',
+        title,
+        text,
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#316BA1',
+        heightAuto: false,
+        scrollbarPadding: false
+      }).then(() => cb?.());
+    } else {
+      alert(title + "\n\n" + text);
+      cb?.();
+    }
+  }
+
+
   document.getElementById('formPemeriksaan')?.addEventListener('submit', function (e) {
+    let firstInvalidSatuan = null;
+
+    document.querySelectorAll('#obatWrap .obat-row').forEach((row) => {
+      const obatSelect = row.querySelector('select[name="obat_id[]"]');
+      const satuanInput = row.querySelector('input[name="satuan[]"]');
+      if (!obatSelect || !satuanInput) return;
+
+      const obatVal = obatSelect.value;
+      const satuanVal = (satuanInput.value ?? '').trim();
+
+      if (obatVal && satuanVal === '' && !firstInvalidSatuan) {
+        firstInvalidSatuan = satuanInput;
+      }
+    });
+
+    if (firstInvalidSatuan) {
+      e.preventDefault();
+      showWarn('Satuan belum diisi', 'Jika obat dipilih, satuan wajib diisi.', () => {
+        firstInvalidSatuan.focus();
+      });
+      return; // << PENTING
+    }
+
     const fields = [
       { name: 'sistol', label: 'Sistol' },
       { name: 'diastol', label: 'Diastol' },
@@ -486,21 +556,12 @@
 
       if (!isFinite(Number(val))) {
         e.preventDefault();
-
-        Swal.fire({
-          icon: 'warning',
-          title: 'Input Tidak Valid',
-          text: `${f.label} harus berupa angka.`,
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#316BA1',
-          heightAuto: false,
-          scrollbarPadding: false
-        }).then(() => el.focus());
-
+        showWarn('Input Tidak Valid', `${f.label} harus berupa angka.`, () => el.focus());
         return;
       }
     }
   });
+
 
   // ===== NAVIGASI KEYBOARD INPUT PEMERIKSAAN =====
   document.addEventListener('DOMContentLoaded', () => {

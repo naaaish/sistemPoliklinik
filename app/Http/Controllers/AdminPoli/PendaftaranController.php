@@ -116,7 +116,7 @@ class PendaftaranController extends Controller
             'tipe_pasien' => ['required', 'in:pegawai,keluarga,pensiunan'],
             'nama_pasien' => ['required', 'string', 'max:255'],
             'hub_kel' => ['required', 'in:YBS,Pasangan,Anak'],
-            'tgl_lahir' => ['required', 'date'],
+            'tgl_lahir' => ['nullable', 'date'],
 
             'id_keluarga' => ['nullable','string','max:32'],
             'jenis_pemeriksaan' => ['required', 'in:cek_kesehatan,berobat'],
@@ -124,6 +124,27 @@ class PendaftaranController extends Controller
 
             'keluhan' => ['nullable', 'string'],
         ]);
+
+        $isPoli = ($validated['nip'] === '001');
+        $pemeriksa = DB::table('pemeriksa')
+            ->where('id_pemeriksa', 'PMR001')
+            ->first();
+
+        if ($isPoli) {
+            // paksa nilai aman untuk mode poliklinik
+            $validated['nama_pegawai'] = $validated['nama_pegawai'] ?: 'Poliklinik';
+            $validated['bagian'] = $validated['bagian'] ?: 'Poliklinik';
+
+            $validated['tipe_pasien'] = 'pegawai';
+            $validated['nama_pasien'] = $validated['nama_pasien'] ?: '-';
+            $validated['hub_kel'] = 'YBS';
+            $validated['id_keluarga'] = null;
+            $validated['dokter'] = null;
+            $validated['pemeriksa'] = $pemeriksa ? $pemeriksa->id_pemeriksa : null;
+
+            // tgl lahir boleh kosong
+            $validated['tgl_lahir'] = $validated['tgl_lahir'] ?: null;
+        }
 
         // cek pegawai ada
         $pegawai = DB::table('pegawai')->where('nip', $validated['nip'])->first();

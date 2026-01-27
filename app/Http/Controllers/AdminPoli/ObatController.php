@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\ObatExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -249,7 +250,6 @@ class ObatController extends Controller
             ->with('success', "Import selesai. Berhasil: $inserted, Dilewati: $skipped");
     }
 
-
     public function export(Request $request)
     {
         $request->validate([
@@ -269,6 +269,7 @@ class ObatController extends Controller
         // Filter rentang berdasarkan created_at (data masuk pada rentang tsb)
         $data = DB::table('obat')
             ->select('id_obat', 'nama_obat', 'harga', 'exp_date', 'created_at', 'is_active')
+            ->where('is_active', 1)
             ->whereBetween('created_at', [$from, $to])
             ->orderBy('nama_obat')
             ->get();
@@ -305,18 +306,12 @@ class ObatController extends Controller
         }
 
         if ($request->format === 'excel') {
-            $filename = $fileBase . '.xls';
+            $filename = $fileBase . '.xlsx';
 
-            $html = view('adminpoli.obat.export_excel', [
-                'data' => $data,
-                'from' => $request->from,
-                'to'   => $request->to,
-            ])->render();
-
-            return response($html, 200, [
-                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
-            ]);
+            return Excel::download(
+                new ObatExport($data, $request->from, $request->to),
+                $filename
+            );
         }
 
         // PDF (butuh dompdf)
