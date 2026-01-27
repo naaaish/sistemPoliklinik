@@ -88,25 +88,21 @@ class DetailRiwayatController extends Controller
         }
 
 
-        // =================================================
-        // DIAGNOSA NON-K3 (MANY TO MANY)
-        // =================================================
-        $diagnosa = DB::table('detail_pemeriksaan_penyakit as dpp')
-            ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dpp.id_diagnosa')
-            ->where('dpp.id_pemeriksaan', $id_pemeriksaan)
-            ->select('d.diagnosa as nama_diagnosa')
-            ->get();
+        // 🔑 DIAGNOSA NON-K3
+            $diagnosa = DB::table('detail_pemeriksaan_penyakit as dpp')
+                ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dpp.id_diagnosa')
+                ->where('dpp.id_pemeriksaan', $id_pemeriksaan)
+                ->select('d.diagnosa as nama_diagnosa')
+                ->get();
 
+            // 🔑 DIAGNOSA K3 (NB)
+            $diagnosa_k3 = DB::table('detail_pemeriksaan_diagnosa_k3 as dpk3')
+                ->join('diagnosa_k3 as dk3', 'dk3.id_nb', '=', 'dpk3.id_nb')
+                ->where('dpk3.id_pemeriksaan', $id_pemeriksaan)
+                ->select('dk3.id_nb', 'dk3.nama_penyakit')
+                ->get();
 
-        // =================================================
-        // DIAGNOSA K3
-        // =================================================
-        $diagnosa_k3 = DB::table('detail_pemeriksaan_diagnosa_k3 as dpk3')
-            ->join('diagnosa_k3 as dk3', 'dk3.id_nb', '=', 'dpk3.id_nb')
-            ->where('dpk3.id_pemeriksaan', $id_pemeriksaan)
-            ->select('dk3.nama_penyakit')
-            ->get();
-
+        
         // =================================================
         // SARAN (MANY TO MANY)
         // =================================================

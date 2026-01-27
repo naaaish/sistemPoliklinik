@@ -179,49 +179,84 @@ class PegawaiController extends Controller
             ->with('success', 'Data pegawai berhasil dihapus!');
     }
 
-    public function import(Request $request)
+    public function importMulti(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:csv,txt'
+            'file' => 'required|mimes:csv,txt',
+            'type' => 'required|in:pegawai,keluarga'
         ]);
 
         $file = fopen($request->file('file')->getRealPath(), 'r');
-        fgetcsv($file); // Lewati header
+            fgetcsv($file);
 
         $rowCount = 0;
+        $type = $request->input('type');
         while (($row = fgetcsv($file, 2000, ",")) !== false) {
             if (empty($row[0])) continue;
 
-            // Kita petakan kolom satu per satu agar tidak tertukar
-            // Asumsi urutan CSV mengikuti urutan Database kamu
-            DB::table('pegawai')->updateOrInsert(
-                ['nip' => $row[0]], 
-                [
-                    'nama_pegawai'      => $row[1] ?? '',
-                    'nik'               => $row[2] ?? '-',
-                    'agama'             => $row[3] ?? '-',
-                    'jenis_kelamin'     => $row[4] ?? '-',
-                    'tgl_lahir'         => $row[5] ?? null,
-                    'tgl_masuk'         => $row[6] ?? null,
-                    'status_pernikahan' => $row[7] ?? '-',
-                    'no_telp'           => $row[8] ?? '-',
-                    'email'             => $row[9] ?? '-',
-                    'alamat'            => $row[10] ?? '-',
-                    'jabatan'           => $row[11] ?? '-',
-                    'bagian'            => $row[12] ?? '-',
-                    'pendidikan_terakhir' => $row[13] ?? '-',
-                    'institusi'         => $row[14] ?? '-',
-                    'thn_lulus'         => $row[15] ?? null,
-                    'is_active'         => 1,
-                    'updated_at'        => now(),
-                ]
-            );
-            $rowCount++;
+        try {
+                DB::beginTransaction();
+                while (($row = fgetcsv($file, 2000, ",")) !== FALSE) {
+                    if (empty($row[0])) continue;
+
+                    if ($type == 'pegawai') {
+                        // LOGIK IMPORT PEGAWAI
+                        DB::table('pegawai')->updateOrInsert(
+                            ['nip' => $row[0]], 
+                            [
+                                'nama_pegawai'      => $row[1] ?? '',
+                                'nik'               => $row[2] ?? '-',
+                                'agama'             => $row[3] ?? '-',
+                                'jenis_kelamin'     => $row[4] ?? '-',
+                                'tgl_lahir'         => $row[5] ?? null,
+                                'tgl_masuk'         => $row[6] ?? null,
+                                'status_pernikahan' => $row[7] ?? '-',
+                                'no_telp'           => $row[8] ?? '-',
+                                'email'             => $row[9] ?? '-',
+                                'alamat'            => $row[10] ?? '-',
+                                'jabatan'           => $row[11] ?? '-',
+                                'bagian'            => $row[12] ?? '-',
+                                'pendidikan_terakhir' => $row[13] ?? '-',
+                                'institusi'         => $row[14] ?? '-',
+                                'thn_lulus'         => $row[15] ?? null,
+                                'is_active'         => 1,
+                                'updated_at'        => now(),
+                            ]
+                        );
+                    } else {
+                        // LOGIK IMPORT KELUARGA
+                        // Kolom CSV Keluarga: 0:NIP, 1:Hubungan, 2:Nama, 3:Tgl Lahir, 4:JK, 5:Anak Ke
+                        $hubungan = strtolower($row[1]);
+                        $urutan = ($hubungan == 'anak') ? ($row[5] ?? null) : null;
+                        
+                        // Generate ID Keluarga otomatis
+                        $id_keluarga = $row[0] . '-' . strtoupper(substr($hubungan, 0, 1)) . ($urutan ?? rand(10, 99));
+
+                        DB::table('keluarga')->updateOrInsert(
+                            [
+                                'nip' => $row[0], 
+                                'hubungan_keluarga' => $hubungan,
+                                'urutan_anak' => $urutan
+                            ],
+                            [
+                                'id_keluarga'   => $id_keluarga,
+                                'nama_keluarga' => $row[2],
+                                'tgl_lahir'     => $row[3],
+                                'jenis_kelamin' => $row[4],
+                                'updated_at'    => now()
+                            ]
+                        );
+                    }
+                    $rowCount++;
+                }
+                DB::commit();
+                fclose($file);
+
+                return redirect()->back()->with('success', "Berhasil mengimport $rowCount data $type.");
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
+            }
         }
-        fclose($file);
-
-        return redirect()->route('kepegawaian.pegawai')
-            ->with('success', "Berhasil mengimport $rowCount data pegawai!");
     }
-
 }

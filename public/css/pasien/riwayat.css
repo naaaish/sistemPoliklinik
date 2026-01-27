@@ -202,3 +202,174 @@
         font-size:30px;
     }
 }
+/* ================================================= */
+/* RIWAYAT GRID & DROPDOWN */
+/* ================================================= */
+
+/* Dropdown Switch */
+.pasien-switch {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.pasien-switch label {
+    font-weight: 700;
+    color: #316BA1;
+    font-size: 16px;
+}
+
+.pasien-switch select {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #E2E8F0;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #2D3748;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Grid Layout 1 Baris isi 2 */
+.riwayat-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+}
+
+/* Card Style */
+.riwayat-card-modern {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border: 1px solid #EDF2F7;
+}
+
+.card-header-blue {
+    background: #316BA1;
+    color: white;
+    padding: 18px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.riwayat-number { font-weight: 800; font-size: 16px; letter-spacing: 1px; }
+.riwayat-date { font-size: 17px; opacity: 0.9; }
+
+.card-body-modern { padding: 30px; }
+
+/* Container Lingkaran Biru */
+.info-icon-circle {
+    width: 48px;
+    height: 48px;
+    background: #00AEEF; /* Biru Cyan */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden; 
+}
+
+/* Style Khusus Gambar di Dalamnya */
+.icon-img-dokter {
+    width: 60px; 
+    height: 60px;
+    object-fit: contain;
+}
+
+/* Biar sejajar sama teks */
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Info Rows */
+.info-text { display: flex; flex-direction: column; }
+.text-name { font-size: 18px; font-weight: 700; color: #316BA1; }
+.text-sub { font-size: 13px; color: #A0AEC0; }
+.text-label { font-size: 13px; color: #A0AEC0; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+.text-value { font-size: 15px; color: #2D3748; font-weight: 600; margin: 0; line-height: 1.5; }
+
+.divider-thin { height: 1px; background: #EDF2F7; margin: 20px 0; }
+
+.info-icon.cyan { color: #00AEEF; width: 24px; }
+.info-icon.blue { color: #316BA1; width: 24px; }
+
+/* Button */
+.card-footer-modern { display: flex; justify-content: flex-end; }
+.btn-detail-full {
+    background: #316BA1;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.btn-detail-full:hover { background: #245784; transform: translateY(-2px); }
+
+/* Responsive */
+@media (max-width: 1100px) {
+    .riwayat-grid-modern { grid-template-columns: 1fr; }
+}
+
+/* PASIEN SWITCH DROPDOWN */
+.pasien-switch-wrapper {
+    margin-bottom: 40px;
+}
+
+.pasien-switch-form .switch-box {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.switch-box label {
+    font-weight: 700;
+    color: #316BA1;
+    white-space: nowrap;
+}
+
+.switch-box select {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #f1f5f9;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    color: #475569;
+    font-weight: 600;
+    outline: none;
+}
+
+.switch-box select:focus {
+    border-color: #316BA1;
+}
+
+/* GRID LAYOUT (1 Baris 2 Kolom) */
+.riwayat-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+@media (max-width: 992px) {
+    .riwayat-grid-modern { grid-template-columns: 1fr; }
+}

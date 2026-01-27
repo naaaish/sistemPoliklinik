@@ -1,207 +1,157 @@
-@extends('layouts.pasien')
+@extends('layouts.kepegawaian') {{-- Sesuaikan jika ada layout khusus pasien --}}
 
 @section('title', 'Rincian Pemeriksaan')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/detail-pemeriksaan.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/pasien/detail-riwayat.css') }}">
 @endpush
 
 @section('content')
-
 <div class="detail-container">
     
     {{-- HEADER --}}
     <div class="detail-header">
-        <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-        </svg>
-        <h1>Rincian Pemeriksaan</h1>
+        <div class="d-flex align-items-center gap-3">
+            <a href="{{ route('pasien.riwayat') }}">
+                <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" width="38" alt="Back">
+            </a>
+            <h1>Rincian Pemeriksaan</h1>
+        </div>
     </div>
 
     {{-- MAIN CARD --}}
     <div class="detail-card">
-    {{-- ================= DATA PENDAFTARAN ================= --}}
-        <div class="detail-card">
-
-            <div class="data-grid">
-                <div class="data-item">
-                    <span class="data-label">No. Registrasi</span>
-                    <span class="data-value">{{ $pendaftaran->id_pendaftaran }}</span>
-                </div>
-
-                <div class="data-item">
-                    <span class="data-label">Nama Pasien</span>
-                    <span class="data-value">
-                        {{ $pasien->nama_keluarga ?? $pasien->nama_pegawai ?? '-' }}
-                    </span>
-                </div>
-
-                <div class="data-item">
-                    <span class="data-label">Tanggal Periksa</span>
-                    <span class="data-value">
-                        {{ \Carbon\Carbon::parse($pendaftaran->tanggal)->translatedFormat('l, d F Y, H:i') }}
-                    </span>
-                </div>
-
-                <div class="data-item">
-                    <span class="data-label">Nama Pemeriksa</span>
-                    <span class="data-value">
-                        {{ $dokter->nama ?? $pemeriksa->nama_pemeriksa ?? '-' }}
-                    </span>
-                </div>
-
-                <div class="data-item">
-                    <span class="data-label">Hubungan Keluarga</span>
-                    <span class="data-value">
-                        {{ $pasien->hubungan_keluarga ?? 'pegawai' }}
-                    </span>
-                </div>
-
-                <div class="data-item">
-                    <span class="data-label">NIP</span>
-                    <span class="data-value">{{ $pegawai->nip ?? '-' }}</span>
-                </div>
-
-                <div class="data-item">
-                    <span class="data-label">Nama Pegawai</span>
-                    <span class="data-value">{{ $pegawai->nama_pegawai ?? '-' }}</span>
-                </div>
-
-                <div class="data-item">
-                    <span class="data-label">Bagian</span>
-                    <span class="data-value">{{ $pegawai->bagian ?? '-' }}</span>
-                </div>
+        
+        {{-- DATA PENDAFTARAN --}}
+        <h2 class="section-title">Data Pendaftaran Pasien</h2>
+        <div class="data-grid">
+            <div class="data-item">
+                <span class="data-label">No. Registrasi :</span>
+                <span class="data-value">#{{ $pemeriksaan->id_pendaftaran }}</span>
             </div>
-
+            <div class="data-item">
+                <span class="data-label">Nama Pasien :</span>
+                <span class="data-value">{{ $pasien->nama_keluarga ?? $pasien->nama_pegawai ?? '-' }}</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Tanggal Periksa :</span>
+                <span class="data-value">{{ \Carbon\Carbon::parse($pemeriksaan->created_at)->translatedFormat('l, d F Y, H:i') }} WIB</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Nama Pemeriksa :</span>
+                <span class="data-value">{{ $namaPemeriksa ?? '-' }}</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Hubungan Keluarga :</span>
+                <span class="data-value">{{ $pasien->hub_kel ?? 'Pegawai' }}</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">NIP Pegawai :</span>
+                <span class="data-value">{{ $pegawai->nip ?? '-' }}</span>
+            </div>
         </div>
 
-        {{-- PEMERIKSAAN KESEHATAN --}}
+        {{-- HASIL PEMERIKSAAN LENGKAP --}}
         <h2 class="section-title">Pemeriksaan Kesehatan</h2>
         <div class="health-metrics">
             <div class="metric-card metric-red">
                 <div class="metric-label">Sistol</div>
-                <div class="metric-value">{{ $pemeriksaan->sistol }} mmHg</div>
+                <div class="metric-value">{{ $pemeriksaan->sistol ?? 0 }} mmHg</div>
             </div>
-            
             <div class="metric-card metric-red">
                 <div class="metric-label">Diastol</div>
-                <div class="metric-value">{{ $pemeriksaan->diastol }} mmHg</div>
+                <div class="metric-value">{{ $pemeriksaan->diastol ?? 0 }} mmHg</div>
             </div>
-            
             <div class="metric-card metric-pink">
                 <div class="metric-label">Nadi</div>
-                <div class="metric-value">{{ $pemeriksaan->nadi }} bpm</div>
+                <div class="metric-value">{{ $pemeriksaan->nadi ?? 0 }} bpm</div>
             </div>
-            
             <div class="metric-card metric-yellow">
                 <div class="metric-label">Gula Darah Puasa</div>
-                <div class="metric-value">{{ $pemeriksaan->gd_puasa }} mg/dL</div>
+                <div class="metric-value">{{ $pemeriksaan->gd_puasa ?? 0 }} mg/dL</div>
             </div>
-            
             <div class="metric-card metric-yellow">
                 <div class="metric-label">Gula Darah 2 Jam PP</div>
-                <div class="metric-value">{{ $pemeriksaan->gd_duajam }} mg/dL</div>
+                <div class="metric-value">{{ $pemeriksaan->gd_duajam ?? 0 }} mg/dL</div>
             </div>
-            
             <div class="metric-card metric-yellow">
                 <div class="metric-label">Gula Darah Sewaktu</div>
-                <div class="metric-value">{{ $pemeriksaan->gd_sewaktu }} mg/dL</div>
+                <div class="metric-value">{{ $pemeriksaan->gd_sewaktu ?? 0 }} mg/dL</div>
             </div>
-            
             <div class="metric-card metric-purple">
                 <div class="metric-label">Asam Urat</div>
-                <div class="metric-value">{{ $pemeriksaan->asam_urat }} mg/dL</div>
+                <div class="metric-value">{{ $pemeriksaan->asam_urat ?? 0 }} mg/dL</div>
             </div>
-            
             <div class="metric-card metric-orange">
                 <div class="metric-label">Cholesterol</div>
-                <div class="metric-value">{{ $pemeriksaan->chol }} mg/dL</div>
+                <div class="metric-value">{{ $pemeriksaan->chol ?? 0 }} mg/dL</div>
             </div>
-            
             <div class="metric-card metric-orange">
                 <div class="metric-label">Trigliserida</div>
-                <div class="metric-value">{{ $pemeriksaan->tg }} mg/dL</div>
+                <div class="metric-value">{{ $pemeriksaan->tg ?? 0 }} mg/dL</div>
             </div>
-            
             <div class="metric-card metric-blue">
                 <div class="metric-label">Suhu</div>
-                <div class="metric-value">{{ $pemeriksaan->suhu }} °C</div>
+                <div class="metric-value">{{ $pemeriksaan->suhu ?? 0 }} °C</div>
             </div>
-            
             <div class="metric-card metric-green">
                 <div class="metric-label">Tinggi Badan</div>
-                <div class="metric-value">{{ $pemeriksaan->tinggi }} cm</div>
+                <div class="metric-value">{{ $pemeriksaan->tinggi ?? 0 }} cm</div>
             </div>
-            
             <div class="metric-card metric-green">
                 <div class="metric-label">Berat Badan</div>
-                <div class="metric-value">{{ $pemeriksaan->berat }} kg</div>
+                <div class="metric-value">{{ $pemeriksaan->berat ?? 0 }} kg</div>
             </div>
         </div>
 
-        {{-- DIAGNOSA DOKTER --}}
+        {{-- DIAGNOSA & TERAPI --}}
+        <h2 class="section-title">Diagnosa & Terapi</h2>
+        
         <div class="info-box">
-            <div class="info-header">
-                <h3>Diagnosa Dokter</h3>
-            </div>
+            <div class="info-header"><h3>Diagnosa Dokter</h3></div>
             <div class="info-content">
-                @if($diagnosa->count())
-                    @foreach($diagnosa as $d)
-                        <p>• {{ $d->nama_diagnosa }}</p>
-                    @endforeach
-                @else
-                    <p>-</p>
-                @endif
+                @forelse($diagnosa as $d) <p>• {{ $d->nama_diagnosa }}</p> @empty <p>-</p> @endforelse
             </div>
         </div>
 
-        {{-- SARAN DOKTER --}}
         <div class="info-box">
-            <div class="info-header">
-                <h3>Saran Dokter</h3>
-            </div>
+            <div class="info-header"><h3>Diagnosa K3 (NB)</h3></div>
             <div class="info-content">
-                @if($saran->count())
-                    @foreach($saran as $s)
-                        <p>• {{ $s->isi_saran }}</p>
-                    @endforeach
-                @else
-                    <p>-</p>
-                @endif
+                @forelse($diagnosa_k3 as $k3) 
+                    <p>• <strong>[{{ $k3->id_nb ?? '-' }}]</strong> {{ $k3->nama_penyakit }}</p> 
+                @empty <p class="text-muted italic">Tidak ada data diagnosa K3.</p> @endforelse
             </div>
         </div>
 
-        {{-- DATA RESEP OBAT --}}
-        <h2 class="section-title">Data Resep Obat</h2>
-        <table class="resep-table">
-            <thead>
+        <div class="info-box">
+            <div class="info-header" style="background: #64748b;"><h3>Saran & Anjuran</h3></div>
+            <div class="info-content">
+                @forelse($saran as $s) <p>• {{ $s->isi_saran }}</p> @empty <p>-</p> @endforelse
+            </div>
+        </div>
+
+        {{-- RESEP (HANYA NAMA & JUMLAH) --}}
+        <h2 class="section-title">Resep Obat</h2>
+        <table style="width:100%; border-collapse: collapse; margin-top: 15px;">
+            <thead style="background: #f1f5f9;">
                 <tr>
-                    <th width="60">No</th>
-                    <th>Nama Obat</th>
-                    <th width="120">Jumlah</th>
+                    <th style="padding:15px; text-align:left; color: #64748b; font-size: 14px;">Nama Obat</th>
+                    <th style="padding:15px; text-align:center; color: #64748b; font-size: 14px;">Jumlah</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($detailResep as $index => $item)
-                <tr>
-                    <td>{{ $index + 1 }}.</td>
-                    <td>{{ $item->nama_obat }}</td>
-                    <td>{{ $item->jumlah }} {{ $item->satuan }}</td>
-                </tr>
+                @forelse($detailResep as $item)
+                    <tr style="border-bottom: 1px solid #f1f5f9;">
+                        <td style="padding:15px; font-weight: 500;">{{ $item->nama_obat }}</td>
+                        <td style="padding:15px; text-align:center;">{{ $item->jumlah }} {{ $item->satuan }}</td>
+                    </tr>
                 @empty
-                <tr>
-                    <td colspan="3" style="text-align: center; color: #52606d;">Tidak ada resep obat</td>
-                </tr>
+                    <tr>
+                        <td colspan="2" style="padding:30px; text-align:center; color: #94a3b8;">Tidak ada resep obat</td>
+                    </tr>
                 @endforelse
             </tbody>
         </table>
-
     </div>
-
 </div>
-
 @endsection

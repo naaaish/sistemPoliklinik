@@ -313,6 +313,7 @@ Route::prefix('kepegawaian/laporan')
 
 
 // CRUD PEGAWAI
+
 Route::prefix('pegawai')->group(function () {
     Route::get('/', [PegawaiController::class, 'index'])->name('pegawai.index');
     Route::get('/create', [PegawaiController::class, 'create'])->name('pegawai.create');
@@ -321,23 +322,18 @@ Route::prefix('pegawai')->group(function () {
     Route::get('/{nip}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
     Route::post('/{nip}/update', [PegawaiController::class, 'update'])->name('pegawai.update');
 
-    Route::post('/kepegawaian/pegawai/import-csv',
-        [PegawaiController::class, 'importCsv']
-    )->name('pegawai.import.csv');
+    // ROUTE BARU UNTUK IMPORT MULTI (PEGAWAI & KELUARGA)
+    Route::post('/import-multi', [PegawaiController::class, 'importMulti'])->name('pegawai.import.multi');
 
-    Route::post('/pegawai/kepegawaian/pegawai/import', 
-        [PegawaiController::class, 'import']
-    )->name('pegawai.import');
-
+    // Export Excel
     Route::get('/laporan/excel/pegawai-pensiun/{jenis}', [LaporanController::class, 'downloadExcelPegawaiPensiun'])->name('laporan.excel.pegawai-pensiun');
     Route::get('/laporan/excel/dokter', [LaporanController::class, 'downloadExcelDokter'])->name('laporan.excel.dokter');
     Route::get('/laporan/excel/obat', [LaporanController::class, 'downloadExcelObat'])->name('laporan.excel.obat');
     Route::get('/laporan/excel/total', [LaporanController::class, 'downloadExcelTotal'])->name('laporan.excel.total');
 
-    // Route Keluarga
+    // Route Keluarga (Hanya Create, Store, Edit, Update)
     Route::get('/keluarga/create/{nip}', [KeluargaController::class, 'create'])->name('keluarga.create');
     Route::post('/keluarga/store', [KeluargaController::class, 'store'])->name('keluarga.store');
     Route::get('/keluarga/edit/{id}', [KeluargaController::class, 'edit'])->name('keluarga.edit');
     Route::put('/keluarga/update/{id}', [KeluargaController::class, 'update'])->name('keluarga.update');
-    Route::delete('/keluarga/destroy/{id}', [KeluargaController::class, 'destroy'])->name('keluarga.destroy');
 });
