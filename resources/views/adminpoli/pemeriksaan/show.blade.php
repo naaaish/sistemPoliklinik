@@ -218,7 +218,6 @@
         </div>
       </div>
 
-
       {{-- ===== OBAT & HARGA ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Obat & Harga</div>
 
@@ -302,48 +301,46 @@
   </footer>
 </div>
 <script>
-document.getElementById('formPemeriksaan').addEventListener('submit', function (e) {
-    let valid = true;
-    let firstInvalidSatuan = null;
+  document.getElementById('formPemeriksaan').addEventListener('submit', function (e) {
+      let valid = true;
+      let firstInvalidSatuan = null;
 
-    // semua row obat
-    document.querySelectorAll('#obatWrap .obat-row').forEach((row, index) => {
-        const obatSelect = row.querySelector('select[name="obat_id[]"]');
-        const satuanInput = row.querySelector('input[name="satuan[]"]');
+      // semua row obat
+      document.querySelectorAll('#obatWrap .obat-row').forEach((row, index) => {
+          const obatSelect = row.querySelector('select[name="obat_id[]"]');
+          const satuanInput = row.querySelector('input[name="satuan[]"]');
 
-        if (!obatSelect || !satuanInput) return;
+          if (!obatSelect || !satuanInput) return;
 
-        const obatVal = obatSelect.value;
-        const satuanVal = satuanInput.value.trim();
+          const obatVal = obatSelect.value;
+          const satuanVal = satuanInput.value.trim();
 
-        if (obatVal && satuanVal === '') {
-            valid = false;
-            if (!firstInvalidSatuan) {
-                firstInvalidSatuan = satuanInput;
-            }
-        }
-    });
+          if (obatVal && satuanVal === '') {
+              valid = false;
+              if (!firstInvalidSatuan) {
+                  firstInvalidSatuan = satuanInput;
+              }
+          }
+      });
 
-    if (!valid) {
-        e.preventDefault(); // STOP SUBMIT
+      if (!valid) {
+          e.preventDefault(); // STOP SUBMIT
 
-        Swal.fire({
-            icon: 'warning',
-            title: 'Satuan belum diisi',
-            text: 'Jika obat dipilih, satuan wajib diisi.',
-            confirmButtonText: 'OK',
-            heightAuto: false, 
-            scrollbarPadding: false 
-        }).then(() => {
-            if (firstInvalidSatuan) {
-                firstInvalidSatuan.focus();
-            }
-        });
-    }
-});
-</script>
+          Swal.fire({
+              icon: 'warning',
+              title: 'Satuan belum diisi',
+              text: 'Jika obat dipilih, satuan wajib diisi.',
+              confirmButtonText: 'OK',
+              heightAuto: false, 
+              scrollbarPadding: false 
+          }).then(() => {
+              if (firstInvalidSatuan) {
+                  firstInvalidSatuan.focus();
+              }
+          });
+      }
+  });
 
-<script>
   // helper rupiah kamu
   function rupiah(n){
     n = Number(n || 0);

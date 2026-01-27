@@ -117,7 +117,7 @@
                 <div class="ap-label">Dokter/Pemeriksa</div>
                 <div class="ap-colon">:</div>
                 <div class="ap-input">
-                    <select name="petugas" class="ap-select" required>
+                    <select name="petugas" id="petugas" class="ap-select" required>
                         <option value="">-- pilih --</option>
                         <optgroup label="Dokter">
                             @foreach($dokter as $d)
@@ -301,7 +301,6 @@ nipEl.addEventListener('focus', async () => {
   renderSuggest(items);
 });
 
-
 // klik item suggestion
 nipSuggestEl.addEventListener('click', (e) => {
   const item = e.target.closest('.item');
@@ -333,13 +332,6 @@ nipEl.addEventListener('keydown', async (e) => {
     if(e.key === 'ArrowUp'){
       e.preventDefault();
       setActive(activeIdx - 1);
-      return;
-    }
-
-    if(e.key === 'Enter'){
-      e.preventDefault();
-      const p = suggestItems[activeIdx];
-      if(p) await applyPegawaiSelected(p);
       return;
     }
 
@@ -536,27 +528,70 @@ tipeEl.addEventListener('change', () => {
 
 namaPasSelect.addEventListener('change', applySelectedPasien);
 
-function setPoliklinikMode(isPoli) {
-  const namaPasienEl = document.getElementById('nama_pasien');
-  const hubKelEl = document.getElementById('hub_kel');
-  const tglLahirEl = document.getElementById('tgl_lahir');
+// function setPoliklinikMode(isPoli) {
+//   const namaPasienEl = document.getElementById('nama_pasien');
+//   const hubKelEl = document.getElementById('hub_kel');
+//   const tglLahirEl = document.getElementById('tgl_lahir');
 
-  if (!namaPasienEl || !hubKelEl || !tglLahirEl) return;
+//   if (!namaPasienEl || !hubKelEl || !tglLahirEl) return;
+
+//   if (isPoli) {
+//     // set value ke "-"
+//     namaPasienEl.value = '-';
+//     hubKelEl.value = 'YBS';
+//     tglLahirEl.value = '2000-01-01'; // dummy aman
+//     // tglLahirEl.classList.add('hidden-field');
+//     // kunci field
+//     namaPasienEl.readOnly = true;
+//     hubKelEl.readOnly = true;
+//     tglLahirEl.readOnly = true;
+//   } else {
+//     namaPasienEl.disabled = false;
+//     hubKelEl.disabled = false;
+//     tglLahirEl.readOnly = false;
+//   }
+// }
+
+function setPoliklinikMode(isPoli) {
+  const petugasEl = document.getElementById('petugas');
 
   if (isPoli) {
-    // set value ke "-"
-    namaPasienEl.value = '-';
-    hubKelEl.value = 'YBS';        // biar lolos validasi backend
-    tglLahirEl.value = '2000-01-01'; // dummy aman
+    // AUTO isi atas
+    nipEl.value = '001';
+    namaPegEl.value = 'Poliklinik';
+    bagianEl.value = 'Poliklinik';
 
-    // kunci field
-    namaPasienEl.disabled = true;
-    hubKelEl.disabled = true;
-    tglLahirEl.readOnly = true;
+    // AUTO set tipe
+    tipeEl.value = 'pegawai';
+    tipeEl.disabled = true; // biar ga bisa diganti
+
+    // AUTO isi pasien
+    namaPasSelect.innerHTML = `<option value="-" selected data-hub="YBS" data-tgl="" data-idkel="">-</option>`;
+    namaPasSelect.value = '-';
+    hubEl.value = 'YBS';
+    idKelEl.value = '';
+
+    // tgl lahir: kosongin aja
+    tglEl.value = '';
+    tglEl.readOnly = true;
+
+    // kunci UI tanpa disable (biar tetap terkirim)
+    namaPasSelect.classList.add('is-locked');
+    hubEl.classList.add('is-locked');
+
+    // AUTO pilih pemeriksa “Sofia”
+    if (petugasEl) {
+      const opt = [...petugasEl.options].find(o =>
+        (o.value || '').startsWith('pemeriksa:')
+      );
+      if (opt) petugasEl.value = opt.value;
+    }
+
   } else {
-    namaPasienEl.disabled = false;
-    hubKelEl.disabled = false;
-    tglLahirEl.readOnly = false;
+    tipeEl.disabled = false;
+    namaPasSelect.classList.remove('is-locked');
+    hubEl.classList.remove('is-locked');
+    tglEl.readOnly = false;
   }
 }
 

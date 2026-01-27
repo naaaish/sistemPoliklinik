@@ -117,7 +117,6 @@ class DiagnosaK3Controller extends Controller
             ->first();
 
         DB::transaction(function() use ($inactive, $nama) {
-
             if ($inactive) {
                 // aktifkan kategori
                 DB::table('diagnosa_k3')
@@ -155,9 +154,7 @@ class DiagnosaK3Controller extends Controller
             }
         });
 
-        return back()->with('success', $inactive
-            ? 'Kategori diaktifkan kembali.'
-            : 'Kategori berhasil ditambahkan.'
+        return back()->with('success', 'Kategori berhasil ditambahkan.'
         );
     }
 
@@ -258,6 +255,16 @@ class DiagnosaK3Controller extends Controller
             return back()->with('error','Kategori tidak aktif / tidak ditemukan.');
         }
 
+        $used = DB::table('diagnosa_k3')
+            ->where('tipe', 'penyakit')
+            ->where('is_active', 1)
+            ->where('id_diagnosa', $request->id_diagnosa)
+            ->exists();
+
+        if ($used) {
+            return back()->with('error', 'Diagnosa ini sudah punya mapping NB (aktif).');
+        }
+
         // aktif & duplikat
         $existsActive = DB::table('diagnosa_k3')
             ->where('tipe','penyakit')
@@ -278,7 +285,7 @@ class DiagnosaK3Controller extends Controller
             ->whereRaw('LOWER(nama_penyakit)=?', [mb_strtolower($nama)])
             ->first();
 
-        DB::transaction(function() use ($inactive, $parent, $nama, $cat){
+        DB::transaction(function() use ($inactive, $parent, $nama, $cat, $request){
             if ($inactive) {
                 DB::table('diagnosa_k3')
                     ->where('id_nb',$inactive->id_nb)
@@ -340,6 +347,16 @@ class DiagnosaK3Controller extends Controller
             return back()->with('error','Kategori tidak valid.');
         }
 
+        $used = DB::table('diagnosa_k3')
+            ->where('tipe', 'penyakit')
+            ->where('is_active', 1)
+            ->where('id_diagnosa', $request->id_diagnosa)
+            ->exists();
+
+        if ($used) {
+        return back()->with('error', 'Diagnosa ini sudah punya mapping NB (aktif).');
+        }
+
         // duplikat aktif di kategori target
         $dup = DB::table('diagnosa_k3')
             ->where('tipe','penyakit')
@@ -399,6 +416,7 @@ class DiagnosaK3Controller extends Controller
     {
         $request->validate(
             [
+                'id_diagnosa' => ['required', 'exists:diagnosa,id_diagnosa'],
                 'file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
             ],
             [
@@ -432,7 +450,6 @@ class DiagnosaK3Controller extends Controller
             $idxJenis = array_search('jenis_penyakit', array_map(fn($h)=>Str::slug((string)$h,'_'), $headerRaw));
         }
         // (kalau di excel headernya "Jenis Penyakit", slug -> jenis_penyakit)
-
         $isFormatA = ($idxNama !== false && $idxKat !== false);
         $isFormatB = ($idxNomor !== false && $idxJenis !== false);
 

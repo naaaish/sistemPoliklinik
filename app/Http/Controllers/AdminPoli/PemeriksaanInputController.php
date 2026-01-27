@@ -73,7 +73,6 @@ class PemeriksaanInputController extends Controller
             'berat_badan'   => 'nullable|numeric',
             'tinggi_badan'  => 'nullable|numeric',
 
-            // pilihan (UI kamu kirim array via chips)
             'penyakit_id'     => 'nullable|array',
             'penyakit_id.*'   => 'nullable|string',
             'id_saran'    => 'nullable|array',
@@ -86,21 +85,24 @@ class PemeriksaanInputController extends Controller
             'jumlah.*'       => 'nullable|numeric',
             'satuan'         => 'nullable|array',
             'satuan.*'       => 'nullable|string',
-            'harga_satuan'   => 'nullable|array',
-            'harga_satuan.*' => 'nullable|numeric',
         ]);
 
-        $obatIds = $validated['obat_id'] ?? [];
-        $satuans = $validated['satuan'] ?? [];
+        $obatIds  = $validated['obat_id'] ?? [];
+        $jumlahs  = $validated['jumlah'] ?? [];
+        $satuans  = $validated['satuan'] ?? [];
 
         foreach ($obatIds as $i => $idObat) {
             if (!$idObat) continue; // skip baris kosong
 
+            $qty    = $jumlahs[$i] ?? null;
             $satuan = $satuans[$i] ?? null;
+
+            if ($qty === null || (float)$qty <= 0) {
+                return back()->withInput()->withErrors(["jumlah.$i" => "Jumlah wajib diisi (min 1) jika obat dipilih."]);
+            }
+
             if (!$satuan) {
-                return back()
-                    ->withInput()
-                    ->withErrors(["satuan.$i" => "Satuan wajib diisi jika obat dipilih."]);
+                return back()->withInput()->withErrors(["satuan.$i" => "Satuan wajib diisi jika obat dipilih."]);
             }
         }
 
@@ -194,7 +196,12 @@ class PemeriksaanInputController extends Controller
             $obatIds = $validated['obat_id'] ?? [];
             $jumlahs = $validated['jumlah'] ?? [];
             $satuans = $validated['satuan'] ?? [];
-            $hargas  = $validated['harga_satuan'] ?? [];
+
+            $obatIdsClean = array_values(array_filter($obatIds));
+
+            // ambil harga dari tabel obat (sesuai show)
+            $hargaMap = Obat::whereIn('id_obat', $obatIdsClean)
+                ->pluck('harga', 'id_obat'); // key=id_obat, value=harga
 
             $detailRows = [];
             $totalTagihan = 0;
@@ -204,14 +211,14 @@ class PemeriksaanInputController extends Controller
                 $idObat = $obatIds[$i] ?? null;
                 if (!$idObat) continue;
 
-                $qty   = (int) ($jumlahs[$i] ?? 0);
-                $harga = (float) ($hargas[$i] ?? 0);
+                $qty    = (int)($jumlahs[$i] ?? 0);
                 $satuan = $satuans[$i] ?? '';
 
-                // skip kalau qty <= 0 (biar ga nyimpen baris kosong)
                 if ($qty <= 0) continue;
 
+                $harga = (float)($hargaMap[$idObat] ?? 0); // harga dari DB
                 $subtotal = $qty * $harga;
+
                 $totalTagihan += $subtotal;
 
                 $detailRows[] = [
@@ -222,7 +229,6 @@ class PemeriksaanInputController extends Controller
                 ];
             }
 
-            // hanya buat resep kalau ada minimal 1 detail
             if (count($detailRows) > 0) {
                 $idResep = 'RS' . date('ymdHis') . Str::upper(Str::random(6));
 
@@ -242,7 +248,6 @@ class PemeriksaanInputController extends Controller
                     ]);
                 }
             }
-
             return redirect()
                 ->route('adminpoli.dashboard')
                 ->with('success', 'Hasil pemeriksaan berhasil disimpan.');

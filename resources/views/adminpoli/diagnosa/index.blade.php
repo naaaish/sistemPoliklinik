@@ -91,7 +91,8 @@
             <div class="diag-actions">
               <button type="button" class="diag-act diag-edit js-diag-edit"
                       data-id="{{ $row->id_diagnosa }}"
-                      data-text="{{ $row->diagnosa }}">
+                      data-text="{{ $row->diagnosa }}"
+                      data-idnb="{{ $row->id_nb ?? '' }}">
                 <img src="{{ asset('assets/adminPoli/edit.png') }}" class="diag-ic-sm" alt="">
                 Edit
               </button>
@@ -128,6 +129,15 @@
             <label>Diagnosa</label>
             <input type="text" name="diagnosa" required>
           </div>
+          <div class="modal-group">
+            <label>Diagnosa K3</label>
+            <select name="id_nb" id="k3Select" class="modal-select">
+              <option value="" disabled selected></option>
+              @foreach($k3Options as $k3)
+                <option value="{{ $k3->id_nb }}">{{ $k3->nama_penyakit }} ({{ $k3->id_nb }})</option>
+              @endforeach
+            </select>
+          </div>
           <button type="submit" class="modal-btn">Simpan</button>
         </form>
       </div>
@@ -144,6 +154,15 @@
           <div class="modal-group">
             <label>Diagnosa</label>
             <input type="text" name="diagnosa" id="editDiagnosaText" required>
+          </div>
+          <div class="modal-group">
+            <label>Diagnosa K3</label>
+            <select name="id_nb" id="editDiagnosaK3" class="modal-select" required>
+              <option value="" disabled selected>Pilih Diagnosa K3...</option>
+              @foreach($k3Options as $k3)
+                <option value="{{ $k3->id_nb }}">{{ $k3->nama_penyakit }} ({{ $k3->id_nb }})</option>
+              @endforeach
+            </select>
           </div>
           <button type="submit" class="modal-btn">Simpan</button>
         </form>
@@ -169,9 +188,10 @@
       btn.addEventListener('click', () => {
         const id = btn.dataset.id;
         const text = btn.dataset.text ?? '';
-
+        const idnb = btn.dataset.idnb ?? '';
         document.getElementById('modalEditDiagnosa').style.display = 'flex';
         document.getElementById('editDiagnosaText').value = text;
+        document.getElementById('editDiagnosaK3').value = idnb;
         document.getElementById('formEditDiagnosa').action = "{{ url('adminpoli/diagnosa') }}/" + id;
       });
     });
@@ -279,6 +299,23 @@ document.addEventListener('DOMContentLoaded', () => {
     el?.addEventListener('change', () => {
       if (isInvalidRange()) toastError('Rentang tanggal tidak valid. Perbaiki tanggalnya.');
     });
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+  const el = document.getElementById('k3Select');
+  if(!el) return;
+
+  // kalau modal dibuka berkali-kali, jangan init ulang
+  if (el.tomselect) return;
+
+  new TomSelect(el, {
+    create: false,
+    allowEmptyOption: true,
+    placeholder: 'Cari diagnosa K3...',
+    searchField: ['text'],
+    closeAfterSelect: true,
+    dropdownDirection: 'down',
   });
 });
 </script>
