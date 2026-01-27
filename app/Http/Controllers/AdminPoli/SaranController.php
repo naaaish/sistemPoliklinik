@@ -27,7 +27,14 @@ class SaranController extends Controller
             });
         }
 
-        $saran = $query
+        $perPageRaw = $request->input('per_page', 10);
+        $allowedPerPage = [10, 25, 50, 100];
+        $isAll = ($perPageRaw === 'all');
+
+        $perPage = (int) $perPageRaw;
+        if (!in_array($perPage, $allowedPerPage)) $perPage = 10;
+
+        $baseSelect = $query
             ->select(
                 'saran.id_saran',
                 'saran.saran as saran_text',
@@ -36,8 +43,15 @@ class SaranController extends Controller
                 'saran.is_active',
                 'saran.created_at'
             )
-            ->orderBy('saran.created_at', 'desc')
-            ->get();
+            ->orderBy('saran.created_at', 'desc');
+
+        if ($isAll) {
+            $saran = $baseSelect->get();
+        } else {
+            $saran = $baseSelect
+                ->paginate($perPage)
+                ->appends($request->query());
+        }
 
         // ===== PREVIEW COUNT (DOWNLOAD) =====
         $previewCount = null;
@@ -55,7 +69,7 @@ class SaranController extends Controller
             ->orderBy('diagnosa')
             ->get();
 
-        return view('adminpoli.saran.index', compact('saran', 'previewCount', 'diagnosaList'));
+        return view('adminpoli.saran.index', compact('saran', 'previewCount', 'diagnosaList', 'perPageRaw'));
     }
 
     public function store(Request $request)

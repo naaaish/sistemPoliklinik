@@ -23,21 +23,28 @@ class DiagnosaController extends Controller
             $query->whereRaw('LOWER(diagnosa) LIKE ?', ["%{$q}%"]);
         }
 
-        $diagnosa = $query
+        $perPage = $request->get('per_page', 10);
+        $allowed = ['10', '25', '50', '100', 'all'];
+        if (!in_array((string) $perPage, $allowed)) $perPage = 10;
+
+        $base = $query
             ->leftJoin('diagnosa_k3', function ($join) {
                 $join->on('diagnosa.id_nb', '=', 'diagnosa_k3.id_nb')
                     ->where('diagnosa_k3.is_active', 1)
                     ->where('diagnosa_k3.tipe', 'penyakit');
             })
-            ->select(       
+            ->select(
                 'diagnosa.id_diagnosa',
                 'diagnosa.diagnosa',
                 'diagnosa.id_nb',
                 'diagnosa.created_at',
                 'diagnosa_k3.nama_penyakit as nama_k3'
             )
-            ->orderBy('diagnosa.diagnosa')
-            ->get();
+            ->orderBy('diagnosa.diagnosa', 'asc');
+
+        $diagnosa = ($perPage === 'all')
+            ? $base->get()
+            : $base->paginate((int) $perPage)->appends($request->query());
 
         $k3Options = DB::table('diagnosa_k3')
             ->where('diagnosa_k3.is_active', 1)
@@ -56,7 +63,7 @@ class DiagnosaController extends Controller
                 ])->count();
         }
 
-        return view('adminpoli.diagnosa.index', compact('diagnosa', 'previewCount', 'k3Options'));
+        return view('adminpoli.diagnosa.index', compact('diagnosa', 'previewCount', 'k3Options', 'perPage'));
     }
 
     public function store(Request $request)

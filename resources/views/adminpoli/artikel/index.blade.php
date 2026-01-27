@@ -114,6 +114,32 @@
       </div>
     </div>
 
+    <div class="artikel-table-foot">
+            <div class="artikel-total">
+                Total
+                @if($artikel instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    {{ $artikel->total() }}
+                @else
+                    {{ $artikel->count() }}
+                @endif
+            </div>
+
+            <form method="GET" action="{{ route('adminpoli.artikel.index') }}" class="artikel-lines">
+                {{-- keep query biar ga reset --}}
+                @if(request('q')) <input type="hidden" name="q" value="{{ request('q') }}"> @endif
+
+                <span class="artikel-lines-label">Lines per page</span>
+
+                <select name="per_page" class="artikel-lines-select" onchange="this.form.submit()">
+                    <option value="10"  {{ request('per_page','10')=='10' ? 'selected' : '' }}>10</option>
+                    <option value="25"  {{ request('per_page')=='25' ? 'selected' : '' }}>25</option>
+                    <option value="50"  {{ request('per_page')=='50' ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ request('per_page')=='100' ? 'selected' : '' }}>100</option>
+                    <option value="all" {{ request('per_page')=='all' ? 'selected' : '' }}>All</option>
+                </select>
+            </form>
+        </div>
+
   </div>
 
   <div class="artikel-foot">

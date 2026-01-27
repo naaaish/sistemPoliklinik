@@ -18,13 +18,25 @@ class ObatController extends Controller
         $query = DB::table('obat')->where('is_active', '1');
 
         if ($request->filled('q')) {
-            $query->where('nama_obat', 'like', '%' . $request->q . '%');
+            $q = $request->q;
+            $query->where(function($w) use ($q){
+                $w->where('id_obat', 'like', "%$q%")
+                ->orWhere('nama_obat', 'like', "%$q%");
+            });
         }
+        $query->orderBy('nama_obat');
 
-        $obat = $query
+        $perPage = $request->get('per_page', 10);
+        $allowed = ['10','25','50','100','all'];
+        if (!in_array((string)$perPage, $allowed)) $perPage = 10;
+
+        $base = $query
             ->select('id_obat', 'nama_obat', 'harga', 'exp_date', 'is_active')
-            ->orderBy('nama_obat')
-            ->get();
+            ->orderBy('nama_obat');
+
+        $obat = ($perPage === 'all')
+            ? $base->get()
+            : $base->paginate((int) $perPage)->appends($request->query());
 
         // ===== PREVIEW COUNT (DOWNLOAD) =====
         $previewCount = null;
@@ -38,7 +50,7 @@ class ObatController extends Controller
                 ->count();
         }
 
-        return view('adminpoli.obat.index', compact('obat', 'previewCount'));
+        return view('adminpoli.obat.index', compact('obat', 'previewCount', 'perPage'));
     }
 
     public function store(Request $request)

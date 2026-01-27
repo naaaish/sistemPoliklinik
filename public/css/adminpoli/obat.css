@@ -430,3 +430,51 @@ body{ margin:0; }
   color: rgba(0,0,0,.5);
   font-weight: 600;
 }
+
+.obat-table-foot{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding: 12px 8px;
+  margin-top: 6px;
+}
+
+.obat-total{
+  font-size: 13px;
+  color: rgba(0,0,0,.55);
+}
+
+.obat-lines{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.obat-lines-label{
+  font-size: 13px;
+  color: rgba(0,0,0,.55);
+  white-space: nowrap;
+}
+
+.obat-lines-select{
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #D9E6F6;
+  background:#fff;
+  font-family: inherit;
+  font-size: 13px;
+  outline:none;
+}
+
+.obat-lines-select:focus{
+  border-color: rgba(49,107,161,.55);
+  box-shadow: 0 0 0 3px rgba(49,107,161,.12);
+}
+
+.obat-pagination{
+  display:flex;
+  justify-content:flex-end;
+  margin-top: 12px;
+}

@@ -83,9 +83,30 @@ class DiagnosaK3Controller extends Controller
                 ->values();
         }
 
+        $perPage = $request->get('per_page', 10);
+        $allowed = ['10', '25', '50', '100', 'all'];
+        if (!in_array((string) $perPage, $allowed)) $perPage = 10;
+
+        if ($perPage !== 'all') {
+            $page = (int) $request->get('page', 1);
+            $perPageInt = (int) $perPage;
+
+            $total = $cats->count();
+            $slice = $cats->slice(($page - 1) * $perPageInt, $perPageInt)->values();
+
+            $cats = new \Illuminate\Pagination\LengthAwarePaginator(
+                $slice,
+                $total,
+                $perPageInt,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        }
+
         return view('adminpoli.diagnosak3.index', [
             'categories' => $cats,
             'children'   => $children,
+            'perPage'    => $perPage,
         ]);
     }
 

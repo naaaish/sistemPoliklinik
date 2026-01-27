@@ -241,7 +241,31 @@
         </form>
       </div>
     </div>
+    <div class="k3-table-foot">
+      <div class="k3-total">
+        Total
+        @if($categories instanceof \Illuminate\Pagination\LengthAwarePaginator)
+            {{ $categories->total() }}
+        @else
+            {{ $categories->count() }}
+        @endif
+      </div>
 
+      <form method="GET" action="{{ route('adminpoli.diagnosak3.index') }}" class="k3-lines">
+        {{-- keep query biar ga reset --}}
+        @if(request('q')) <input type="hidden" name="q" value="{{ request('q') }}"> @endif
+
+        <span class="k3-lines-label">Lines per page</span>
+
+        <select name="per_page" class="k3-lines-select" onchange="this.form.submit()">
+          <option value="10"  {{ request('per_page','10')=='10' ? 'selected' : '' }}>10</option>
+          <option value="25"  {{ request('per_page')=='25' ? 'selected' : '' }}>25</option>
+          <option value="50"  {{ request('per_page')=='50' ? 'selected' : '' }}>50</option>
+          <option value="100" {{ request('per_page')=='100' ? 'selected' : '' }}>100</option>
+          <option value="all" {{ request('per_page')=='all' ? 'selected' : '' }}>All</option>
+        </select>
+      </form>
+    </div>
   </div>
 
   <div class="k3-foot">

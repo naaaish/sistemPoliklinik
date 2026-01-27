@@ -253,12 +253,10 @@
   gap: 10px;
 }
 
-/* khusus saran: biar satu baris penuh */
 .ap-form-value.is-long .ap-readonly-pill{
   width: 100%;
 }
 
-/* pill hasil (lebih kecil dari input) */
 .ap-readonly-pill{
   font-weight: 700;
   font-size: 15px;
@@ -266,7 +264,7 @@
 }
 
 .ap-form-value .ap-readonly-pill{
-  width:100%; /* kalau mau satu item per baris */
+  width:100%;
 }
 
 .ap-form-value .ap-readonly-pill{ width:auto; }
