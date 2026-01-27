@@ -202,3 +202,114 @@
         font-size:30px;
     }
 }
+/* ================================================= */
+/* RIWAYAT GRID & DROPDOWN */
+/* ================================================= */
+
+/* Dropdown Switch */
+.pasien-switch {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.pasien-switch label {
+    font-weight: 700;
+    color: #316BA1;
+    font-size: 16px;
+}
+
+.pasien-switch select {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #E2E8F0;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    color: #2D3748;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Grid Layout 1 Baris isi 2 */
+.riwayat-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+}
+
+/* Card Style */
+.riwayat-card-modern {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border: 1px solid #EDF2F7;
+}
+
+.card-header-blue {
+    background: #316BA1;
+    color: white;
+    padding: 18px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.riwayat-number { font-weight: 800; font-size: 16px; letter-spacing: 1px; }
+.riwayat-date { font-size: 13px; opacity: 0.9; }
+
+.card-body-modern { padding: 30px; }
+
+/* Icon Circle */
+.info-icon-circle {
+    width: 48px;
+    height: 48px;
+    background: #00AEEF;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.info-icon-circle svg { width: 26px; height: 26px; }
+
+/* Info Rows */
+.info-row { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 20px; }
+.info-text { display: flex; flex-direction: column; }
+.text-name { font-size: 18px; font-weight: 700; color: #316BA1; }
+.text-sub { font-size: 13px; color: #A0AEC0; }
+.text-label { font-size: 13px; color: #A0AEC0; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+.text-value { font-size: 15px; color: #2D3748; font-weight: 600; margin: 0; line-height: 1.5; }
+
+.divider-thin { height: 1px; background: #EDF2F7; margin: 20px 0; }
+
+.info-icon.cyan { color: #00AEEF; width: 24px; }
+.info-icon.blue { color: #316BA1; width: 24px; }
+
+/* Button */
+.card-footer-modern { display: flex; justify-content: flex-end; }
+.btn-detail-full {
+    background: #316BA1;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.btn-detail-full:hover { background: #245784; transform: translateY(-2px); }
+
+/* Responsive */
+@media (max-width: 1100px) {
+    .riwayat-grid-modern { grid-template-columns: 1fr; }
+}

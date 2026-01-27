@@ -76,19 +76,27 @@
 </div>
 
 {{-- MODAL UPLOAD CSV --}}
-<div class="csv-modal-overlay" id="csvModal" onclick="closeOnOverlay(event)">
+<div id="csvModal" class="csv-modal-overlay">
     <div class="csv-modal-box">
         <div class="csv-modal-header">
-            <h5>Import Data Pegawai (CSV)</h5>
-            <button type="button" class="btn-close-modal" onclick="closeCsvModal()">×</button>
+            <h5 class="mb-0">Import Data Pegawai / Keluarga</h5>
+            <button type="button" class="btn-close-modal" onclick="closeCsvModal()">&times;</button>
         </div>
-
-        <form action="{{ route('pegawai.import') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('pegawai.import.multi') }}" method="POST" enctype="multipart/form-data">
             @csrf
-
             <div class="csv-modal-body">
-                <label class="form-label">Pilih File CSV</label>
-                <input type="file" name="file" class="form-control" accept=".csv,.txt" required>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Pilih Tipe Data</label>
+                    <select name="type" class="form-control" required>
+                        <option value="pegawai">Data Pegawai</option>
+                        <option value="keluarga">Data Keluarga</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">File CSV</label>
+                    <input type="file" name="file" class="form-control" accept=".csv" required>
+                </div>
 
                 <div class="csv-info">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -96,20 +104,12 @@
                         <line x1="12" y1="16" x2="12" y2="12"></line>
                         <line x1="12" y1="8" x2="12.01" y2="8"></line>
                     </svg>
-                    <span>Format: CSV dengan delimiter koma (,). Max 2MB</span>
+                    <span>Pastikan urutan kolom CSV sesuai format. NIP harus terdaftar jika pilih Data Keluarga.</span>
                 </div>
             </div>
-
             <div class="csv-modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="closeCsvModal()">Batal</button>
-                <button type="submit" class="btn btn-primary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                    Import CSV
-                </button>
+                <button type="submit" class="btn btn-primary">Import CSV</button>
             </div>
         </form>
     </div>

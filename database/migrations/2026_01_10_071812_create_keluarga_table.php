@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('nama_keluarga');
             $table->date('tgl_lahir');
             $table->enum('jenis_kelamin', ['L','P']);
+            $table->boolean('is_active')->default(1);
 
             $table->timestamps();
 

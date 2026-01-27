@@ -349,7 +349,7 @@ class LaporanController extends Controller
             ->get()
             ->groupBy('id_pemeriksaan');
 
-        // === FINAL DATA (SAMA KAYA PREVIEW) ===
+        // === FINAL DATA  ===
         $final = collect();
         $counter = [];
 
@@ -357,7 +357,7 @@ class LaporanController extends Controller
             $id = $r->id_pemeriksaan;
 
             $diag = $diagnosaMap[$id] ?? collect([ (object)['diagnosa'=>'-'] ]);
-            $nb   = $nbMap[$id] ?? collect([ (object)['id_nb'=>'-'] ]);
+            $nb   = $nbMap[$id] ?? collect([ (object)['id_nb'=>'-', 'nama_penyakit_k3' => '-'] ]);
             $obat = $obatMap[$id] ?? collect([ (object)[
                 'nama_obat'=>'-','jumlah'=>'-','satuan'=>'','harga'=>0
             ]]);
@@ -367,11 +367,11 @@ class LaporanController extends Controller
             $counter[$id] = ($counter[$id] ?? 0) + 1;
             $totalObat = $obat->sum(fn($o)=>((int)$o->jumlah*(int)$o->harga));
 
-            for ($i=0;$i<$max;$i++) {
-                $row = clone $r;
-                $row->diagnosa = $diag[$i]->diagnosa ?? '-';
-                $row->nb = $nb[$i]->id_nb ?? '-';
-
+            for ($i=0; $i<$max; $i++) {
+                    $row = clone $r;
+                    $row->diagnosa = $diag[$i]->diagnosa ?? '-';
+                    $row->nb = isset($nb[$i]) ? $nb[$i]->id_nb : '-';
+    
                 $row->nama_obat = $obat[$i]->nama_obat ?? '-';
                 $row->jumlah = $obat[$i]->jumlah ?? '-';
                 $row->satuan = $obat[$i]->satuan ?? '';

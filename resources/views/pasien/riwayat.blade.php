@@ -123,43 +123,5 @@
     </div>
 </div>
 
-{{-- ================= STYLE ================= --}}
-<style>
-.pasien-switch {
-    margin-bottom: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.pasien-switch label {
-    font-weight: 600;
-    color: #316BA1;
-}
-
-.pasien-switch select {
-    padding: 12px 16px;
-    border: 2px solid #e1e8ed;
-    border-radius: 8px;
-    font-family: 'Poppins', sans-serif;
-}
-
-.detail-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    padding: 10px 20px;
-    background: #316BA1;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
-}
-
-.detail-btn:hover {
-    background: #3f7fbf;
-}
-</style>
 
 @endsection
