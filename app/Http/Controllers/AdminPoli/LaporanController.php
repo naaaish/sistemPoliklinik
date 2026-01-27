@@ -23,9 +23,9 @@ class LaporanController extends Controller
             $to   = $to   ?: now()->toDateString();
         }
 
-        $perPage = (int) $request->input('per_page', 5);
-        $allowedPerPage = [5, 10, 25, 100];
-        if (!in_array($perPage, $allowedPerPage)) $perPage = 5;
+        $perPage = $request->get('per_page', 10);
+        $allowed = ['10','25','50','100','all'];
+        if (!in_array((string)$perPage, $allowed)) $perPage = 10;
 
         // Ambil daftar NIP yang ada di pendaftaran pada range tanggal
         $nipQuery = DB::table('pendaftaran as p')
@@ -55,10 +55,22 @@ class LaporanController extends Controller
             ->paginate($perPage)
             ->appends($request->query());
 
+        if ($perPage === 'all') {
+            $nips = $nipQuery->get();
+            $totalNips = $nips->count();
+            $currentPage = 1;
+            $perPageInt = $totalNips > 0 ? $totalNips : 1;
+            $offsetNo = 0;
+        } else {
+            $nips = $nipQuery->paginate((int)$perPage)->appends($request->query());
+            $totalNips = $nips->total();
+            $currentPage = $nips->currentPage();
+            $perPageInt = $nips->perPage();
+            $offsetNo = ($currentPage - 1) * $perPageInt;
+        }
         // Build ringkas pasien+hubkel per NIP (di range tanggal)
-        $items = [];
-        $noAwal = ($nips->currentPage() - 1) * $nips->perPage();
-
+        $itemsArr = [];
+        
         foreach ($nips as $idx => $row) {
             $nip = $row->nip;
 
@@ -114,14 +126,28 @@ class LaporanController extends Controller
             if (count($namaList) > 3) $namaTxt .= "\n(+".(count($namaList)-3).")";
             if (count($hubList) > 3)  $hubTxt  .= "\n(+".(count($hubList)-3).")";
 
-            $items[] = [
-                'no' => $noAwal + $idx + 1,
+            $itemsArr[] = [
+                'no' => $offsetNo + $idx + 1,
                 'tanggal' => $row->last_tanggal ?? '-',
                 'nama' => $row->nama_pegawai ?? '-',
                 'nip' => $nip ?? '-',
                 'nama_pasien' => $namaTxt ?: '-',
                 'hub_kel' => $hubTxt ?: '-',
             ];
+        }
+        if ($perPage === 'all') {
+            $items = collect($itemsArr);
+        } else {
+            $items = new \Illuminate\Pagination\LengthAwarePaginator(
+                $itemsArr,
+                $totalNips,
+                $perPageInt,
+                $currentPage,
+                [
+                    'path'  => $request->url(),
+                    'query' => $request->query(),
+                ]
+            );
         }
 
         return view('adminpoli.laporan.index', [

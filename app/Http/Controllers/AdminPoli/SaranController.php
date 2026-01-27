@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\SaranExport;
+
 
 class SaranController extends Controller
 {
@@ -25,7 +27,14 @@ class SaranController extends Controller
             });
         }
 
-        $saran = $query
+        $perPageRaw = $request->input('per_page', 10);
+        $allowedPerPage = [10, 25, 50, 100];
+        $isAll = ($perPageRaw === 'all');
+
+        $perPage = (int) $perPageRaw;
+        if (!in_array($perPage, $allowedPerPage)) $perPage = 10;
+
+        $baseSelect = $query
             ->select(
                 'saran.id_saran',
                 'saran.saran as saran_text',
@@ -34,8 +43,15 @@ class SaranController extends Controller
                 'saran.is_active',
                 'saran.created_at'
             )
-            ->orderBy('saran.created_at', 'desc')
-            ->get();
+            ->orderBy('saran.created_at', 'desc');
+
+        if ($isAll) {
+            $saran = $baseSelect->get();
+        } else {
+            $saran = $baseSelect
+                ->paginate($perPage)
+                ->appends($request->query());
+        }
 
         // ===== PREVIEW COUNT (DOWNLOAD) =====
         $previewCount = null;
@@ -53,7 +69,7 @@ class SaranController extends Controller
             ->orderBy('diagnosa')
             ->get();
 
-        return view('adminpoli.saran.index', compact('saran', 'previewCount', 'diagnosaList'));
+        return view('adminpoli.saran.index', compact('saran', 'previewCount', 'diagnosaList', 'perPageRaw'));
     }
 
     public function store(Request $request)
@@ -78,19 +94,18 @@ class SaranController extends Controller
                 ->with('error', 'Saran untuk diagnosa ini sudah ada. Gunakan teks lain.');
         }
 
-        // Ambil id_saran terakhir berdasarkan urutan terbesar (SAR-xxx)
+        // Ambil id_saran terakhir berdasarkan urutan terbesar (SRN-xxx)
         $lastId = DB::table('saran')
-            ->where('id_saran', 'like', 'SAR-%')
+            ->where('id_saran', 'like', 'SRN-%')
             ->orderByRaw("CAST(SUBSTRING(id_saran, 5) AS UNSIGNED) DESC")
             ->value('id_saran');
 
         $nextNumber = 1;
         if ($lastId) {
-            $nextNumber = (int) substr($lastId, 4) + 1; // "SAR-" = 4 char
+            $nextNumber = (int) substr($lastId, 4) + 1; // "SRN-" = 4 char
         }
 
-        $newId = 'SAR-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
-
+        $newId = 'SRN-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
         DB::table('saran')->insert([
             'id_saran'   => $newId,
             'saran'      => $saranText,
@@ -209,14 +224,14 @@ class SaranController extends Controller
                 continue;
             }
 
-            // generate id_saran SAR-XXX
+            // generate id_saran SRN-XXX
             $last = DB::table('saran')
                 ->select('id_saran')
                 ->orderByRaw("CAST(SUBSTRING(id_saran, 5) AS UNSIGNED) DESC")
                 ->value('id_saran');
 
             $nextNum = $last ? ((int)substr($last, 4) + 1) : 1;
-            $newId   = 'SAR-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+            $newId   = 'SRN-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
 
             DB::table('saran')->insert([
                 'id_saran'    => $newId,
@@ -260,6 +275,7 @@ class SaranController extends Controller
                 'saran.created_at',
                 'saran.is_active'
             )
+            ->where('saran.is_active', '1')
             ->whereBetween('saran.created_at', [$from, $to])
             ->orderBy('saran.created_at', 'desc')
             ->get();
@@ -296,18 +312,12 @@ class SaranController extends Controller
         }
 
         if ($request->format === 'excel') {
-            $filename = $fileBase . '.xls';
+            $filename = $fileBase . '.xlsx';
 
-            $html = view('adminpoli.saran.export_excel', [
-                'data' => $data,
-                'from' => $request->from,
-                'to'   => $request->to,
-            ])->render();
-
-            return response($html, 200, [
-                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
-            ]);
+            return Excel::download(
+                new SaranExport($data, $request->from, $request->to),
+                $filename
+            );
         }
 
         if ($request->format === 'pdf') {

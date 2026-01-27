@@ -71,38 +71,31 @@
         @endforelse
       </div>
     </div>
+    <div class="lapidx-table-foot">
+        <div class="lapidx-total">
+            Total
+            @if($items instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                {{ $items->total() }}
+            @else
+                {{ $items->count() }}
+            @endif
+        </div>
 
-    <div class="lapidx-bottom-full">
-      {{-- kiri: total --}}
-      <div class="lapidx-total">
-        Total <strong>{{ $nips->total() }}</strong>
-      </div>
+            <form method="GET" action="{{ route('adminpoli.laporan.index') }}" class="lapidx-lines">
+                {{-- keep query biar ga reset --}}
+                @if(request('q')) <input type="hidden" name="q" value="{{ request('q') }}"> @endif
 
-      {{-- tengah: lines per page --}}
-      <form method="GET"
-            action="{{ route('adminpoli.laporan.index') }}"
-            class="lapidx-lines">
+                <span class="lapidx-lines-label">Lines per page</span>
 
-        {{-- keep filter --}}
-        <input type="hidden" name="tipe" value="{{ $tipe }}">
-        <input type="hidden" name="from" value="{{ $from }}">
-        <input type="hidden" name="to" value="{{ $to }}">
-
-        <span>Lines per page</span>
-        <select name="per_page" onchange="this.form.submit()">
-          @foreach([5,10,15,25,50] as $n)
-            <option value="{{ $n }}" {{ (int)$perPage === $n ? 'selected' : '' }}>
-              {{ $n }}
-            </option>
-          @endforeach
-        </select>
-      </form>
-
-      {{-- kanan: pagination --}}
-      <div class="lapidx-paginate">
-        {{ $nips->links() }}
-      </div>
-    </div>
+                <select name="per_page" class="lapidx-lines-select" onchange="this.form.submit()">
+                    <option value="10"  {{ request('per_page','10')=='10' ? 'selected' : '' }}>10</option>
+                    <option value="25"  {{ request('per_page')=='25' ? 'selected' : '' }}>25</option>
+                    <option value="50"  {{ request('per_page')=='50' ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ request('per_page')=='100' ? 'selected' : '' }}>100</option>
+                    <option value="all" {{ request('per_page')=='all' ? 'selected' : '' }}>All</option>
+                </select>
+            </form>
+        </div>
   </div>
 
   <div class="lapidx-foot">

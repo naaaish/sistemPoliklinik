@@ -50,12 +50,20 @@ class PemeriksaanController extends Controller
                 END as nama_pasien"),
                 'pemeriksaan.created_at as tanggal_periksa',
             ])
-            ->selectRaw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as dokter_pemeriksa")
-            ->get();
+            ->selectRaw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as dokter_pemeriksa");
+            
+        $perPage = $request->get('per_page', 10);
+        $allowed = ['10', '25', '50', '100', 'all'];
+        if (!in_array((string) $perPage, $allowed)) $perPage = 10;
+
+        $rows = ($perPage === 'all')
+            ? $rows->get()
+            : $rows->paginate((int) $perPage)->appends($request->query());
 
         // blade kamu pakai $pemeriksaan
         return view('adminpoli.pemeriksaan.index', [
             'pemeriksaan' => $rows,
+            'perPage' => $perPage,
         ]);
     }
 

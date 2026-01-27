@@ -204,6 +204,32 @@
                 </form>
             </div>
         </div>
+
+        <div class="saran-table-foot">
+            <div class="saran-total">
+                Total
+                @if($saran instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    {{ $saran->total() }}
+                @else
+                    {{ $saran->count() }}
+                @endif
+            </div>
+
+            <form method="GET" action="{{ route('adminpoli.saran.index') }}" class="saran-lines">
+                {{-- keep query biar ga reset --}}
+                @if(request('q')) <input type="hidden" name="q" value="{{ request('q') }}"> @endif
+
+                <span class="saran-lines-label">Lines per page</span>
+
+                <select name="per_page" class="saran-lines-select" onchange="this.form.submit()">
+                    <option value="10"  {{ request('per_page','10')=='10' ? 'selected' : '' }}>10</option>
+                    <option value="25"  {{ request('per_page')=='25' ? 'selected' : '' }}>25</option>
+                    <option value="50"  {{ request('per_page')=='50' ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ request('per_page')=='100' ? 'selected' : '' }}>100</option>
+                    <option value="all" {{ request('per_page')=='all' ? 'selected' : '' }}>All</option>
+                </select>
+            </form>
+        </div>
     </div>
 
     <div class="saran-foot">

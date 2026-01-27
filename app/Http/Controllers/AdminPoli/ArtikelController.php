@@ -68,13 +68,20 @@ class ArtikelController extends Controller
             $query->where('judul_artikel', 'like', '%' . $q . '%');
         }
 
-        $artikel = $query
+         $perPage = $request->get('per_page', 10);
+        $allowed = ['10', '25', '50', '100', 'all'];
+        if (!in_array((string) $perPage, $allowed)) $perPage = 10;
+
+        $base = $query
             ->select('id_artikel', 'judul_artikel', 'tanggal', 'cover_path', 'updated_at')
             ->orderByDesc('tanggal')
-            ->orderByDesc('updated_at')
-            ->get();
+            ->orderByDesc('updated_at');
 
-        return view('adminpoli.artikel.index', compact('artikel'));
+        $artikel = ($perPage === 'all')
+            ? $base->get()
+            : $base->paginate((int) $perPage)->appends($request->query());
+
+        return view('adminpoli.artikel.index', compact('artikel', 'perPage'));
     }
 
     public function create()
