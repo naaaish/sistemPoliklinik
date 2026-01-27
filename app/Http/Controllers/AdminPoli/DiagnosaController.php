@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Exports\DiagnosaExport;
 
 class DiagnosaController extends Controller
 {
@@ -288,16 +289,12 @@ class DiagnosaController extends Controller
         }
 
         if ($request->format === 'excel') {
-            $html = view('adminpoli.diagnosa.export_excel', [
-                'data' => $data,
-                'from' => $request->from,
-                'to'   => $request->to,
-            ])->render();
+            $filename = $fileBase . '.xlsx';
 
-            return response($html, 200, [
-                'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="'.$fileBase.'.xls"',
-            ]);
+            return Excel::download(
+                new DiagnosaExport($from, $to),
+                $filename
+            );
         }
 
         // pdf
