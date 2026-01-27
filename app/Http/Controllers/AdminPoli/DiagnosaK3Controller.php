@@ -254,7 +254,7 @@ class DiagnosaK3Controller extends Controller
                 ]);
         });
 
-        return back()->with('success','Kategori dinonaktifkan.');
+        return back()->with('success','Kategori dihapus.');
     }
 
     public function storePenyakit(Request $request)
@@ -274,16 +274,6 @@ class DiagnosaK3Controller extends Controller
 
         if (!$cat) {
             return back()->with('error','Kategori tidak aktif / tidak ditemukan.');
-        }
-
-        $used = DB::table('diagnosa_k3')
-            ->where('tipe', 'penyakit')
-            ->where('is_active', 1)
-            ->where('id_diagnosa', $request->id_diagnosa)
-            ->exists();
-
-        if ($used) {
-            return back()->with('error', 'Diagnosa ini sudah punya mapping NB (aktif).');
         }
 
         // aktif & duplikat
@@ -321,7 +311,6 @@ class DiagnosaK3Controller extends Controller
                     'id_nb' => $id,
                     'tipe' => 'penyakit',
                     'parent_id' => $parent,
-                    'id_diagnosa' => $request->id_diagnosa,
                     'nama_penyakit' => $nama,
                     'kategori_penyakit' => $cat->nama_penyakit,
                     'is_active' => 1,
@@ -366,16 +355,6 @@ class DiagnosaK3Controller extends Controller
 
         if (!$cat) {
             return back()->with('error','Kategori tidak valid.');
-        }
-
-        $used = DB::table('diagnosa_k3')
-            ->where('tipe', 'penyakit')
-            ->where('is_active', 1)
-            ->where('id_diagnosa', $request->id_diagnosa)
-            ->exists();
-
-        if ($used) {
-        return back()->with('error', 'Diagnosa ini sudah punya mapping NB (aktif).');
         }
 
         // duplikat aktif di kategori target
@@ -430,14 +409,13 @@ class DiagnosaK3Controller extends Controller
                 'updated_at' => now()
             ]);
 
-        return back()->with('success','Penyakit dinonaktifkan.');
+        return back()->with('success','Penyakit dihapus.');
     }
 
     public function import(Request $request)
     {
         $request->validate(
             [
-                'id_diagnosa' => ['required', 'exists:diagnosa,id_diagnosa'],
                 'file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
             ],
             [
@@ -676,12 +654,14 @@ class DiagnosaK3Controller extends Controller
 
         // Ambil kategori urut 1..n
         $cats = DB::table('diagnosa_k3')
+            ->where('is_active', 1)
             ->where('tipe','kategori')
             ->orderByRaw("CAST(id_nb AS UNSIGNED) ASC")
             ->get();
 
         // Ambil penyakit urut per kategori
         $kids = DB::table('diagnosa_k3')
+            ->where('is_active', 1)
             ->where('tipe','penyakit')
             ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',1) AS UNSIGNED) ASC")
             ->orderByRaw("CAST(SUBSTRING_INDEX(id_nb,'.',-1) AS UNSIGNED) ASC")
