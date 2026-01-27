@@ -108,7 +108,8 @@ Route::prefix('adminpoli')
 
         Route::resource('obat', ObatController::class)->except(['show']);
         Route::post('obat/import', [\App\Http\Controllers\AdminPoli\ObatController::class, 'import'])->name('obat.import');
-        Route::get('obat/export', [\App\Http\Controllers\AdminPoli\ObatController::class, 'export'])->name('obat.export');
+        Route::get('obat/export', [\App\Http\Controllers\AdminPoli\ObatController::class, 'export'])
+            ->name('obat.export');
 
         // Diagnosa
         Route::post('diagnosa/import', [DiagnosaController::class, 'import'])->name('diagnosa.import');

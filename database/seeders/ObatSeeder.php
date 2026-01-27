@@ -22,6 +22,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 5000.00,
                 'exp_date'  => '2026-12-31',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             [
                 'id_obat'   => 'OBT-002',
@@ -29,6 +30,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 12500.00,
                 'exp_date'  => '2026-10-20',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             [
                 'id_obat'   => 'OBT-003',
@@ -36,6 +38,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 45000.00,
                 'exp_date'  => '2027-01-15',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
              [
                 'id_obat'   => 'OBT-004',
@@ -43,6 +46,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 18000.00,
                 'exp_date'  => '2026-06-05',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             [
                 'id_obat'   => 'OBT-005',
@@ -50,6 +54,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 8000.00,
                 'exp_date'  => '2027-11-11',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             [
                 'id_obat'   => 'OBT-006',
@@ -57,6 +62,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 15000.00,
                 'exp_date'  => '2027-03-22',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             [
                 'id_obat'   => 'OBT-007',
@@ -64,6 +70,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 20000.00,
                 'exp_date'  => '2026-09-30',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             [
                 'id_obat'   => 'OBT-008',
@@ -71,6 +78,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 9000.00,
                 'exp_date'  => '2026-12-12',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             // alat kesehatan
             [
@@ -79,6 +87,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 75000.00,
                 'exp_date'  => '2028-05-01',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             [
                 'id_obat'   => 'OBT-010',
@@ -86,6 +95,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 120000.00,
                 'exp_date'  => '2028-08-15',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             [
                 'id_obat'   => 'OBT-011',
@@ -93,6 +103,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 25000.00,
                 'exp_date'  => '2027-07-07',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             [
                 'id_obat'   => 'OBT-012',
@@ -100,6 +111,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 15000.00,
                 'exp_date'  => '2027-04-18',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             [
                 'id_obat'   => 'OBT-013',
@@ -107,6 +119,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 85000.00,
                 'exp_date'  => '2030-01-01',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ],
             [
                 'id_obat'   => 'OBT-014',
@@ -114,6 +127,7 @@ class ObatSeeder extends Seeder
                 'harga'     => 150000.00,
                 'exp_date'  => '2030-01-01',
                 'is_active' => true,
+                'created_at' => Carbon::now(),
             ]
         ];
 

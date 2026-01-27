@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('nama_obat');
             $table->decimal('harga',12,2);
             $table->date('exp_date');
+            $table->timestamps();
             $table->boolean('is_active')->default(true);
         });
-
     }
 
     /**

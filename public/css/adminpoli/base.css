@@ -32,6 +32,7 @@ body{
   top: 0;
   height: 100vh;
   overflow-y: auto;
+  z-index: 10;
 }
 
 .ap-brand{
@@ -138,9 +139,13 @@ body{
 .ap-main{
   flex: 1;
   padding: 20px 24px 40px 24px;
-  display: flex;
-  justify-content: center;
+  display: block;
   margin-left: 250px;
+  width: calc(100% - 250px);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  z-index: 1;
 }
 
 .ap-page{
