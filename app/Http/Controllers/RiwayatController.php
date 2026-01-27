@@ -99,6 +99,9 @@ class RiwayatController extends Controller
             ->leftJoin('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
             ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
             ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
+            // 🔑 WAJIB TAMBAH JOIN INI BIAR DIAGNOSA MUNCUL
+            ->leftJoin('detail_pemeriksaan_penyakit', 'pemeriksaan.id_pemeriksaan', '=', 'detail_pemeriksaan_penyakit.id_pemeriksaan')
+            ->leftJoin('diagnosa', 'detail_pemeriksaan_penyakit.id_diagnosa', '=', 'diagnosa.id_diagnosa')
             ->where(function ($q) use ($keluargaAktifId, $pegawai) {
                 if ($keluargaAktifId === 'pegawai') {
                     $q->whereNull('pendaftaran.id_keluarga')
@@ -110,20 +113,29 @@ class RiwayatController extends Controller
             ->select(
                 'pemeriksaan.id_pemeriksaan',
                 'pemeriksaan.created_at',
+                'pendaftaran.keluhan',
                 DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
-                DB::raw("
-                    CASE
-                        WHEN pendaftaran.id_dokter IS NOT NULL THEN dokter.nama
-                        WHEN pendaftaran.id_pemeriksa IS NOT NULL THEN pemeriksa.nama_pemeriksa
-                        ELSE '-'
-                    END as nama_pemeriksa
-                "),
-                'pendaftaran.keluhan'
-                
+                DB::raw("CASE 
+                    WHEN pendaftaran.id_dokter IS NOT NULL THEN dokter.nama 
+                    WHEN pendaftaran.id_pemeriksa IS NOT NULL THEN pemeriksa.nama_pemeriksa 
+                    ELSE '-' 
+                END as nama_pemeriksa"),
+                // 🔑 GABUNGKAN DIAGNOSA
+                DB::raw("GROUP_CONCAT(DISTINCT diagnosa.diagnosa SEPARATOR ', ') as daftar_diagnosa")
+            )
+            ->groupBy(
+                'pemeriksaan.id_pemeriksaan', 
+                'pemeriksaan.created_at', 
+                'pendaftaran.keluhan', 
+                'keluarga.nama_keluarga', 
+                'pegawai.nama_pegawai', 
+                'pendaftaran.id_dokter', 
+                'dokter.nama', 
+                'pendaftaran.id_pemeriksa', 
+                'pemeriksa.nama_pemeriksa'
             )
             ->orderBy('pemeriksaan.created_at', 'desc')
             ->get();
-
 
         return view('pasien.riwayat', compact(
             'pegawai',
@@ -133,7 +145,6 @@ class RiwayatController extends Controller
             'keluargaAktifId'
         ));
     }
-
     /**
      * ==================================================
      * DETAIL RIWAYAT PEMERIKSAAN

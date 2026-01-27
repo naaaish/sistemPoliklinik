@@ -20,27 +20,27 @@
             @if($keluargaAktif)
 
                 {{-- DROPDOWN PILIH KELUARGA --}}
-                <form method="GET" action="{{ route('pasien.riwayat') }}" class="pasien-switch">
-                    <label>Hubungan Keluarga</label>
-                    <select name="id_keluarga" onchange="this.form.submit()">
-                        @foreach($daftarKeluarga as $k)
-                            <option value="{{ $k->id_keluarga }}"
-                                {{ $k->id_keluarga == $keluargaAktifId ? 'selected' : '' }}>
-
-                                @if($k->hubungan_keluarga === 'pegawai')
-                                    Pegawai (YBS)
-                                @elseif($k->hubungan_keluarga === 'anak')
-                                    Anak ke-{{ $k->urutan_anak }}
-                                @else
-                                    {{ ucfirst($k->hubungan_keluarga) }}
-                                @endif
-                                - {{ $k->nama_keluarga }}
-
-                            </option>
-                        @endforeach
-                    </select>
-
-                </form>
+                <div class="pasien-switch-wrapper">
+                    <form method="GET" action="{{ route('pasien.riwayat') }}" class="pasien-switch-form">
+                        <div class="switch-box">
+                            <label><i class="fas fa-users"></i> Hubungan Keluarga</label>
+                            <select name="id_keluarga" onchange="this.form.submit()">
+                                @foreach($daftarKeluarga as $k)
+                                    <option value="{{ $k->id_keluarga }}" {{ $k->id_keluarga == $keluargaAktifId ? 'selected' : '' }}>
+                                        @if($k->hubungan_keluarga === 'pegawai')
+                                            Pegawai (YBS)
+                                        @elseif($k->hubungan_keluarga === 'anak')
+                                            Anak ke-{{ $k->urutan_anak }}
+                                        @else
+                                            {{ ucfirst($k->hubungan_keluarga) }}
+                                        @endif
+                                        - {{ $k->nama_keluarga }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </form>
+                </div>
 
                 {{-- BOX PROFIL --}}
                 <div class="profile-box">
@@ -79,44 +79,48 @@
             @endif
         </div>
 
-        {{-- ================= RIWAYAT ================= --}}
-        <div class="riwayat-grid">
+        {{-- GRID RIWAYAT --}}
+        <div class="riwayat-grid-modern">
             @forelse($riwayat as $i => $r)
-                <div class="riwayat-card">
-                    <div class="riwayat-header">
-                        <span>RIWAYAT {{ $i + 1 }}</span>
-                        <span>
-                            {{ \Carbon\Carbon::parse($r->created_at)
-                                ->translatedFormat('l, d F Y, H:i') }}
-                        </span>
+                <div class="riwayat-card-modern">
+                    <div class="card-header-blue">
+                        <span class="riwayat-number">RIWAYAT {{ $i + 1 }}</span>
+                        <span class="riwayat-date">{{ \Carbon\Carbon::parse($r->created_at)->translatedFormat('l, d F Y') }}</span>
                     </div>
-
-                    <div class="riwayat-body">
-                        <p><b>Dokter:</b> {{ $r->nama_dokter ?? '-' }}</p>
-                        <p><b>Dokter / Pemeriksa:</b>
-                            {{ $r->nama_dokter ?? $r->nama_pemeriksa ?? '-' }}
-                        </p>
-
-                        <p><b>Keluhan:</b> {{ $r->keluhan ?? '-' }}</p>
-
-                        <a href="{{ route('pasien.pemeriksaan.detail', $r->id_pemeriksaan) }}"
-                           class="detail-btn">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                            Lihat Detail
-                        </a>
+                    <div class="card-body-modern">
+                        <div class="info-row">
+                            <div class="info-icon-circle">
+                                <img src="{{ asset('assets/adminPoli/dokter.png') }}" alt="Icon Dokter" class="icon-img-dokter">
+                            </div>
+                            <div class="info-text">
+                                <span class="text-name">{{ $r->nama_pemeriksa }}</span>
+                                <span class="text-sub">Pemeriksa / Dokter</span>
+                            </div>
+                        </div>
+                        <div class="divider-thin"></div>
+                        <div class="info-row">
+                            <div class="info-icon cyan"><i class="fas fa-notes-medical"></i></div>
+                            <div class="info-text">
+                                <span class="text-label">Keluhan</span>
+                                <p class="text-value">{{ $r->keluhan ?? '-' }}</p>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-icon blue"><i class="fas fa-stethoscope"></i></div>
+                            <div class="info-text">
+                                <span class="text-label">Diagnosa Dokter</span>
+                                <p class="text-value">{{ $r->daftar_diagnosa ?? '-' }}</p>
+                            </div>
+                        </div>
+                        <div class="card-footer-modern">
+                            <a href="{{ route('pasien.pemeriksaan.detail', $r->id_pemeriksaan) }}" class="btn-detail-full">
+                                Lihat Detail Lengkap →
+                            </a>
+                        </div>
                     </div>
                 </div>
             @empty
-                <div class="riwayat-empty">
-                    <img src="{{ asset('images/empty-state.png') }}" alt="No Data"
-                         onerror="this.style.display='none'">
-                    <h3>Tidak ada riwayat pemeriksaan</h3>
-                    <p>Riwayat pemeriksaan akan muncul di sini.</p>
-                </div>
+                <div class="riwayat-empty">Belum ada riwayat pemeriksaan.</div>
             @endforelse
         </div>
 

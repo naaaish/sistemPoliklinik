@@ -262,27 +262,39 @@
 }
 
 .riwayat-number { font-weight: 800; font-size: 16px; letter-spacing: 1px; }
-.riwayat-date { font-size: 13px; opacity: 0.9; }
+.riwayat-date { font-size: 17px; opacity: 0.9; }
 
 .card-body-modern { padding: 30px; }
 
-/* Icon Circle */
+/* Container Lingkaran Biru */
 .info-icon-circle {
     width: 48px;
     height: 48px;
-    background: #00AEEF;
-    color: white;
+    background: #00AEEF; /* Biru Cyan */
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    overflow: hidden; 
 }
 
-.info-icon-circle svg { width: 26px; height: 26px; }
+/* Style Khusus Gambar di Dalamnya */
+.icon-img-dokter {
+    width: 60px; 
+    height: 60px;
+    object-fit: contain;
+}
+
+/* Biar sejajar sama teks */
+.info-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
 
 /* Info Rows */
-.info-row { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 20px; }
 .info-text { display: flex; flex-direction: column; }
 .text-name { font-size: 18px; font-weight: 700; color: #316BA1; }
 .text-sub { font-size: 13px; color: #A0AEC0; }
@@ -311,5 +323,53 @@
 
 /* Responsive */
 @media (max-width: 1100px) {
+    .riwayat-grid-modern { grid-template-columns: 1fr; }
+}
+
+/* PASIEN SWITCH DROPDOWN */
+.pasien-switch-wrapper {
+    margin-bottom: 40px;
+}
+
+.pasien-switch-form .switch-box {
+    background: white;
+    padding: 20px 30px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.switch-box label {
+    font-weight: 700;
+    color: #316BA1;
+    white-space: nowrap;
+}
+
+.switch-box select {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #f1f5f9;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    color: #475569;
+    font-weight: 600;
+    outline: none;
+}
+
+.switch-box select:focus {
+    border-color: #316BA1;
+}
+
+/* GRID LAYOUT (1 Baris 2 Kolom) */
+.riwayat-grid-modern {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+@media (max-width: 992px) {
     .riwayat-grid-modern { grid-template-columns: 1fr; }
 }
