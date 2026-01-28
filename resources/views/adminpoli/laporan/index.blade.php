@@ -37,7 +37,6 @@
         <input type="date" name="to" value="{{ $to }}" class="lapidx-date" required>
 
         <button type="submit" class="lapidx-btn-search">
-          <img class="lapidx-ic" src="{{ asset('assets/adminPoli/search.png') }}" alt="">
           Tampilkan
         </button>
       </div>
