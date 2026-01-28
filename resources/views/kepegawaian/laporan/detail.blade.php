@@ -27,19 +27,22 @@
         @endif
     </div>
 
-    <div class="laporan-card">
-        <form method="GET" action="{{ route('kepegawaian.laporan.detail', $jenis) }}" class="filter-form">
-            <div class="filter-group">
-                <label>Dari</label>
-                <input type="date" name="dari" value="{{ $dari }}" class="form-control">
-            </div>
-            <div class="filter-group">
-                <label>Sampai</label>
-                <input type="date" name="sampai" value="{{ $sampai }}" class="form-control">
-            </div>
-            <button class="btn btn-primary">Tampilkan</button>
-        </form>
+    {{-- ========================================
+         ✅ TAMBAHAN: INFO PERIODE + TOMBOL UBAH
+    ======================================== --}}
+    @if($dari && $sampai)
+    <div class="periode-info">
+        <div>
+            <strong>📅 Periode:</strong> 
+            {{ \Carbon\Carbon::parse($dari)->translatedFormat('d F Y') }} 
+            - 
+            {{ \Carbon\Carbon::parse($sampai)->translatedFormat('d F Y') }}
+        </div>
+        <a href="{{ route('kepegawaian.laporan') }}" class="btn-reset">
+            ← Ubah Periode
+        </a>
     </div>
+    @endif
 
     {{-- ===================== DOKTER ===================== --}}
  @if($jenis === 'dokter')

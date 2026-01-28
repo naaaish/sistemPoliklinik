@@ -179,13 +179,25 @@ class RiwayatController extends Controller
 
         // 3. AMBIL NAMA PEMERIKSA
         $namaPemeriksa = '-';
-        if (!empty($pemeriksaan->id_dokter)) {
-            $namaPemeriksa = DB::table('dokter')->where('id_dokter', $pemeriksaan->id_dokter)->value('nama');
-        } elseif (!empty($pemeriksaan->id_pemeriksa)) {
-            // Pastikan nama kolom di tabel pemeriksa adalah 'nama_pemeriksa'
-            $namaPemeriksa = DB::table('pemeriksa')->where('id_pemeriksa', $pemeriksaan->id_pemeriksa)->value('nama_pemeriksa');
-        }
 
+        if (!empty($pendaftaran->id_dokter)) {
+            $dokter = DB::table('dokter')
+                ->where('id_dokter', $pendaftaran->id_dokter)
+                ->first();
+
+            if ($dokter) {
+                $namaPemeriksa = $dokter->nama;
+            }
+        } elseif (!empty($pendaftaran->id_pemeriksa)) {
+            $pemeriksa = DB::table('pemeriksa')
+                ->where('id_pemeriksa', $pendaftaran->id_pemeriksa)
+                ->first();
+
+            if ($pemeriksa) {
+                $namaPemeriksa = $pemeriksa->nama_pemeriksa;
+            }
+        }
+        
         // 4. DATA DIAGNOSA & SARAN (Query Anda sudah cukup bagus)
         $diagnosa = DB::table('detail_pemeriksaan_penyakit as dpp')
             ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dpp.id_diagnosa')
