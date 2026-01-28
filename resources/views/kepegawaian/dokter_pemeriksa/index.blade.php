@@ -144,10 +144,12 @@
       @endforelse
     </div>
 
+    <div class="dp-foot">
+      Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
+    </div>
   </div>
 </div>
 
-  {{-- FLASH (buat toast) --}}
 
 
   {{-- ================= MODAL TAMBAH ================= --}}
@@ -374,7 +376,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ========== TAMBAH ==========
-  btnOpenTambah?.addEventListener('click', () => {
     // auto-generate ID (hidden)
     const idDokterEl = document.getElementById('dpTambahIdDokter');
     const idPemeriksaEl = document.getElementById('dpTambahIdPemeriksa');
@@ -493,12 +494,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // helper jadwal row
+  // ========== HELPER JADWAL ROW  ==========
   function addJadwalRow(container, baseName, hari = '', jamMulai = '', jamSelesai = ''){
     const idx = container.querySelectorAll('.dp-jrow').length;
 
     const row = document.createElement('div');
     row.className = 'dp-jrow';
+
+    
     row.innerHTML = `
       <input class="dp-jinput" type="text" name="${baseName}[${idx}][hari]" placeholder="Hari" value="${hari || ''}" required>
       <input class="dp-jinput" type="time" name="${baseName}[${idx}][jam_mulai]" value="${(jamMulai || '').substring(0,5)}" required>
@@ -510,7 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
     row.querySelector('.dp-jremove').addEventListener('click', () => row.remove());
     container.appendChild(row);
   }
-});
+
 
 </script>
 

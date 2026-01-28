@@ -50,27 +50,35 @@
     <div class="services-grid">
 
         <div class="service-card">
-            <div class="icon">🩺</div>
-            <h3>Pemeriksaan Umum</h3>
+            <div class="service-icon">
+                <img src="{{ asset('assets/home/doctor.png') }}" alt="Pemeriksaan Umum">
+            </div>
+            <h4>Pemeriksaan Umum</h4>
             <p>Deteksi dini penyakit</p>
         </div>
 
         <div class="service-card">
-            <div class="icon">💊</div>
-            <h3>Resep Dokter</h3>
+            <div class="service-icon">
+                <img src="{{ asset('assets/home/drugs.png') }}" alt="Resep Dokter">
+            </div>
+            <h4>Resep Dokter</h4>
             <p>Resep langsung dari dokter</p>
         </div>
 
         <div class="service-card">
-            <div class="icon">📄</div>
-            <h3>Riwayat Medis</h3>
-            <p>Akses data kapan saja</p>
+            <div class="service-icon">
+                <img src="{{ asset('assets/home/report.png') }}" alt="Riwayat Medis">
+            </div>
+            <h4>Riwayat Medis</h4>
+            <p>Akses riwayat pemeriksaan kapan saja</p>
         </div>
 
         <div class="service-card">
-            <div class="icon">💬</div>
-            <h3>Konsultasi Online</h3>
-            <p>Konsultasi jarak jauh</p>
+            <div class="service-icon">
+                <img src="{{ asset('assets/home/chat.png') }}" alt="Konsultasi Online">
+            </div>
+            <h4>Konsultasi Online</h4>
+            <p>Konsultasi jarak jauh melalui WhatsApp</p>
         </div>
 
     </div>
@@ -163,7 +171,7 @@
 
         <div class="about-grid">
             <div>📅 Senin - Jumat</div>
-            <div>🕘 07.00 - 16.00</div>
+            <div>🕘 10.00 - 15.00</div>
             <div>📞 0286-xxxx-xxxx</div>
             <div>📍 Banyumas - Banjarnegara KM 8</div>
         </div>

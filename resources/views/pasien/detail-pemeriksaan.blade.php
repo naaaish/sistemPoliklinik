@@ -1,4 +1,4 @@
-@extends('layouts.kepegawaian') {{-- Sesuaikan jika ada layout khusus pasien --}}
+@extends('layouts.pasien') 
 
 @section('title', 'Rincian Pemeriksaan')
 
