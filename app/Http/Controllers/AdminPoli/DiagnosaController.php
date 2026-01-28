@@ -71,8 +71,9 @@ class DiagnosaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'diagnosa' => ['required',
-            Rule::unique('diagnosa', 'diagnosa')->where(fn ($q) => $q->where('is_active', 1)),
+            'diagnosa' => [
+                'required', 
+                'string'
             ],
             'id_nb' => [
                 'required',
@@ -119,10 +120,7 @@ class DiagnosaController extends Controller
         $request->validate([
             'diagnosa' => [
                 'required',
-                'string',
-                Rule::unique('diagnosa', 'diagnosa')
-                ->where(fn ($q) => $q->where('is_active', 1))
-                ->ignore($id, 'id_diagnosa'),
+                'string'
             ],
             'id_nb' => [
                 'required',
@@ -153,24 +151,6 @@ class DiagnosaController extends Controller
                 'id_nb'      => $request->input('id_nb'),
                 'updated_at' => now(),
             ]);
-
-        // reset semua link diagnosa_k3 yg sebelumnya mengarah ke diagnosa ini
-        DB::table('diagnosa_k3')
-            ->where('id_diagnosa', $id)
-            ->update([
-                'id_diagnosa' => null,
-                'updated_at'  => now(),
-            ]);
-
-        // link baru (kalau dipilih)
-        if ($request->filled('id_nb')) {
-            DB::table('diagnosa_k3')
-                ->where('id_nb', $request->id_nb)
-                ->update([
-                    'id_diagnosa' => $id,
-                    'updated_at'  => now(),
-                ]);
-        }
 
         return redirect()->route('adminpoli.diagnosa.index')
             ->with('success', 'Diagnosa berhasil diperbarui');
