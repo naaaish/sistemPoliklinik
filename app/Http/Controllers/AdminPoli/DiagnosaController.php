@@ -71,8 +71,9 @@ class DiagnosaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'diagnosa' => ['required',
-            Rule::unique('diagnosa', 'diagnosa')->where(fn ($q) => $q->where('is_active', 1)),
+            'diagnosa' => [
+                'required', 
+                'string'
             ],
             'id_nb' => [
                 'required',
@@ -119,10 +120,7 @@ class DiagnosaController extends Controller
         $request->validate([
             'diagnosa' => [
                 'required',
-                'string',
-                Rule::unique('diagnosa', 'diagnosa')
-                ->where(fn ($q) => $q->where('is_active', 1))
-                ->ignore($id, 'id_diagnosa'),
+                'string'
             ],
             'id_nb' => [
                 'required',
