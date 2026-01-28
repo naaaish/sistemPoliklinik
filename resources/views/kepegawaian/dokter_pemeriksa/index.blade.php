@@ -478,15 +478,23 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-{{-- SweetAlert Toast --}}
+
+{{-- TOAST NOTIFICATIONS - --}}
 @if(session('success'))
 <script>
-  Swal.fire({ icon: 'success', title: 'Berhasil', text: @json(session('success')), timer: 3000, showConfirmButton: false });
+  AdminPoliToast.fire({
+    icon: 'success',
+    title: @json(session('success'))
+  });
 </script>
 @endif
+
 @if(session('error'))
 <script>
-  Swal.fire({ icon: 'error', title: 'Gagal', text: @json(session('error')), timer: 3000, showConfirmButton: false });
+  AdminPoliToast.fire({
+    icon: 'error',
+    title: @json(session('error'))
+  });
 </script>
 @endif
 @endpush

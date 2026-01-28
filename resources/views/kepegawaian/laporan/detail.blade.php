@@ -274,120 +274,89 @@
                 <table class="laporan-table">
                     <thead>
                         <tr>
-                            @if($jenis === 'obat')
-                                <th>Nama Obat</th>
-                                <th>Tanggal</th>
-                                <th>Jumlah</th>
-                                <th>Harga</th>
-                                <th>Total</th>
-
-                            @elseif($jenis === 'total')
-                                <th>Tanggal</th>
-                                <th>Biaya Obat</th>
-                                <th>Jumlah Dokter Perusahaan</th>
-                                <th>Total</th>
-
-                            @else
-                                <tr>
-                                    <th>No</th>
-                                    <th>Tanggal</th>
-                                    <th>Nama Pegawai</th>
-                                    <th>Umur</th>
-                                    <th>Bagian</th>
-                                    <th>Nama Pasien</th>
-                                    <th>Hub. Kel</th>
-
-                                    <th>TD</th>
-                                    <th>GDP</th>
-                                    <th>GD 2 Jam</th>
-                                    <th>GDS</th>
-                                    <th>AU</th>
-                                    <th>Chol</th>
-                                    <th>TG</th>
-                                    <th>Suhu</th>
-                                    <th>BB</th>
-                                    <th>TB</th>
-
-                                    <th>Diagnosa</th>
-                                    <th>NB</th>
-                                    <th>Therapy</th>
-                                    <th>Jml Obat</th>
-                                    <th>Harga Obat</th>
-                                    <th>Total Obat</th>
-                                    <th>Pemeriksa</th>
-                                    <th>Periksa Ke</th>
-
-                                </tr>
-                        @endif
-                    </tr>
-                </thead>
-
-                <tbody>
-                @php
-                    $grouped = $data->groupBy('id_pemeriksaan');
-                    $no = 1;
-                @endphp
-
-                @foreach($grouped as $rows)
-                    @php
-                        $rowspan = $rows->count();
-                    @endphp
-
-                    @foreach($rows as $item)
-                        <tr>
-                            @if($loop->first)
-                                <td rowspan="{{ $rowspan }}">{{ $no++ }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->nama_pegawai }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->umur }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->bagian }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->nama_pasien }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ ucfirst($item->hub_kel) }}</td>
-
-                                <td rowspan="{{ $rowspan }}">{{ $item->sistol }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->gd_puasa }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->gd_duajam }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->gd_sewaktu }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->asam_urat }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->chol }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->tg }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->suhu }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->berat }}</td>
-                                <td rowspan="{{ $rowspan }}">{{ $item->tinggi }}</td>
-                            @endif
-
-                        {{-- DIAGNOSA --}}
-                        <td>{{ $item->diagnosa }}</td>
-
-                        {{-- NB --}}
-                        <td>{{ $item->nb }}</td>
-
-                        {{-- THERAPY / OBAT --}}
-                        <td>{{ $item->nama_obat }}</td>
-
-                        <td class="text-center">
-                            {{ $item->jumlah }} {{ $item->satuan }}
-                        </td>
-
-                        <td class="text-right">
-                            Rp {{ number_format($item->harga,0,',','.') }}
-                        </td>
-
-                        @if($loop->first)
-                        <td rowspan="{{ $rowspan }}" class="text-right fw-bold">
-                            Rp {{ number_format($item->total_obat_pasien,0,',','.') }}
-                        </td>
-                        <td rowspan="{{ $rowspan }}">{{ $item->pemeriksa }}</td>
-                        <td rowspan="{{ $rowspan }}">{{ $item->periksa_ke }}</td>
-                        @endif
-
+                            <th>No</th>
+                            <th>Tanggal</th>
+                            <th>Nama Pegawai</th>
+                            <th>Umur</th>
+                            <th>Bagian</th>
+                            <th>Nama Pasien</th>
+                            <th>Hub. Kel</th>
+                            <th>TD</th>
+                            <th>GDP</th>
+                            <th>GD 2 Jam</th>
+                            <th>GDS</th>
+                            <th>AU</th>
+                            <th>Chol</th>
+                            <th>TG</th>
+                            <th>Suhu</th>
+                            <th>BB</th>
+                            <th>TB</th>
+                            <th>Diagnosa</th>
+                            <th>NB</th>
+                            <th>Therapy</th>
+                            <th>Jml Obat</th>
+                            <th>Harga Obat</th>
+                            <th>Total Obat</th>
+                            <th>Pemeriksa</th>
+                            <th>Periksa Ke</th> {{-- Kolom Periksa Ke diletakkan di paling kanan --}}
                         </tr>
-                    @endforeach
-                @endforeach
-                </tbody>
+                    </thead>
 
-            </table>
-        @endif
+                    <tbody>
+                        @php
+                            $grouped = $data->groupBy('id_pemeriksaan');
+                            $no = 1;
+                        @endphp
+
+                        @foreach($grouped as $rows)
+                            @php
+                                $rowspan = $rows->count();
+                            @endphp
+
+                            @foreach($rows as $item)
+                                <tr>
+                                    @if($loop->first)
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $no++ }}</td>
+                                        <td rowspan="{{ $rowspan }}">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</td>
+                                        <td rowspan="{{ $rowspan }}">{{ $item->nama_pegawai }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->umur }}</td>
+                                        <td rowspan="{{ $rowspan }}">{{ $item->bagian }}</td>
+                                        <td rowspan="{{ $rowspan }}">{{ $item->nama_pasien }}</td>
+                                        <td rowspan="{{ $rowspan }}">{{ ucfirst($item->hub_kel) }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->sistol }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->gd_puasa }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->gd_duajam }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->gd_sewaktu }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->asam_urat }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->chol }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->tg }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->suhu }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->berat }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->tinggi }}</td>
+                                    @endif
+
+                                    {{-- Kolom yang TIDAK menggunakan rowspan (mengikuti jumlah diagnosa/obat) --}}
+                                    <td>{{ $item->diagnosa }}</td>
+                                    <td class="text-center">{{ $item->nb }}</td>
+                                    <td>{{ $item->nama_obat }}</td>
+                                    <td class="text-center">{{ $item->jumlah }} {{ $item->satuan }}</td>
+                                    <td class="text-right">Rp {{ number_format($item->harga,0,',','.') }}</td>
+
+                                    @if($loop->first)
+                                        <td rowspan="{{ $rowspan }}" class="text-right fw-bold">
+                                            Rp {{ number_format($item->total_obat_pasien ?? 0,0,',','.') }}
+                                        </td>
+                                        <td rowspan="{{ $rowspan }}">{{ $item->pemeriksa }}</td>
+                                        {{-- Kolom Periksa Ke sekarang sejajar dengan header terakhir --}}
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->periksa_ke }}</td>
+                                    @endif
+                                </tr>
+                            @endforeach
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+    @endif
 </div>
 @endsection
 
