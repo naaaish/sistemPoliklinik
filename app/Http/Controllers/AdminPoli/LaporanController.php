@@ -343,14 +343,9 @@ class LaporanController extends Controller
 
                 $ob = $obatList[$i] ?? null;
 
-                $saranText = '-';
-                if (!empty($v->saran_list) && count($v->saran_list) > 0) {
-                    $items = [];
-                    foreach ($v->saran_list as $sr) {
-                        $items[] = $sr->nama_saran ?? (string)$sr;
-                    }
-                    $saranText = implode("\n", $items);
-                }
+                $saranArr = $v->saran_list ?? [];
+                $hasDiagLine = ($i < count($diagUmum));
+                $saranLine = $hasDiagLine ? ($saranArr[$i] ?? '-') : '';
 
                 $rows[] = [
                     'NO' => $isFirst ? $no : '',
@@ -380,7 +375,7 @@ class LaporanController extends Controller
                     'JUMLAH_OBAT' => $ob ? trim(($ob->jumlah ?? 0) . ' ' . ($ob->satuan ?? '')) : ($isFirst ? '-' : ''),
                     'HARGA_OBAT_SATUAN' => $ob ? ($ob->harga ?? 0) : ($isFirst ? '-' : ''),
                     'TOTAL_HARGA_OBAT' => $isFirst ? ($totalHarga ?: '-') : '',
-                    'SARAN' => $isFirst ? $saranText : '',
+                    'SARAN' => $saranLine,
                     'PEMERIKSA' => $isFirst ? ($v->pemeriksa ?? '-') : '',
 
                     'NB' => $isPegawai ? ($nbLine ?: '-') : '',
@@ -457,5 +452,4 @@ class LaporanController extends Controller
         if (!$tglLahir) return null;
         return Carbon::parse($tglLahir)->age;
     }
-
 }

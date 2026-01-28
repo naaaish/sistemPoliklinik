@@ -6,11 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-
+USE Illuminate\Validation\Rule;
 use App\Models\Pendaftaran;
 use App\Models\Pemeriksaan;
 use App\Models\Obat;
-use App\Models\DiagnosaK3;
 use App\Models\Saran;
 use App\Models\Diagnosa;
 use App\Models\DetailResep;
@@ -41,8 +40,13 @@ class PemeriksaanInputController extends Controller
             ->orderBy('diagnosa.diagnosa')
             ->get();
 
-        $obat  = Obat::orderBy('nama_obat', 'asc')->get();
-        $saran = Saran::orderBy('saran', 'asc')->get();
+        $obat  = Obat::where('is_active', 1)
+            ->orderBy('nama_obat', 'asc')
+            ->get();
+
+        $saran = Saran::where('is_active', 1)
+            ->orderBy('saran', 'asc')
+            ->get();
 
         return view('adminpoli.pemeriksaan.create', compact(
             'pendaftaran',
@@ -80,7 +84,7 @@ class PemeriksaanInputController extends Controller
 
             // resep
             'obat_id'        => 'nullable|array',
-            'obat_id.*'      => 'nullable|string',
+            'obat_id.*'      => ['nullable', Rule::exists('obat', 'id_obat')->where('is_active', 1)],
             'jumlah'         => 'nullable|array',
             'jumlah.*'       => 'nullable|numeric',
             'satuan'         => 'nullable|array',
