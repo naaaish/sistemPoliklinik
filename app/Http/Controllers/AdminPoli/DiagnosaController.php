@@ -16,7 +16,8 @@ class DiagnosaController extends Controller
     public function index(Request $request)
     {
         $query = DB::table('diagnosa')
-            ->where('diagnosa.is_active', 1);
+            ->where('diagnosa.is_active', 1)
+            ->orderBy('created_at', 'desc');
 
         // search
         if ($request->filled('q')) {

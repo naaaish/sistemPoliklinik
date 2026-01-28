@@ -15,7 +15,9 @@ class ObatController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DB::table('obat')->where('is_active', '1');
+        $query = DB::table('obat')
+            ->where('is_active', '1')
+            ->orderBy('created_at', 'desc');
 
         if ($request->filled('q')) {
             $q = $request->q;
