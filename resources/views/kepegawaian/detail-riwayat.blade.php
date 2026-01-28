@@ -1,4 +1,4 @@
-@extends('layouts.kepegawaian') {{-- Sesuaikan layout pasien kamu --}}
+@extends('layouts.kepegawaian') 
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/pasien/detail-riwayat.css') }}">

@@ -172,7 +172,8 @@
                     </thead>
                     <tbody>
                         @forelse($keluarga as $k)
-                        <tr>
+                        {{-- LOGIC BUREM: Jika is_active adalah 0 --}}
+                        <tr style="{{ $k->is_active == 0 ? 'opacity: 0.5; background-color: #f8f9fa; color: #94a3b8;' : '' }}">
                             <td class="fw-bold text-secondary">
                                 {{ ucfirst($k->hubungan_keluarga) }} 
                                 @if($k->urutan_anak)
@@ -183,8 +184,7 @@
                             <td>{{ \Carbon\Carbon::parse($k->tgl_lahir)->translatedFormat('d F Y') }}</td>
                             <td>{{ $k->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
                             <td class="text-center">
-                                {{-- Tombol Edit Saja --}}
-                                <a href="{{ route('keluarga.edit', $k->id_keluarga) }}" class="btn-edit-sm" title="Edit Data Keluarga">
+                                <a href="{{ route('keluarga.edit', $k->id_keluarga) }}" class="btn-edit-sm">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -195,10 +195,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">
-                                <img src="{{ asset('assets/adminPoli/no-data.png') }}" alt="" style="width: 40px; opacity: 0.5; display: block; margin: 0 auto 10px;">
-                                Belum ada data keluarga terdaftar.
-                            </td>
+                            <td colspan="5" class="text-center py-4 text-muted">Belum ada data keluarga terdaftar.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -207,6 +204,8 @@
         </div>
     </div>
 </div>
+
+
 
 <script>
 // Auto-hide alert after 5 seconds

@@ -117,7 +117,7 @@ class DokterPemeriksaController extends Controller
             ]);
         }
 
-        return view('kepegawaian.dokter_pemeriksa.jadwal_view', compact('tipe','id','jadwal'));
+        return view('kepegawwaian.dokter_pemeriksa.jadwal_view', compact('tipe','id','jadwal'));
     }
 
     public function storeDokter(Request $request)
@@ -131,6 +131,7 @@ class DokterPemeriksaController extends Controller
             'jadwal.*.jam_mulai' => 'required',
             'jadwal.*.jam_selesai' => 'required',
         ]);
+
 
         // Auto-generate ID
         $lastDokter = Dokter::orderBy('id_dokter', 'desc')->first();
@@ -162,6 +163,7 @@ class DokterPemeriksaController extends Controller
                 ]);
             }
         });
+    
 
         return redirect()
         ->route('kepegawaian.dokter_pemeriksa.index')

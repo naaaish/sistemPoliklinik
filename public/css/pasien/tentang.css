@@ -1,17 +1,107 @@
-.about-section {
-    background: white;
-    border-radius: 18px;
-    padding: 30px;
-}
+.about-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
 
-.about-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin-top: 20px;
-}
-.about-card {
-    background: #f9f9f9;
-    border-radius: 12px;
-    padding: 20px;
-}
+    .page-header {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        text-align: center;
+    }
+
+    .page-header h2 {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .about-card-main {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        margin-bottom: 2rem;
+    }
+
+    .about-flex {
+        display: flex;
+        gap: 3rem;
+        align-items: center;
+    }
+
+    .about-icon-box {
+        background: #eef2f7;
+        width: 100px;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 25px;
+        font-size: 3rem;
+        color: #4a6fa5;
+        flex-shrink: 0;
+    }
+
+    .about-text h3 {
+        color: #4a6fa5;
+        margin-bottom: 1.2rem;
+        font-weight: 600;
+    }
+
+    .about-text p {
+        color: #5a6772;
+        line-height: 1.8;
+        font-size: 1.05rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 15px;
+        border-top: 4px solid #4a6fa5;
+        transition: transform 0.3s ease;
+    }
+
+    .info-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .info-item h4 {
+        color: #334155;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .info-item i {
+        color: #4a6fa5;
+    }
+
+    .info-item p, .info-item ul {
+        color: #64748b;
+        font-size: 0.95rem;
+        list-style: none;
+        padding: 0;
+    }
+
+    .info-item li {
+        margin-bottom: 5px;
+    }
+
+    @media (max-width: 768px) {
+        .about-flex { flex-direction: column; text-align: center; }
+        .about-icon-box { margin: 0 auto; }
+
+    }
