@@ -5,6 +5,7 @@ namespace App\Http\Controllers\AdminPoli;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 use App\Models\Pendaftaran;
 use App\Models\Pemeriksaan;
@@ -111,7 +112,9 @@ class PemeriksaanController extends Controller
         }
 
         // ===== master obat (buat dropdown obat editable di show) =====
-        $obat = Obat::orderBy('nama_obat', 'asc')->get();
+        $obat = Obat::where('is_active', 1)
+            ->orderBy('nama_obat', 'asc')
+            ->get();
 
         return view('adminpoli.pemeriksaan.show', compact(
             'pendaftaran',
@@ -148,10 +151,18 @@ class PemeriksaanController extends Controller
         }
 
         // dropdown data (kalau halaman edit kamu butuh)
-        $obat = Obat::orderBy('nama_obat', 'asc')->get();
-        $diagnosaK3 = DiagnosaK3::orderBy('nama_penyakit', 'asc')->get();
-        $saran = Saran::orderBy('saran', 'asc')->get();
-        $penyakit = Diagnosa::orderBy('diagnosa', 'asc')->get();
+        $obat = Obat::where('is_active', 1)
+            ->orderBy('nama_obat', 'asc')
+            ->get();
+        $diagnosaK3 = DiagnosaK3::where('is_active', 1)
+            ->orderBy('nama_penyakit', 'asc')
+            ->get();
+        $saran = Saran::where('is_active', 1)
+            ->orderBy('saran', 'asc')
+            ->get();
+        $penyakit = Diagnosa::where('is_active', 1)
+            ->orderBy('diagnosa', 'asc')
+            ->get();
 
         return view('adminpoli.pemeriksaan.edit', compact(
             'pendaftaran',
@@ -193,7 +204,7 @@ class PemeriksaanController extends Controller
 
             // resep
             'obat_id'        => 'nullable|array',
-            'obat_id.*'      => 'nullable|string',
+            'obat_id.*'      => ['nullable', Rule::exists('obat', 'id_obat')->where('is_active', 1)],
             'jumlah'         => 'nullable|array',
             'jumlah.*'       => 'nullable|numeric',
             'satuan'         => 'nullable|array',
