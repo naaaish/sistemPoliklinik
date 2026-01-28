@@ -14,12 +14,28 @@ class PegawaiController extends Controller
     public function index(Request $request)
     {
         $q = $request->input('q');
-        
-        $pegawai = Pegawai::when($q, function($query, $q) {
-            return $query->where('nama_pegawai', 'like', "%{$q}%");
-        })->get();
+        $perPage = $request->get('per_page', 10);
 
-        return view('kepegawaian.pegawai.index', compact('pegawai', 'q'));
+        $query = Pegawai::when($q, function ($query, $q) {
+            $query->where('nama_pegawai', 'like', "%{$q}%");
+        })->orderBy('nama_pegawai');
+
+        if ($perPage === 'all') {
+            $pegawai = $query->get();
+            $isAll = true;
+        } else {
+            $pegawai = $query
+                ->paginate((int)$perPage)
+                ->withQueryString();
+            $isAll = false;
+        }
+
+        return view('kepegawaian.pegawai.index', compact(
+            'pegawai',
+            'q',
+            'perPage',
+            'isAll'
+        ));
     }
 
     public function create()

@@ -12,7 +12,7 @@
         <div class="page-header">
             <div class="d-flex align-items-center">
                 <a href="{{ route('pegawai.show', $pegawai->nip) }}" class="btn-back-icon">
-                    <img src="{{ asset('assets/adminPoli/back-arrow.png.png') }}" alt="Back">
+                    <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Back">
                 </a>
                 <h4 class="mb-0">{{ $mode == 'create' ? 'Tambah Anggota Keluarga' : 'Edit Anggota Keluarga' }}</h4>
             </div>

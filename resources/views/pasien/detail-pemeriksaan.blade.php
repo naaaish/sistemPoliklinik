@@ -39,7 +39,7 @@
             </div>
             <div class="data-item">
                 <span class="data-label">Nama Pemeriksa :</span>
-                <span class="data-value">{{ $namaPemeriksa ?? '-' }}</span>
+                <span class="data-value">{{ $namaPemeriksa }}</span>
             </div>
             <div class="data-item">
                 <span class="data-label">Hubungan Keluarga :</span>

@@ -454,16 +454,17 @@ select.status-akun option[value="0"] {
 }
 
 .btn-secondary {
-    background: #64748b;
+    background: #e16d6d;
     border: none;
     border-radius: 10px;
     padding: 12px 24px;
     font-weight: 600;
     transition: all 0.3s ease;
+    margin-top: 15px;
 }
 
 .btn-secondary:hover {
-    background: #475569;
+    background: #ad5454;
     transform: translateY(-2px);
 }
 
@@ -524,4 +525,45 @@ select.status-akun option[value="0"] {
 .btn-tambah svg {
     width: 18px;
     height: 18px;
+}
+.btn-action-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border: none; /* Hapus border default browser */
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    color: white !important; /* Paksa teks jadi putih */
+}
+
+/* Efek melayang pas di-hover */
+.btn-action-custom:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.1);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Tombol Kembali (Header) - Abu-abu Elegan */
+.btn-secondary-gray {
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+    box-shadow: 0 4px 10px rgba(100, 116, 139, 0.3);
+}
+
+/* Tombol Simpan - Hijau Emerald */
+.btn-simpan-green {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+/* Tombol Batal - Merah Rose */
+.btn-batal-red {
+    background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+    box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3);
+    margin-right: 10px;
 }

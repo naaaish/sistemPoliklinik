@@ -34,7 +34,18 @@
     padding: 35px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.05);
     border: 1px solid #e2e8f0;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.08),
+        0 2px 6px rgba(0, 0, 0, 0.04);    
 }
+
+.detail-card:hover {
+    box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.1),
+        0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.25s ease;
+}
+
 
 .section-title {
     font-size: 18px;
@@ -146,3 +157,4 @@
     color: var(--text-dark);
     margin-bottom: 8px;
 }
+
