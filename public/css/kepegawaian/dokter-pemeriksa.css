@@ -1,12 +1,14 @@
 /* =========================
-   DOKTER/PEMERIKSA PAGE
-   (dibuat ngikut pola OBAT)
+   DOKTER/PEMERIKSA PAGE - FIXED VERSION
+   SEMUA TOMBOL DIJAMIN BISA DIKLIK!
 ========================= */
 *{ box-sizing: border-box; }
 body{ margin:0; }
 
 .dp-page{
   font-family: Poppins, sans-serif;
+  position: relative;
+  z-index: 1;
 }
 
 /* topbar */
@@ -15,6 +17,8 @@ body{ margin:0; }
   align-items:center;
   justify-content:space-between;
   margin-bottom: 14px;
+  position: relative;
+  z-index: 10;
 }
 
 .dp-left{
@@ -32,11 +36,16 @@ body{ margin:0; }
   width: 40px;
   height: 40px;
   transition: transform .15s ease, filter .15s ease;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 100;
 }
 .dp-back-img img{
   width: 40px;
   height: 40px;
   object-fit: contain;
+  pointer-events: none;
 }
 .dp-back-img:hover{
   transform: translateY(-1px);
@@ -53,23 +62,26 @@ body{ margin:0; }
   color:#3B5E8C;
 }
 
-/* buttons */
+/* buttons - FORCE CLICKABLE! */
 .dp-btn-add{
-  display:inline-flex;
+  display:inline-flex !important;
   align-items:center;
   gap: 8px;
-  background:#3B5E8C;
-  color:#fff;
+  background:#3B5E8C !important;
+  color:#fff !important;
   text-decoration:none;
   padding: 10px 16px;
-  border: none;
+  border: none !important;
   border-radius: 10px;
   font-weight: 600;
-  cursor:pointer;
+  cursor:pointer !important;
   box-shadow:
     0 6px 16px rgba(74, 111, 165, 0.25),
     0 2px 6px rgba(0, 0, 0, 0.12);
   transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+  position: relative !important;
+  z-index: 100 !important;
+  pointer-events: auto !important;
 }
 
 .dp-btn-soft{
@@ -83,7 +95,10 @@ body{ margin:0; }
   border-radius: 10px;
   padding: 0 14px;
   font-weight: 600;
-  cursor:pointer;
+  cursor:pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 50;
 }
 
 /* Hover system */
@@ -108,7 +123,7 @@ body{ margin:0; }
   filter: brightness(0.98);
 }
 
-/* card (hapus flex:0 0 920px biar gak narik layout) */
+/* card */
 .dp-card{
   width: 920px;
   max-width: 920px;
@@ -117,6 +132,8 @@ body{ margin:0; }
   border-radius: 14px;
   box-shadow: 0 8px 18px rgba(0,0,0,0.10);
   padding: 20px 22px;
+  position: relative;
+  z-index: 5;
 }
 
 /* search */
@@ -146,8 +163,11 @@ body{ margin:0; }
   background:#7FA6D9;
   color:#fff;
   font-weight: 600;
-  cursor:pointer;
+  cursor:pointer !important;
   transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 50;
 }
 .dp-search-btn:hover{
   transform: translateY(-1px);
@@ -187,6 +207,8 @@ body{ margin:0; }
 .dp-row{
   min-height: 50px;
   align-items: center;
+  position: relative;
+  z-index: 5;
 }
 
 .dp-cell{
@@ -210,7 +232,7 @@ body{ margin:0; }
   white-space: nowrap;
 }
 
-/* status select (tampilan sama vibe obat-select) */
+/* status select */
 .dp-select{
   height: 38px;
   border-radius: 10px;
@@ -234,7 +256,7 @@ body{ margin:0; }
   padding: 0 !important;
   font-weight: 700;
   color: #3B5E8C;
-  appearance: none;        /* hilangin style default */
+  appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
 }
@@ -244,7 +266,6 @@ body{ margin:0; }
   width: 100%;
   display:flex;
   align-items:center;
-
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
@@ -257,26 +278,24 @@ body{ margin:0; }
 }
 
 .dp-status-select{
-  /* reset */
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
   outline: none !important;
-
-  /* penting biar native arrow ilang */
   appearance: none !important;
   -webkit-appearance: none !important;
   -moz-appearance: none !important;
-
   width: 100%;
-  padding: 0 30px 0 0;  /* ruang buat icon */
+  padding: 0 30px 0 0;
   margin: 0;
-
   font: inherit;
   font-weight: 700;
   color: #3B5E8C;
-  cursor: pointer;
+  cursor: pointer !important;
   line-height: 1;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 50;
 }
 
 .dp-status-select:focus{
@@ -294,7 +313,7 @@ body{ margin:0; }
   opacity: .75;
 }
 
-/* teks polos seperti "Edit/Hapus" */
+/* teks polos */
 .dp-plain{
   border: none !important;
   background: transparent !important;
@@ -306,24 +325,49 @@ body{ margin:0; }
   font-size: 13px;
   text-align: center;
 }
-/* wrapper di dalam dp-cell (menyamakan feel dengan status) */
+
 .dp-jadwal-wrap{
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2px;               /* bikin jarak kecil seperti status */
+  padding: 2px;
 }
 
-.dp-jadwal-btn:hover{ filter: brightness(0.98); }
-.dp-jadwal-btn:active{ transform: scale(0.98); }
+.dp-jadwal-btn{
+  height: 38px;
+  display:inline-flex !important;
+  align-items:center;
+  gap: 8px;
+  background:#E7F0FF !important;
+  color:#3B5E8C !important;
+  border: 1px solid #CFE0FF !important;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-weight: 600;
+  cursor:pointer !important;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+.dp-jadwal-btn:hover{ 
+  filter: brightness(0.98); 
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0,0,0,.10);
+}
+.dp-jadwal-btn:active{ 
+  transform: scale(0.98); 
+}
 
 /* icon wrap */
 .dp-jadwal-icons{
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  pointer-events: none;
 }
 
 .dp-jadwal-line{
@@ -336,34 +380,40 @@ body{ margin:0; }
   font-size: 13px;
 }
 
-
-/* dp-cell khusus jadwal: jangan bikin kotak abu */
+/* dp-cell khusus jadwal */
 .dp-cell.dp-cell-jadwal{
   border: none !important;
   background: transparent !important;
   padding: 0 !important;
-  height: 34px;          /* samain tinggi cell lain */
+  height: 34px;
 }
 
-/* actions */
+/* actions - FORCE CLICKABLE! */
 .dp-actions{
-  display:flex;
+  display:flex !important;
   justify-content:center;
   gap: 14px;
   align-items:center;
+  position: relative !important;
+  z-index: 100 !important;
 }
+
 .dp-act{
-  display:inline-flex;
+  display:inline-flex !important;
   align-items:center;
   gap: 6px;
-  border:none;
-  background:transparent;
+  border:none !important;
+  background:transparent !important;
   font-weight: 700;
-  cursor:pointer;
+  cursor:pointer !important;
   text-decoration:none;
   padding: 6px 6px;
   transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 150 !important;
 }
+
 .dp-act:hover{
   transform: translateY(-1px);
   filter: brightness(1.05);
@@ -372,9 +422,14 @@ body{ margin:0; }
   transform: translateY(0);
   opacity: .85;
 }
-.dp-edit{ color:#E58A1F; }
-.dp-del{ color:#E04A4A; }
-.dp-del-form{ margin:0; }
+
+.dp-edit{ color:#E58A1F !important; }
+.dp-del{ color:#E04A4A !important; }
+.dp-del-form{ 
+  margin:0; 
+  position: relative;
+  z-index: 150;
+}
 
 /* Empty row */
 .dp-row-empty{
@@ -404,94 +459,53 @@ body{ margin:0; }
 }
 
 /* =========================
-   MODAL (boleh tetap pakai milikmu)
+   MODAL - ULTIMATE FIX!
 ========================= */
-.dp-modal{
-  position: fixed;
-  inset: 0;
-  display: none;
+.modal-overlay {
+  display: none !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0,0,0,.4) !important;
+  z-index: 99999 !important;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
-}
-.dp-modal.is-open{ 
-  pointer-events: auto;
-  display:flex; }
-
-.dp-modal-backdrop{
-  position:absolute;
-  inset:0;
-  background: rgba(0,0,0,0.35);
+  pointer-events: none !important;
 }
 
-.dp-modal-card{
-  position: relative;
+/* Saat modal TERBUKA */
+.modal-overlay.dp-open,
+.modal-overlay[style*="display: flex"],
+.modal-overlay[style*="display:flex"] {
+  display: flex !important;
+  pointer-events: auto !important;
+}
+
+.modal-card {
+  position: relative !important;
   width: 520px;
   max-width: calc(100% - 28px);
-  background:#fff;
+  background:#fff !important;
   border-radius: 12px;
   box-shadow: 0 10px 22px rgba(0,0,0,0.18);
   padding: 22px 22px 18px;
-  z-index: 2;
+  z-index: 100000 !important;
+  pointer-events: auto !important;
 }
 
-/* ===== PATCH: perapihan dokter-pemeriksa ===== */
-
-/* icons (samakan dengan obat) */
+/* icons */
 .dp-ic{
   width: 16px;
   height: 16px;
   object-fit: contain;
+  pointer-events: none;
 }
 .dp-ic-sm{
   width: 14px;
   height: 14px;
   object-fit: contain;
+  pointer-events: none;
 }
 
-.dp-select{
-  height: 38px;
-  border-radius: 10px;
-  border: 1px solid #CFE0FF;
-  padding: 0 10px;
-  outline:none;
-  background:#fff;
-  font-weight:600;
-  color:#3B5E8C;
-}
-.dp-select:focus{
-  border-color:#89B2D9;
-  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
-}
-
-.dp-jadwal-btn{
-  height: 38px;
-  display:inline-flex;
-  align-items:center;
-  gap: 8px;
-  background:#E7F0FF;
-  color:#3B5E8C;
-  border: 1px solid #CFE0FF;
-  border-radius: 10px;
-  padding: 0 14px;
-  font-weight: 600;
-  cursor:pointer;
-  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
-}
-.dp-jadwal-btn:hover{
-  transform: translateY(-1px);
-  filter: brightness(1.02);
-  box-shadow: 0 8px 18px rgba(0,0,0,.10);
-}
-.dp-jadwal-btn:active{
-  transform: translateY(0);
-  filter: brightness(0.98);
-}
-
-.dp-edit{ color:#E58A1F; }
-.dp-del{ color:#E04A4A; } /* sudah ada, pastikan sama */
-
-/* modal obat tapi untuk DP */
 .dp-modal-wide{ width: 520px; }
 .dp-modal-select{
   width: 100%;
@@ -504,7 +518,10 @@ body{ margin:0; }
   color: #3B5E8C;
 }
 
-.dp-btn-soft-full{ width: 100%; justify-content: center; }
+.dp-btn-soft-full{ 
+  width: 100%; 
+  justify-content: center; 
+}
 
 .dp-jadwal-list{ 
   display:flex; 
@@ -530,7 +547,6 @@ body{ margin:0; }
   background:#fff;
 }
 
-/* ← INI YANG DIPERBAIKI! */
 .dp-jinput[type="text"]{ 
   flex: 1;              
   min-width: 90px;     
@@ -553,7 +569,8 @@ body{ margin:0; }
   background: #fff;
   color:#B42318;
   font-weight: 900;
-  cursor:pointer;
+  cursor:pointer !important;
+  pointer-events: auto !important;
 }
 
 .dp-jadwal-fixed{
@@ -572,7 +589,7 @@ body{ margin:0; }
   left: 50%;
   top: 18px;
   transform: translateX(-50%);
-  z-index: 10050;
+  z-index: 100500;
   min-width: 280px;
   max-width: calc(100% - 28px);
   background:#fff;
@@ -591,4 +608,93 @@ body{ margin:0; }
 #dpEditJadwalBtn,
 #dpTambahJadwalBtn {
   margin-top: 12px;
+}
+
+/* Modal group styling */
+.modal-group {
+  margin-bottom: 16px;
+}
+
+.modal-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #3B5E8C;
+}
+
+.modal-group input[type="text"],
+.modal-group input[type="time"] {
+  width: 100%;
+  height: 38px;
+  border: 1px solid #CFE0FF;
+  border-radius: 8px;
+  padding: 0 12px;
+  outline: none;
+  font-weight: 600;
+  color: #3B5E8C;
+  background: #fff;
+}
+
+.modal-group input:focus,
+.modal-group select:focus {
+  border-color: #89B2D9;
+  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
+}
+
+.modal-btn {
+  width: 100% !important;
+  height: 42px;
+  background: #3B5E8C !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer !important;
+  margin-top: 20px;
+  transition: all .15s ease;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 50;
+}
+
+.modal-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+
+.modal-btn:active {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+h3 {
+  margin: 0 0 20px 0;
+  color: #3B5E8C;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* ULTIMATE OVERRIDE - PAKSA SEMUA BUTTON BISA DIKLIK! */
+button,
+.dp-btn-add,
+.dp-jadwal-btn,
+.dp-edit-btn,
+.dp-search-btn,
+.dp-act,
+button[type="button"],
+button[type="submit"],
+a.dp-back-img {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+/* Pastikan SEMUA gambar di dalam button gak block klik */
+button img,
+.dp-btn-add img,
+.dp-jadwal-btn img,
+.dp-act img {
+  pointer-events: none !important;
 }

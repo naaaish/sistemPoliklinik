@@ -144,10 +144,12 @@
       @endforelse
     </div>
 
+    <div class="dp-foot">
+      Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
+    </div>
   </div>
 </div>
 
-  {{-- FLASH (buat toast) --}}
 
 
   {{-- ================= MODAL TAMBAH ================= --}}
@@ -294,12 +296,11 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  // 1. Inisialisasi Elemen & URL
   const dokterStoreUrl = "{{ route('kepegawaian.dokter_pemeriksa.dokter.store') }}";
   const pemeriksaStoreUrl = "{{ route('kepegawaian.dokter_pemeriksa.pemeriksa.store') }}";
   const dokterUpdateBase = "{{ url('kepegawaian/dokter-pemeriksa/dokter') }}";
   const pemeriksaUpdateBase = "{{ url('kepegawaian/dokter-pemeriksa/pemeriksa') }}";
-
-  const genId = (prefix) => prefix + String(Date.now());
 
   const btnOpenTambah = document.getElementById('dpOpenTambah');
   const modalTambah = document.getElementById('dpModalTambah');
@@ -307,230 +308,185 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const formTambah = document.getElementById('dpFormTambah');
   const tambahTipe = document.getElementById('dpTambahTipe');
-
   const tambahDokterBox = document.querySelector('.dp-tambah-dokter');
   const tambahPemeriksaBox = document.querySelector('.dp-tambah-pemeriksa');
-
   const tambahJadwalList = document.getElementById('dpTambahJadwalList');
   const tambahJadwalBtn = document.getElementById('dpTambahJadwalBtn');
 
-  const editDokterBox = document.querySelector('.dp-edit-dokter');
-  const editPemeriksaBox = document.querySelector('.dp-edit-pemeriksa');
   const formEdit = document.getElementById('dpFormEdit');
   const editTipe = document.getElementById('dpEditTipe');
+  const editDokterBox = document.querySelector('.dp-edit-dokter');
+  const editPemeriksaBox = document.querySelector('.dp-edit-pemeriksa');
   const editJadwalList = document.getElementById('dpEditJadwalList');
   const editJadwalBtn = document.getElementById('dpEditJadwalBtn');
 
+  // Helper Modal
   function openModal(el){ if(el) el.style.display = 'flex'; }
   function closeModal(el){ if(el) el.style.display = 'none'; }
 
-  // close modal kalau klik overlay
   window.addEventListener('click', (e) => {
-    if (e.target.classList?.contains('modal-overlay')) {
+    if (e.target.classList && e.target.classList.contains('modal-overlay')) {
       closeModal(e.target);
     }
   });
 
+  // Helper untuk mengaktifkan/mematikan field (agar 'required' tidak bentrok)
   function setSectionEnabled(sectionEl, enabled){
     if (!sectionEl) return;
-    const fields = sectionEl.querySelectorAll('input, select, textarea, button');
+    const fields = sectionEl.querySelectorAll('input, select, textarea');
     fields.forEach(el => {
-      // jangan disable tombol submit utama form
-      if (el.classList?.contains('modal-btn')) return;
-
-      // simpan required asli
-      if (el.hasAttribute('required')) el.dataset.wasRequired = '1';
-
       if (enabled) {
         el.disabled = false;
         if (el.dataset.wasRequired === '1') el.setAttribute('required', 'required');
       } else {
+        if (el.hasAttribute('required')) el.dataset.wasRequired = '1';
         el.disabled = true;
         el.removeAttribute('required');
       }
     });
   }
 
+  // ========== LOGIKA TAMBAH ==========
   function syncTambahTipe(){
     const tipe = tambahTipe.value;
-
     if (tipe === 'dokter'){
-      tambahDokterBox.style.display = '';
+      tambahDokterBox.style.display = 'block';
       tambahPemeriksaBox.style.display = 'none';
-
       setSectionEnabled(tambahDokterBox, true);
       setSectionEnabled(tambahPemeriksaBox, false);
-
       formTambah.action = dokterStoreUrl;
     } else {
       tambahDokterBox.style.display = 'none';
-      tambahPemeriksaBox.style.display = '';
-
+      tambahPemeriksaBox.style.display = 'block';
       setSectionEnabled(tambahDokterBox, false);
       setSectionEnabled(tambahPemeriksaBox, true);
-
       formTambah.action = pemeriksaStoreUrl;
     }
   }
 
-  // ========== TAMBAH ==========
   btnOpenTambah?.addEventListener('click', () => {
-    // auto-generate ID (hidden)
-    const idDokterEl = document.getElementById('dpTambahIdDokter');
-    const idPemeriksaEl = document.getElementById('dpTambahIdPemeriksa');
-    if (idDokterEl) idDokterEl.value = genId('D');
-    if (idPemeriksaEl) idPemeriksaEl.value = genId('P');
-
-    // reset jadwal dokter (form tambah)
-    if (tambahJadwalList) {
-      tambahJadwalList.innerHTML = '';
-      addJadwalRow(tambahJadwalList, 'jadwal');
-    }
-
-    // default dokter
-    if (tambahTipe) tambahTipe.value = 'dokter';
+    formTambah.reset();
+    tambahJadwalList.innerHTML = '';
+    addJadwalRow(tambahJadwalList, 'jadwal');
+    tambahTipe.value = 'dokter';
     syncTambahTipe();
     openModal(modalTambah);
   });
 
   tambahTipe?.addEventListener('change', syncTambahTipe);
+  tambahJadwalBtn?.addEventListener('click', () => addJadwalRow(tambahJadwalList, 'jadwal'));
 
-  tambahJadwalBtn?.addEventListener('click', () => {
-    addJadwalRow(tambahJadwalList, 'jadwal');
-  });
+  // ========== LOGIKA EDIT (Event Delegation) ==========
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.dp-edit-btn');
+    if (!btn) return;
 
-  // ========== EDIT ==========
-  document.querySelectorAll('.dp-edit-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const tipe = btn.dataset.tipe;
-      const id   = btn.dataset.id;
+    const tipe = btn.dataset.tipe;
+    const id   = btn.dataset.id;
+    editJadwalList.innerHTML = '';
 
-      editTipe.value = tipe;
-      editJadwalList.innerHTML = '';
+    if (tipe === 'dokter'){
+      editDokterBox.style.display = 'block';
+      editPemeriksaBox.style.display = 'none';
+      setSectionEnabled(editDokterBox, true);
+      setSectionEnabled(editPemeriksaBox, false);
 
-      if (tipe === 'dokter'){
-        editDokterBox.style.display = '';
-        editPemeriksaBox.style.display = 'none';
-        setSectionEnabled(editDokterBox, true);
-        setSectionEnabled(editPemeriksaBox, false);
+      document.getElementById('dpEditNamaDokter').value = btn.dataset.nama || '';
+      document.getElementById('dpEditJenisDokter').value = btn.dataset.jenis || '';
+      document.getElementById('dpEditStatusDokter').value = btn.dataset.status || 'Aktif';
 
-        document.getElementById('dpEditNamaDokter').value = btn.dataset.nama || '';
-        document.getElementById('dpEditJenisDokter').value = btn.dataset.jenis || '';
-        document.getElementById('dpEditStatusDokter').value = btn.dataset.status || 'Aktif';
+      formEdit.action = dokterUpdateBase + '/' + id;
 
-        formEdit.action = dokterUpdateBase + '/' + id;
-
-        // autofill jadwal dari row
-        const row = btn.closest('.dp-row');
-        const raw = row?.dataset?.jadwal || '';
-        if (raw.trim()) {
-          raw.split(';;').filter(Boolean).forEach((s) => {
-            const [hari, mulai, selesai] = s.split('|');
-            addJadwalRow(editJadwalList, 'jadwal', hari, mulai, selesai);
-          });
-        } else {
-          addJadwalRow(editJadwalList, 'jadwal');
-        }
-
+      const row = btn.closest('.dp-row');
+      const raw = row?.dataset?.jadwal || '';
+      if (raw.trim()) {
+        raw.split(';;').forEach((s) => {
+          const [hari, mulai, selesai] = s.split('|');
+          addJadwalRow(editJadwalList, 'jadwal', hari, mulai, selesai);
+        });
       } else {
-        editDokterBox.style.display = 'none';
-        editPemeriksaBox.style.display = '';
-        setSectionEnabled(editDokterBox, false);
-        setSectionEnabled(editPemeriksaBox, true);
-
-
-        document.getElementById('dpEditNamaPemeriksa').value = btn.dataset.nama || '';
-        document.getElementById('dpEditStatusPemeriksa').value = btn.dataset.status || 'Aktif';
-
-        formEdit.action = pemeriksaUpdateBase + '/' + id;
+        addJadwalRow(editJadwalList, 'jadwal');
       }
+    } else {
+      editDokterBox.style.display = 'none';
+      editPemeriksaBox.style.display = 'block';
+      setSectionEnabled(editDokterBox, false);
+      setSectionEnabled(editPemeriksaBox, true);
 
-      openModal(modalEdit);
-    });
+      document.getElementById('dpEditNamaPemeriksa').value = btn.dataset.nama || '';
+      document.getElementById('dpEditStatusPemeriksa').value = btn.dataset.status || 'Aktif';
+      formEdit.action = pemeriksaUpdateBase + '/' + id;
+    }
+    openModal(modalEdit);
   });
 
-  editJadwalBtn?.addEventListener('click', () => {
-    addJadwalRow(editJadwalList, 'jadwal');
+  editJadwalBtn?.addEventListener('click', () => addJadwalRow(editJadwalList, 'jadwal'));
+
+  // ========== LIHAT JADWAL ==========
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.dp-jadwal-btn');
+    if (!btn) return;
+
+    const raw = btn.dataset.jadwal || '';
+    let html = '';
+    if (raw.trim()) {
+      html = raw.split(';;').map((s) => {
+        const [hari, mulai, selesai] = s.split('|');
+        return `<div style="margin-bottom:5px;"><b>${hari}</b>: ${mulai} - ${selesai}</div>`;
+      }).join('');
+    } else {
+      html = 'Tidak ada jadwal praktik.';
+    }
+    Swal.fire({ title: 'Jadwal Praktik', html: `<div style="text-align:left;">${html}</div>`, icon: 'info' });
   });
 
-  // ========== HAPUS (konfirmasi) ==========
-  document.querySelectorAll('form.js-dp-delete').forEach((form) => {
-    form.addEventListener('submit', (e) => {
+  // ========== KONFIRMASI HAPUS ==========
+  document.addEventListener('submit', (e) => {
+    if (e.target.classList.contains('js-dp-delete')) {
       e.preventDefault();
+      const form = e.target;
       Swal.fire({
         title: 'Hapus data ini?',
-        text: 'Data dokter/pemeriksa akan dihapus dari daftar.',
+        text: 'Data tidak dapat dikembalikan.',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Ya, hapus',
-        cancelButtonText: 'Batal',
-        reverseButtons: true,
-      }).then((r) => { if (r.isConfirmed) form.submit(); });
-    });
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3B5E8C',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) form.submit();
+      });
+    }
   });
 
-  // ========== LIHAT JADWAL (TANPA JSON / TANPA ROUTE) ==========
-  document.querySelectorAll('.dp-jadwal-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const tipe = btn.dataset.tipe || '';
-      const raw = btn.dataset.jadwal || '';
-
-      let html = '-';
-      if (raw.trim()) {
-        html = raw
-          .split(';;')
-          .filter(Boolean)
-          .map((s) => {
-            const [hari, mulai, selesai] = s.split('|');
-            return `<div>${hari}: ${String(mulai).substring(0,5)} - ${String(selesai).substring(0,5)}</div>`;
-          })
-          .join('');
-      } else {
-        html = (tipe === 'dokter') ? '<div>-</div>' : html;
-      }
-
-      Swal.fire({ title: 'Jadwal', html, icon: 'info' });
-    });
-  });
-
-  // helper jadwal row
+  // Helper Tambah Baris Jadwal
   function addJadwalRow(container, baseName, hari = '', jamMulai = '', jamSelesai = ''){
     const idx = container.querySelectorAll('.dp-jrow').length;
-
     const row = document.createElement('div');
     row.className = 'dp-jrow';
     row.innerHTML = `
-      <input class="dp-jinput" type="text" name="${baseName}[${idx}][hari]" placeholder="Hari" value="${hari || ''}" required>
-      <input class="dp-jinput" type="time" name="${baseName}[${idx}][jam_mulai]" value="${(jamMulai || '').substring(0,5)}" required>
+      <input class="dp-jinput" type="text" name="${baseName}[${idx}][hari]" placeholder="Hari" value="${hari}" required>
+      <input class="dp-jinput" type="time" name="${baseName}[${idx}][jam_mulai]" value="${jamMulai}" required>
       <span class="dp-jsep">-</span>
-      <input class="dp-jinput" type="time" name="${baseName}[${idx}][jam_selesai]" value="${(jamSelesai || '').substring(0,5)}" required>
-      <button type="button" class="dp-jremove" title="Hapus">x</button>
+      <input class="dp-jinput" type="time" name="${baseName}[${idx}][jam_selesai]" value="${jamSelesai}" required>
+      <button type="button" class="dp-jremove">×</button>
     `;
-
     row.querySelector('.dp-jremove').addEventListener('click', () => row.remove());
     container.appendChild(row);
   }
 });
-
 </script>
 
-{{-- SWEETALERT TOAST (SAMA DENGAN ADMINPOLI) --}}
+{{-- SweetAlert Toast --}}
 @if(session('success'))
 <script>
-  AdminPoliToast.fire({
-    icon: 'success',
-    title: @json(session('success'))
-  });
+  Swal.fire({ icon: 'success', title: 'Berhasil', text: @json(session('success')), timer: 3000, showConfirmButton: false });
 </script>
 @endif
-
 @if(session('error'))
 <script>
-  AdminPoliToast.fire({
-    icon: 'error',
-    title: @json(session('error'))
-  });
+  Swal.fire({ icon: 'error', title: 'Gagal', text: @json(session('error')), timer: 3000, showConfirmButton: false });
 </script>
 @endif
-
 @endpush
