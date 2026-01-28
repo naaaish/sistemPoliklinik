@@ -154,24 +154,6 @@ class DiagnosaController extends Controller
                 'updated_at' => now(),
             ]);
 
-        // reset semua link diagnosa_k3 yg sebelumnya mengarah ke diagnosa ini
-        DB::table('diagnosa_k3')
-            ->where('id_diagnosa', $id)
-            ->update([
-                'id_diagnosa' => null,
-                'updated_at'  => now(),
-            ]);
-
-        // link baru (kalau dipilih)
-        if ($request->filled('id_nb')) {
-            DB::table('diagnosa_k3')
-                ->where('id_nb', $request->id_nb)
-                ->update([
-                    'id_diagnosa' => $id,
-                    'updated_at'  => now(),
-                ]);
-        }
-
         return redirect()->route('adminpoli.diagnosa.index')
             ->with('success', 'Diagnosa berhasil diperbarui');
     }
