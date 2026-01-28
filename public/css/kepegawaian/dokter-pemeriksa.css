@@ -698,3 +698,70 @@ button img,
 .dp-act img {
   pointer-events: none !important;
 }
+/* Container Box untuk Resep Obat */
+.resep-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin: 20px 0;
+}
+
+.resep-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.resep-table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.resep-table th {
+    padding: 12px 15px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #475569;
+    text-align: left;
+}
+
+.resep-table td {
+    padding: 12px 15px;
+    font-size: 14px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Pengaturan Lebar & Aligment Kolom */
+.col-no { width: 50px; text-align: center; }
+.col-nama { text-align: left; }
+.col-jumlah { width: 120px; text-align: center; }
+.col-harga { width: 150px; text-align: right; }
+.col-subtotal { width: 150px; text-align: right; }
+
+/* Footer Biru Muda (Cyan) */
+.resep-footer {
+    background: #ecfeff; /* Sesuai desain figma */
+    font-weight: 700;
+}
+
+.resep-footer td {
+    border-top: 2px solid #cffafe;
+    color: #0e7490;
+    padding: 12px 15px;
+}
+.btn-upload-csv {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white !important;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}

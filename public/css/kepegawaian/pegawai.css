@@ -1,58 +1,46 @@
-/* =================== GLOBAL =================== */
-* { 
-    box-sizing: border-box; 
-}
-
 /* =================== DETAIL PEGAWAI PAGE =================== */
-.detail-pegawai-container {
-    padding: 28px 60px;
-    background: #F1F8FF;
-}
 
-/* PAGE HEADER */
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    text-align: left;
-    align-items: center;
-    margin-bottom: 24px;
-    padding: 0;
-}
-
-.page-header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.page-header h1,
-.page-header h4 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1e293b;
+/* Status Dropdown */
+.status-form {
     margin: 0;
 }
 
-.page-header .d-flex {
-    display: flex;
-    gap: 12px;
-    align-items: center;
+.status-dropdown {
+    min-width: 150px;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 10px 16px;
+    border: 2px solid;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 14px;
 }
 
-.btn-back {
-    font-size: 20px;
-    text-decoration: none;
-    color: #316BA1;
+.status-dropdown.status-active {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-color: #10b981;
+    color: #065f46;
+}
+
+.status-dropdown.status-inactive {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-color: #ef4444;
+    color: #991b1b;
+}
+
+.status-dropdown:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
 /* Edit Button */
 .btn-edit {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     padding: 10px 20px;
     background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    color: white !important;
+    color: white;
     border: none;
     border-radius: 10px;
     font-weight: 600;
@@ -65,8 +53,7 @@
 .btn-edit:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4);
-    color: white !important;
-    text-decoration: none;
+    color: white;
 }
 
 .btn-edit svg {
@@ -74,108 +61,7 @@
     height: 16px;
 }
 
-/* PROFILE CARD */
-.profile-card {
-    background: #fff;
-    border-radius: 14px;
-    overflow: hidden;
-    margin-bottom: 28px;
-}
-
-.profile-cover {
-    height: 70px;
-    background: #6B93B8;
-}
-
-.profile-body {
-    padding: 0 24px 24px;
-    text-align: center;
-}
-
-.profile-avatar {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    overflow: hidden;
-    margin: -60px auto 0;
-    border: 5px solid white;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    position: relative;
-    z-index: 10;
-}
-
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.profile-body h2 {
-    margin: 6px 0 2px;
-    font-size: 20px;
-}
-
-.profile-bagian {
-    font-size: 14px;
-    color: #777;
-    margin-bottom: 10px;
-}
-
-/* Profile Meta - Status Dropdown Inline */
-.profile-meta {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    align-items: center;
-}
-
-.status-form-inline {
-    margin: 0;
-}
-
-.status-dropdown-inline {
-    min-width: 120px;
-    font-weight: 600;
-    border-radius: 20px;
-    padding: 6px 14px;
-    border: 2px solid;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    font-size: 13px;
-}
-
-.status-dropdown-inline.status-active {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-    border-color: #10b981;
-    color: #065f46;
-}
-
-.status-dropdown-inline.status-inactive {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border-color: #ef4444;
-    color: #991b1b;
-}
-
-.status-dropdown-inline:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.nip {
-    font-size: 13px;
-    color: #666;
-    font-weight: 500;
-}
-
 /* Badge Status */
-.badge {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
 .badge-active {
     background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
     color: #065f46;
@@ -198,75 +84,23 @@
     border: 2px solid #ef4444;
 }
 
-/* DATA CARD */
-.data-card {
-    background: #fff;
-    border-radius: 14px;
+/* Profile Avatar */
+.profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
     overflow: hidden;
-    margin-bottom: 20px;
+    margin: -60px auto 0;
+    border: 5px solid white;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    position: relative;
+    z-index: 10;
 }
 
-.card-header {
-    height: 56px;
-    background: #5B88B2;
-    display: flex;
-    align-items: center;
-    padding: 0 28px;
-}
-
-.card-header.alt {
-    background: #5283B0;
-}
-
-.card-header-inner {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.card-header-inner svg {
-    width: 22px;
-    height: 22px;
-    fill: none;
-    stroke: #fff;
-    stroke-width: 2;
-}
-
-.card-header-inner span {
-    color: #fff;
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 1;
-}
-
-/* BODY */
-.card-body {
-    padding: 24px 28px 30px;
-}
-
-.grid-2 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 22px 40px;
-}
-
-.grid-1 {
-    display: grid;
-    gap: 20px;
-}
-
-.card-body label {
-    font-size: 13px;
-    color: #888;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.card-body p {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 500;
-    color: #111;
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* Alert Success */
@@ -303,35 +137,248 @@
     }
 }
 
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.page-header h4 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.page-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Tombol Upload CSV */
+.btn-upload-csv {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-upload-csv:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+}
+
+/* Tombol Tambah Pegawai */
+.btn-tambah {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-tambah:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+}
+
+/* =================== MODAL UPLOAD CSV =================== */
+
+.csv-modal-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999999;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.csv-modal-overlay.show {
+    display: flex !important;
+    pointer-events: auto !important;
+}
+
+.csv-modal-box {
+    position: relative;
+    width: 520px;
+    max-width: calc(100% - 40px);
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+    pointer-events: auto;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.csv-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 16px 24px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.csv-modal-header h5 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.btn-close-modal {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 8px;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-close-modal:hover {
+    background: #e2e8f0;
+    color: #334155;
+    transform: rotate(90deg);
+}
+
+.csv-modal-body {
+    padding: 24px;
+}
+
+.csv-modal-body .mb-3 {
+    margin-bottom: 20px;
+}
+
+.csv-modal-body .form-label {
+    display: block;
+    font-weight: 600;
+    font-size: 14px;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+.csv-modal-body .form-control,
+.csv-modal-body select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.csv-modal-body .form-control:focus,
+.csv-modal-body select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+.csv-info {
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #1e40af;
+    line-height: 1.5;
+}
+
+.csv-info svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.csv-modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 16px 24px 24px 24px;
+    border-top: 2px solid #e5e7eb;
+}
+
+.csv-modal-footer .btn {
+    padding: 11px 24px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.csv-modal-footer .btn-secondary {
+    background: #64748b;
+    color: white;
+}
+
+.csv-modal-footer .btn-secondary:hover {
+    background: #475569;
+    transform: translateY(-1px);
+}
+
+.csv-modal-footer .btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.csv-modal-footer .btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
 
 /* =================== FORM PEGAWAI (CREATE/EDIT) =================== */
 
-/* Layout Form Pegawai */
 .pegawai-form-wrapper {
     max-width: 900px;
     margin: 0 auto;
 }
-
-.btn-back-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 42px;        
-    height: 42px;       
-    border-radius: 50%;
-}
-
-.btn-back-icon img {
-    width: 42px;        
-    height: 42px;
-}
-
-.page-title {
-    margin: 0;            
-    font-size: 1.25rem;   
-    font-weight: 600;
-}
-
 
 .pegawai-form-card {
     border-radius: 16px;
@@ -343,7 +390,6 @@
     padding: 32px;
 }
 
-/* Foto Preview */
 .foto-wrapper {
     display: flex;
     justify-content: center;
@@ -382,45 +428,29 @@
     height: 100%;
 }
 
-/* Form Row Custom - Horizontal Layout */
-.form-row-custom {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    gap: 16px;
-    align-items: center;
-    margin-bottom: 0;
-}
-
-.form-label-custom {
+.form-label {
     font-weight: 600;
     font-size: 14px;
     color: #334155;
-    margin-bottom: 0;
-    text-align: right;
-    padding-right: 8px;
+    margin-bottom: 8px;
 }
 
-.form-control-custom {
-    width: 100%;
-    border-radius: 8px;
-    padding: 10px 14px;
+.form-control,
+.form-select {
+    border-radius: 10px;
+    padding: 11px 14px;
     border: 2px solid #e2e8f0;
     font-size: 14px;
     transition: all 0.2s ease;
 }
 
-.form-control-custom:focus {
+.form-control:focus,
+.form-select:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 0 4px rgba(59,130,246,.1);
     outline: none;
 }
 
-textarea.form-control-custom {
-    resize: vertical;
-    min-height: 70px;
-}
-
-/* Status Akun Dropdown */
 .status-akun {
     font-size: 15px;
     font-weight: 600;
@@ -438,7 +468,6 @@ select.status-akun option[value="0"] {
     color: #991b1b;
 }
 
-/* Buttons */
 .btn-success {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     border: none;
@@ -456,7 +485,7 @@ select.status-akun option[value="0"] {
 }
 
 .btn-secondary {
-    background: #cf7e7e;
+    background: #64748b;
     border: none;
     border-radius: 10px;
     padding: 12px 24px;
@@ -465,340 +494,98 @@ select.status-akun option[value="0"] {
 }
 
 .btn-secondary:hover {
-    background: #e63838;
+    background: #475569;
     transform: translateY(-2px);
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-    .detail-pegawai-container { 
-        padding: 20px; 
-    }
-    .grid-2 { 
-        grid-template-columns: 1fr; 
-    }
+.page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.btn-back-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #eaf2ff;
+    transition: all 0.2s ease;
+}
+
+.btn-back-icon img {
+    width: 35px;
+    height: 35px;
+}
+
+.btn-back-icon:hover {
+    background: #dbeafe;
+    transform: translateX(-2px);
+}
+
+.view-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #e8faff;
+    cursor: pointer;
+    position: relative;
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+.view-btn img {
+    width: 18px;
+    height: 18px;
+    pointer-events: none; 
+}
+
+.view-btn:hover {
+    background: #bfdbfe;
+    transform: scale(1.05);
+}
+
+.pegawai-cell-center {
+    text-align: center;
+}
+
+.pegawai-empty {
+    text-align: center;
+    padding: 40px 20px !important;
+    color: #64748b;
+    font-weight: 600;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
     .pegawai-form-card .card-body {
         padding: 20px;
     }
     
-    .form-row-custom {
-        grid-template-columns: 1fr;
-        gap: 6px;
+    .page-actions {
+        flex-direction: column;
+        width: 100%;
     }
     
-    .form-label-custom {
-        text-align: left;
-        padding-right: 0;
+    .btn-upload-csv,
+    .btn-tambah {
+        width: 100%;
+        justify-content: center;
     }
-}
-
-
-/* =================== INDEX PEGAWAI PAGE =================== */
-
-/* Tombol Tambah Pegawai */
-.btn-tambah {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white !important;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 14px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.btn-tambah:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    color: white !important;
-    text-decoration: none;
-}
-
-.btn-tambah svg {
-    width: 18px;
-    height: 18px;
-}
-
-/* Tombol Upload CSV */
-.btn-upload-csv {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background: white;
-    color: #64748b;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.3s ease;
-}
-
-.btn-upload-csv:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
-    color: #475569;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.btn-upload-csv svg {
-    width: 18px;
-    height: 18px;
-}
-
-/* CSV Modal Overlay */
-.csv-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.csv-modal-overlay.show {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* CSV Modal Box */
-.csv-modal-box {
-    background: white;
-    border-radius: 16px;
-    width: 90%;
-    max-width: 500px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: modalSlideIn 0.3s ease-out;
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px) scale(0.95);
+    
+    .csv-modal-box {
+        max-width: calc(100% - 20px);
     }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-/* Modal Header */
-.csv-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 24px;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.csv-modal-header h5 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-    color: #1e293b;
-}
-
-.btn-close-modal {
-    background: transparent;
-    border: none;
-    font-size: 28px;
-    color: #64748b;
-    cursor: pointer;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-    line-height: 1;
-}
-
-.btn-close-modal:hover {
-    background: #f1f5f9;
-    color: #1e293b;
-}
-
-/* Modal Body */
-.csv-modal-body {
-    padding: 24px;
-}
-
-.csv-modal-body .form-label {
-    font-weight: 600;
-    font-size: 14px;
-    color: #334155;
-    margin-bottom: 8px;
-    display: block;
-}
-
-.csv-modal-body .form-control {
-    border-radius: 8px;
-    border: 2px solid #e2e8f0;
-    padding: 10px 14px;
-    font-size: 14px;
-    transition: all 0.2s ease;
-}
-
-.csv-modal-body .form-control:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59,130,246,.1);
-    outline: none;
-}
-
-.csv-info {
-    display: flex;
-    align-items: start;
-    gap: 8px;
-    margin-top: 12px;
-    padding: 12px;
-    background: #f8fafc;
-    border-radius: 8px;
-    font-size: 13px;
-    color: #64748b;
-}
-
-.csv-info svg {
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-/* Modal Footer */
-.csv-modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    padding: 20px 24px;
-    border-top: 1px solid #e2e8f0;
-}
-
-.csv-modal-footer .btn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 14px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.csv-modal-footer .btn-secondary {
-    background: #f1f5f9;
-    color: #64748b;
-}
-
-.csv-modal-footer .btn-secondary:hover {
-    background: #e2e8f0;
-    color: #475569;
-}
-
-.csv-modal-footer .btn-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: white;
-    box-shadow: 0 2px 8px rgba(59,130,246,0.3);
-}
-
-.csv-modal-footer .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59,130,246,0.4);
-}
-
-.csv-modal-footer .btn svg {
-    width: 16px;
-    height: 16px;
-}
-
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Memastikan foto tetap proporsional dalam lingkaran */
-    border-radius: 50%;
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative; 
-}
-
-.btn-light {
-    background: #fff;
-    color: #316BA1;
-    font-weight: 600;
-    border-radius: 8px;
-    padding: 6px 12px;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-.btn-light:hover {
-    background: #f1f5f9;
-    color: #25537d;
-}
-
-/* Tombol Tambah di Header Biru */
-.btn-tambah-sm {
-    background: white;
-    color: #316BA1 !important;
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.btn-tambah-sm:hover {
-    background: #f8fafc;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
-
-/* Tombol Edit di Dalam Tabel */
-.btn-edit-sm {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 12px;
-    background: #fff9eb;
-    color: #d97706 !important;
-    border: 1.5px solid #fde68a;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.btn-edit-sm:hover {
-    background: #fef3c7;
-    border-color: #fbbf24;
-    transform: scale(1.05);
-}
-
-/* Tabel Adjustments */
-.table-hover tbody tr:hover {
-    background-color: #f8fbff;
 }

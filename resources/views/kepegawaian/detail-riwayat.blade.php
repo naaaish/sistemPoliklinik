@@ -139,25 +139,50 @@
             </div>
         </div>
 
-        <h2 class="section-title">Resep Obat</h2>
-        <table style="width:100%; border-collapse: collapse;">
-            <thead style="background: #f1f5f9;">
-                <tr>
-                    <th style="padding:12px; text-align:left;">Nama Obat</th>
-                    <th style="padding:12px; text-align:center;">Jumlah</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($detailResep as $item)
-                    <tr style="border-bottom: 1px solid #f1f5f9;">
-                        <td style="padding:12px;">{{ $item->nama_obat }}</td>
-                        <td style="padding:12px; text-align:center;">{{ $item->jumlah }} {{ $item->satuan }}</td>
+        <h2 class="section-title" style="text-align: center; border-bottom: none;">Data Resep Obat</h2>
+
+        <div class="resep-box">
+            <table class="resep-table">
+                <thead>
+                    <tr>
+                        <th class="col-no">No</th>
+                        <th class="col-nama">Nama Obat</th>
+                        <th class="col-jumlah">Jumlah</th>
+                        <th class="col-harga">Harga</th>
+                        <th class="col-subtotal">Subtotal</th>
                     </tr>
-                @empty
-                    <tr><td colspan="2" style="padding:20px; text-align:center;" class="text-muted">Tidak ada resep obat</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @php $totalHarga = 0; @endphp
+                    @forelse($detailResep as $index => $item)
+                        @php 
+                            $subtotal = $item->harga * $item->jumlah; 
+                            $totalHarga += $subtotal;
+                        @endphp
+                        <tr>
+                            <td class="col-no">{{ $index + 1 }}.</td>
+                            <td class="col-nama" style="font-weight: 500;">{{ $item->nama_obat }}</td>
+                            <td class="col-jumlah">{{ $item->jumlah }} {{ $item->satuan }}</td>
+                            <td class="col-harga">Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
+                            <td class="col-subtotal" style="font-weight: 600;">Rp {{ number_format($subtotal, 0, ',', '.') }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 30px; color: #94a3b8;">
+                                Tidak ada data resep obat.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+                @if($detailResep->isNotEmpty())
+                <tfoot>
+                    <tr class="resep-footer">
+                        <td colspan="4" style="text-align: right; letter-spacing: 1px;">TOTAL</td>
+                        <td class="col-subtotal">Rp {{ number_format($totalHarga, 0, ',', '.') }}</td>
+                    </tr>
+                </tfoot>
+                @endif
+            </table>
+        </div>
 </div>
 @endsection

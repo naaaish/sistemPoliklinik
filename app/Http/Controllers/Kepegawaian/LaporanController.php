@@ -273,9 +273,10 @@ class LaporanController extends Controller
     /* =========================
        LOGIC UTAMA (DIPAKAI ULANG)
     ========================= */
+    
     private function buildPegawaiPensiunData($jenis, $dari, $sampai)
     {
-        // === QUERY INTI (SAMA PERSIS SEPERTI DETAIL) ===
+        // 1. QUERY UTAMA
         $query = DB::table('pemeriksaan')
             ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
             ->join('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
@@ -293,7 +294,9 @@ class LaporanController extends Controller
             ->select(
                 'pemeriksaan.id_pemeriksaan',
                 DB::raw('DATE(pemeriksaan.created_at) as tanggal'),
+                'pemeriksaan.created_at as full_created_at', // Untuk urutan waktu yang presisi
                 'pegawai.nama_pegawai',
+                'pegawai.nip', // 🔑 PENTING: Harus ada agar tidak error $r->nip
                 DB::raw('TIMESTAMPDIFF(YEAR, pegawai.tgl_lahir, CURDATE()) as umur'),
                 'pegawai.bagian',
                 DB::raw('COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien'),
@@ -308,77 +311,78 @@ class LaporanController extends Controller
                 'pemeriksaan.suhu',
                 'pemeriksaan.berat',
                 'pemeriksaan.tinggi',
-                DB::raw("
-                    CASE
-                        WHEN dokter.id_dokter IS NOT NULL THEN dokter.nama
-                        WHEN pemeriksa.id_pemeriksa IS NOT NULL THEN pemeriksa.nama_pemeriksa
-                        ELSE '-'
-                    END as pemeriksa
-                ")
+                DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as pemeriksa")
             );
 
         if ($dari && $sampai) {
-            $query->whereBetween(
-                DB::raw('DATE(pemeriksaan.created_at)'),
-                [$dari, $sampai]
-            );
+            $query->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari, $sampai]);
         }
 
-        $raw = $query->get();
+        $raw = $query->orderBy('pemeriksaan.created_at', 'asc')->get();
         $ids = $raw->pluck('id_pemeriksaan');
 
-        // === DIAGNOSA ===
+        // Ambil Map Diagnosa, NB, dan Obat (Kode kamu yang sudah ada tetap sama)
         $diagnosaMap = DB::table('detail_pemeriksaan_penyakit as dpp')
             ->join('diagnosa as d','d.id_diagnosa','=','dpp.id_diagnosa')
-            ->whereIn('dpp.id_pemeriksaan',$ids)
-            ->get()
-            ->groupBy('id_pemeriksaan');
+            ->whereIn('dpp.id_pemeriksaan',$ids)->get()->groupBy('id_pemeriksaan');
 
-        // === NB ===
         $nbMap = DB::table('detail_pemeriksaan_diagnosa_k3 as dpk3')
             ->join('diagnosa_k3 as dk3','dk3.id_nb','=','dpk3.id_nb')
-            ->whereIn('dpk3.id_pemeriksaan',$ids)
-            ->get()
-            ->groupBy('id_pemeriksaan');
+            ->whereIn('dpk3.id_pemeriksaan',$ids)->get()->groupBy('id_pemeriksaan');
 
-        // === OBAT ===
         $obatMap = DB::table('resep')
             ->join('detail_resep','resep.id_resep','=','detail_resep.id_resep')
             ->join('obat','detail_resep.id_obat','=','obat.id_obat')
-            ->whereIn('resep.id_pemeriksaan',$ids)
-            ->get()
-            ->groupBy('id_pemeriksaan');
+            ->whereIn('resep.id_pemeriksaan',$ids)->get()->groupBy('id_pemeriksaan');
 
-        // === FINAL DATA  ===
         $final = collect();
-        $counter = [];
 
         foreach ($raw as $r) {
             $id = $r->id_pemeriksaan;
 
-            $diag = $diagnosaMap[$id] ?? collect([ (object)['diagnosa'=>'-'] ]);
-            $nb   = $nbMap[$id] ?? collect([ (object)['id_nb'=>'-', 'nama_penyakit_k3' => '-'] ]);
-            $obat = $obatMap[$id] ?? collect([ (object)[
-                'nama_obat'=>'-','jumlah'=>'-','satuan'=>'','harga'=>0
-            ]]);
+            // 🟢 LOGIKA PERIKSA KE- (Dynamic dari Riwayat)
+            // Hitung berapa kali pasien ini sudah melakukan pemeriksaan yang berisi Gula darah/Kolesterol/dll
+            // sampai dengan detik ini (full_created_at)
+            $periksaKe = DB::table('pemeriksaan')
+                ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
+                ->where('pendaftaran.nip', $r->nip) 
+                ->where('pemeriksaan.created_at', '<=', $r->full_created_at) 
+                ->where(function($q) {
+                    // Syarat: Salah satu kolom lab/kesehatan ini terisi > 0
+                    $q->where('pemeriksaan.gd_puasa', '>', 0)
+                    ->orWhere('pemeriksaan.gd_duajam', '>', 0)
+                    ->orWhere('pemeriksaan.gd_sewaktu', '>', 0)
+                    ->orWhere('pemeriksaan.asam_urat', '>', 0)
+                    ->orWhere('pemeriksaan.chol', '>', 0)
+                    ->orWhere('pemeriksaan.tg', '>', 0);
+                })
+                ->count();
+
+            // Fallback jika pemeriksaan saat ini hanya tensi (tidak masuk hitungan di atas), 
+            // kita tetap beri angka 1 atau biarkan mengikuti counter riwayat terakhir
+            $displayPeriksaKe = ($periksaKe > 0) ? $periksaKe : 1;
+
+            // Data pendukung baris (Diagnosa & Obat)
+            $diag = $diagnosaMap[$id] ?? collect([(object)['diagnosa'=>'-']]);
+            $nb   = $nbMap[$id] ?? collect([(object)['id_nb'=>'-']]);
+            $obat = $obatMap[$id] ?? collect([(object)['nama_obat'=>'-','jumlah'=>'-','satuan'=>'','harga'=>0]]);
 
             $max = max($diag->count(), $nb->count(), $obat->count());
-
-            $counter[$id] = ($counter[$id] ?? 0) + 1;
             $totalObat = $obat->sum(fn($o)=>((int)$o->jumlah*(int)$o->harga));
 
             for ($i=0; $i<$max; $i++) {
-                    $row = clone $r;
-                    $row->diagnosa = $diag[$i]->diagnosa ?? '-';
-                    $row->nb = isset($nb[$i]) ? $nb[$i]->id_nb : '-';
-    
+                $row = clone $r;
+                $row->diagnosa = $diag[$i]->diagnosa ?? '-';
+                $row->nb = isset($nb[$i]) ? $nb[$i]->id_nb : '-';
                 $row->nama_obat = $obat[$i]->nama_obat ?? '-';
                 $row->jumlah = $obat[$i]->jumlah ?? '-';
                 $row->satuan = $obat[$i]->satuan ?? '';
                 $row->harga = $obat[$i]->harga ?? 0;
 
                 $row->total_obat_pasien = $i === 0 ? $totalObat : null;
-                $row->periksa_ke = $counter[$id];
+                
+                // 🔑 MASUKKAN HASIL HITUNGAN KE PROPERTY PERIKSA_KE
+                $row->periksa_ke = $displayPeriksaKe; 
 
                 $final->push($row);
             }
