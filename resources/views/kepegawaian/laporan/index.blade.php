@@ -6,15 +6,52 @@
 <div class="laporan-page">
     <h2 class="page-title">Rekapan Laporan</h2>
 
+    {{-- ========================================
+         FILTER TANGGAL - SATU-SATUNYA TEMPAT!
+         Sekali pilih langsung filter semua
+    ======================================== --}}
+    <div class="filter-card">
+        <form method="GET" action="{{ route('kepegawaian.laporan') }}" class="filter-form">
+
+            <div>
+                <label>Dari</label>
+                <input type="date" name="dari" value="{{ request('dari') }}">
+            </div>
+
+            <div>
+                <label>Sampai</label>
+                <input type="date" name="sampai" value="{{ request('sampai') }}">
+            </div>
+
+            <button type="submit" class="btn-primary">
+                Tampilkan
+            </button>
+
+        </form>
+    </div>
+
+    {{-- INFO PERIODE YANG DIPILIH --}}
+    @if(request('dari') && request('sampai'))
+    <div class="periode-info">
+        <strong>📅 Periode Aktif:</strong> 
+        {{ \Carbon\Carbon::parse(request('dari'))->translatedFormat('d F Y') }} 
+        - 
+        {{ \Carbon\Carbon::parse(request('sampai'))->translatedFormat('d F Y') }}
+    </div>
+    @endif
+
     @foreach($rekapan as $key => $judul)
         <div class="laporan-card">
 
             {{-- HEADER --}}
             <div class="laporan-header">
                 <h3>{{ $judul }}</h3>
-                <a href="{{ route('kepegawaian.laporan.detail', $key) }}" class="lihat-semua">
+                
+                {{-- ⚠️ PERBAIKAN: Tambahkan parameter 'jenis' ke route --}}
+                <a href="{{ route('kepegawaian.laporan.detail', ['jenis' => $key] + request()->only(['dari','sampai'])) }}">
                     Lihat Semua →
                 </a>
+
             </div>
 
             {{-- TABLE --}}
@@ -92,7 +129,7 @@
                                 <td>{{ $p->nama_pemeriksa }}</td>
                             </tr>
                         @empty
-                            <tr><td colspan="3">Tidak ada data</td></tr>
+                            <tr><td colspan="4">Tidak ada data</td></tr>
                         @endforelse
                     @endif
 

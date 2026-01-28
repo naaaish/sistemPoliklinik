@@ -306,3 +306,61 @@
     width: 100%;
     border-collapse: collapse;
 }
+
+/* Info Periode di Index */
+.periode-info {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 2px solid #3b82f6;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #1e40af;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.periode-info strong {
+    font-weight: 700;
+}
+
+/* Tombol Reset/Ubah Periode */
+.btn-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: white;
+    color: #3b82f6;
+    border: 2px solid #3b82f6;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.btn-reset:hover {
+    background: #3b82f6;
+    color: white;
+    transform: translateX(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .periode-info {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .btn-reset {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+

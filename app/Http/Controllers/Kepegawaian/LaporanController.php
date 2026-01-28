@@ -17,8 +17,11 @@ class LaporanController extends Controller
     /* =========================
        INDEX (PREVIEW)
     ========================= */
-    public function index()
+    public function index(Request $request)
     {
+
+        $dari   = $request->dari;
+        $sampai = $request->sampai;
         $rekapan = [
             'pegawai' => 'Rekapan Pemeriksaan Pegawai',
             'pensiun' => 'Rekapan Pemeriksaan Pensiunan',
@@ -55,9 +58,16 @@ class LaporanController extends Controller
                         COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as nama_pemeriksa
                     ")
                 )
+                ->when($dari && $sampai, fn($q) =>
+                    $q->whereBetween(
+                        DB::raw('DATE(pemeriksaan.created_at)'),
+                        [$dari, $sampai]
+                    )
+                )
                 ->orderByDesc('pemeriksaan.created_at')
                 ->limit(5)
                 ->get();
+
         }
 
         // ================= DOKTER =================
@@ -91,7 +101,13 @@ class LaporanController extends Controller
         // ================= TOTAL =================
         $preview['total'] = $this->buildTotalOperasional();
 
-        return view('kepegawaian.laporan.index', compact('rekapan','preview'));
+        return view('kepegawaian.laporan.index', compact(
+            'rekapan',
+            'preview',
+            'dari',
+            'sampai'
+        ));
+
     }
 
     /* =========================
@@ -104,7 +120,7 @@ class LaporanController extends Controller
         $sampai = $request->sampai;
 
         
-                /* ================= PEGAWAI / PENSIUN ================= */
+        /* ================= PEGAWAI / PENSIUN ================= */
         if (in_array($jenis,['pegawai','pensiun'])) {
             $data = $this->buildPegawaiPensiunData($jenis, $dari, $sampai);
 
@@ -294,10 +310,10 @@ class LaporanController extends Controller
             ->select(
                 'pemeriksaan.id_pemeriksaan',
                 DB::raw('DATE(pemeriksaan.created_at) as tanggal'),
-                'pemeriksaan.created_at as full_created_at', // Untuk urutan waktu yang presisi
+                'pemeriksaan.created_at as full_created_at', 
                 'pegawai.nama_pegawai',
-                'pegawai.nip', // 🔑 PENTING: Harus ada agar tidak error $r->nip
-                DB::raw('TIMESTAMPDIFF(YEAR, pegawai.tgl_lahir, CURDATE()) as umur'),
+                'pegawai.nip', 
+                DB::raw('TIMESTAMPDIFF(YEAR, COALESCE(keluarga.tgl_lahir, pegawai.tgl_lahir), CURDATE()) as umur'),
                 'pegawai.bagian',
                 DB::raw('COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien'),
                 DB::raw("COALESCE(keluarga.hubungan_keluarga,'pegawai') as hub_kel"),
@@ -450,6 +466,7 @@ class LaporanController extends Controller
         };
     }
 
+
         // ===========================================================
         // ===== LAPORAN PEGAWAI / PENSIUNAN =========================
         // ===========================================================
@@ -462,6 +479,8 @@ class LaporanController extends Controller
 
         $data = $this->buildPegawaiPensiunData($jenis, $dari, $sampai);
         $totalTagihan = $data->sum('total_obat_pasien');
+
+        $grouped = $data->groupBy('id_pemeriksaan');
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -498,39 +517,49 @@ class LaporanController extends Controller
         }
 
         $row++;
+
         $no = 1;
 
-        foreach ($data as $d) {
-            $sheet->fromArray([
-                $no++,
-                $d->tanggal,
-                $d->nama_pegawai,
-                $d->umur,
-                $d->bagian,
-                $d->nama_pasien,
-                $d->hub_kel,
-                $d->sistol,
-                $d->gd_puasa,
-                $d->gd_duajam,
-                $d->gd_sewaktu,
-                $d->asam_urat,
-                $d->chol,
-                $d->tg,
-                $d->suhu,
-                $d->berat,
-                $d->tinggi,
-                $d->diagnosa,
-                $d->nb,
-                $d->nama_obat,
-                $d->jumlah.' '.$d->satuan,
-                $d->harga,
-                $d->total_obat_pasien,
-                $d->pemeriksa,
-                $d->periksa_ke
-            ],null,"A$row");
-            $row++;
+        foreach ($grouped as $rows) {
+
+            $first = $rows->first();
+            $totalObat = $rows->sum('total_obat_pasien');
+
+            foreach ($rows as $i => $r) {
+
+                $sheet->fromArray([
+                    $i === 0 ? $no++ : '',
+                    $i === 0 ? $first->tanggal : '',
+                    $i === 0 ? $first->nama_pegawai : '',
+                    $i === 0 ? $first->umur : '',
+                    $i === 0 ? $first->bagian : '',
+                    $i === 0 ? $first->nama_pasien : '',
+                    $i === 0 ? $first->hub_kel : '',
+                    $i === 0 ? $first->sistol : '',
+                    $i === 0 ? $first->gd_puasa : '',
+                    $i === 0 ? $first->gd_duajam : '',
+                    $i === 0 ? $first->gd_sewaktu : '',
+                    $i === 0 ? $first->asam_urat : '',
+                    $i === 0 ? $first->chol : '',
+                    $i === 0 ? $first->tg : '',
+                    $i === 0 ? $first->suhu : '',
+                    $i === 0 ? $first->berat : '',
+                    $i === 0 ? $first->tinggi : '',
+                    $r->diagnosa,
+                    $r->nb,
+                    $r->nama_obat,
+                    $r->jumlah.' '.$r->satuan,
+                    $r->harga,
+                    $i === 0 ? $first->total_obat_pasien : '',
+                    $i === 0 ? $first->pemeriksa : '',
+                    $i === 0 ? $first->periksa_ke : '',
+                ], null, "A$row");
+
+                $row++;
+            }
         }
 
+        
         $row++;
         $sheet->setCellValue("A$row",'TOTAL TAGIHAN PERIODE');
         $sheet->mergeCells("A$row:W$row");
@@ -824,6 +853,19 @@ class LaporanController extends Controller
         $writer->save($path);
 
         return response()->download($path)->deleteFileAfterSend(true);
+    }
+
+    private function applyTanggal($query, $request)
+    {
+        if ($request->filled('dari')) {
+            $query->whereDate('pemeriksaan.tanggal_periksa', '>=', $request->dari);
+        }
+
+        if ($request->filled('sampai')) {
+            $query->whereDate('pemeriksaan.tanggal_periksa', '<=', $request->sampai);
+        }
+
+        return $query;
     }
 
 }
