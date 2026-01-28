@@ -309,13 +309,13 @@ body{ margin:0; }
 .saran-table-head,
 .saran-row{
   display:grid;
-  grid-template-columns: 1fr 2fr 1.6fr 1fr; /* ID | Saran | Diagnosa | Aksi */
+  grid-template-columns: 3fr 1.6fr 1fr; /* ID | Saran | Diagnosa | Aksi */
   gap: 16px;
   align-items: center;
 }
 
 .saran-row.saran-row-3{
-  grid-template-columns: 1fr 2fr 1fr; /* preview: ID | Saran | Diagnosa */
+  grid-template-columns: 3fr 1fr; /* preview: ID | Saran | Diagnosa */
 }
 
 .saran-table-head{

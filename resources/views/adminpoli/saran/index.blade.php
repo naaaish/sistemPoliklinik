@@ -86,16 +86,8 @@
                 </button>
             </form>
         </div>
-
-        @if(!is_null($previewCount) && request('from') && request('to'))
-            <div class="saran-preview">
-                {{ $previewCount }} data ditemukan untuk rentang tanggal ini.
-            </div>
-        @endif
-
         {{-- TABLE --}}
         <div class="saran-table-head">
-            <div>ID Saran</div>
             <div>Saran</div>
             <div>Diagnosa</div>
             <div>Aksi</div>
@@ -111,7 +103,6 @@
             @endphp
 
             <div class="saran-row">
-                <div><div class="saran-cell saran-center">{{ $pk }}</div></div>
                 <div><div class="saran-cell">{{ $text }}</div></div>
                 <div><div class="saran-cell saran-center">{{ $diagText }}</div></div>
 

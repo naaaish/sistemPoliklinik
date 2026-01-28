@@ -61,14 +61,15 @@ class ArtikelController extends Controller
 
     public function index(Request $request)
     {
-        $query = DB::table('artikel');
+        $query = DB::table('artikel')
+            ->orderBy('created_at', 'desc');
 
         if ($request->filled('q')) {
             $q = trim($request->q);
             $query->where('judul_artikel', 'like', '%' . $q . '%');
         }
 
-         $perPage = $request->get('per_page', 10);
+        $perPage = $request->get('per_page', 10);
         $allowed = ['10', '25', '50', '100', 'all'];
         if (!in_array((string) $perPage, $allowed)) $perPage = 10;
 

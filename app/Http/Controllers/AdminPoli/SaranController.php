@@ -16,7 +16,8 @@ class SaranController extends Controller
     {
         $query = DB::table('saran')
             ->join('diagnosa', 'diagnosa.id_diagnosa', '=', 'saran.id_diagnosa')
-            ->where('saran.is_active', '1');
+            ->where('saran.is_active', '1')
+            ->orderBy('created_at', 'desc');;
 
         if ($request->filled('q')) {
             $q = $request->q;
