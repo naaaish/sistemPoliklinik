@@ -58,6 +58,7 @@ class KeluargaController extends Controller
             }
         }
 
+        // Generate ID Keluarga
         $suffix = substr($request->hubungan_keluarga, 0, 1) . ($request->urutan_anak ?? '');
         $id_keluarga = $request->nip . '-' . strtoupper($suffix) . '-' . rand(10, 99);
 
@@ -157,54 +158,82 @@ class KeluargaController extends Controller
         $mode = 'edit';
         return view('kepegawaian.pegawai.keluarga-form', compact('pegawai', 'keluarga', 'mode'));
     }
-    // 3. Status Tanggungan Otomatis
+
+    // --- LOGIKA UTAMA SINKRONISASI ---
+
     private function reSyncActiveStatus($nip)
     {
         $pegawai = DB::table('pegawai')->where('nip', $nip)->first();
         if (!$pegawai) return;
 
-        // Reset status
+        // 1. Reset & Aktifkan Pasangan (Spouse)
         DB::table('keluarga')->where('nip', $nip)->update(['is_active' => 0]);
-
-        // Pasangan Aktif
         DB::table('keluarga')
             ->where('nip', $nip)
             ->where('hubungan_keluarga', 'pasangan')
+            ->limit(1)
             ->update(['is_active' => 1]);
 
-        // Ambil SEMUA anak, urutkan dari yang paling tua (tgl_lahir terkecil)
+        // 2. Ambil Semua Anak Urut Tua -> Muda
         $allAnak = DB::table('keluarga')
             ->where('nip', $nip)
             ->where('hubungan_keluarga', 'anak')
             ->orderBy('tgl_lahir', 'asc') 
             ->get();
 
+        // 3. Pisahkan Logika Berdasarkan Status Pegawai
+        if ($pegawai->is_active == 1) {
+            $this->syncActiveEmployee($allAnak);
+        } else {
+            $this->syncRetiredEmployee($allAnak);
+        }
+    }
+
+    /**
+     * Logika Pegawai AKTIF: Menggunakan Sliding Window.
+     * Jika anak ke-1 tidak aktif (umur > 25), anak ke-4 bisa naik jadi aktif.
+     */
+    private function syncActiveEmployee($allAnak)
+    {
         $activeCount = 0;
         foreach ($allAnak as $index => $anak) {
-            $umur = \Carbon\Carbon::parse($anak->tgl_lahir)->age;
-            $isEligible = ($umur < 25); // Syarat umur 25 tahun
-
-            // Update urutan_anak di database secara otomatis berdasarkan umur
-            $urutanBaru = $index + 1; 
-
+            $umur = Carbon::parse($anak->tgl_lahir)->age;
             $statusBaru = 0;
-            // Jika pegawai AKTIF, anak bisa naik (sliding window)
-            if ($pegawai->is_active == 1) {
-                if ($isEligible && $activeCount < 3) {
-                    $statusBaru = 1;
-                    $activeCount++;
-                }
-            } else {
-                // Jika PENSIUNAN, hanya 3 anak tertua yang memenuhi syarat saat itu yang aktif
-                if ($isEligible && $index < 3) {
-                    $statusBaru = 1;
-                }
+
+            // Selama kuota jatah (3) masih ada dan umur memenuhi syarat
+            if ($umur < 25 && $activeCount < 3) {
+                $statusBaru = 1;
+                $activeCount++;
             }
 
             DB::table('keluarga')->where('id_keluarga', $anak->id_keluarga)->update([
                 'is_active' => $statusBaru,
-                'urutan_anak' => $urutanBaru
+                'urutan_anak' => $index + 1
             ]);
         }
     }
-}
+
+    /**
+     * Logika PENSIUNAN: Tidak ada Sliding Window.
+     * Hanya anak urutan 1, 2, 3 yang bisa aktif. 
+     * Jika urutan 1 gugur, urutan 4 tetap tidak bisa masuk.
+     */
+    private function syncRetiredEmployee($allAnak)
+    {
+        foreach ($allAnak as $index => $anak) {
+            $umur = Carbon::parse($anak->tgl_lahir)->age;
+            $statusBaru = 0;
+
+            // Hanya anak yang urutan lahirnya 1-3 (index 0,1,2) 
+            // DAN umurnya masuk syarat yang bisa aktif.
+            if ($index < 3 && $umur < 25) {
+                $statusBaru = 1;
+            }
+
+            DB::table('keluarga')->where('id_keluarga', $anak->id_keluarga)->update([
+                'is_active' => $statusBaru,
+                'urutan_anak' => $index + 1
+            ]);
+        }
+    }
+}    
