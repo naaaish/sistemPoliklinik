@@ -99,7 +99,6 @@ class RiwayatController extends Controller
             ->leftJoin('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
             ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
             ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
-            // 🔑 WAJIB TAMBAH JOIN INI BIAR DIAGNOSA MUNCUL
             ->leftJoin('detail_pemeriksaan_penyakit', 'pemeriksaan.id_pemeriksaan', '=', 'detail_pemeriksaan_penyakit.id_pemeriksaan')
             ->leftJoin('diagnosa', 'detail_pemeriksaan_penyakit.id_diagnosa', '=', 'diagnosa.id_diagnosa')
             ->where(function ($q) use ($keluargaAktifId, $pegawai) {

@@ -28,12 +28,12 @@
     </div>
 
     {{-- ========================================
-         ✅ TAMBAHAN: INFO PERIODE + TOMBOL UBAH
+    INFO PERIODE + TOMBOL UBAH
     ======================================== --}}
     @if($dari && $sampai)
     <div class="periode-info">
         <div>
-            <strong>📅 Periode:</strong> 
+            <strong> Periode:</strong> 
             {{ \Carbon\Carbon::parse($dari)->translatedFormat('d F Y') }} 
             - 
             {{ \Carbon\Carbon::parse($sampai)->translatedFormat('d F Y') }}

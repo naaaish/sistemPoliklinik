@@ -309,17 +309,25 @@
 
 /* Info Periode di Index */
 .periode-info {
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
     border: 2px solid #3b82f6;
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
+    border-radius: 14px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
+
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 10px;
+
     font-size: 14px;
+    font-weight: 600;
     color: #1e40af;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 6px 18px rgba(59,130,246,.18);
+}
+
+.periode-info::before {
+    content: "📅";
+    font-size: 18px;
 }
 
 .periode-info strong {
@@ -363,4 +371,107 @@
     }
 }
 
+/* =============================
+   FILTER PERIODE (INDEX)
+============================= */
 
+.filter-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+}
+
+.filter-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.filter-form > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-form label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.filter-form input[type="date"] {
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1.5px solid #cbd5e1;
+    font-size: 14px;
+}
+
+.filter-form input[type="date"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+}
+
+.filter-form button {
+    height: 40px;
+    padding: 0 22px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+.filter-form button:hover {
+    background: #1e40af;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(37,99,235,.35);
+}
+
+/* =============================
+   BUTTON "LIHAT SEMUA"
+============================= */
+
+.btn-lihat-semua {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 8px 14px;
+    border-radius: 10px;
+
+    background: #eff6ff;
+    color: #2563eb;
+
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+
+    border: 1.5px solid #bfdbfe;
+
+    transition: all .2s ease;
+}
+
+.btn-lihat-semua:hover {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+
+    transform: translateX(2px);
+    box-shadow: 0 6px 14px rgba(37,99,235,.35);
+}
+
+.btn-lihat-semua::after {
+    content: "→";
+    transition: transform .2s ease;
+}
+
+.btn-lihat-semua:hover::after {
+    transform: translateX(3px);
+}

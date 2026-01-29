@@ -43,31 +43,31 @@ class JadwalDokterSeeder extends Seeder
             [
                 'hari' => 'Senin',
                 'jam_mulai' => '13:30:00',
-                'jam_selesai' => '15:00:00',
+                'jam_selesai' => '15:30:00',
                 'id_dokter' => 'DOK002',
             ],
             [
                 'hari' => 'Selasa',
                 'jam_mulai' => '13:30:00',
-                'jam_selesai' => '15:00:00',
+                'jam_selesai' => '15:30:00',
                 'id_dokter' => 'DOK002',
             ],
             [
                 'hari' => 'Rabu',
                 'jam_mulai' => '13:30:00',
-                'jam_selesai' => '15:00:00',
+                'jam_selesai' => '15:30:00',
                 'id_dokter' => 'DOK002',
             ],
             [
                 'hari' => 'Kamis',
                 'jam_mulai' => '13:30:00',
-                'jam_selesai' => '15:00:00',
+                'jam_selesai' => '15:30:00',
                 'id_dokter' => 'DOK002',
             ],            
             [
                 'hari' => 'Jumat',
                 'jam_mulai' => '13:30:00',
-                'jam_selesai' => '15:00:00',
+                'jam_selesai' => '15:30:00',
                 'id_dokter' => 'DOK002',
             ],            
         ]);
