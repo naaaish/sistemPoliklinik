@@ -45,19 +45,24 @@ class DetailPemeriksaanController extends Controller
         }
 
         // ================= DOKTER / PEMERIKSA =================
-        $dokter = null;
-        $pemeriksa = null;
+        $namaPemeriksa = '-';
 
-        if ($pendaftaran->id_dokter) {
+         if (!empty($pendaftaran->id_dokter)) {
             $dokter = DB::table('dokter')
                 ->where('id_dokter', $pendaftaran->id_dokter)
                 ->first();
-        }
 
-        if ($pendaftaran->id_pemeriksa) {
+            if ($dokter) {
+                $namaPemeriksa = $dokter->nama;
+            }
+        } elseif (!empty($pendaftaran->id_pemeriksa)) {
             $pemeriksa = DB::table('pemeriksa')
                 ->where('id_pemeriksa', $pendaftaran->id_pemeriksa)
                 ->first();
+
+            if ($pemeriksa) {
+                $namaPemeriksa = $pemeriksa->nama_pemeriksa;
+            }
         }
 
         // =================================================
@@ -115,8 +120,7 @@ class DetailPemeriksaanController extends Controller
             'pendaftaran',
             'pasien',
             'pegawai',
-            'dokter',
-            'pemeriksa',
+            'namaPemeriksa',
             'diagnosa',
             'diagnosa_k3',
             'saran',

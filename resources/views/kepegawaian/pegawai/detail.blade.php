@@ -154,7 +154,7 @@
                 <span>Daftar Keluarga</span>
             </div>
             {{-- Tombol Tambah Keluarga yang lebih rapi --}}
-            <a href="{{ route('keluarga.create', $pegawai->nip) }}" class="btn-tambah-sm">
+            <a href="{{ route('keluarga.create', $pegawai->nip) }}" class="btn-tambah">
                 <span>+</span> Tambah Keluarga
             </a>
         </div>
@@ -184,7 +184,7 @@
                             <td>{{ \Carbon\Carbon::parse($k->tgl_lahir)->translatedFormat('d F Y') }}</td>
                             <td>{{ $k->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
                             <td class="text-center">
-                                <a href="{{ route('keluarga.edit', $k->id_keluarga) }}" class="btn-edit-sm">
+                                <a href="{{ route('keluarga.edit', $k->id_keluarga) }}" class="btn btn-edit">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>

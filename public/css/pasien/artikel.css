@@ -44,15 +44,16 @@ body {
     display: flex;
     justify-content: center;
     margin-bottom: 50px;
+    margin-top: 20px;
 }
 
 .search-box {
     display: flex;
     width: 100%;
-    max-width: 520px;
+    max-width: 950px;
     background: white;
     border-radius: 30px;
-    padding: 6px;
+    padding: 8px;
     box-shadow: 0 10px 25px rgba(0,0,0,.08);
 }
 

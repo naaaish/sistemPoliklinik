@@ -40,6 +40,45 @@
             @endforelse
         </tbody>
     </table>
+
+    {{-- Pagination --}}
+    <div class="pagination-container">
+        <form method="GET" class="per-page-selector">
+            <label>Tampilkan</label>
+
+            <select name="per_page" onchange="this.form.submit()">
+                @foreach ([10,25,50,100,'all'] as $size)
+                    <option value="{{ $size }}"
+                        {{ $perPage == $size ? 'selected' : '' }}>
+                        {{ strtoupper($size) }}
+                    </option>
+                @endforeach
+            </select>
+
+            {{-- keep query lain --}}
+            @foreach(request()->except('per_page','page') as $key => $value)
+                <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+            @endforeach
+        </form>
+
+        @if(!$isAll)
+            <div class="pagination-info">
+                Menampilkan
+                <strong>{{ $riwayat->firstItem() }}</strong>
+                -
+                <strong>{{ $riwayat->lastItem() }}</strong>
+                dari
+                <strong>{{ $riwayat->total() }}</strong> data
+            </div>
+        @endif
+
+        @if(!$isAll)
+            <div class="pagination-nav">
+                {{ $riwayat->links() }}
+            </div>
+        @endif
+    </div>
+
 </div>
 </div>
 
