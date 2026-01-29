@@ -10,6 +10,7 @@ use App\Http\Controllers\AdminPoli\PendaftaranController;
 use App\Http\Controllers\AdminPoli\PemeriksaanInputController;
 use App\Http\Controllers\AdminPoli\PemeriksaanController;
 use App\Http\Controllers\AdminPoli\SaranController;
+use App\Http\Controllers\AdminPoli\DokterPemeriksaController as AdminPoliDokterPemeriksaController;
 use App\Http\Controllers\AdminPoli\ArtikelController as AdminPoliArtikelController;
 use App\Http\Controllers\AdminPoli\LaporanController as AdminPoliLaporanController;
 
@@ -164,6 +165,36 @@ Route::prefix('adminpoli')
 
         // upload from pdf/word → create draft → redirect edit
         Route::post('/artikel/import', [AdminPoliArtikelController::class, 'importDoc'])->name('artikel.import');
+
+        // Dokter/pemeriksa
+        Route::get('/dokter-pemeriksa', [AdminPoliDokterPemeriksaController::class, 'index'])
+            ->name('dokter_pemeriksa.index');
+
+        // CRUD dokter
+        Route::post('/dokter-pemeriksa/dokter', [AdminPoliDokterPemeriksaController::class, 'storeDokter'])
+            ->name('dokter_pemeriksa.dokter.store');
+        Route::put('/dokter-pemeriksa/dokter/{id}', [AdminPoliDokterPemeriksaController::class, 'updateDokter'])
+            ->name('dokter_pemeriksa.dokter.update');
+        Route::delete('/dokter-pemeriksa/dokter/{id}', [AdminPoliDokterPemeriksaController::class, 'destroyDokter'])
+            ->name('dokter_pemeriksa.dokter.destroy');
+
+        // CRUD pemeriksa
+        Route::post('/dokter-pemeriksa/pemeriksa', [AdminPoliDokterPemeriksaController::class, 'storePemeriksa'])
+            ->name('dokter_pemeriksa.pemeriksa.store');
+        Route::put('/dokter-pemeriksa/pemeriksa/{id}', [AdminPoliDokterPemeriksaController::class, 'updatePemeriksa'])
+            ->name('dokter_pemeriksa.pemeriksa.update');
+        Route::delete('/dokter-pemeriksa/pemeriksa/{id}', [AdminPoliDokterPemeriksaController::class, 'destroyPemeriksa'])
+            ->name('dokter_pemeriksa.pemeriksa.destroy');
+
+        // jadwal gabungan
+        Route::get('/dokter-pemeriksa/{tipe}/{id}/jadwal', [AdminPoliDokterPemeriksaController::class, 'jadwalJson'])
+            ->name('dokter_pemeriksa.jadwal_json');
+
+        Route::patch('/dokter-pemeriksa/dokter/{id}/status', [AdminPoliDokterPemeriksaController::class, 'updateStatusDokter'])
+            ->name('dokter_pemeriksa.dokter.status');
+
+        Route::patch('/dokter-pemeriksa/pemeriksa/{id}/status', [AdminPoliDokterPemeriksaController::class, 'updateStatusPemeriksa'])
+            ->name('dokter_pemeriksa.pemeriksa.status');
 
         // Laporan
         Route::get('/laporan', [AdminPoliLaporanController::class, 'index'])->name('laporan.index');

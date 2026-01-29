@@ -1,0 +1,493 @@
+/* =========================
+   DOKTER/PEMERIKSA PAGE
+   (dibuat ngikut pola OBAT)
+========================= */
+*{ box-sizing: border-box; }
+body{ margin:0; }
+
+.dp-page{
+  font-family: Poppins, sans-serif;
+}
+
+/* topbar */
+.dp-topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom: 14px;
+}
+
+.dp-left{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+}
+
+/* back arrow pakai gambar */
+.dp-back-img{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  width: 40px;
+  height: 40px;
+  transition: transform .15s ease, filter .15s ease;
+}
+.dp-back-img img{
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+.dp-back-img:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+.dp-back-img:active{
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+.dp-heading{
+  font-size: 22px;
+  font-weight: 700;
+  color:#3B5E8C;
+}
+
+/* buttons */
+.dp-btn-add{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  background:#3B5E8C;
+  color:#fff;
+  text-decoration:none;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor:pointer;
+  box-shadow:
+    0 6px 16px rgba(74, 111, 165, 0.25),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+}
+
+.dp-btn-soft{
+  height: 38px;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  background:#E7F0FF;
+  color:#3B5E8C;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-weight: 600;
+  cursor:pointer;
+}
+
+/* Hover system */
+.dp-btn-add:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow:
+    0 10px 22px rgba(74, 111, 165, 0.30),
+    0 4px 10px rgba(0, 0, 0, 0.14);
+}
+.dp-btn-add:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+.dp-btn-soft:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 8px 18px rgba(0,0,0,.10);
+}
+.dp-btn-soft:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+/* card (hapus flex:0 0 920px biar gak narik layout) */
+.dp-card{
+  width: 920px;
+  max-width: 920px;
+  margin: 0 auto;
+  background:#fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.10);
+  padding: 20px 22px;
+}
+
+/* search */
+.dp-search{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  margin-bottom: 12px;
+}
+.dp-search-input{
+  flex: 1;
+  height: 42px;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 14px;
+  outline:none;
+  transition: box-shadow .12s ease, border-color .12s ease, transform .12s ease;
+}
+.dp-search-btn{
+  height: 42px;
+  border:none;
+  border-radius: 10px;
+  padding: 0 14px;
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  background:#7FA6D9;
+  color:#fff;
+  font-weight: 600;
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.dp-search-btn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+.dp-search-btn:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+.dp-search-input:focus{
+  border-color:#89B2D9;
+  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
+}
+
+/* table: grid (5 kolom) */
+.dp-table-head,
+.dp-row{
+  display:grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
+  gap: 16px;
+}
+
+.dp-table-head{
+  padding: 6px 4px 10px;
+  color:#7B8DA8;
+  font-weight: 700;
+  font-size: 16px;
+  text-align:center;
+}
+
+.dp-table-body{
+  border-top: 1px solid #EEF4FF;
+  padding-top: 12px;
+}
+
+.dp-row{
+  min-height: 50px;
+  align-items: center;
+}
+
+.dp-cell{
+  height: 34px;
+  border: 1px solid #D6D6D6;
+  border-radius: 8px;
+  display:flex;
+  align-items:center;
+  padding: 0 12px;
+  color:#666;
+  background:#fff;
+  font-size: 13px;
+}
+.dp-center{ justify-content:center; }
+
+/* Nama text */
+.dp-celltext{
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* status select (tampilan sama vibe obat-select) */
+.dp-select{
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #CFE0FF;
+  padding: 0 10px;
+  outline:none;
+  background:#fff;
+  font-weight:600;
+  color:#3B5E8C;
+}
+.dp-select:focus{
+  border-color:#89B2D9;
+  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
+}
+
+.dp-select-plain{
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  height: auto !important;
+  padding: 0 !important;
+  font-weight: 700;
+  color: #3B5E8C;
+  appearance: none;        /* hilangin style default */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* =========================
+   STATUS DROPDOWN (1 KOTAKAN)
+========================= */
+.dp-status-wrap{
+  position: relative;
+  height: 38px;
+  min-width: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* select-nya */
+.dp-status-select{
+  width: 100%;
+  height: 38px;
+  padding: 0 34px 0 14px; /* kanan dikosongin buat icon */
+  border-radius: 10px;
+  border: 1px solid #CFE0FF;
+  background: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  color: #3B5E8C;
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  transition: box-shadow .15s ease, border-color .15s ease;
+}
+
+.dp-status-select:focus{
+  outline: none;
+  border-color: #89B2D9;
+  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
+}
+
+/* icon dropdown */
+.dp-status-arrow{
+  position: absolute;
+  right: 12px;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  opacity: .8;
+}
+
+/* teks polos seperti "Edit/Hapus" */
+.dp-plain{
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  height: auto !important;
+  line-height: 1 !important;
+  font-weight: 700;
+  color: #3B5E8C;
+  font-size: 13px;
+  text-align: center;
+}
+/* wrapper di dalam dp-cell (menyamakan feel dengan status) */
+.dp-jadwal-wrap{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;               /* bikin jarak kecil seperti status */
+}
+
+.dp-jadwal-btn{
+  width: 100%;
+  height: 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  background: #E7F0FF;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+
+  font-weight: 600;
+  font-size: 13px;
+  color: #3B5E8C;
+
+  cursor: pointer;
+  transition: filter .15s ease, transform .15s ease;
+}
+
+.dp-jadwal-btn:hover{ filter: brightness(0.98); }
+.dp-jadwal-btn:active{ transform: scale(0.98); }
+
+/* icon wrap */
+.dp-jadwal-icons{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* dp-cell khusus jadwal: jangan bikin kotak abu */
+.dp-cell.dp-cell-jadwal{
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  height: 34px;          /* samain tinggi cell lain */
+}
+
+/* actions */
+.dp-actions{
+  display:flex;
+  justify-content:center;
+  gap: 14px;
+  align-items:center;
+}
+.dp-act{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  border:none;
+  background:transparent;
+  font-weight: 700;
+  cursor:pointer;
+  text-decoration:none;
+  padding: 6px 6px;
+  transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+}
+.dp-act:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+.dp-act:active{
+  transform: translateY(0);
+  opacity: .85;
+}
+.dp-edit{ color:#E58A1F; }
+.dp-del{ color:#E04A4A; }
+.dp-del-form{ margin:0; }
+
+/* Empty row */
+.dp-row-empty{
+  padding: 8px 4px;
+  min-height: 50px;
+}
+.dp-empty-span{
+  grid-column: 1 / -1;
+  height: 34px;
+  border-radius: 8px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 0 12px;
+  font-size: 13px;
+  color:#7B8DA8;
+  font-weight:700;
+}
+
+.dp-foot{
+  margin-top: 18px;
+  text-align:center;
+  color: rgba(0,0,0,0.55);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================
+   MODAL (boleh tetap pakai milikmu)
+========================= */
+.dp-modal{
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.dp-modal.is-open{ display:flex; }
+
+.dp-modal-backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,0.35);
+}
+
+.dp-modal-card{
+  position: relative;
+  width: 520px;
+  max-width: calc(100% - 28px);
+  background:#fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+  padding: 22px 22px 18px;
+  z-index: 2;
+}
+
+/* ===== PATCH: perapihan dokter-pemeriksa ===== */
+
+/* icons (samakan dengan obat) */
+.dp-ic{
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+.dp-ic-sm{
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.dp-select{
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #CFE0FF;
+  padding: 0 10px;
+  outline:none;
+  background:#fff;
+  font-weight:600;
+  color:#3B5E8C;
+}
+.dp-select:focus{
+  border-color:#89B2D9;
+  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
+}
+
+.dp-jadwal-btn{
+  height: 38px;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  background:#E7F0FF;
+  color:#3B5E8C;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-weight: 600;
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+}
+.dp-jadwal-btn:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow: 0 8px 18px rgba(0,0,0,.10);
+}
+.dp-jadwal-btn:active{
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+.dp-edit{ color:#E58A1F; }
+.dp-del{ color:#E04A4A; } /* sudah ada, pastikan sama */

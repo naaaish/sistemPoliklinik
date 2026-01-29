@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="{{ asset('css/adminpoli/artikel.css') }}?v={{ filemtime(public_path('css/adminpoli/artikel.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/laporan.css') }}?v={{ filemtime(public_path('css/adminpoli/laporan.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/adminpoli/laporan_index.css') }}?v={{ filemtime(public_path('css/adminpoli/laporan_index.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/adminpoli/dokter-pemeriksa.css') }}?v={{ filemtime(public_path('css/adminpoli/dokter-pemeriksa.css')) }}">
 
     {{-- Sweet Alert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -81,6 +82,12 @@
             href="{{ route('adminpoli.laporan.index') }}">
                 <img src="{{ asset('assets/adminPoli/laporan.png') }}" alt="laporan">
                 <span>Laporan</span>
+            </a>
+
+            <a class="ap-nav-item {{ request()->routeIs('adminpoli.dokter_pemeriksa.*') ? 'active' : '' }}"
+            href="{{ route('adminpoli.dokter_pemeriksa.index') }}">
+                <img src="{{ asset('assets/adminPoli/doctor.png') }}" alt="dokter">
+                <span>Dokter/Pemeriksa</span>
             </a>
 
             <a class="ap-nav-item {{ request()->routeIs('adminpoli.artikel.*') ? 'active' : '' }}"
