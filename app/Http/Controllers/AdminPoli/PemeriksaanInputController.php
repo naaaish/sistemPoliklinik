@@ -28,16 +28,12 @@ class PemeriksaanInputController extends Controller
     {
         $pendaftaran = Pendaftaran::findOrFail($pendaftaranId);
 
-        // kolom sesuai migration: obat.nama_obat, diagnosa_k3.nama_penyakit, saran.isi
         $penyakit = DB::table('diagnosa')
-            ->leftJoin('diagnosa_k3', 'diagnosa.id_nb', '=', 'diagnosa_k3.id_nb')
             ->select(
-                'diagnosa.id_diagnosa',
-                'diagnosa.diagnosa',
-                'diagnosa.id_nb',
-                'diagnosa_k3.nama_penyakit as nama_k3'
+                'id_diagnosa',
+                'diagnosa',
             )
-            ->orderBy('diagnosa.diagnosa')
+            ->orderBy('diagnosa')
             ->get();
 
         $obat  = Obat::where('is_active', 1)
@@ -120,14 +116,6 @@ class PemeriksaanInputController extends Controller
 
             $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
 
-            // AUTO ambil NB K3 dari tabel diagnosa
-            $k3Ids = Diagnosa::whereIn('id_diagnosa', $penyakitIds)
-                ->pluck('id_nb')
-                ->filter()
-                ->unique()
-                ->values()
-                ->all();
-
             $saranIdsUI  = array_values(array_filter($validated['id_saran'] ?? []));
 
             $autoSaranIds = [];
@@ -174,16 +162,6 @@ class PemeriksaanInputController extends Controller
                 ], $penyakitIds);
 
                 DB::table('detail_pemeriksaan_penyakit')->insert($rows);
-            }
-
-            // diagnosa k3
-            if (count($k3Ids) > 0) {
-                $rows = array_map(fn($id) => [
-                    'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
-                    'id_nb' => $id,
-                ], $k3Ids);
-
-                DB::table('detail_pemeriksaan_diagnosa_k3')->insert($rows);
             }
 
             // saran

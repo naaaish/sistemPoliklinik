@@ -64,6 +64,9 @@
                         <option value="pegawai">Pegawai</option>
                         <option value="keluarga">Keluarga</option>
                         <option value="pensiunan">Pensiunan</option>
+                        <option value="unit_lain">Unit Lain</option>
+                        <option value="ojt">OJT</option>
+                        <option value="poliklinik">Poliklinik</option>
                     </select>
                 </div>
             </div>
@@ -108,7 +111,8 @@
                 <div class="ap-input">
                     <select name="jenis_pemeriksaan" class="ap-select" required>
                         <option value="cek_kesehatan">Cek Kesehatan</option>
-                        <option value="berobat">Berobat</option>
+                        <option value="periksa">Periksa</option>
+                        <option value="konsultasi">Konsultasi</option>    
                     </select>
                 </div>
             </div>
@@ -118,13 +122,12 @@
                 <div class="ap-colon">:</div>
                 <div class="ap-input">
                     <select name="petugas" id="petugas" class="ap-select" required>
-                        <option value="">-- pilih --</option>
-                        <optgroup label="Dokter">
+                        <optgroup label="Tenaga Medis">
                             @foreach($dokter as $d)
                                 <option value="dokter:{{ $d->id_dokter }}">{{ $d->nama }} ({{ $d->jenis_dokter }})</option>
                             @endforeach
                         </optgroup>
-                        <optgroup label="Pemeriksa">
+                        <optgroup label="Tenaga Pemeriksa">
                             @foreach($pemeriksa as $p)
                                 <option value="pemeriksa:{{ $p->id_pemeriksa }}">{{ $p->nama_pemeriksa }}</option>
                             @endforeach
@@ -449,7 +452,7 @@ async function onTipeChange(){
   const tipe = tipeEl.value;
 
   // 2A) pegawai: dropdown hanya pegawai, auto select
-  if(tipe === 'pegawai'){
+  if(tipe === 'pegawai' || tipe === 'unit_lain' || tipe === 'ojt'){
     namaPasSelect.innerHTML =
       `<option value="${escapeHtml(pegawaiData.nama_pegawai)}"
         data-hub="YBS"
@@ -528,70 +531,50 @@ tipeEl.addEventListener('change', () => {
 
 namaPasSelect.addEventListener('change', applySelectedPasien);
 
-// function setPoliklinikMode(isPoli) {
-//   const namaPasienEl = document.getElementById('nama_pasien');
-//   const hubKelEl = document.getElementById('hub_kel');
-//   const tglLahirEl = document.getElementById('tgl_lahir');
-
-//   if (!namaPasienEl || !hubKelEl || !tglLahirEl) return;
-
-//   if (isPoli) {
-//     // set value ke "-"
-//     namaPasienEl.value = '-';
-//     hubKelEl.value = 'YBS';
-//     tglLahirEl.value = '2000-01-01'; // dummy aman
-//     // tglLahirEl.classList.add('hidden-field');
-//     // kunci field
-//     namaPasienEl.readOnly = true;
-//     hubKelEl.readOnly = true;
-//     tglLahirEl.readOnly = true;
-//   } else {
-//     namaPasienEl.disabled = false;
-//     hubKelEl.disabled = false;
-//     tglLahirEl.readOnly = false;
-//   }
-// }
-
-function setPoliklinikMode(isPoli) {
+function applyAutoPetugasByJenis() {
+  const jenisEl = document.querySelector('select[name="jenis_pemeriksaan"]');
   const petugasEl = document.getElementById('petugas');
+  
+  if(!jenisEl || !petugasEl) return;
 
-  if (isPoli) {
-    // AUTO isi atas
-    nipEl.value = '001';
-    namaPegEl.value = 'Poliklinik';
-    bagianEl.value = 'Poliklinik';
+  const jenis = jenisEl.value;
 
-    // AUTO set tipe
-    tipeEl.value = 'pegawai';
-    tipeEl.disabled = true; // biar ga bisa diganti
+  if (jenis === 'cek_kesehatan') {
+    // cari option pemeriksa:PMR001 (Bu Meta)
+    const opt = [...petugasEl.options].find(o => (o.value || '') === 'pemeriksa:PMR001');
+    if (opt) petugasEl.value = opt.value;
 
-    // AUTO isi pasien
-    namaPasSelect.innerHTML = `<option value="-" selected data-hub="YBS" data-tgl="" data-idkel="">-</option>`;
-    namaPasSelect.value = '-';
-    hubEl.value = 'YBS';
-    idKelEl.value = '';
-
-    // tgl lahir: kosongin aja
-    tglEl.value = '';
-    tglEl.readOnly = true;
-
-    // kunci UI tanpa disable (biar tetap terkirim)
-    namaPasSelect.classList.add('is-locked');
-    hubEl.classList.add('is-locked');
-
-    // AUTO pilih pemeriksa “Sofia”
-    if (petugasEl) {
-      const opt = [...petugasEl.options].find(o =>
-        (o.value || '').startsWith('pemeriksa:')
-      );
-      if (opt) petugasEl.value = opt.value;
-    }
-
+    // kunci UI (opsional) biar user gak ganti
+    petugasEl.classList.add('is-locked');
   } else {
-    tipeEl.disabled = false;
-    namaPasSelect.classList.remove('is-locked');
-    hubEl.classList.remove('is-locked');
-    tglEl.readOnly = false;
+    petugasEl.classList.remove('is-locked');
+  }
+}
+jenisEl.addEventListener('change', applyAutoPetugasByJenis);
+applyAutoPetugasByJenis();
+
+function setPoliklinikMode(on){
+  const nipEl = document.getElementById('nip');
+  const namaPegawaiEl = document.getElementById('nama_pegawai');
+  const bagianEl = document.getElementById('bagian');
+  const namaPasienEl = document.getElementById('nama_pasien');
+  const hubKelEl = document.getElementById('hub_kel');
+  const idKeluargaEl = document.getElementById('id_keluarga');
+
+  if(on){
+    if(nipEl) nipEl.value = '001';
+    if(namaPegawaiEl) namaPegawaiEl.value = '-';
+    if(bagianEl) bagianEl.value = '-';
+    if(namaPasienEl) namaPasienEl.value = '-';
+    if(hubKelEl) hubKelEl.value = '-';
+    if(idKeluargaEl) idKeluargaEl.value = '';
+
+    // kalau ada dropdown keluarga / section keluarga, hide
+    const keluargaSection = document.getElementById('keluarga_section');
+    if(keluargaSection) keluargaSection.style.display = 'none';
+  } else {
+    // balik normal: kosongin biar autoload ngisi lagi
+    // (atau biarin, tergantung UX kamu)
   }
 }
 
@@ -618,8 +601,6 @@ document.getElementById('formPendaftaran').addEventListener('submit', () => {
   const namaPasienEl = document.getElementById('nama_pasien');
   if (namaPasienEl) namaPasienEl.disabled = false;
 });
-
-
 </script>
 
 @endsection

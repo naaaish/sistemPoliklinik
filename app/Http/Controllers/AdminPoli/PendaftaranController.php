@@ -113,46 +113,41 @@ class PendaftaranController extends Controller
             'nama_pegawai' => ['required', 'string', 'max:255'],
             'bagian' => ['required', 'string', 'max:255'],
 
-            'tipe_pasien' => ['required', 'in:pegawai,keluarga,pensiunan'],
+            'tipe_pasien' => ['required', 'in:pegawai,keluarga,pensiunan,unit_lain,ojt,poliklinik'],
             'nama_pasien' => ['required', 'string', 'max:255'],
             'hub_kel' => ['required', 'in:YBS,Pasangan,Anak'],
             'tgl_lahir' => ['nullable', 'date'],
 
             'id_keluarga' => ['nullable','string','max:32'],
-            'jenis_pemeriksaan' => ['required', 'in:cek_kesehatan,berobat'],
+            'jenis_pemeriksaan' => ['required', 'in:cek_kesehatan,periksa,konsultasi'],
             'petugas' => ['required', 'string'],
 
             'keluhan' => ['nullable', 'string'],
         ]);
 
-        $isPoli = ($validated['nip'] === '001');
-        $pemeriksa = DB::table('pemeriksa')
-            ->where('id_pemeriksa', 'PMR001')
-            ->first();
+        $isPoli = ($validated['tipe_pasien'] === 'poliklinik');
 
         if ($isPoli) {
-            // paksa nilai aman untuk mode poliklinik
+            $validated['nip'] = '001';
+
             $validated['nama_pegawai'] = $validated['nama_pegawai'] ?: 'Poliklinik';
             $validated['bagian'] = $validated['bagian'] ?: 'Poliklinik';
 
-            $validated['tipe_pasien'] = 'pegawai';
-            $validated['nama_pasien'] = $validated['nama_pasien'] ?: '-';
             $validated['hub_kel'] = 'YBS';
             $validated['id_keluarga'] = null;
-            $validated['dokter'] = null;
-            $validated['pemeriksa'] = $pemeriksa ? $pemeriksa->id_pemeriksa : null;
-
-            // tgl lahir boleh kosong
             $validated['tgl_lahir'] = $validated['tgl_lahir'] ?: null;
         }
 
-        // cek pegawai ada
+        $BU_META_ID = 'PMR001';
+        if ($validated['jenis_pemeriksaan'] === 'cek_kesehatan') {
+            $validated['petugas'] = 'pemeriksa:' . $BU_META_ID;
+        }
+
         $pegawai = DB::table('pegawai')->where('nip', $validated['nip'])->first();
         if (!$pegawai) {
             return back()->withInput()->withErrors(['nip' => 'NIP tidak ditemukan di data pegawai.']);
         }
 
-        // ===== Tentukan id_keluarga berdasarkan tipe + hub_kel =====
         $idKeluarga = null;
 
         // 1) Pegawai: wajib YBS
@@ -300,6 +295,92 @@ class PendaftaranController extends Controller
 
         return redirect()->route('adminpoli.dashboard')
             ->with('success', 'Pendaftaran berhasil disimpan.');
+    }
+
+    public function autoloadPasien(Request $request)
+    {
+        $nip  = trim((string) $request->query('nip', ''));
+        $tipe = trim((string) $request->query('tipe', ''));
+
+        if ($nip === '' || $tipe === '') {
+            return response()->json(['ok' => false, 'message' => 'nip/tipe wajib'], 422);
+        }
+
+        // 1) POLIKLINIK
+        if ($tipe === 'poliklinik') {
+            return response()->json([
+                'ok' => true,
+                'mode' => 'poliklinik',
+                'pegawai' => [
+                    'nip' => '001',
+                    'nama_pegawai' => 'Poliklinik',
+                    'bagian' => 'Poliklinik',
+                    'tgl_lahir' => null,
+                ],
+                'pasien' => [
+                    'nama_pasien' => 'Poliklinik',
+                    'hub_kel' => 'YBS',
+                    'id_keluarga' => null,
+                    'tgl_lahir' => null,
+                ],
+                'keluarga_list' => [],
+            ]);
+        }
+
+        // 2) selain poliklinik: ambil pegawai berdasar nip
+        // (kalau nantinya Unit lain/OJT bukan dari tabel pegawai, bagian ini tinggal diganti switch ke tabel lain)
+        $pegawai = DB::table('pegawai')
+            ->where('nip', $nip)
+            ->select('nip', 'nama_pegawai', 'bagian', 'tgl_lahir')
+            ->first();
+
+        if (!$pegawai) {
+            return response()->json(['ok' => false, 'message' => 'NIP tidak ditemukan'], 404);
+        }
+
+        // default pasien = YBS
+        $pasien = [
+            'nama_pasien' => $pegawai->nama_pegawai,
+            'hub_kel' => 'YBS',
+            'id_keluarga' => null,
+            'tgl_lahir' => $pegawai->tgl_lahir,
+        ];
+
+        $keluargaList = [];
+
+        // 3) KELUARGA / PENSIUNAN (kalau pilih keluarga, frontend butuh list keluarga)
+        if (in_array($tipe, ['keluarga','pensiunan'], true)) {
+            $keluargaList = DB::table('keluarga')
+                ->where('nip', $nip)
+                ->orderByRaw("CASE WHEN hubungan_keluarga = 'pasangan' THEN 0 ELSE 1 END")
+                ->orderBy('urutan_anak')
+                ->get()
+                ->map(function($r){
+                    return [
+                        'id_keluarga' => $r->id_keluarga,
+                        'nama' => $r->nama_keluarga,
+                        'hubungan_keluarga' => $r->hubungan_keluarga, // pasangan/anak
+                        'tgl_lahir' => $r->tgl_lahir,
+                    ];
+                })
+                ->values();
+        }
+
+        if (in_array($validated['tipe_pasien'], ['pegawai','unit_lain','ojt','poliklinik'], true)) {
+    if ($validated['hub_kel'] !== 'YBS') {
+        return back()->withInput()->withErrors(['hub_kel' => 'Tipe ini harus YBS.']);
+    }
+    $idKeluarga = null;
+}
+
+
+        return response()->json([
+            'ok' => true,
+            'mode' => $tipe,
+            'pegawai' => $pegawai,
+            'pasien' => $pasien,
+            'keluarga_list' => $keluargaList,
+        ]);
     }
 
     private function generateIdPendaftaran()
