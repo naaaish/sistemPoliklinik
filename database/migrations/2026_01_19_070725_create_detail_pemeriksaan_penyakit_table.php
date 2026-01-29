@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('detail_pemeriksaan_penyakit', function (Blueprint $table) {
             $table->id();
             $table->string('id_pemeriksaan', 30);
-            $table->string('id_diagnosa', 30);
+            $table->integer('id_diagnosa');
+            $table->string('id_nb', 10)->nullable();
 
             $table->foreign('id_pemeriksaan')
                 ->references('id_pemeriksaan')

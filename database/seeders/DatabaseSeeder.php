@@ -31,7 +31,6 @@ class DatabaseSeeder extends Seeder
 
             // 4) master medis
             DiagnosaSeeder::class,
-            DiagnosaK3Seeder::class,
             SaranSeeder::class,
             ObatSeeder::class,
 
@@ -41,7 +40,6 @@ class DatabaseSeeder extends Seeder
 
             // 6) detail pemeriksaan (relasi ke pemeriksaan)
             DetailPemeriksaanPenyakitSeeder::class,
-            DetailPemeriksaanDiagnosaK3Seeder::class,
             DetailPemeriksaanSaranSeeder::class,
 
             // 7) resep (relasi ke pemeriksaan dan obat)

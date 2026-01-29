@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
             'password'  => Hash::make('poli123'),
             'role'      => 'adminPoli',
             'nama_user' => 'Admin Poliklinik',
-            'nip'       => null, // Admin tidak punya NIP
+            'nip'       => null,
         ]);
 
         User::create([
@@ -23,10 +23,9 @@ class UserSeeder extends Seeder
             'password'  => Hash::make('kepeg123'),
             'role'      => 'adminKepegawaian',
             'nama_user' => 'Admin Kepegawaian',
-            'nip'       => null, // Admin tidak punya NIP
+            'nip'       => null,
         ]);
 
-        // PENTING: Username = NIP, dan kolom nip diisi
         User::create([
             'username'  => '198765432001',
             'password'  => Hash::make('pasien123'),

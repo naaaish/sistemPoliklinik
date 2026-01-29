@@ -46,7 +46,7 @@ class PendaftaranSeeder extends Seeder
                 ['id_pendaftaran' => 'DFT-002'],
                 [
                     'tanggal'           => now()->toDateString(),
-                    'jenis_pemeriksaan' => 'berobat',
+                    'jenis_pemeriksaan' => 'periksa',
                     'keluhan'           => 'Demam tinggi, batuk pilek',
                     'tipe_pasien'       => 'keluarga',
                     'nip'               => $pegawai->nip,

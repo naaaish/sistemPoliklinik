@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('pendaftaran', function (Blueprint $table) {
             $table->string('id_pendaftaran',20)->primary();
             $table->date('tanggal');
-            $table->enum('jenis_pemeriksaan',['cek_kesehatan','berobat']);
+            $table->enum('jenis_pemeriksaan',['cek_kesehatan','periksa', 'konsultasi']);
             $table->text('keluhan')->nullable();
 
             // pengganti pasien:
-            $table->enum('tipe_pasien', ['pegawai','keluarga', 'pensiunan']);
+            $table->enum('tipe_pasien', ['pegawai','keluarga', 'pensiunan', 'unit lain', 'OJT']);
             $table->string('nip', 20)->nullable();
             $table->string('id_keluarga', 32)->nullable();
 

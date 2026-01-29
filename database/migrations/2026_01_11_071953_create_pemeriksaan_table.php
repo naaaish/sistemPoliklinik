@@ -25,13 +25,14 @@ return new class extends Migration
             $table->float('suhu')->nullable();
             $table->float('berat')->nullable();
             $table->float('tinggi')->nullable();
+            $table->string('id_saran',20)->nullable();
 
             $table->string('id_pendaftaran',20);
 
+            $table->foreign('id_saran')->references('id_saran')->on('saran');
             $table->foreign('id_pendaftaran')->references('id_pendaftaran')->on('pendaftaran');
             $table->timestamps();
         });
-
     }
 
     /**
