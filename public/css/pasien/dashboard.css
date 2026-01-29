@@ -21,76 +21,109 @@ body {
     max-width: 1200px;
     margin: auto;
 }
-
-/* ================= HERO ================= */
+/* ================= HERO REVISED ================= */
 .hero {
     display: grid;
     grid-template-columns: 1fr 1fr;
     min-height: 85vh;
-    background: linear-gradient(135deg, var(--dark), var(--primary));
+    /* Memberikan jarak atas agar tidak menempel navbar */
+    padding-top: 40px; 
+    /* Memastikan konten di dalamnya berada di tengah secara vertikal */
+    align-items: center; 
+    
+    background: linear-gradient(rgba(26, 58, 82, 0.5), rgba(26, 58, 82, 0.5)), 
+                url('/assets/home/bg.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     color: white;
 }
 
+/* Animasi untuk konten teks */
 .hero-content {
     padding: 90px 60px;
+    z-index: 2;
 }
 
 .hero-badge {
-    background: rgba(255,255,255,.15);
-    padding: 8px 16px;
-    border-radius: 20px;
-    display: inline-block;
-    margin-bottom: 20px;
-    font-size: 14px;
+    font-size: 25px;
+    animation: fadeInDown 0.8s ease-out forwards;
 }
 
 .hero h1 {
     font-size: 42px;
     line-height: 1.25;
     margin-bottom: 20px;
-}
-
-.hero h1 span {
-    color: #b4f2f4;
+    opacity: 0;
+    animation: fadeInLeft 0.8s ease-out 0.3s forwards; /* Muncul setelah badge */
 }
 
 .hero p {
     max-width: 480px;
-    opacity: .9;
+    opacity: 0;
+    animation: fadeInLeft 0.8s ease-out 0.5s forwards; /* Muncul setelah judul */
 }
 
 .hero-actions {
+    position: relative;
+    z-index: 5;
     margin-top: 32px;
     display: flex;
-    gap: 14px;
+    gap: 15px;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease-out 0.7s forwards;
 }
 
-.btn-primary {
-    background: white;
-    color: var(--primary);
-    padding: 14px 30px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.btn-outline {
-    border: 2px solid rgba(255,255,255,.5);
-    color: white;
-    padding: 14px 30px;
-    border-radius: 10px;
-    text-decoration: none;
-}
-
-.hero-image {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
+/* Animasi melayang untuk gambar dokter di kanan */
 .hero-image img {
-    max-width: 90%;
+    max-width: 70%;         /* Sedikit diperbesar agar proporsional */
+    height: auto;
+    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
+    animation: floatingDoctor 4s ease-in-out infinite;
+    /* Menghapus margin negatif jika ada agar tidak menabrak navbar */
+    margin-top: 0;
+    border-radius: 20px;
 }
+
+/* ================= KEYFRAMES ANIMASI ================= */
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes floatingDoctor {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
 /* ================= LAYANAN (SERVICES) ================= */
 .services {
     margin-top: -60px; /* Biar kartu agak naik ke area hero */
@@ -410,3 +443,39 @@ body {
     pointer-events: none;
 }
 
+/* Style Tombol Login (Primary) */
+.btn-primary {
+    background: #2563eb;
+    color: white !important;
+    padding: 12px 28px;
+    border-radius: 10px;
+    text-decoration: none !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-block;
+    border: none;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Style Tombol Konsultasi (Outline) */
+.btn-outline {
+    background: rgba(255, 255, 255, 0.1);
+    color: white !important;
+    padding: 12px 28px;
+    border-radius: 10px;
+    text-decoration: none !important;
+    font-weight: 600;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.btn-outline:hover {
+    background: white;
+    color: #1a3a52 !important;
+}
