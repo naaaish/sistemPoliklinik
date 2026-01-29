@@ -71,17 +71,24 @@ class LaporanController extends Controller
         }
 
         // ================= DOKTER =================
-        $preview['dokter'] = DB::table('pemeriksaan')
-            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-            ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
-            ->select(
-                'dokter.nama as nama_dokter',
-                'dokter.jenis_dokter',
-                DB::raw('COUNT(*) as total_pasien')
+    $preview['dokter'] = DB::table('pemeriksaan')
+        ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+        ->join('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
+        ->select(
+            'dokter.nama as nama_dokter',
+            'dokter.jenis_dokter',
+            DB::raw('COUNT(*) as total_pasien')
+        )
+        ->when($dari && $sampai, fn($q) =>
+            $q->whereBetween(
+                DB::raw('DATE(pemeriksaan.created_at)'),
+                [$dari, $sampai]
             )
-            ->groupBy('dokter.nama','dokter.jenis_dokter')
-            ->limit(5)
-            ->get();
+        )
+        ->groupBy('dokter.nama','dokter.jenis_dokter')
+        ->limit(5)
+        ->get();
+
 
         // ================= OBAT =================
         $preview['obat'] = DB::table('detail_resep')
@@ -94,6 +101,12 @@ class LaporanController extends Controller
                 'detail_resep.jumlah',
                 DB::raw('(detail_resep.jumlah * obat.harga) as total')
             )
+                ->when($dari && $sampai, fn($q) =>
+                    $q->whereBetween(
+                        DB::raw('DATE(pemeriksaan.created_at)'),
+                        [$dari, $sampai]
+                    )
+                )
             ->orderByDesc('pemeriksaan.created_at')
             ->limit(5)
             ->get();
@@ -154,6 +167,28 @@ class LaporanController extends Controller
                     DB::raw("DATE(pemeriksaan.created_at) as tanggal")
                 );
 
+
+            $rows = $query->get();
+
+            // =======================
+            // DOKTER POLIKLINIK
+            // =======================
+            $query = DB::table('pemeriksaan')
+                ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
+                ->join('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
+                ->leftJoin('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
+                ->leftJoin('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
+                ->whereNotNull('pendaftaran.id_dokter')
+                ->select(
+                    'dokter.id_dokter',
+                    'dokter.nama as nama_dokter',
+                    'dokter.jenis_dokter',
+                    'pendaftaran.nip',
+                    DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
+                    DB::raw("DATE(pemeriksaan.created_at) as tanggal")
+                );
+
+            //  FILTER TANGGAL
             if ($dari && $sampai) {
                 $query->whereBetween(
                     DB::raw('DATE(pemeriksaan.created_at)'),
@@ -161,30 +196,31 @@ class LaporanController extends Controller
                 );
             }
 
-            $rows = $query->get();
+            $rows = $query->get(); 
 
-            // =======================
-            // DOKTER POLIKLINIK
-            // =======================
-            $dokterPoli = $rows
-                ->where('jenis_dokter', 'Dokter Poliklinik')
-                ->groupBy('id_dokter')
-                ->map(function ($items) use ($tarifPoliklinik) {
-                    return (object) [
-                        'id_dokter'    => $items->first()->id_dokter,
-                        'nama_dokter'  => $items->first()->nama_dokter,
-                        'pasien'       => $items->map(function ($p) {
-                            return (object) [
-                                'nip'          => $p->nip,
-                                'nama_pasien'  => $p->nama_pasien,
-                                'tanggal'      => $p->tanggal,
-                            ];
-                        }),
-                        'total_pasien' => $items->count(),
-                        'total_biaya'  => $items->count() * $tarifPoliklinik
-                    ];
-                })
-                ->values();
+        // =======================
+        // DOKTER POLIKLINIK
+        // =======================
+        $dokterPoli = $rows
+            ->where('jenis_dokter', 'Dokter Poliklinik')
+            ->groupBy('id_dokter')
+            ->map(function ($items) use ($tarifPoliklinik) {
+                return (object) [
+                    'id_dokter'    => $items->first()->id_dokter,
+                    'nama_dokter'  => $items->first()->nama_dokter,
+                    'pasien'       => $items->map(function ($p) {
+                        return (object) [
+                            'nip'          => $p->nip,
+                            'nama_pasien'  => $p->nama_pasien,
+                            'tanggal'      => $p->tanggal,
+                        ];
+                    }),
+                    'total_pasien' => $items->count(),
+                    'total_biaya'  => $items->count() * $tarifPoliklinik
+                ];
+            })
+            ->values();
+
 
             // =======================
             // DOKTER PERUSAHAAN
@@ -207,6 +243,12 @@ class LaporanController extends Controller
                         'gaji'         => $gajiPerusahaan
                     ];
                 })
+                ->when($dari && $sampai, fn($q) =>
+                    $q->whereBetween(
+                        DB::raw('DATE(pemeriksaan.created_at)'),
+                        [$dari, $sampai]
+                    )
+                )
                 ->values();
 
             return view('kepegawaian.laporan.detail', compact(
@@ -234,14 +276,19 @@ class LaporanController extends Controller
                     'obat.harga',
                     DB::raw('(detail_resep.jumlah * obat.harga) as total')
                 )
+                ->when($dari && $sampai, fn($q) =>
+                    $q->whereBetween(
+                        DB::raw('DATE(pemeriksaan.created_at)'),
+                        [$dari, $sampai]
+                    )
+                )
+                ->when($dari && $sampai, fn($q) =>
+                    $q->whereBetween(
+                        DB::raw('DATE(pemeriksaan.created_at)'),
+                        [$dari, $sampai]
+                    )
+                )
                 ->orderByDesc('pemeriksaan.created_at');
-
-            if ($dari && $sampai) {
-                $query->whereBetween(
-                    DB::raw('DATE(pemeriksaan.created_at)'),
-                    [$dari, $sampai]
-                );
-            }
 
             $data = $query->get();
         }
