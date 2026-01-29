@@ -157,34 +157,54 @@ class KeluargaController extends Controller
         $mode = 'edit';
         return view('kepegawaian.pegawai.keluarga-form', compact('pegawai', 'keluarga', 'mode'));
     }
-    // 3. LOGIC UTAMA (KUNCI AGAR ANAK KE-4 BUREM)
+    // 3. Status Tanggungan Otomatis
     private function reSyncActiveStatus($nip)
     {
-        // STEP A: Matikan semua status aktif untuk pegawai ini
+        $pegawai = DB::table('pegawai')->where('nip', $nip)->first();
+        if (!$pegawai) return;
+
+        // Reset status
         DB::table('keluarga')->where('nip', $nip)->update(['is_active' => 0]);
 
-        // STEP B: Nyalakan Pasangan (Maksimal 1)
+        // Pasangan Aktif
         DB::table('keluarga')
             ->where('nip', $nip)
             ->where('hubungan_keluarga', 'pasangan')
-            ->orderBy('created_at', 'asc')
-            ->limit(1)
             ->update(['is_active' => 1]);
 
-        // STEP C: Ambil ID 3 Anak yang berhak (Urutan 1-3 & Umur < 23)
-        $anakBerhakIds = DB::table('keluarga')
+        // Ambil SEMUA anak, urutkan dari yang paling tua (tgl_lahir terkecil)
+        $allAnak = DB::table('keluarga')
             ->where('nip', $nip)
             ->where('hubungan_keluarga', 'anak')
-            ->whereRaw("TIMESTAMPDIFF(YEAR, tgl_lahir, CURDATE()) < 23")
-            ->orderBy('urutan_anak', 'asc') // Urutan 1, 2, 3 diutamakan
-            ->limit(3) // HANYA 3 ANAK
-            ->pluck('id_keluarga');
+            ->orderBy('tgl_lahir', 'asc') 
+            ->get();
 
-        // STEP D: Nyalakan status aktif hanya untuk ID yang terpilih
-        if ($anakBerhakIds->isNotEmpty()) {
-            DB::table('keluarga')
-                ->whereIn('id_keluarga', $anakBerhakIds)
-                ->update(['is_active' => 1]);
+        $activeCount = 0;
+        foreach ($allAnak as $index => $anak) {
+            $umur = \Carbon\Carbon::parse($anak->tgl_lahir)->age;
+            $isEligible = ($umur < 25); // Syarat umur 25 tahun
+
+            // Update urutan_anak di database secara otomatis berdasarkan umur
+            $urutanBaru = $index + 1; 
+
+            $statusBaru = 0;
+            // Jika pegawai AKTIF, anak bisa naik (sliding window)
+            if ($pegawai->is_active == 1) {
+                if ($isEligible && $activeCount < 3) {
+                    $statusBaru = 1;
+                    $activeCount++;
+                }
+            } else {
+                // Jika PENSIUNAN, hanya 3 anak tertua yang memenuhi syarat saat itu yang aktif
+                if ($isEligible && $index < 3) {
+                    $statusBaru = 1;
+                }
+            }
+
+            DB::table('keluarga')->where('id_keluarga', $anak->id_keluarga)->update([
+                'is_active' => $statusBaru,
+                'urutan_anak' => $urutanBaru
+            ]);
         }
-    } 
+    }
 }

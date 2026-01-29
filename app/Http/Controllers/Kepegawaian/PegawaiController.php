@@ -88,12 +88,13 @@ class PegawaiController extends Controller
 
     public function show($nip)
     {
-        $pegawai = Pegawai::where('nip', $nip)->firstOrFail();
+        $pegawai = DB::table('pegawai')->where('nip', $nip)->firstOrFail();
         
         // Ambil data keluarga berdasarkan NIP pegawai
         $keluarga = DB::table('keluarga')
             ->where('nip', $nip)
-            ->orderBy('hubungan_keluarga', 'asc')
+            ->orderBy('is_active', 'desc')   
+            ->orderBy('urutan_anak', 'asc')  
             ->get();
         
         $masaKerja = \Carbon\Carbon::parse($pegawai->tgl_masuk)->diff(\Carbon\Carbon::now());

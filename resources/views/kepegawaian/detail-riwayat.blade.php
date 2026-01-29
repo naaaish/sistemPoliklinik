@@ -13,7 +13,7 @@
         <h1>Rincian Pemeriksaan Pasien</h1>
     </div>
     {{-- MAIN CARD --}}
-
+    <div class="detail-card">
         {{-- DATA PENDAFTARAN --}}
         <h2 class="section-title">Data Pendaftaran Pasien</h2>
         <div class="data-grid">
@@ -184,5 +184,6 @@
                 @endif
             </table>
         </div>
+    </div>
 </div>
 @endsection

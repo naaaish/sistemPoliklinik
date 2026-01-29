@@ -33,7 +33,7 @@
     {{-- INFO PERIODE YANG DIPILIH --}}
     @if(request('dari') && request('sampai'))
     <div class="periode-info">
-        <strong>📅 Periode Aktif:</strong> 
+        <strong>Periode :</strong> 
         {{ \Carbon\Carbon::parse(request('dari'))->translatedFormat('d F Y') }} 
         - 
         {{ \Carbon\Carbon::parse(request('sampai'))->translatedFormat('d F Y') }}
@@ -47,10 +47,11 @@
             <div class="laporan-header">
                 <h3>{{ $judul }}</h3>
                 
-                {{-- ⚠️ PERBAIKAN: Tambahkan parameter 'jenis' ke route --}}
-                <a href="{{ route('kepegawaian.laporan.detail', ['jenis' => $key] + request()->only(['dari','sampai'])) }}">
-                    Lihat Semua →
-                </a>
+                    <a class="btn-lihat-semua"
+                    href="{{ route('kepegawaian.laporan.detail', ['jenis' => $key] + request()->only(['dari','sampai'])) }}">
+                        Lihat Semua 
+                    </a>
+
 
             </div>
 
