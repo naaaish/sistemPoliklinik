@@ -43,23 +43,6 @@
                 >
                 @csrf
 
-                {{-- FOTO --}}
-                <div class="foto-wrapper">
-                    <div class="foto-preview" id="foto-preview-box">
-                        @if($mode == 'edit' && !empty($pegawai->foto))
-                            <img src="{{ asset('profile-pegawai/'.$pegawai->foto) }}?v={{ time() }}" alt="Foto" id="preview-img">
-                        @else
-                            <span id="preview-text">Foto Pegawai</span>
-                            <img src="" alt="Preview" id="preview-img" style="display:none;">
-                        @endif
-                    </div>
-                </div>
-
-                <div class="mb-4 text-center">
-                    <input type="file" name="foto" class="form-control w-50 mx-auto" accept="image/*" id="foto-input">
-                    <small class="text-muted">Format: JPG, PNG (Max 2MB)</small>
-                </div>
-
                 <div class="row g-3">
                     @if($mode == 'create')
                     <div class="col-md-6">
@@ -78,13 +61,6 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="form-row-custom">
-                            <label class="form-label-custom">NIK</label>
-                            <input type="text" name="nik" class="form-control-custom"
-                                   value="{{ old('nik', $pegawai->nik ?? '') }}">
-                        </div>
-                    </div>
 
                     <div class="col-md-6">
                         <div class="form-row-custom">
@@ -94,14 +70,6 @@
                                 <option value="Laki-laki" {{ old('jenis_kelamin', $pegawai->jenis_kelamin ?? '') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
                                 <option value="Perempuan" {{ old('jenis_kelamin', $pegawai->jenis_kelamin ?? '') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
                             </select>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-row-custom">
-                            <label class="form-label-custom">Agama</label>
-                            <input type="text" name="agama" class="form-control-custom"
-                                   value="{{ old('agama', $pegawai->agama ?? '') }}">
                         </div>
                     </div>
 
@@ -121,16 +89,6 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="form-row-custom">
-                            <label class="form-label-custom">Status Pernikahan</label>
-                            <select name="status_pernikahan" class="form-control-custom">
-                                <option value="">-- Pilih --</option>
-                                <option value="Menikah" {{ old('status_pernikahan', $pegawai->status_pernikahan ?? '') == 'Menikah' ? 'selected' : '' }}>Menikah</option>
-                                <option value="Belum Menikah" {{ old('status_pernikahan', $pegawai->status_pernikahan ?? '') == 'Belum Menikah' ? 'selected' : '' }}>Belum Menikah</option>
-                            </select>
-                        </div>
-                    </div>
 
                     <div class="col-md-6">
                         <div class="form-row-custom">
@@ -168,30 +126,6 @@
                             <label class="form-label-custom">Bagian <span class="text-danger">*</span></label>
                             <input type="text" name="bagian" class="form-control-custom"
                                    value="{{ old('bagian', $pegawai->bagian ?? '') }}" required>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-row-custom">
-                            <label class="form-label-custom">Pendidikan Terakhir</label>
-                            <input type="text" name="pendidikan_terakhir" class="form-control-custom"
-                                   value="{{ old('pendidikan_terakhir', $pegawai->pendidikan_terakhir ?? '') }}">
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-row-custom">
-                            <label class="form-label-custom">Institusi</label>
-                            <input type="text" name="institusi" class="form-control-custom"
-                                   value="{{ old('institusi', $pegawai->institusi ?? '') }}">
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="form-row-custom">
-                            <label class="form-label-custom">Tahun Lulus</label>
-                            <input type="text" name="thn_lulus" class="form-control-custom"
-                                   value="{{ old('thn_lulus', $pegawai->thn_lulus ?? '') }}">
                         </div>
                     </div>
 
