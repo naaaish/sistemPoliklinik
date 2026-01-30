@@ -14,9 +14,11 @@
   <table>
     <thead>
       <tr>
-        <th>ID Diagnosa</th>
+        <th>No</th>
         <th>Diagnosa</th>
-        <th>Created At</th>
+        <th>Keterangan</th>
+        <th>Klasifikasi</th>
+        <th>Bagian Tubuh</th>
       </tr>
     </thead>
     <tbody>
@@ -24,7 +26,9 @@
         <tr>
           <td>{{ $row->id_diagnosa }}</td>
           <td>{{ $row->diagnosa }}</td>
-          <td>{{ $row->created_at }}</td>
+          <td>{{ $row->keterangan }}</td>
+          <td>{{ $row->klasifikasi_nama }}</td>
+          <td>{{ $row->bagian_tubuh }}</td>
         </tr>
       @empty
         <tr><td colspan="3">Tidak ada data pada rentang ini.</td></tr>
