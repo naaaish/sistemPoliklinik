@@ -214,20 +214,75 @@
         <div class="table-wrapper">
             <table class="laporan-table">
 
-                <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($data as $row)
-                    <tr style="{{ $row->nama === 'TOTAL' ? 'font-weight:bold;background:#f0fff0' : '' }}">
-                        <td>{{ $row->nama }}</td>
-                        <td>Rp {{ number_format($row->total,0,',','.') }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Tanggal</th>
+                    <th>Nama Pegawai</th>
+                    <th>NIP</th>
+                    <th>Umur</th>
+                    <th>Bagian</th>
+                    <th>Nama Pasien</th>
+                    <th>Hub Kel</th>
+                    <th>TD (S/D)</th>
+                    <th>GDP</th>
+                    <th>GD 2Jam</th>
+                    <th>GDS</th>
+                    <th>AU</th>
+                    <th>CHOL</th>
+                    <th>TG</th>
+                    <th>Suhu</th>
+                    <th>BB</th>
+                    <th>TB</th>
+                    <th>Diagnosa</th>
+                    <th>Nama Obat</th>
+                    <th>Jumlah</th>
+                    <th>Harga Satuan</th>
+                    <th>Subtotal</th>
+                    <th>Total Obat (Pasien)</th>
+                    <th>Pemeriksa</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $no = 1; @endphp
+                @foreach($data as $r)
+                <tr>
+                    <td>{{ $r->is_first ? $no++ : '' }}</td>
+                    <td>{{ $r->is_first ? \Carbon\Carbon::parse($r->tanggal)->format('d/m/Y') : '' }}</td>
+                    <td>{{ $r->is_first ? $r->nama_pegawai : '' }}</td>
+                    <td>{{ $r->is_first ? $r->nip : '' }}</td>
+                    <td>{{ $r->is_first ? $r->umur : '' }}</td>
+                    <td>{{ $r->is_first ? $r->bagian : '' }}</td>
+                    <td>{{ $r->is_first ? $r->nama_pasien : '' }}</td>
+                    <td>{{ $r->is_first ? $r->hub_kel : '' }}</td>
+                    <td>{{ $r->is_first ? ($r->sistol . '/' . ($r->diastol ?? '-')) : '' }}</td>
+                    <td>{{ $r->is_first ? $r->gd_puasa : '' }}</td>
+                    <td>{{ $r->is_first ? $r->gd_duajam : '' }}</td>
+                    <td>{{ $r->is_first ? $r->gd_sewaktu : '' }}</td>
+                    <td>{{ $r->is_first ? $r->asam_urat : '' }}</td>
+                    <td>{{ $r->is_first ? $r->chol : '' }}</td>
+                    <td>{{ $r->is_first ? $r->tg : '' }}</td>
+                    <td>{{ $r->is_first ? $r->suhu : '' }}</td>
+                    <td>{{ $r->is_first ? $r->berat : '' }}</td>
+                    <td>{{ $r->is_first ? $r->tinggi : '' }}</td>
+                    
+                    <td>{{ $r->diagnosa }}</td>
+                    <td>{{ $r->nama_obat }}</td>
+                    <td>{{ $r->jumlah }} {{ $r->satuan }}</td>
+                    <td>Rp {{ number_format($r->harga_satuan, 0, ',', '.') }}</td>
+                    <td>Rp {{ number_format($r->subtotal_obat, 0, ',', '.') }}</td>
+                    
+                    {{-- Total per Pasien --}}
+                    <td style="font-weight: bold; background: #f0fff0;">
+                        @if($r->total_obat_pasien !== null)
+                            Rp {{ number_format($r->total_obat_pasien, 0, ',', '.') }}
+                        @endif
+                    </td>
+                    
+                    <td>{{ $r->is_first ? $r->nama_pemeriksa : '' }}</td>
+                </tr>
+                @endforeach
+            </tbody>
             </table>
         </div>
 

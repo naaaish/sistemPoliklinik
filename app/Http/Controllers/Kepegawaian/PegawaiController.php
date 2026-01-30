@@ -52,30 +52,14 @@ class PegawaiController extends Controller
             'nama_pegawai' => 'required',
             'nik' => 'nullable',
             'jenis_kelamin' => 'nullable',
-            'agama' => 'nullable',
             'tgl_lahir' => 'nullable|date',
-            'tgl_masuk' => 'nullable|date',
-            'status_pernikahan' => 'nullable',
             'no_telp' => 'nullable',
             'email' => 'nullable|email',
             'alamat' => 'nullable',
             'jabatan' => 'required',
             'bagian' => 'required',
-            'pendidikan_terakhir' => 'nullable',
-            'institusi' => 'nullable',
-            'thn_lulus' => 'nullable',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'is_active' => 'nullable',
         ]);
-
-        // Handle foto upload
-        if ($request->hasFile('foto')) {
-            $file = $request->file('foto');
-            $namaFile = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('profile-pegawai'), $namaFile); // Pindahkan langsung ke public
-            $data['foto'] = $namaFile;
-        }
-
 
         // Set default is_active jika tidak ada
         $data['is_active'] = $request->input('is_active', 1);
@@ -97,11 +81,7 @@ class PegawaiController extends Controller
             ->orderBy('urutan_anak', 'asc')  
             ->get();
         
-        $masaKerja = \Carbon\Carbon::parse($pegawai->tgl_masuk)->diff(\Carbon\Carbon::now());
-        $years = $masaKerja->y;
-        $months = $masaKerja->m;
-
-        return view('kepegawaian.pegawai.detail', compact('pegawai', 'years', 'months', 'keluarga'));
+        return view('kepegawaian.pegawai.detail', compact('pegawai', 'keluarga'));
     }
     
     public function edit($nip)
@@ -141,34 +121,15 @@ class PegawaiController extends Controller
             'nama_pegawai' => 'required',
             'nik' => 'nullable',
             'jenis_kelamin' => 'nullable',
-            'agama' => 'nullable',
             'tgl_lahir' => 'nullable|date',
-            'tgl_masuk' => 'nullable|date',
-            'status' => 'nullable',
-            'status_pernikahan' => 'nullable',
             'no_telp' => 'nullable',
             'email' => 'nullable|email',
             'alamat' => 'nullable',
             'jabatan' => 'required',
             'bagian' => 'required',
-            'pendidikan_terakhir' => 'nullable',
-            'institusi' => 'nullable',
-            'thn_lulus' => 'nullable',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'is_active' => 'nullable',
         ]);
 
-        // Handle foto upload
-        if ($request->hasFile('foto')) {
-            $file = $request->file('foto');
-            $namaFile = time() . '_' . $file->getClientOriginalName();
-            // Hapus foto lama jika ada
-            if ($pegawai->foto && file_exists(public_path('profile-pegawai/' . $pegawai->foto))) {
-                unlink(public_path('profile-pegawai/' . $pegawai->foto));
-            }
-            $file->move(public_path('profile-pegawai'), $namaFile); // Simpan foto baru
-            $data['foto'] = $namaFile;
-        }
 
         // Update is_active
         if ($request->has('is_active')) {
@@ -179,21 +140,6 @@ class PegawaiController extends Controller
 
         return redirect()->route('pegawai.show', $pegawai->nip) 
             ->with('success', 'Data pegawai berhasil diperbarui!');
-    }
-
-    public function destroy($nip)
-    {
-        $pegawai = Pegawai::where('nip', $nip)->firstOrFail();
-
-        // Hapus foto jika ada
-        if ($pegawai->foto) {
-            Storage::delete('public/foto_pegawai/' . $pegawai->foto);
-        }
-
-        $pegawai->delete();
-
-        return redirect()->route('pegawai.index')
-            ->with('success', 'Data pegawai berhasil dihapus!');
     }
 
     public function importMulti(Request $request)
@@ -223,19 +169,13 @@ class PegawaiController extends Controller
                             [
                                 'nama_pegawai'      => $row[1] ?? '',
                                 'nik'               => $row[2] ?? '-',
-                                'agama'             => $row[3] ?? '-',
                                 'jenis_kelamin'     => $row[4] ?? '-',
                                 'tgl_lahir'         => $row[5] ?? null,
-                                'tgl_masuk'         => $row[6] ?? null,
-                                'status_pernikahan' => $row[7] ?? '-',
                                 'no_telp'           => $row[8] ?? '-',
                                 'email'             => $row[9] ?? '-',
                                 'alamat'            => $row[10] ?? '-',
                                 'jabatan'           => $row[11] ?? '-',
                                 'bagian'            => $row[12] ?? '-',
-                                'pendidikan_terakhir' => $row[13] ?? '-',
-                                'institusi'         => $row[14] ?? '-',
-                                'thn_lulus'         => $row[15] ?? null,
                                 'is_active'         => 1,
                                 'updated_at'        => now(),
                             ]

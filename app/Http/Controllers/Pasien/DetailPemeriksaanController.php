@@ -78,11 +78,10 @@ class DetailPemeriksaanController extends Controller
         // =================================================
         // DIAGNOSA K3
         // =================================================
-        $diagnosa_k3 = DB::table('detail_pemeriksaan_diagnosa_k3 as dpk3')
-            ->join('diagnosa_k3 as dk3', 'dk3.id_nb', '=', 'dpk3.id_nb')
-            ->where('dpk3.id_pemeriksaan', $id_pemeriksaan)
-            ->select('dk3.nama_penyakit')
-            ->get();
+        $diagnosa_k3 = DB::table('detail_pemeriksaan_penyakit as dpp')
+            ->where('dpp.id_pemeriksaan', $id_pemeriksaan)
+            ->whereNotNull('dpp.id_nb')
+            ->pluck('dpp.id_nb');
 
         // =================================================
         // SARAN (MANY TO MANY)
