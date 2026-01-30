@@ -134,17 +134,17 @@
 
           <div class="modal-group">
             <label>Keterangan</label>
-            <input type="text" name="keterangan" rows="3"></input>
+            <input type="text" name="keterangan" required>
           </div>
 
           <div class="modal-group">
             <label>Klasifikasi Nama</label>
-            <input type="text" name="klasifikasi_nama">
+            <input type="text" name="klasifikasi_nama" required>
           </div>
 
           <div class="modal-group">
             <label>Bagian Tubuh</label>
-            <input type="text" name="bagian_tubuh">
+            <input type="text" name="bagian_tubuh" required>
           </div>
 
           <button type="submit" class="modal-btn">Simpan</button>
@@ -168,17 +168,17 @@
 
           <div class="modal-group">
             <label>Keterangan</label>
-            <input type="text" name="keterangan" id="editKeterangan" rows="3"></input>
+            <input type="text" name="keterangan" id="editKeterangan" required>
           </div>
 
           <div class="modal-group">
             <label>Klasifikasi Nama</label>
-            <input type="text" name="klasifikasi_nama" id="editKlasifikasi">
+            <input type="text" name="klasifikasi_nama" id="editKlasifikasi" required>
           </div>
 
           <div class="modal-group">
             <label>Bagian Tubuh</label>
-            <input type="text" name="bagian_tubuh" id="editBagian">
+            <input type="text" name="bagian_tubuh" id="editBagian" required>
           </div>
 
           <button type="submit" class="modal-btn">Simpan</button>

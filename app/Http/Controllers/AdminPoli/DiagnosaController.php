@@ -122,8 +122,11 @@ class DiagnosaController extends Controller
         DB::table('diagnosa')
             ->where('id_diagnosa', $id)
             ->update([
-                'diagnosa'   => $text,
-                'updated_at' => now(),
+                'diagnosa'         => $text,
+                'keterangan'       => $request->keterangan,
+                'klasifikasi_nama' => $request->klasifikasi_nama,
+                'bagian_tubuh'     => $request->bagian_tubuh,
+                'updated_at'       => now(),
             ]);
 
         return redirect()->route('adminpoli.diagnosa.index')
@@ -186,7 +189,7 @@ class DiagnosaController extends Controller
             'klasifikasi_nama' => 'klasifikasi_nama',
             'bagian tubuh'     => 'bagian_tubuh',
             'bagian_tubuh'     => 'bagian_tubuh',
-            'no'               => null, // diabaikan
+            'no'               => null,
         ];
 
         $colIndex = [];
@@ -263,8 +266,7 @@ class DiagnosaController extends Controller
                 'diagnosa',
                 'keterangan',
                 'klasifikasi_nama',
-                'bagian_tubuh',
-                'created_at'
+                'bagian_tubuh'
             )
             ->where('is_active', 1)
             ->whereBetween('created_at', [$from, $to])
@@ -288,7 +290,7 @@ class DiagnosaController extends Controller
             return response()->streamDownload(function () use ($data) {
                 $out = fopen('php://output', 'w');
                 fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF));
-                fputcsv($out, ['ID Diagnosa', 'Diagnosa', 'Keterangan', 'Klasifikasi Nama', 'Bagian Tubuh', 'Created At']);
+                fputcsv($out, ['ID Diagnosa', 'Diagnosa', 'Keterangan', 'Klasifikasi Nama', 'Bagian Tubuh']);
 
                 foreach ($data as $row) {
                     fputcsv($out, [
@@ -296,8 +298,7 @@ class DiagnosaController extends Controller
                         $row->diagnosa,
                         $row->keterangan,
                         $row->klasifikasi_nama,
-                        $row->bagian_tubuh,
-                        $row->created_at
+                        $row->bagian_tubuh
                     ]);
                 }
 
@@ -314,18 +315,10 @@ class DiagnosaController extends Controller
             );
         }
 
-        // pdf
-        if (!class_exists(Pdf::class)) {
-            return redirect()->route('adminpoli.diagnosa.index')
-                ->with('error', 'Export PDF belum aktif (Dompdf belum terpasang).');
-        }
-
         $pdf = Pdf::loadView('adminpoli.diagnosa.export_pdf', [
-            'data' => $data,
-            'from' => $request->from,
-            'to'   => $request->to,
-        ])->setPaper('A4', 'portrait');
+            'data' => $data
+        ])->setPaper('A4','portrait');
 
-        return $pdf->download($fileBase . '.pdf');
+        return $pdf->download($fileBase.'.pdf');
     }
 }

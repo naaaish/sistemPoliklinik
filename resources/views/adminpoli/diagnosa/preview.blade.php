@@ -40,7 +40,7 @@
             <div><div class="diag-cell">{{ $row->id_diagnosa }}</div></div>
             <div><div class="diag-cell">{{ $row->diagnosa }}</div></div>
             <div><div class="diag-cell">{{ $row->keterangan }}</div></div>
-            <div><div class="diag-cell">{{ $row->klasifikasi_nama }}></div></div>
+            <div><div class="diag-cell">{{ $row->klasifikasi_nama }}</div></div>
             <div><div class="diag-cell">{{ $row->bagian_tubuh }}</div></div>
           </div>
         @empty
