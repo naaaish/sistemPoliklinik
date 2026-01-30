@@ -83,11 +83,14 @@
     padding: 8px;
     border-bottom: 1px solid #dee2e6;
 }
+
+/* ===== BADGE UNTUK TIPE PASIEN ===== */
 .badge {
     padding: 4px 12px;
     border-radius: 12px;
     font-size: 0.85em;
     font-weight: 500;
+    display: inline-block;
 }
 .badge-blue {
     background: #e3f2fd;
@@ -97,6 +100,11 @@
     background: #e8f5e9;
     color: #388e3c;
 }
+.badge-orange {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
 .expandable-row {
     cursor: pointer;
 }
@@ -236,8 +244,14 @@
     border-bottom: 1px solid #eee;
 }
 
+/* ===== TOTAL ROW HIGHLIGHT ===== */
 .total-row {
-    background: #f0fff0;
+    background: #f0fff0 !important;
+    font-weight: 600;
+}
+
+.total-row td {
+    border-top: 2px solid #4caf50 !important;
 }
 
 .total-box{

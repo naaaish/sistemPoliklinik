@@ -73,13 +73,9 @@
         </div>
         <div class="card-body grid-2">
             <div><label>Nama Lengkap</label><p>{{ $pegawai->nama_pegawai }}</p></div>
-            <div><label>NIK</label><p>{{ $pegawai->nik ?? '-' }}</p></div>
             <div><label>Jenis Kelamin</label><p>{{ $pegawai->jenis_kelamin ?? '-' }}</p></div>
-            <div><label>Tempat Lahir</label><p>{{ $pegawai->tempat_lahir ?? '-' }}</p></div>
             <div><label>Tanggal Lahir</label><p>{{ $pegawai->tgl_lahir ? \Carbon\Carbon::parse($pegawai->tgl_lahir)->translatedFormat('d F Y') : '-' }}</p></div>
             <div><label>Umur</label><p>{{ $pegawai->tgl_lahir ? \Carbon\Carbon::parse($pegawai->tgl_lahir)->age.' Tahun' : '-' }}</p></div>
-            <div><label>Agama</label><p>{{ $pegawai->agama ?? '-' }}</p></div>
-            <div><label>Status Perkawinan</label><p>{{ $pegawai->status_pernikahan ?? '-' }}</p></div>
         </div>
     </div>
 
@@ -95,19 +91,6 @@
             <div><label>NIP</label><p>{{ $pegawai->nip }}</p></div>
             <div><label>Jabatan</label><p>{{ $pegawai->jabatan ?? '-' }}</p></div>
             <div><label>Bagian</label><p>{{ $pegawai->bagian }}</p></div>
-            <div>
-                <label>Status</label>
-                <p>
-                    <span class="badge {{ $pegawai->is_active ? 'badge-active' : 'badge-inactive' }}">
-                        {{ $pegawai->is_active ? 'Aktif' : 'Non Aktif' }}
-                    </span>
-                </p>
-            </div>
-            <div><label>Tanggal Masuk</label><p>{{ $pegawai->tgl_masuk ? \Carbon\Carbon::parse($pegawai->tgl_masuk)->translatedFormat('d F Y') : '-' }}</p></div>
-            <div>
-                <label>Masa Kerja</label>
-                <p>{{ (int) $years }} Tahun {{ (int) $months }} Bulan</p>
-            </div>
         </div>
     </div>
 
@@ -126,21 +109,6 @@
         </div>
     </div>
 
-    {{-- RIWAYAT PENDIDIKAN --}}
-    <div class="data-card">
-        <div class="card-header alt">
-            <div class="card-header-inner">
-                <svg viewBox="0 0 24 24"><path d="M22 10L12 4 2 10l10 6z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-                <span>Riwayat Pendidikan</span>
-            </div>
-        </div>
-        <div class="card-body grid-1">
-            <div><label>Pendidikan Terakhir</label><p>{{ $pegawai->pendidikan_terakhir ?? '-' }}</p></div>
-            <div><label>Institusi</label><p>{{ $pegawai->institusi ?? '-' }}</p></div>
-            <div><label>Tahun Lulus</label><p>{{ $pegawai->thn_lulus ?? '-' }}</p></div>
-        </div>
-    </div>
-    
     {{-- DAFTAR KELUARGA --}}
     <div class="data-card">
         <div class="card-header" style="background: #316BA1; display: flex; justify-content: space-between; align-items: center;">
