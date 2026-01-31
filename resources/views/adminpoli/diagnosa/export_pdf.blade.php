@@ -15,7 +15,7 @@
   <table>
     <thead>
       <tr>
-        <th>ID Diagnosa</th>
+        <th>No</th>
         <th>Diagnosa</th>
         <th>Keterangan</th>
         <th>Klasifikasi Nama</th>

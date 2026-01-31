@@ -270,7 +270,7 @@ class DiagnosaController extends Controller
             )
             ->where('is_active', 1)
             ->whereBetween('created_at', [$from, $to])
-            ->orderBy('diagnosa')
+            ->orderBy('id_diagnosa', 'asc')
             ->get();
 
         // preview
@@ -321,11 +321,17 @@ class DiagnosaController extends Controller
                     ->with('error', 'Export PDF belum aktif (Dompdf belum terpasang).');
             }
 
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('adminpoli.diagnosa.export_pdf', [
-                'data' => $data,
-                'from' => $request->from,
-                'to'   => $request->to,
-            ])->setPaper('A4', 'portrait');
+            ini_set('memory_limit', '512M');
+            set_time_limit(180);
+
+            $pdf = Pdf::loadView('adminpoli.diagnosa.export_pdf', compact('data'), [
+                    'data' => $data,
+                    'from' => $request->from,
+                    'to'   => $request->to,
+                ])
+                ->setPaper('A4', 'potrait')
+                ->setOption('isHtml5ParserEnabled', true)
+                ->setOption('isRemoteEnabled', false);
 
             return $pdf->download($fileBase . '.pdf');
         }
