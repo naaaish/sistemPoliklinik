@@ -22,7 +22,7 @@ class PendaftaranSeeder extends Seeder
 
         // KASUS 1: Pegawai Sakit Kepala (Cek Kesehatan)
         Pendaftaran::updateOrCreate(
-            ['id_pendaftaran' => 'DFT-001'],
+            ['id_pendaftaran' => 'REG-001'],
             [
                 'tanggal'           => now()->toDateString(),
                 'jenis_pemeriksaan' => 'cek_kesehatan',
@@ -43,7 +43,7 @@ class PendaftaranSeeder extends Seeder
 
         if ($anak1) {
             Pendaftaran::updateOrCreate(
-                ['id_pendaftaran' => 'DFT-002'],
+                ['id_pendaftaran' => 'REG-002'],
                 [
                     'tanggal'           => now()->toDateString(),
                     'jenis_pemeriksaan' => 'periksa',

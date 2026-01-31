@@ -11,11 +11,20 @@ class PendaftaranController extends Controller
 {
     public function create()
     {
-        // dropdown dokter & pemeriksa
-        $dokter = DB::table('dokter')->orderBy('nama')->get();
-        $pemeriksa = DB::table('pemeriksa')->orderBy('nama_pemeriksa')->get();
+        $dokter = DB::table('dokter')
+            ->where('status', 'aktif')
+            ->orderBy('nama')
+            ->get();
 
-        return view('adminpoli.pendaftaran.create', compact('dokter', 'pemeriksa'));
+        $pemeriksa = DB::table('pemeriksa')
+            ->where('status', 'aktif')
+            ->orderBy('id_pemeriksa')
+            ->get();
+
+        $defaultPemeriksa = $pemeriksa->first();
+        $defaultPemeriksaId = $defaultPemeriksa?->id_pemeriksa;
+
+        return view('adminpoli.pendaftaran.create', compact('dokter', 'pemeriksa', 'defaultPemeriksaId'));
     }
 
     public function searchPegawai(Request $request)
@@ -282,8 +291,9 @@ class PendaftaranController extends Controller
 
         // ===== insert pendaftaran =====
         DB::transaction(function () use ($validated, $pegawai, $idKeluarga, $idDokter, $idPemeriksa) {
-
+            $idPendaftaran = $this->generateIdPendaftaran();
             DB::table('pendaftaran')->insert([
+                'id_pendaftaran' => $idPendaftaran,
                 'tanggal' => $validated['tanggal'],
                 'jenis_pemeriksaan' => $validated['jenis_pemeriksaan'],
                 'keluhan' => $validated['keluhan'] ?? null,
@@ -304,81 +314,18 @@ class PendaftaranController extends Controller
             ->with('success', 'Pendaftaran berhasil disimpan.');
     }
 
-    public function autoloadPasien(Request $request)
+    private function generateIdPendaftaran() {
+    $ids = DB::table('pendaftaran')
+        ->pluck('id_pendaftaran'); 
+    $max = 0; 
+    foreach ($ids as $id) 
     {
-        $nip  = trim((string) $request->query('nip', ''));
-        $tipe = trim((string) $request->query('tipe', ''));
-
-        if ($nip === '' || $tipe === '') {
-            return response()->json(['ok' => false, 'message' => 'nip/tipe wajib'], 422);
-        }
-
-        // 1) POLIKLINIK
-        if ($tipe === 'poliklinik') {
-            return response()->json([
-                'ok' => true,
-                'mode' => 'poliklinik',
-                'pegawai' => [
-                    'nip' => '001',
-                    'nama_pegawai' => 'Poliklinik',
-                    'bagian' => 'Poliklinik',
-                    'tgl_lahir' => null,
-                ],
-                'pasien' => [
-                    'nama_pasien' => 'Poliklinik',
-                    'hub_kel' => 'YBS',
-                    'id_keluarga' => null,
-                    'tgl_lahir' => null,
-                ],
-                'keluarga_list' => [],
-            ]);
-        }
-
-        // 2) selain poliklinik: ambil pegawai berdasar nip
-        // (kalau nantinya Unit lain/OJT bukan dari tabel pegawai, bagian ini tinggal diganti switch ke tabel lain)
-        $pegawai = DB::table('pegawai')
-            ->where('nip', $nip)
-            ->select('nip', 'nama_pegawai', 'bagian', 'tgl_lahir')
-            ->first();
-
-        if (!$pegawai) {
-            return response()->json(['ok' => false, 'message' => 'NIP tidak ditemukan'], 404);
-        }
-
-        // default pasien = YBS
-        $pasien = [
-            'nama_pasien' => $pegawai->nama_pegawai,
-            'hub_kel' => 'YBS',
-            'id_keluarga' => null,
-            'tgl_lahir' => $pegawai->tgl_lahir,
-        ];
-
-        $keluargaList = [];
-
-        // 3) KELUARGA / PENSIUNAN (kalau pilih keluarga, frontend butuh list keluarga)
-        if (in_array($tipe, ['keluarga','pensiunan'], true)) {
-            $keluargaList = DB::table('keluarga')
-                ->where('nip', $nip)
-                ->orderByRaw("CASE WHEN hubungan_keluarga = 'pasangan' THEN 0 ELSE 1 END")
-                ->orderBy('urutan_anak')
-                ->get()
-                ->map(function($r){
-                    return [
-                        'id_keluarga' => $r->id_keluarga,
-                        'nama' => $r->nama_keluarga,
-                        'hubungan_keluarga' => $r->hubungan_keluarga, // pasangan/anak
-                        'tgl_lahir' => $r->tgl_lahir,
-                    ];
-                })
-                ->values();
-        }
-
-        return response()->json([
-            'ok' => true,
-            'mode' => $tipe,
-            'pegawai' => $pegawai,
-            'pasien' => $pasien,
-            'keluarga_list' => $keluargaList,
-        ]);
+        if (preg_match('/(\d+)$/', $id, $m)){ 
+            $num = (int) $m[1]; 
+            if ($num > $max) $max = $num; 
+        } 
+    } 
+    $next = $max + 1;
+    return 'REG-00' . $next;
     }
 }

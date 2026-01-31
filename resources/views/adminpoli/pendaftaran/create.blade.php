@@ -77,7 +77,6 @@
                 <div class="ap-input">
                     <select name="nama_pasien" id="nama_pasien" class="ap-select" required>
                         <option value="-" selected>-</option>
-                        <option value="">-- pilih nama pasien --</option>
                     </select>
                     <small class="ap-help" id="namaPasienHelp"></small>
                  </div>
@@ -253,6 +252,7 @@ async function applyPegawaiSelected(p){
 
   namaPegEl.value = p.nama_pegawai || '';
   bagianEl.value = p.bagian ?? '';
+  tglEl.value = (p.tgl_lahir || '').substring(0, 10);
 
   // AUTO pensiunan dari bagian (kode kamu tetap)
   const bagianVal = (bagianEl.value || '').trim().toLowerCase();
@@ -477,7 +477,7 @@ async function onTipeChange(){
         data-hub="YBS"
         data-tgl="${(pegawaiData.tgl_lahir || '').substring(0,10)}"
         data-idkel="">
-        ${escapeHtml(pegawaiData.nama_pegawai)} (Pegawai)
+        ${escapeHtml(pegawaiData.nama_pegawai)} (YBS)
       </option>`;
   }
 
@@ -534,23 +534,29 @@ namaPasSelect.addEventListener('change', applySelectedPasien);
 function applyAutoPetugasByJenis() {
   const jenisEl = document.querySelector('select[name="jenis_pemeriksaan"]');
   const petugasEl = document.getElementById('petugas');
-  
+  const defaultPemeriksaId = "{{ $defaultPemeriksaId ?? '' }}";
+
   if(!jenisEl || !petugasEl) return;
 
   const jenis = jenisEl.value;
 
   if (jenis === 'cek_kesehatan') {
-    // cari option pemeriksa:PMR001 (Bu Meta)
-    const opt = [...petugasEl.options].find(o => (o.value || '') === 'pemeriksa:PMR001');
-    if (opt) petugasEl.value = opt.value;
-
-    // kunci UI (opsional) biar user gak ganti
-    petugasEl.classList.add('is-locked');
-  } else {
-    petugasEl.classList.remove('is-locked');
+    if (defaultPemeriksaId) {
+      const target = 'pemeriksa:' + defaultPemeriksaId;
+      const opt = [...petugasEl.options].find(o => (o.value || '') === target);
+      if (opt) petugasEl.value = opt.value;
+    } else {
+      const opt = [...petugasEl.options].find(o => (o.value || '').startsWith('pemeriksa:'));
+      if (opt) petugasEl.value = opt.value;
+    }
   }
 }
-jenisEl.addEventListener('change', applyAutoPetugasByJenis);
+
+
+const jenisEl = document.querySelector('select[name="jenis_pemeriksaan"]');
+if (jenisEl) {
+  jenisEl.addEventListener('change', applyAutoPetugasByJenis);
+}
 applyAutoPetugasByJenis();
 
 function setPoliklinikMode(on){
@@ -565,8 +571,11 @@ function setPoliklinikMode(on){
     if(nipEl) nipEl.value = '001';
     if(namaPegawaiEl) namaPegawaiEl.value = '-';
     if(bagianEl) bagianEl.value = '-';
-    if(namaPasienEl) namaPasienEl.value = '-';
-    if(hubKelEl) hubKelEl.value = '-';
+    if(namaPasienEl){
+      namaPasienEl.innerHTML = `<option value="-" data-hub="YBS" data-tgl="" data-idkel="">-</option>`;
+      namaPasienEl.selectedIndex = 0;
+    }
+    if(hubKelEl) hubKelEl.value = 'YBS';
     if(idKeluargaEl) idKeluargaEl.value = '';
 
     // kalau ada dropdown keluarga / section keluarga, hide
