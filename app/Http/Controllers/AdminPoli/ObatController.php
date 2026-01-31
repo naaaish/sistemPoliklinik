@@ -33,7 +33,7 @@ class ObatController extends Controller
         if (!in_array((string)$perPage, $allowed)) $perPage = 10;
 
         $base = $query
-            ->select('id_obat', 'nama_obat', 'harga', 'exp_date', 'is_active')
+            ->select('id_obat', 'nama_obat', 'harga', 'is_active')
             ->orderBy('nama_obat');
 
         $obat = ($perPage === 'all')
@@ -60,10 +60,8 @@ class ObatController extends Controller
         $request->validate([
             'nama_obat' => 'required|string|max:255',
             'harga'     => 'required|numeric|min:1',
-            'exp_date'  => 'required|date|after:today',
         ],
         [
-            'exp_date.after' => 'Tanggal kadaluarsa harus lebih dari hari ini.',
             'harga.min'      => 'Harga tidak boleh kurang dari 1.',
         ]);
 
@@ -98,7 +96,6 @@ class ObatController extends Controller
             'id_obat'   => $newId,
             'nama_obat' => $request->nama_obat,
             'harga'     => $request->harga,
-            'exp_date'  => $request->exp_date,
             'created_at'=> now(),
             'updated_at'=> now(),
         ]);
@@ -124,10 +121,8 @@ class ObatController extends Controller
         $request->validate([
             'nama_obat' => 'required|string|max:255',
             'harga'     => 'required|numeric|min:1',
-            'exp_date'  => 'required|date|after:today',
         ],
         [
-            'exp_date.after' => 'Tanggal kadaluarsa harus lebih dari hari ini.',
             'harga.min'      => 'Harga tidak boleh kurang dari 1.',
         ]);
 
@@ -150,7 +145,6 @@ class ObatController extends Controller
             ->update([
                 'nama_obat'  => $request->nama_obat,
                 'harga'      => $request->harga,
-                'exp_date'   => $request->exp_date,
                 'updated_at' => now(),
             ]);
 
@@ -190,14 +184,13 @@ class ObatController extends Controller
 
         // mapping nama kolom yang kita butuhin
         // contoh header yang diterima:
-        // nama_obat | harga | exp_date
+        // nama_obat | harga
         $idxNama = array_search('nama_obat', $header);
         $idxHarga = array_search('harga', $header);
-        $idxExp = array_search('exp_date', $header);
 
-        if ($idxNama === false || $idxHarga === false || $idxExp === false) {
+        if ($idxNama === false || $idxHarga === false) {
             return redirect()->route('adminpoli.obat.index')
-                ->with('error', 'Header harus mengandung: nama_obat, harga, exp_date');
+                ->with('error', 'Header harus mengandung: nama_obat, harga');
         }
 
         $inserted = 0;
@@ -206,9 +199,8 @@ class ObatController extends Controller
         foreach (array_slice($rows, 1) as $r) {
             $nama = trim((string)($r[$idxNama] ?? ''));
             $harga = $r[$idxHarga] ?? null;
-            $exp = $r[$idxExp] ?? null;
 
-            if ($nama === '' || $harga === null || $exp === null) {
+            if ($nama === '' || $harga === null) {
                 $skipped++;
                 continue;
             }
@@ -216,13 +208,6 @@ class ObatController extends Controller
             // normalisasi harga (kalau ada "Rp", titik, koma)
             $hargaNum = (int) preg_replace('/[^0-9]/', '', (string)$harga);
             if ($hargaNum <= 0) {
-                $skipped++;
-                continue;
-            }
-
-            // exp_date harus lebih dari hari ini
-            $expDate = date('Y-m-d', strtotime((string)$exp));
-            if (!$expDate || $expDate <= date('Y-m-d')) {
                 $skipped++;
                 continue;
             }
@@ -251,7 +236,6 @@ class ObatController extends Controller
                 'id_obat' => $newId,
                 'nama_obat' => $nama,
                 'harga' => $hargaNum,
-                'exp_date' => $expDate,
                 'is_active' => '1',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -282,10 +266,10 @@ class ObatController extends Controller
 
         // Filter rentang berdasarkan created_at (data masuk pada rentang tsb)
         $data = DB::table('obat')
-            ->select('id_obat', 'nama_obat', 'harga', 'exp_date', 'created_at', 'is_active')
+            ->select('id_obat', 'nama_obat', 'harga')
             ->where('is_active', 1)
             ->whereBetween('created_at', [$from, $to])
-            ->orderBy('nama_obat')
+            ->orderBy('id_obat', 'asc')
             ->get();
 
         // ====== PREVIEW ======
@@ -309,10 +293,10 @@ class ObatController extends Controller
                 $out = fopen('php://output', 'w');
                 fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM UTF-8
 
-                fputcsv($out, ['ID Obat', 'Nama Obat', 'Harga', 'Exp Date']);
+                fputcsv($out, ['ID Obat', 'Nama Obat', 'Harga']);
 
                 foreach ($data as $row) {
-                    fputcsv($out, [$row->id_obat, $row->nama_obat, $row->harga, $row->exp_date]);
+                    fputcsv($out, [$row->id_obat, $row->nama_obat, $row->harga]);
                 }
 
                 fclose($out);

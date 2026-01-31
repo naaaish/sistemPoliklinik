@@ -13,120 +13,162 @@ class DokterPemeriksaController extends Controller
 {
     public function index(Request $request)
     {
-        $q = $request->query('q');
-        $jenisList = Pemeriksa::orderBy('nama_pemeriksa')->get();
+        $q = $request->q;
 
-        $dokter = Dokter::with('jadwal')
-            ->when($q, fn($qr) => $qr->where('nama', 'like', "%{$q}%"))
-            ->get()
-            ->map(function ($d) {
-                return (object)[
-                    'tipe'   => 'dokter',
-                    'id'     => $d->id_dokter,
-                    'nama'   => $d->nama,
-                    'jenis'  => $d->jenis_dokter,
-                    'status' => $d->status ?? 'Aktif',
-                ];
-            });
+        // ===== DOKTER =====
+        $dokter = Dokter::query()
+            ->when($q, fn($qr) => $qr->where('nama', 'like', "%$q%")->orWhere('jenis_dokter', 'like', "%$q%"))
+            ->get();
 
         $pemeriksa = Pemeriksa::query()
-            ->when($q, fn($qr) => $qr->where('nama_pemeriksa', 'like', "%{$q}%"))
+            ->when($q, fn($qr) => $qr->where('nama_pemeriksa', 'like', "%$q%"))
+            ->get();
+
+        // ambil jadwal semua dokter yang tampil
+        $dokterIds = $dokter->pluck('id_dokter')->all();
+
+        $jadwalMap = JadwalDokter::whereIn('id_dokter', $dokterIds)
+            ->orderByRaw("FIELD(hari,'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu')")
+            ->orderBy('jam_mulai')
             ->get()
-            ->map(function ($p) {
-                return (object)[
-                    'tipe'   => 'pemeriksa',
-                    'id'     => $p->id_pemeriksa,
-                    'nama'   => $p->nama_pemeriksa,
-                    'jenis'  => 'Pemeriksa',
-                    'status' => $p->status ?? 'Aktif',
-                ];
-            });
+            ->groupBy('id_dokter');
 
-        // gabung jadi satu list
-        $rows = $dokter->merge($pemeriksa)->sortBy('nama')->values();
+        // gabungkan jadi $rows yang kamu pakai di blade
+        $rows = collect();
 
-        return view('adminpoli.dokter_pemeriksa.index', compact('rows','q','jenisList'));
+        foreach ($dokter as $d) {
+            $parts = [];
+            foreach (($jadwalMap[$d->id_dokter] ?? collect()) as $j) {
+                $parts[] = $j->hari.'|'.substr($j->jam_mulai,0,5).'|'.substr($j->jam_selesai,0,5);
+            }
+
+            $rows->push((object)[
+                'tipe'   => 'dokter',
+                'id'     => $d->id_dokter,
+                'nama'   => $d->nama,
+                'jenis'  => $d->jenis_dokter,
+                'status' => $d->status,
+                'jadwalStr' => implode(';;', $parts),
+            ]);
+        }
+
+        foreach ($pemeriksa as $p) {
+            $rows->push((object)[
+                'tipe'   => 'pemeriksa',
+                'id'     => $p->id_pemeriksa,
+                'nama'   => $p->nama_pemeriksa,
+                'jenis'  => 'Pemeriksa',
+                'status' => $p->status,
+                'jadwalStr' => 'Senin|07:00|16:00;;Selasa|07:00|16:00;;Rabu|07:00|16:00;;Kamis|07:00|16:00;;Jumat|07:00|16:00',
+            ]);
+        }
+
+        return view('adminpoli.dokter_pemeriksa.index', compact('rows','q'));
     }
 
     public function jadwalJson($tipe, $id)
     {
         if ($tipe === 'dokter') {
-            $dokter = Dokter::where('id_dokter', $id)->firstOrFail();
-
-            $items = JadwalDokter::where('id_dokter', $id)
-                ->orderByRaw("FIELD(hari,'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu')")
-                ->orderBy('jam_mulai')
-                ->get()
-                ->map(fn($j) => [
-                    'hari' => $j->hari,
-                    'jam_mulai' => substr((string)$j->jam_mulai, 0, 5),
-                    'jam_selesai' => substr((string)$j->jam_selesai, 0, 5),
-                ])->values();
-
-            return response()->json([
-                'ok' => true,
-                'tipe' => 'dokter',
-                'nama' => $dokter->nama,
-                'jadwal' => $items,
-            ]);
+            $jadwal = JadwalDokter::where('id_dokter', $id)->get();
+            return response()->json(['jadwal' => $jadwal]);
         }
 
-        $p = Pemeriksa::where('id_pemeriksa', $id)->firstOrFail();
-
-        $fixed = [
-            ['hari' => 'Senin',  'jam_mulai' => '07:00', 'jam_selesai' => '16:00'],
-            ['hari' => 'Selasa', 'jam_mulai' => '07:00', 'jam_selesai' => '16:00'],
-            ['hari' => 'Rabu',   'jam_mulai' => '07:00', 'jam_selesai' => '16:00'],
-            ['hari' => 'Kamis',  'jam_mulai' => '07:00', 'jam_selesai' => '16:00'],
-            ['hari' => 'Jumat',  'jam_mulai' => '07:00', 'jam_selesai' => '16:00'],
-        ];
-
         return response()->json([
-            'ok' => true,
-            'tipe' => 'pemeriksa',
-            'nama' => $p->nama_pemeriksa,
-            'jadwal' => $fixed,
+            'jadwal' => [
+                ['hari'=>'Senin','jam_mulai'=>'07:00','jam_selesai'=>'16:00'],
+                ['hari'=>'Selasa','jam_mulai'=>'07:00','jam_selesai'=>'16:00'],
+                ['hari'=>'Rabu','jam_mulai'=>'07:00','jam_selesai'=>'16:00'],
+                ['hari'=>'Kamis','jam_mulai'=>'07:00','jam_selesai'=>'16:00'],
+                ['hari'=>'Jumat','jam_mulai'=>'07:00','jam_selesai'=>'16:00'],
+            ]
         ]);
     }
 
+    public function jadwalDokterJson($id)
+    {
+        $items = JadwalDokter::where('id_dokter', $id)
+            ->orderByRaw("FIELD(hari,'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu')")
+            ->orderBy('jam_mulai')
+            ->get()
+            ->map(fn($j) => [
+                'hari' => $j->hari,
+                'jam_mulai' => substr((string)$j->jam_mulai, 0, 5),
+                'jam_selesai' => substr((string)$j->jam_selesai, 0, 5),
+            ])->values();
 
-    // =========================
-    // CRUD DOKTER
-    // =========================
+        return response()->json(['ok' => true, 'jadwal' => $items]);
+    }
+
+    public function jadwalView($tipe, $id)
+    {
+        if ($tipe === 'dokter') {
+            $jadwal = JadwalDokter::where('id_dokter', $id)
+                ->orderByRaw("FIELD(hari,'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu')")
+                ->orderBy('jam_mulai')
+                ->get();
+        } else {
+            // pemeriksa: jadwal fixed
+            $jadwal = collect([
+                (object)['hari'=>'Senin','jam_mulai'=>'07:00','jam_selesai'=>'16:00'],
+                (object)['hari'=>'Selasa','jam_mulai'=>'07:00','jam_selesai'=>'16:00'],
+                (object)['hari'=>'Rabu','jam_mulai'=>'07:00','jam_selesai'=>'16:00'],
+                (object)['hari'=>'Kamis','jam_mulai'=>'07:00','jam_selesai'=>'16:00'],
+                (object)['hari'=>'Jumat','jam_mulai'=>'07:00','jam_selesai'=>'16:00'],
+            ]);
+        }
+
+        return view('adminpoli.dokter_pemeriksa.jadwal_view', compact('tipe','id','jadwal'));
+    }
+
     public function storeDokter(Request $request)
     {
         $request->validate([
-            'id_dokter' => 'required|string|max:20|unique:dokter,id_dokter',
-            'nama' => 'required|string|max:255',
-            'jenis_dokter' => 'required|string|max:255',
-            'status' => 'required|in:Aktif,Nonaktif',
-            'jadwal' => 'nullable|array',
-            'jadwal.*.hari' => 'required_with:jadwal|string|max:50',
-            'jadwal.*.jam_mulai' => 'required_with:jadwal|date_format:H:i',
-            'jadwal.*.jam_selesai' => 'required_with:jadwal|date_format:H:i',
+            'nama' => 'required',
+            'jenis_dokter' => 'required',
+            'status' => 'required',
+            'jadwal' => 'required|array|min:1',
+            'jadwal.*.hari' => 'required|string',
+            'jadwal.*.jam_mulai' => 'required',
+            'jadwal.*.jam_selesai' => 'required',
         ]);
 
-        DB::transaction(function () use ($request) {
+
+        // Auto-generate ID
+        $lastDokter = Dokter::orderBy('id_dokter', 'desc')->first();
+        if ($lastDokter) {
+            $lastNumber = (int) substr($lastDokter->id_dokter, 1);
+            $newId = 'D' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        } else {
+            $newId = 'D001';
+        }
+
+        DB::transaction(function () use ($request, $newId) {
             Dokter::create([
-                'id_dokter' => $request->id_dokter,
+                'id_dokter' => $newId,
                 'nama' => $request->nama,
                 'jenis_dokter' => $request->jenis_dokter,
                 'status' => $request->status,
             ]);
 
-            foreach (($request->jadwal ?? []) as $j) {
-                if (!$j['hari'] || !$j['jam_mulai'] || !$j['jam_selesai']) continue;
+            foreach ($request->jadwal as $j) {
+                if (empty($j['hari']) || empty($j['jam_mulai']) || empty($j['jam_selesai'])) {
+                    continue;
+                }
 
                 JadwalDokter::create([
-                    'id_dokter' => $request->id_dokter,
+                    'id_dokter' => $newId,
                     'hari' => $j['hari'],
                     'jam_mulai' => $j['jam_mulai'],
                     'jam_selesai' => $j['jam_selesai'],
                 ]);
             }
         });
+    
 
-        return back()->with('success', 'Dokter berhasil ditambahkan.');
+        return redirect()
+        ->route('adminpoli.dokter_pemeriksa.index')
+        ->with('success', 'Data dokter berhasil ditambahkan');
+
     }
 
     public function updateDokter(Request $request, $id)
@@ -137,8 +179,8 @@ class DokterPemeriksaController extends Controller
             'status' => 'required|in:Aktif,Nonaktif',
             'jadwal' => 'nullable|array',
             'jadwal.*.hari' => 'required_with:jadwal|string|max:50',
-            'jadwal.*.jam_mulai' => 'required_with:jadwal|date_format:H:i',
-            'jadwal.*.jam_selesai' => 'required_with:jadwal|date_format:H:i',
+            'jadwal.*.jam_mulai' => 'required_with:jadwal',
+            'jadwal.*.jam_selesai' => 'required_with:jadwal',
         ]);
 
         DB::transaction(function () use ($request, $id) {
@@ -152,7 +194,9 @@ class DokterPemeriksaController extends Controller
             JadwalDokter::where('id_dokter', $dokter->id_dokter)->delete();
 
             foreach (($request->jadwal ?? []) as $j) {
-                if (!$j['hari'] || !$j['jam_mulai'] || !$j['jam_selesai']) continue;
+                if (empty($j['hari']) || empty($j['jam_mulai']) || empty($j['jam_selesai'])) {
+                    continue;
+                }
 
                 JadwalDokter::create([
                     'id_dokter' => $dokter->id_dokter,
@@ -163,7 +207,10 @@ class DokterPemeriksaController extends Controller
             }
         });
 
-        return back()->with('success', 'Dokter berhasil diperbarui.');
+        return redirect()
+        ->route('adminpoli.dokter_pemeriksa.index')
+        ->with('success', 'Data dokter berhasil diperbarui');
+
     }
 
     public function destroyDokter($id)
@@ -182,18 +229,26 @@ class DokterPemeriksaController extends Controller
     public function storePemeriksa(Request $request)
     {
         $request->validate([
-            'id_pemeriksa' => 'required|string|max:20|unique:pemeriksa,id_pemeriksa',
-            'nama_pemeriksa' => 'required|string|max:255',
-            'status' => 'required|in:Aktif,Nonaktif',
+            'nama_pemeriksa' => 'required',
+            'status' => 'required',
         ]);
 
+        // Auto-generate ID
+        $lastPemeriksa = Pemeriksa::orderBy('id_pemeriksa', 'desc')->first();
+        if ($lastPemeriksa) {
+            $lastNumber = (int) substr($lastPemeriksa->id_pemeriksa, 1);
+            $newId = 'P' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        } else {
+            $newId = 'P001';
+        }
+
         Pemeriksa::create([
-            'id_pemeriksa' => $request->id_pemeriksa,
+            'id_pemeriksa' => $newId,
             'nama_pemeriksa' => $request->nama_pemeriksa,
             'status' => $request->status,
         ]);
 
-        return back()->with('success', 'Pemeriksa berhasil ditambahkan.');
+        return back()->with('success', 'Pemeriksa berhasil ditambahkan');
     }
 
     public function updatePemeriksa(Request $request, $id)
@@ -225,7 +280,7 @@ class DokterPemeriksaController extends Controller
             'status' => $request->status,
         ]);
 
-        return response()->json(['ok' => true]);
+        return back()->with('success', 'Status dokter diperbarui.');
     }
 
     public function updateStatusPemeriksa(Request $request, $id)
@@ -236,7 +291,7 @@ class DokterPemeriksaController extends Controller
             'status' => $request->status,
         ]);
 
-        return response()->json(['ok' => true]);
+        return back()->with('success', 'Status pemeriksa diperbarui.');
     }
 
 }

@@ -9,7 +9,6 @@
   </style>
 </head>
 <body>
-  <h3>Data Diagnosa</h3>
   <table>
     <thead>
       <tr>
