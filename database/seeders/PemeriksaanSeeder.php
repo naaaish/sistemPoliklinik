@@ -16,7 +16,7 @@ class PemeriksaanSeeder extends Seeder
             // HASIL PEMERIKSAAN KASUS 1 (Pegawai - Hipertensi)
             [
                 'id_pemeriksaan' => 'PMX-001',
-                'id_pendaftaran' => 'DFT-001',
+                'id_pendaftaran' => 'REG-001',
                 'sistol'         => 160, // Tinggi
                 'diastol'        => 100, // Tinggi
                 'nadi'           => 88,
@@ -35,7 +35,7 @@ class PemeriksaanSeeder extends Seeder
             // HASIL PEMERIKSAAN KASUS 2 (Anak - Demam)
             [
                 'id_pemeriksaan' => 'PMX-002',
-                'id_pendaftaran' => 'DFT-002',
+                'id_pendaftaran' => 'REG-002',
                 'sistol'         => 110,
                 'diastol'        => 70,
                 'nadi'           => 100, // Agak cepat karena demam
