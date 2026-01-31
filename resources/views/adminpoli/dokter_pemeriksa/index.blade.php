@@ -6,7 +6,7 @@
 <div class="dp-page">
   <div class="dp-topbar">
     <div class="dp-left">
-      <a href="{{ route('adminpol.dashboard') }}" class="dp-back-img" title="Kembali">
+      <a href="{{ route('adminpoli.dashboard') }}" class="dp-back-img" title="Kembali">
         <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
       </a>
       <div class="dp-heading">Dokter/Pemeriksa</div>
@@ -20,7 +20,7 @@
 
   <div class="dp-card">
     {{-- Search --}}
-    <form class="dp-search" method="GET" action="{{ route('adminpol.dokter_pemeriksa.index') }}">
+    <form class="dp-search" method="GET" action="{{ route('adminpoli.dokter_pemeriksa.index') }}">
       <input type="text" name="q" value="{{ $q ?? request('q') }}" placeholder="Cari dokter/pemeriksa" class="dp-search-input">
       <button class="dp-search-btn" type="submit">
         <img src="{{ asset('assets/adminPoli/search.png') }}" class="dp-ic" alt="cari">
@@ -79,7 +79,7 @@
 
           <div class="dp-cell dp-center">
             <div class="dp-status-wrap">
-              <form method="POST" action="{{ $d->tipe === 'dokter' ? route('adminpol.dokter_pemeriksa.dokter.status', $d->id) : route('adminpol.dokter_pemeriksa.pemeriksa.status', $d->id) }}">
+              <form method="POST" action="{{ $d->tipe === 'dokter' ? route('adminpoli.dokter_pemeriksa.dokter.status', $d->id) : route('adminpoli.dokter_pemeriksa.pemeriksa.status', $d->id) }}">
                 @csrf
                 @method('PATCH')
 
@@ -118,21 +118,6 @@
               <img src="{{ asset('assets/adminPoli/edit.png') }}" class="dp-ic-sm" alt="">
               Edit
             </button>
-
-            <form method="POST"
-              class="dp-del-form js-dp-delete"
-              action="{{ $d->tipe === 'dokter'
-                ? route('adminpol.dokter_pemeriksa.dokter.destroy', $d->id)
-                : route('adminpol.dokter_pemeriksa.pemeriksa.destroy', $d->id)
-              }}"
-            >
-              @csrf
-              @method('DELETE')
-              <button type="submit" class="dp-act dp-del">
-                <span>Hapus</span>
-                <img src="{{ asset('assets/adminPoli/sampah.png') }}" class="dp-ic-sm" alt="">
-              </button>
-            </form>
           </div>
         </div>
       @empty
@@ -157,7 +142,7 @@
     <div class="modal-card dp-modal-wide">
       <h3>Tambah Dokter/Pemeriksa</h3>
 
-      <form method="POST" id="dpFormTambah" action="{{ route('adminpol.dokter_pemeriksa.dokter.store') }}">
+      <form method="POST" id="dpFormTambah" action="{{ route('adminpoli.dokter_pemeriksa.dokter.store') }}">
         @csrf
 
         <div class="modal-group">
@@ -297,10 +282,10 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Inisialisasi Elemen & URL
-  const dokterStoreUrl = "{{ route('adminpol.dokter_pemeriksa.dokter.store') }}";
-  const pemeriksaStoreUrl = "{{ route('adminpol.dokter_pemeriksa.pemeriksa.store') }}";
-  const dokterUpdateBase = "{{ url('adminpol/dokter-pemeriksa/dokter') }}";
-  const pemeriksaUpdateBase = "{{ url('adminpol/dokter-pemeriksa/pemeriksa') }}";
+  const dokterStoreUrl = "{{ route('adminpoli.dokter_pemeriksa.dokter.store') }}";
+  const pemeriksaStoreUrl = "{{ route('adminpoli.dokter_pemeriksa.pemeriksa.store') }}";
+  const dokterUpdateBase = "{{ url('adminpoli/dokter-pemeriksa/dokter') }}";
+  const pemeriksaUpdateBase = "{{ url('adminpoli/dokter-pemeriksa/pemeriksa') }}";
 
   const btnOpenTambah = document.getElementById('dpOpenTambah');
   const modalTambah = document.getElementById('dpModalTambah');
@@ -440,26 +425,6 @@ document.addEventListener('DOMContentLoaded', () => {
     Swal.fire({ title: 'Jadwal Praktik', html: `<div style="text-align:left;">${html}</div>`, icon: 'info' });
   });
 
-  // ========== KONFIRMASI HAPUS ==========
-  document.addEventListener('submit', (e) => {
-    if (e.target.classList.contains('js-dp-delete')) {
-      e.preventDefault();
-      const form = e.target;
-      Swal.fire({
-        title: 'Hapus data ini?',
-        text: 'Data tidak dapat dikembalikan.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3B5E8C',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal'
-      }).then((result) => {
-        if (result.isConfirmed) form.submit();
-      });
-    }
-  });
-
   // Helper Tambah Baris Jadwal
   function addJadwalRow(container, baseName, hari = '', jamMulai = '', jamSelesai = ''){
     const idx = container.querySelectorAll('.dp-jrow').length;
@@ -477,20 +442,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
-
-
-{{-- TOAST NOTIFICATIONS - --}}
-@if(session('success'))
-  AdminPoliToast.fire({
-    icon: 'success',
-    title: @json(session('success'))
-  });
-@endif
-
-@if(session('error'))
-  AdminPoliToast.fire({
-    icon: 'error',
-    title: @json(session('error'))
-  });
-@endif
 @endpush

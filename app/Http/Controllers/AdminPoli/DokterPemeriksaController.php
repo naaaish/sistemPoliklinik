@@ -137,9 +137,9 @@ class DokterPemeriksaController extends Controller
         $lastDokter = Dokter::orderBy('id_dokter', 'desc')->first();
         if ($lastDokter) {
             $lastNumber = (int) substr($lastDokter->id_dokter, 1);
-            $newId = 'D' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+            $newId = 'DOK' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
         } else {
-            $newId = 'D001';
+            $newId = 'DOK001';
         }
 
         DB::transaction(function () use ($request, $newId) {
@@ -210,17 +210,6 @@ class DokterPemeriksaController extends Controller
         return redirect()
         ->route('adminpoli.dokter_pemeriksa.index')
         ->with('success', 'Data dokter berhasil diperbarui');
-
-    }
-
-    public function destroyDokter($id)
-    {
-        DB::transaction(function () use ($id) {
-            JadwalDokter::where('id_dokter', $id)->delete();
-            Dokter::where('id_dokter', $id)->delete();
-        });
-
-        return back()->with('success', 'Dokter berhasil dihapus.');
     }
 
     // =========================
@@ -237,9 +226,9 @@ class DokterPemeriksaController extends Controller
         $lastPemeriksa = Pemeriksa::orderBy('id_pemeriksa', 'desc')->first();
         if ($lastPemeriksa) {
             $lastNumber = (int) substr($lastPemeriksa->id_pemeriksa, 1);
-            $newId = 'P' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+            $newId = 'PMR' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
         } else {
-            $newId = 'P001';
+            $newId = 'PMR001';
         }
 
         Pemeriksa::create([
@@ -264,12 +253,6 @@ class DokterPemeriksaController extends Controller
         ]);
 
         return back()->with('success', 'Pemeriksa berhasil diperbarui.');
-    }
-
-    public function destroyPemeriksa($id)
-    {
-        Pemeriksa::where('id_pemeriksa', $id)->delete();
-        return back()->with('success', 'Pemeriksa berhasil dihapus.');
     }
 
     public function updateStatusDokter(Request $request, $id)

@@ -187,7 +187,7 @@ body{ margin:0; }
 .dp-table-head,
 .dp-row{
   display:grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
   gap: 16px;
 }
 
