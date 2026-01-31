@@ -27,7 +27,7 @@
                 type="text"
                 name="q"
                 value="{{ request('q') }}"
-                placeholder="Masukkan saran / diagnosa yang dicari"
+                placeholder="Masukkan saran yang dicari"
                 class="saran-search-input"
             >
             <button class="saran-search-btn" type="submit">
@@ -89,7 +89,6 @@
         {{-- TABLE --}}
         <div class="saran-table-head">
             <div>Saran</div>
-            <div>Diagnosa</div>
             <div>Aksi</div>
         </div>
 
@@ -98,13 +97,10 @@
             @php
                 $pk = $row->id_saran;
                 $text = $row->saran_text ?? '-';
-                $idDiag = $row->id_diagnosa ?? '';
-                $diagText = $row->diagnosa_text ?? ($idDiag ?: '-');
             @endphp
 
             <div class="saran-row">
                 <div><div class="saran-cell">{{ $text }}</div></div>
-                <div><div class="saran-cell saran-center">{{ $diagText }}</div></div>
 
                 <div class="saran-actions">
                     <button
@@ -112,7 +108,6 @@
                         class="saran-act saran-edit js-edit"
                         data-id="{{ $pk }}"
                         data-saran="{{ e($text) }}"
-                        data-iddiagnosa="{{ $idDiag }}"
                     >
                         <img src="{{ asset('assets/adminPoli/edit.png') }}" class="saran-ic-sm" alt="">
                         Edit
@@ -145,17 +140,6 @@
 
                 <form action="{{ route('adminpoli.saran.store') }}" method="POST">
                     @csrf
-
-                    <div class="modal-group">
-                        <label>Diagnosa</label>
-                        <select name="id_diagnosa" class="modal-select js-diagnosa-select" required>
-                            <option value="" disabled selected>Pilih Diagnosa</option>
-                            @foreach($diagnosaList as $d)
-                                <option value="{{ $d->id_diagnosa }}">{{ $d->diagnosa }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
                     <div class="modal-group">
                         <label>Saran</label>
                         <textarea name="saran" class="modal-textarea" rows="4" required></textarea>
@@ -174,18 +158,6 @@
                 <form method="POST" id="formEdit">
                     @csrf
                     @method('PUT')
-
-                    <div class="modal-group">
-                        <label>Diagnosa</label>
-                        <select name="id_diagnosa" class="modal-select js-diagnosa-select" id="editDiagnosa" required>
-
-                            <option value="" disabled>Pilih Diagnosa</option>
-                            @foreach($diagnosaList as $d)
-                                <option value="{{ $d->id_diagnosa }}">{{ $d->diagnosa }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
                     <div class="modal-group">
                         <label>Saran</label>
                         <textarea name="saran" class="modal-textarea" id="editSaran" rows="4" required></textarea>
@@ -232,32 +204,6 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  function initSelect2(modalId){
-    if (typeof $ === 'undefined' || !$.fn.select2) return;
-
-    const $modal = $(modalId);
-    const $select = $modal.find('.js-diagnosa-select');
-
-    // prevent double init
-    $select.each(function(){
-      if ($(this).hasClass("select2-hidden-accessible")) return;
-
-      $(this).select2({
-        dropdownParent: $modal,
-        width: '100%',
-        placeholder: 'Pilih Diagnosa',
-        allowClear: true
-      });
-    });
-  }
-
-  // init untuk kedua modal (supaya search langsung aktif)
-  initSelect2('#modalTambah');
-  initSelect2('#modalEdit');
-
-  // kalau modal dibuka setelah init, tetap aman.
-});
 
 // Upload file (copy behavior obat)
 document.addEventListener('DOMContentLoaded', () => {
@@ -348,11 +294,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
       const saran = btn.dataset.saran || '';
-      const idDiagnosa = btn.dataset.iddiagnosa || '';
 
       document.getElementById('modalEdit').style.display = 'flex';
       document.getElementById('editSaran').value = saran;
-      document.getElementById('editDiagnosa').value = idDiagnosa;
 
       document.getElementById('formEdit').action =
         "{{ url('adminpoli/saran') }}/" + id;

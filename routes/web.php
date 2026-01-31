@@ -117,22 +117,6 @@ Route::prefix('adminpoli')
         Route::get('diagnosa/export', [DiagnosaController::class, 'export'])->name('diagnosa.export');
         Route::resource('diagnosa', DiagnosaController::class)->except(['show']);
 
-        Route::get('/api/diagnosa/{id}/nb', [PemeriksaanController::class, 'getNbByDiagnosa']);
-
-        // Diagnosa K3
-        Route::get('/diagnosak3', [DiagnosaK3Controller::class,'index'])->name('diagnosak3.index');
-
-        Route::post('/diagnosak3/kategori', [DiagnosaK3Controller::class,'storeKategori'])->name('diagnosak3.kategori.store');
-        Route::put('/diagnosak3/kategori/{id_nb}', [DiagnosaK3Controller::class,'updateKategori'])->name('diagnosak3.kategori.update');
-        Route::delete('/diagnosak3/kategori/{id_nb}', [DiagnosaK3Controller::class,'destroyKategori'])->name('diagnosak3.kategori.destroy');
-
-        Route::post('/diagnosak3/penyakit', [DiagnosaK3Controller::class,'storePenyakit'])->name('diagnosak3.penyakit.store');
-        Route::put('/diagnosak3/penyakit/{id_nb}', [DiagnosaK3Controller::class,'updatePenyakit'])->name('diagnosak3.penyakit.update');
-        Route::delete('/diagnosak3/penyakit/{id_nb}', [DiagnosaK3Controller::class,'destroyPenyakit'])->name('diagnosak3.penyakit.destroy');
-
-        Route::post('/diagnosak3/import', [DiagnosaK3Controller::class,'import'])->name('diagnosak3.import');
-        Route::get('/diagnosak3/export', [DiagnosaK3Controller::class,'export'])->name('diagnosak3.export');
-
         // Saran
         Route::resource('saran', SaranController::class)->except(['show']);
         Route::post('saran/import', [SaranController::class, 'import'])->name('saran.import');

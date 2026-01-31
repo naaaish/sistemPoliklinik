@@ -4,18 +4,20 @@
   <meta charset="utf-8">
   <style>
     table{ border-collapse:collapse; width:100%; }
-    th,td{ border:1px solid #000; padding:6px; }
+    th,td{ border:1px solid #000; padding:6px; vertical-align: top; }
     th{ background:#eee; }
   </style>
 </head>
 <body>
-  <h3>Data Diagnosa ({{ $from }} s/d {{ $to }})</h3>
+  <h3>Data Diagnosa</h3>
   <table>
     <thead>
       <tr>
         <th>ID Diagnosa</th>
         <th>Diagnosa</th>
-        <th>Created At</th>
+        <th>Keterangan</th>
+        <th>Klasifikasi Nama</th>
+        <th>Bagian Tubuh</th>
       </tr>
     </thead>
     <tbody>
@@ -23,10 +25,12 @@
         <tr>
           <td>{{ $row->id_diagnosa }}</td>
           <td>{{ $row->diagnosa }}</td>
-          <td>{{ $row->created_at }}</td>
+          <td>{{ $row->keterangan }}</td>
+          <td>{{ $row->klasifikasi_nama }}</td>
+          <td>{{ $row->bagian_tubuh }}</td>
         </tr>
       @empty
-        <tr><td colspan="3">Tidak ada data pada rentang ini.</td></tr>
+        <tr><td colspan="6">Tidak ada data pada rentang ini.</td></tr>
       @endforelse
     </tbody>
   </table>

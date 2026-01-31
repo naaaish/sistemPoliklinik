@@ -13,25 +13,20 @@ class DiagnosaExport implements FromCollection, WithHeadings
     public function collection()
     {
         return DB::table('diagnosa')
-            ->leftJoin('diagnosa_k3', function ($join) {
-                $join->on('diagnosa.id_nb', '=', 'diagnosa_k3.id_nb')
-                    ->where('diagnosa_k3.is_active', 1)
-                    ->where('diagnosa_k3.tipe', 'penyakit');
-            })
-            ->where('diagnosa.is_active', 1)
-            ->whereBetween('diagnosa.created_at', [$this->from, $this->to])
-            ->orderBy('diagnosa.diagnosa')
+            ->where('is_active', 1)
+            ->whereBetween('created_at', [$this->from, $this->to])
+            ->orderBy('diagnosa')
             ->get([
-                'diagnosa.id_diagnosa',
-                'diagnosa.diagnosa',
-                'diagnosa.id_nb',
-                'diagnosa_k3.nama_penyakit as nama_k3',
-                'diagnosa.created_at',
+                'id_diagnosa',
+                'diagnosa',
+                'keterangan',
+                'klasifikasi_nama',
+                'bagian_tubuh',
             ]);
     }
 
     public function headings(): array
     {
-        return ['ID Diagnosa', 'Diagnosa', 'NB', 'Nama Diagnosa K3', 'Created At'];
+        return ['NO.', 'DIAGNOSA NAMA', 'KETERANGAN', 'KLASIFIKASI NAMA', 'BAGIAN TUBUH'];
     }
 }

@@ -110,8 +110,8 @@ class PendaftaranController extends Controller
             'tanggal' => ['required', 'date'],
             'nip' => ['required', 'string'],
 
-            'nama_pegawai' => ['required', 'string', 'max:255'],
-            'bagian' => ['required', 'string', 'max:255'],
+            'nama_pegawai' => ['nullable', 'string', 'max:255'],
+            'bagian' => ['nullable', 'string', 'max:255'],
 
             'tipe_pasien' => ['required', 'in:pegawai,keluarga,pensiunan,unit_lain,ojt,poliklinik'],
             'nama_pasien' => ['required', 'string', 'max:255'],
@@ -130,13 +130,15 @@ class PendaftaranController extends Controller
         if ($isPoli) {
             $validated['nip'] = '001';
 
-            $validated['nama_pegawai'] = $validated['nama_pegawai'] ?: 'Poliklinik';
-            $validated['bagian'] = $validated['bagian'] ?: 'Poliklinik';
+            $validated['nama_pegawai'] = '-';
+            $validated['bagian'] = '-';
+            $validated['nama_pasien'] = '-';
 
             $validated['hub_kel'] = 'YBS';
             $validated['id_keluarga'] = null;
-            $validated['tgl_lahir'] = $validated['tgl_lahir'] ?: null;
+            $validated['tgl_lahir'] = null;
         }
+
 
         $BU_META_ID = 'PMR001';
         if ($validated['jenis_pemeriksaan'] === 'cek_kesehatan') {
@@ -151,12 +153,12 @@ class PendaftaranController extends Controller
         $idKeluarga = null;
 
         // 1) Pegawai: wajib YBS
-        if ($validated['tipe_pasien'] === 'pegawai') {
-            if ($validated['hub_kel'] !== 'YBS') {
-                return back()->withInput()->withErrors(['hub_kel' => 'Tipe Pegawai harus YBS.']);
-            }
-            $idKeluarga = null;
-        }
+        // if ($validated['tipe_pasien'] === 'pegawai') {
+        //     if ($validated['hub_kel'] !== 'YBS') {
+        //         return back()->withInput()->withErrors(['hub_kel' => 'Tipe Pegawai harus YBS.']);
+        //     }
+        //     $idKeluarga = null;
+        // }
 
         // 2) Keluarga: wajib Pasangan/Anak + wajib id_keluarga
         if ($validated['tipe_pasien'] === 'keluarga') {
@@ -257,6 +259,13 @@ class PendaftaranController extends Controller
             }
         }
 
+        if (in_array($validated['tipe_pasien'], ['pegawai','unit_lain','ojt','poliklinik'], true)) {
+            if ($validated['hub_kel'] !== 'YBS') {
+                return back()->withInput()->withErrors(['hub_kel' => 'Tipe ini harus YBS.']);
+            }
+            $idKeluarga = null;
+        }
+
         // ===== parse petugas: dokter:ID atau pemeriksa:ID =====
         $petugas = explode(':', $validated['petugas']);
         if (count($petugas) !== 2) {
@@ -273,10 +282,8 @@ class PendaftaranController extends Controller
 
         // ===== insert pendaftaran =====
         DB::transaction(function () use ($validated, $pegawai, $idKeluarga, $idDokter, $idPemeriksa) {
-            $idPendaftaran = $this->generateIdPendaftaran();
 
             DB::table('pendaftaran')->insert([
-                'id_pendaftaran' => $idPendaftaran,
                 'tanggal' => $validated['tanggal'],
                 'jenis_pemeriksaan' => $validated['jenis_pemeriksaan'],
                 'keluhan' => $validated['keluhan'] ?? null,
@@ -366,14 +373,6 @@ class PendaftaranController extends Controller
                 ->values();
         }
 
-        if (in_array($validated['tipe_pasien'], ['pegawai','unit_lain','ojt','poliklinik'], true)) {
-    if ($validated['hub_kel'] !== 'YBS') {
-        return back()->withInput()->withErrors(['hub_kel' => 'Tipe ini harus YBS.']);
-    }
-    $idKeluarga = null;
-}
-
-
         return response()->json([
             'ok' => true,
             'mode' => $tipe,
@@ -381,31 +380,5 @@ class PendaftaranController extends Controller
             'pasien' => $pasien,
             'keluarga_list' => $keluargaList,
         ]);
-    }
-
-    private function generateIdPendaftaran()
-    {
-        // ambil semua id, cari angka terbesar di belakang (aman meski formatnya REG-26011403 / REG0007 / dll)
-        $ids = DB::table('pendaftaran')->pluck('id_pendaftaran');
-
-        $max = 0;
-        foreach ($ids as $id) {
-            // ambil digit terakhir berurutan (contoh REG-26011403 => 26011403, REG0007 => 0007)
-            if (preg_match('/(\d+)$/', $id, $m)) {
-                $num = (int) $m[1];
-                if ($num > $max) $max = $num;
-            }
-        }
-
-        $next = $max + 1;
-
-        // opsi B: format REG0001 dst
-        // kalau next besar (misal 26011404), ini bakal jadi REG26011404 (tetap unik).
-        // kalau kamu mau dipaksa 4 digit doang, bilang ya.
-        if ($next <= 9999) {
-            return 'REG' . str_pad($next, 4, '0', STR_PAD_LEFT);
-        }
-
-        return 'REG' . $next;
     }
 }

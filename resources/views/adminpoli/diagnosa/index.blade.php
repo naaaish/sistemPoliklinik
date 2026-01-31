@@ -63,7 +63,6 @@
 
         <button type="submit" name="action" value="preview" class="diag-btn-soft"><span>Preview</span></button>
         <button type="submit" name="action" value="download" class="diag-btn-soft">
-          <img src="{{ asset('assets/adminPoli/download.png') }}" alt="download" class="diag-ic">
           <span>Download</span>
         </button>
       </form>
@@ -77,7 +76,7 @@
     @endif
 
     {{-- Table --}}
-    <div class="diag-table">
+    <div class="diag-table diag-table--index">
       <div class="diag-table-head diag-head">
         <div>Diagnosa</div>
         <div>Aksi</div>
@@ -85,14 +84,15 @@
 
       <div class="diag-table-body">
         @forelse($diagnosa as $row)
-          <div class="diag-row diag-row">
-            <div><div class="diag-cell">{{ $row->diagnosa }}</div></div>
-
+          <div class="diag-row">
+            <div class="diag-cell">{{ $row->diagnosa }}</div>
             <div class="diag-actions">
               <button type="button" class="diag-act diag-edit js-diag-edit"
                       data-id="{{ $row->id_diagnosa }}"
-                      data-text="{{ $row->diagnosa }}"
-                      data-idnb="{{ $row->id_nb ?? '' }}">
+                      data-diagnosa="{{ $row->diagnosa }}"
+                      data-keterangan="{{ $row->keterangan ?? '' }}"
+                      data-klasifikasi="{{ $row->klasifikasi_nama ?? '' }}"
+                      data-bagian="{{ $row->bagian_tubuh ?? '' }}">
                 <img src="{{ asset('assets/adminPoli/edit.png') }}" class="diag-ic-sm" alt="">
                 Edit
               </button>
@@ -125,19 +125,27 @@
 
         <form action="{{ route('adminpoli.diagnosa.store') }}" method="POST">
           @csrf
+
           <div class="modal-group">
             <label>Diagnosa</label>
             <input type="text" name="diagnosa" required>
           </div>
+
           <div class="modal-group">
-            <label>Diagnosa K3</label>
-            <select name="id_nb" id="k3Select" class="modal-select">
-              <option value="" disabled selected></option>
-              @foreach($k3Options as $k3)
-                <option value="{{ $k3->id_nb }}">{{ $k3->nama_penyakit }} ({{ $k3->id_nb }})</option>
-              @endforeach
-            </select>
+            <label>Keterangan</label>
+            <input type="text" name="keterangan" required>
           </div>
+
+          <div class="modal-group">
+            <label>Klasifikasi Nama</label>
+            <input type="text" name="klasifikasi_nama" required>
+          </div>
+
+          <div class="modal-group">
+            <label>Bagian Tubuh</label>
+            <input type="text" name="bagian_tubuh" required>
+          </div>
+
           <button type="submit" class="modal-btn">Simpan</button>
         </form>
       </div>
@@ -151,19 +159,27 @@
         <form method="POST" id="formEditDiagnosa">
           @csrf
           @method('PUT')
+
           <div class="modal-group">
             <label>Diagnosa</label>
-            <input type="text" name="diagnosa" id="editDiagnosaText" required>
+            <input type="text" name="diagnosa" id="editDiagnosa" required>
           </div>
+
           <div class="modal-group">
-            <label>Diagnosa K3</label>
-            <select name="id_nb" id="editDiagnosaK3" class="modal-select" required>
-              <option value="" disabled selected>Pilih Diagnosa K3...</option>
-              @foreach($k3Options as $k3)
-                <option value="{{ $k3->id_nb }}">{{ $k3->nama_penyakit }} ({{ $k3->id_nb }})</option>
-              @endforeach
-            </select>
+            <label>Keterangan</label>
+            <input type="text" name="keterangan" id="editKeterangan" required>
           </div>
+
+          <div class="modal-group">
+            <label>Klasifikasi Nama</label>
+            <input type="text" name="klasifikasi_nama" id="editKlasifikasi" required>
+          </div>
+
+          <div class="modal-group">
+            <label>Bagian Tubuh</label>
+            <input type="text" name="bagian_tubuh" id="editBagian" required>
+          </div>
+
           <button type="submit" class="modal-btn">Simpan</button>
         </form>
       </div>
@@ -213,12 +229,15 @@
     document.querySelectorAll('.js-diag-edit').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.dataset.id;
-        const text = btn.dataset.text ?? '';
-        const idnb = btn.dataset.idnb ?? '';
         document.getElementById('modalEditDiagnosa').style.display = 'flex';
-        document.getElementById('editDiagnosaText').value = text;
-        document.getElementById('editDiagnosaK3').value = idnb;
-        document.getElementById('formEditDiagnosa').action = "{{ url('adminpoli/diagnosa') }}/" + id;
+
+        document.getElementById('editDiagnosa').value = btn.dataset.diagnosa ?? '';
+        document.getElementById('editKeterangan').value = btn.dataset.keterangan ?? '';
+        document.getElementById('editKlasifikasi').value = btn.dataset.klasifikasi ?? '';
+        document.getElementById('editBagian').value = btn.dataset.bagian ?? '';
+
+        document.getElementById('formEditDiagnosa').action =
+          "{{ url('adminpoli/diagnosa') }}/" + id;
       });
     });
 
@@ -325,23 +344,6 @@ document.addEventListener('DOMContentLoaded', () => {
     el?.addEventListener('change', () => {
       if (isInvalidRange()) toastError('Rentang tanggal tidak valid. Perbaiki tanggalnya.');
     });
-  });
-});
-
-document.addEventListener('DOMContentLoaded', function () {
-  const el = document.getElementById('k3Select');
-  if(!el) return;
-
-  // kalau modal dibuka berkali-kali, jangan init ulang
-  if (el.tomselect) return;
-
-  new TomSelect(el, {
-    create: false,
-    allowEmptyOption: true,
-    placeholder: 'Cari diagnosa K3...',
-    searchField: ['text'],
-    closeAfterSelect: true,
-    dropdownDirection: 'down',
   });
 });
 </script>

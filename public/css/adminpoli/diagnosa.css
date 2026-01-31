@@ -430,9 +430,9 @@ body{ margin:0; }
 }
 
 /* Diagnosa table: 2 kolom */
-.diag-head,
-.diag-row{
-  grid-template-columns: 3fr 1fr !important;
+.diag-table--index .diag-table-head,
+.diag-table--index .diag-row{
+  grid-template-columns: 3fr 1fr;
 }
 
 .diag-table-foot{
@@ -481,4 +481,69 @@ body{ margin:0; }
   display:flex;
   justify-content:flex-end;
   margin-top: 12px;
+}
+
+/* ===== PREVIEW/EXPORT: table 6 kolom ===== */
+.diag-table--preview .diag-table-head,
+.diag-table--preview .diag-row{
+  grid-template-columns: 1.1fr 2.2fr 2.2fr 2fr 1.6fr 1.5fr;
+  gap: 12px;
+}
+
+/* biar cell ga kepotong parah */
+.diag-table--preview .diag-cell{
+  height: auto;
+  min-height: 34px;
+  padding: 8px 10px;
+  align-items: flex-start;
+}
+/* ===============================
+   INDEX DIAGNOSA (LIST VIEW)
+   =============================== */
+.diag-table--index .diag-cell{
+  min-height: unset;      /* buang tinggi paksa */
+  height: auto;
+  padding: 10px 14px;
+  align-items: center;
+  white-space: nowrap;    /* satu baris */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+}
+
+/* row lebih rapih */
+.diag-table--index .diag-row{
+  padding: 6px 0;
+}
+
+/* biar teks nggak keliatan kayak input */
+.diag-table--index .diag-cell{
+  background: #fff;
+  border: 1px solid #E5EAF2;
+  border-radius: 8px;
+}
+
+/* ===== PREVIEW/EXPORT: table 6 kolom ===== */
+.diag-table--preview .diag-table-head,
+.diag-table--preview .diag-row{
+  grid-template-columns: 1.1fr 2.2fr 2.2fr 2fr 1.6fr 1.5fr;
+  gap: 12px;
+}
+
+/* biar cell ga kepotong parah */
+/* ===== PREVIEW DIAGNOSA: hilangkan box input ===== */
+.diag-table--preview .diag-cell{
+  border: none;
+  background: transparent;
+  padding: 8px 6px;
+  color:#444;
+  font-size: 13px;
+  align-items: flex-start;
+}
+
+/* ===== GARIS PEMISAH ANTAR ROW (kayak SARAN) ===== */
+.diag-table--preview .diag-row{
+  border-bottom: 1px solid #E6EEF8; /* sama persis saran */
+  padding: 6px 0;
+  min-height: 56px;
 }

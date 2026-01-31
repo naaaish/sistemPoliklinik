@@ -105,7 +105,6 @@
             <div class="obat-table-head">
                 <div>Nama</div>
                 <div>Harga Satuan</div>
-                <div>Exp Date</div>
                 <div>Aksi</div>
             </div>
 
@@ -115,13 +114,11 @@
                         $pk = $row->id_obat ?? $row->kode_obat ?? null;
                         $nama = $row->nama_obat ?? $row->nama ?? '-';
                         $harga = $row->harga ?? null;
-                        $exp = $row->exp_date ?? $row->expired_at ?? '-';
                     @endphp
 
                     <div class="obat-row">
                         <div><div class="obat-cell">{{ $nama }}</div></div>
                         <div><div class="obat-cell obat-center">{{ $harga ? 'Rp'.number_format($harga,0,',','.') : '-' }}</div></div>
-                        <div><div class="obat-cell obat-center">{{ $exp }}</div></div>
 
                         <div class="obat-actions">
                             <button
@@ -130,7 +127,6 @@
                                 data-id="{{ $pk }}"
                                 data-nama="{{ $nama }}"
                                 data-harga="{{ $harga }}"
-                                data-exp="{{ $row->exp_date }}"
                             >
                                 <img src="{{ asset('assets/adminPoli/edit.png') }}" class="obat-ic-sm" alt="">
                                 Edit
@@ -176,11 +172,6 @@
                         <input type="number" name="harga" min="1" step="1" required>
                     </div>
 
-                    <div class="modal-group">
-                        <label>Expired Date</label>
-                        <input type="date" name="exp_date" id="tambahExp" min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
-                    </div>
-
                     <button type="submit" class="modal-btn">Simpan</button>
                 </form>
             </div>
@@ -203,11 +194,6 @@
                     <div class="modal-group">
                         <label>Harga Satuan</label>
                         <input type="number" name="harga" id="editHarga" required>
-                    </div>
-
-                    <div class="modal-group">
-                        <label>Expired Date</label>
-                        <input type="date" name="exp_date" id="editExp" min="{{ date('Y-m-d', strtotime('+1 day')) }}" required>
                     </div>
 
                     <button type="submit" class="modal-btn">Simpan</button>
@@ -358,12 +344,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const id    = btn.dataset.id;
       const nama  = btn.dataset.nama;
       const harga = btn.dataset.harga;
-      const exp   = toDateInputValue(btn.dataset.exp);
 
       document.getElementById('modalEdit').style.display = 'flex';
       document.getElementById('editNama').value  = nama ?? '';
       document.getElementById('editHarga').value = harga ?? '';
-      document.getElementById('editExp').value   = exp ?? '';
 
       document.getElementById('formEdit').action =
         "{{ url('adminpoli/obat') }}/" + id;

@@ -11,16 +11,13 @@
     </style>
 </head>
 <body>
-    <h3>Data Saran ({{ $from }} s/d {{ $to }})</h3>
+    <h3>Data Saran</h3>
 
     <table>
         <thead>
             <tr>
                 <th>ID Saran</th>
                 <th>Saran</th>
-                <th>ID Diagnosa</th>
-                <th>Diagnosa</th>
-                <th>Created At</th>
             </tr>
         </thead>
         <tbody>
@@ -28,9 +25,6 @@
                 <tr>
                     <td>{{ $row->id_saran }}</td>
                     <td>{{ $row->saran }}</td>
-                    <td>{{ $row->id_diagnosa }}</td>
-                    <td>{{ $row->diagnosa_text }}</td>
-                    <td>{{ $row->created_at }}</td>
                 </tr>
             @empty
                 <tr>

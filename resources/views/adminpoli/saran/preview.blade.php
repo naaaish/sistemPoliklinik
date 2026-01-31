@@ -26,20 +26,16 @@
         </div>
 
         <div style="margin-top:12px;">
-            <div class="saran-table-head" style="grid-template-columns: 1fr 2fr 1fr 1fr;">
+            <div class="saran-table-head" style="grid-template-columns: 1fr 2fr;">
                 <div>ID Saran</div>
                 <div>Saran</div>
-                <div>ID Diagnosa</div>
-                <div>Diagnosa</div>
             </div>
 
             <div class="saran-table-body">
                 @forelse($data as $row)
-                    <div class="saran-row" style="grid-template-columns: 1fr 2fr 1fr 1fr;">
+                    <div class="saran-row" style="grid-template-columns: 1fr 2fr;">
                         <div class="saran-cell saran-center">{{ $row->id_saran }}</div>
                         <div class="saran-cell">{{ $row->saran }}</div>
-                        <div class="saran-cell saran-center">{{ $row->id_diagnosa }}</div>
-                        <div class="saran-cell">{{ $row->diagnosa_text }}</div>
                     </div>
                 @empty
                     <div class="saran-row saran-row-empty">

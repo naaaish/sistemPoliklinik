@@ -25,17 +25,23 @@
       <b>{{ $count }}</b> data diagnosa ditemukan ({{ $from }} s/d {{ $to }}) — format: <b>{{ strtoupper($format) }}</b>
     </div>
 
-    <div class="diag-table" style="margin-top:12px;">
+    <div class="diag-table diag-table--preview" style="margin-top:12px;">
       <div class="diag-table-head diag-head">
+        <div>No</div>
         <div>Diagnosa</div>
-        <div>Created At</div>
+        <div>Keterangan</div>
+        <div>Klasifikasi</div>
+        <div>Bagian Tubuh</div>
       </div>
 
       <div class="diag-table-body">
         @forelse($data as $row)
           <div class="diag-row diag-row">
+            <div><div class="diag-cell">{{ $row->id_diagnosa }}</div></div>
             <div><div class="diag-cell">{{ $row->diagnosa }}</div></div>
-            <div><div class="diag-cell diag-center">{{ $row->created_at }}</div></div>
+            <div><div class="diag-cell">{{ $row->keterangan }}</div></div>
+            <div><div class="diag-cell">{{ $row->klasifikasi_nama }}</div></div>
+            <div><div class="diag-cell">{{ $row->bagian_tubuh }}</div></div>
           </div>
         @empty
           <div style="padding:14px; text-align:center; color:#7B8DA8; font-weight:700;">
