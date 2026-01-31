@@ -9,16 +9,12 @@
     </style>
 </head>
 <body>
-    <h3>Data Obat ({{ $from }} s/d {{ $to }})</h3>
-
     <table>
         <thead>
             <tr>
                 <th>ID Obat</th>
                 <th>Nama Obat</th>
                 <th>Harga</th>
-                <th>Exp Date</th>
-                <th>Created At</th>
             </tr>
         </thead>
         <tbody>
@@ -27,8 +23,6 @@
                     <td>{{ $row->id_obat }}</td>
                     <td>{{ $row->nama_obat }}</td>
                     <td>{{ $row->harga }}</td>
-                    <td>{{ $row->exp_date }}</td>
-                    <td>{{ $row->created_at }}</td>
                 </tr>
             @empty
                 <tr>

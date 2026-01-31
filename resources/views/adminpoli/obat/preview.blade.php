@@ -7,7 +7,7 @@
 
     <div class="obat-topbar">
         <div class="obat-left">
-            <a href="{{ route('adminpoli.dashboard') }}" class="obat-back-img" title="Kembali">
+            <a href="{{ route('adminpoli.obat.index') }}" class="obat-back-img" title="Kembali">
                 <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
             </a>
         <div class="obat-heading">Preview Export Obat</div>
@@ -34,7 +34,6 @@
         <div>ID Obat</div>
         <div>Nama</div>
         <div>Harga</div>
-        <div>Exp Date</div>
       </div>
 
       <div class="obat-table-body">
@@ -43,7 +42,6 @@
             <div><div class="obat-cell obat-center">{{ $row->id_obat }}</div></div>
             <div><div class="obat-cell">{{ $row->nama_obat }}</div></div>
             <div><div class="obat-cell obat-center">{{ 'Rp'.number_format($row->harga,0,',','.') }}</div></div>
-            <div><div class="obat-cell obat-center">{{ $row->exp_date }}</div></div>
           </div>
         @empty
           <div style="padding:14px; text-align:center; color:#7B8DA8; font-weight:700;">

@@ -271,7 +271,7 @@ body{ margin:0; }
 .obat-table-head,
 .obat-row{
   display:grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr;
   gap: 16px;
 }
 

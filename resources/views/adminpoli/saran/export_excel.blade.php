@@ -9,8 +9,6 @@
     </style>
 </head>
 <body>
-    <h3>Data Saran</h3>
-
     <table>
         <thead>
             <tr>

@@ -1,12 +1,14 @@
 /* =========================
-   DOKTER/PEMERIKSA PAGE
-   (dibuat ngikut pola OBAT)
+   DOKTER/PEMERIKSA PAGE - FIXED VERSION
+   SEMUA TOMBOL DIJAMIN BISA DIKLIK!
 ========================= */
 *{ box-sizing: border-box; }
 body{ margin:0; }
 
 .dp-page{
   font-family: Poppins, sans-serif;
+  position: relative;
+  z-index: 1;
 }
 
 /* topbar */
@@ -15,6 +17,8 @@ body{ margin:0; }
   align-items:center;
   justify-content:space-between;
   margin-bottom: 14px;
+  position: relative;
+  z-index: 10;
 }
 
 .dp-left{
@@ -32,11 +36,16 @@ body{ margin:0; }
   width: 40px;
   height: 40px;
   transition: transform .15s ease, filter .15s ease;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 100;
 }
 .dp-back-img img{
   width: 40px;
   height: 40px;
   object-fit: contain;
+  pointer-events: none;
 }
 .dp-back-img:hover{
   transform: translateY(-1px);
@@ -53,23 +62,26 @@ body{ margin:0; }
   color:#3B5E8C;
 }
 
-/* buttons */
+/* buttons - FORCE CLICKABLE! */
 .dp-btn-add{
-  display:inline-flex;
+  display:inline-flex !important;
   align-items:center;
   gap: 8px;
-  background:#3B5E8C;
-  color:#fff;
+  background:#3B5E8C !important;
+  color:#fff !important;
   text-decoration:none;
   padding: 10px 16px;
-  border: none;
+  border: none !important;
   border-radius: 10px;
   font-weight: 600;
-  cursor:pointer;
+  cursor:pointer !important;
   box-shadow:
     0 6px 16px rgba(74, 111, 165, 0.25),
     0 2px 6px rgba(0, 0, 0, 0.12);
   transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+  position: relative !important;
+  z-index: 100 !important;
+  pointer-events: auto !important;
 }
 
 .dp-btn-soft{
@@ -83,7 +95,10 @@ body{ margin:0; }
   border-radius: 10px;
   padding: 0 14px;
   font-weight: 600;
-  cursor:pointer;
+  cursor:pointer !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 50;
 }
 
 /* Hover system */
@@ -108,7 +123,7 @@ body{ margin:0; }
   filter: brightness(0.98);
 }
 
-/* card (hapus flex:0 0 920px biar gak narik layout) */
+/* card */
 .dp-card{
   width: 920px;
   max-width: 920px;
@@ -117,6 +132,8 @@ body{ margin:0; }
   border-radius: 14px;
   box-shadow: 0 8px 18px rgba(0,0,0,0.10);
   padding: 20px 22px;
+  position: relative;
+  z-index: 5;
 }
 
 /* search */
@@ -146,8 +163,11 @@ body{ margin:0; }
   background:#7FA6D9;
   color:#fff;
   font-weight: 600;
-  cursor:pointer;
+  cursor:pointer !important;
   transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 50;
 }
 .dp-search-btn:hover{
   transform: translateY(-1px);
@@ -167,7 +187,7 @@ body{ margin:0; }
 .dp-table-head,
 .dp-row{
   display:grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
   gap: 16px;
 }
 
@@ -187,6 +207,8 @@ body{ margin:0; }
 .dp-row{
   min-height: 50px;
   align-items: center;
+  position: relative;
+  z-index: 5;
 }
 
 .dp-cell{
@@ -210,7 +232,7 @@ body{ margin:0; }
   white-space: nowrap;
 }
 
-/* status select (tampilan sama vibe obat-select) */
+/* status select */
 .dp-select{
   height: 38px;
   border-radius: 10px;
@@ -234,60 +256,64 @@ body{ margin:0; }
   padding: 0 !important;
   font-weight: 700;
   color: #3B5E8C;
-  appearance: none;        /* hilangin style default */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-}
-
-/* =========================
-   STATUS DROPDOWN (1 KOTAKAN)
-========================= */
-.dp-status-wrap{
-  position: relative;
-  height: 38px;
-  min-width: 110px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* select-nya */
-.dp-status-select{
-  width: 100%;
-  height: 38px;
-  padding: 0 34px 0 14px; /* kanan dikosongin buat icon */
-  border-radius: 10px;
-  border: 1px solid #CFE0FF;
-  background: #fff;
-  font-weight: 600;
-  font-size: 13px;
-  color: #3B5E8C;
-  cursor: pointer;
-
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+}
 
-  transition: box-shadow .15s ease, border-color .15s ease;
+.dp-status-wrap{
+  position: relative;
+  width: 100%;
+  display:flex;
+  align-items:center;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.dp-status-wrap form{
+  width: 100%;
+  margin: 0;
+}
+
+.dp-status-select{
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  width: 100%;
+  padding: 0 30px 0 0;
+  margin: 0;
+  font: inherit;
+  font-weight: 700;
+  color: #3B5E8C;
+  cursor: pointer !important;
+  line-height: 1;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 50;
 }
 
 .dp-status-select:focus{
-  outline: none;
-  border-color: #89B2D9;
-  box-shadow: 0 0 0 3px rgba(137,178,217,.25);
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-/* icon dropdown */
+/* icon dropdown custom */
 .dp-status-arrow{
   position: absolute;
-  right: 12px;
+  right: 2px;
   width: 14px;
   height: 14px;
   pointer-events: none;
-  opacity: .8;
+  opacity: .75;
 }
 
-/* teks polos seperti "Edit/Hapus" */
+/* teks polos */
 .dp-plain{
   border: none !important;
   background: transparent !important;
@@ -299,74 +325,95 @@ body{ margin:0; }
   font-size: 13px;
   text-align: center;
 }
-/* wrapper di dalam dp-cell (menyamakan feel dengan status) */
+
 .dp-jadwal-wrap{
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2px;               /* bikin jarak kecil seperti status */
+  padding: 2px;
 }
 
 .dp-jadwal-btn{
-  width: 100%;
   height: 38px;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-
-  background: #E7F0FF;
-  border: 1px solid #CFE0FF;
+  display:inline-flex !important;
+  align-items:center;
+  gap: 8px;
+  background:#E7F0FF !important;
+  color:#3B5E8C !important;
+  border: 1px solid #CFE0FF !important;
   border-radius: 10px;
-
+  padding: 0 14px;
   font-weight: 600;
-  font-size: 13px;
-  color: #3B5E8C;
-
-  cursor: pointer;
-  transition: filter .15s ease, transform .15s ease;
+  cursor:pointer !important;
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 100 !important;
 }
 
-.dp-jadwal-btn:hover{ filter: brightness(0.98); }
-.dp-jadwal-btn:active{ transform: scale(0.98); }
+.dp-jadwal-btn:hover{ 
+  filter: brightness(0.98); 
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0,0,0,.10);
+}
+.dp-jadwal-btn:active{ 
+  transform: scale(0.98); 
+}
 
 /* icon wrap */
 .dp-jadwal-icons{
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  pointer-events: none;
 }
 
-/* dp-cell khusus jadwal: jangan bikin kotak abu */
+.dp-jadwal-line{
+  padding: 8px 10px;
+  border: 1px solid #D6D6D6;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: rgba(0,0,0,.60);
+  font-size: 13px;
+}
+
+/* dp-cell khusus jadwal */
 .dp-cell.dp-cell-jadwal{
   border: none !important;
   background: transparent !important;
   padding: 0 !important;
-  height: 34px;          /* samain tinggi cell lain */
+  height: 34px;
 }
 
-/* actions */
+/* actions - FORCE CLICKABLE! */
 .dp-actions{
-  display:flex;
+  display:flex !important;
   justify-content:center;
   gap: 14px;
   align-items:center;
+  position: relative !important;
+  z-index: 100 !important;
 }
+
 .dp-act{
-  display:inline-flex;
+  display:inline-flex !important;
   align-items:center;
   gap: 6px;
-  border:none;
-  background:transparent;
+  border:none !important;
+  background:transparent !important;
   font-weight: 700;
-  cursor:pointer;
+  cursor:pointer !important;
   text-decoration:none;
   padding: 6px 6px;
   transition: transform .12s ease, filter .12s ease, opacity .12s ease;
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 150 !important;
 }
+
 .dp-act:hover{
   transform: translateY(-1px);
   filter: brightness(1.05);
@@ -375,9 +422,14 @@ body{ margin:0; }
   transform: translateY(0);
   opacity: .85;
 }
-.dp-edit{ color:#E58A1F; }
-.dp-del{ color:#E04A4A; }
-.dp-del-form{ margin:0; }
+
+.dp-edit{ color:#E58A1F !important; }
+.dp-del{ color:#E04A4A !important; }
+.dp-del-form{ 
+  margin:0; 
+  position: relative;
+  z-index: 150;
+}
 
 /* Empty row */
 .dp-row-empty{
@@ -407,87 +459,309 @@ body{ margin:0; }
 }
 
 /* =========================
-   MODAL (boleh tetap pakai milikmu)
+   MODAL - ULTIMATE FIX!
 ========================= */
-.dp-modal{
-  position: fixed;
-  inset: 0;
-  display: none;
+.modal-overlay {
+  display: none !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0,0,0,.4) !important;
+  z-index: 99999 !important;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
-}
-.dp-modal.is-open{ display:flex; }
-
-.dp-modal-backdrop{
-  position:absolute;
-  inset:0;
-  background: rgba(0,0,0,0.35);
+  pointer-events: none !important;
 }
 
-.dp-modal-card{
-  position: relative;
+/* Saat modal TERBUKA */
+.modal-overlay.dp-open,
+.modal-overlay[style*="display: flex"],
+.modal-overlay[style*="display:flex"] {
+  display: flex !important;
+  pointer-events: auto !important;
+}
+
+.modal-card {
+  position: relative !important;
   width: 520px;
   max-width: calc(100% - 28px);
-  background:#fff;
+  background:#fff !important;
   border-radius: 12px;
   box-shadow: 0 10px 22px rgba(0,0,0,0.18);
   padding: 22px 22px 18px;
-  z-index: 2;
+  z-index: 100000 !important;
+  pointer-events: auto !important;
 }
 
-/* ===== PATCH: perapihan dokter-pemeriksa ===== */
-
-/* icons (samakan dengan obat) */
+/* icons */
 .dp-ic{
   width: 16px;
   height: 16px;
   object-fit: contain;
+  pointer-events: none;
 }
 .dp-ic-sm{
   width: 14px;
   height: 14px;
   object-fit: contain;
+  pointer-events: none;
 }
 
-.dp-select{
+.dp-modal-wide{ width: 520px; }
+.dp-modal-select{
+  width: 100%;
   height: 38px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: 1px solid #CFE0FF;
+  padding: 0 12px;
+  background: #fff;
+  font-weight: 600;
+  color: #3B5E8C;
+}
+
+.dp-btn-soft-full{ 
+  width: 100%; 
+  justify-content: center; 
+}
+
+.dp-jadwal-list{ 
+  display:flex; 
+  flex-direction:column; 
+  gap:10px; 
+  margin-top:8px; 
+}
+
+.dp-jrow{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.dp-jinput{
+  height: 38px;
+  border: 1px solid #CFE0FF;
+  border-radius: 8px;
   padding: 0 10px;
   outline:none;
+  font-weight: 600;
+  color:#3B5E8C;
   background:#fff;
-  font-weight:600;
+}
+
+.dp-jinput[type="text"]{ 
+  flex: 1;              
+  min-width: 90px;     
+}
+
+.dp-jinput[type="time"]{ 
+  width: 85px;         
+}
+
+.dp-jsep{ 
+  font-weight: 800; 
+  color:#3B5E8C; 
+}
+
+.dp-jremove{
+  width: 42px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid #FFA3A3;
+  background: #fff;
+  color:#B42318;
+  font-weight: 900;
+  cursor:pointer !important;
+  pointer-events: auto !important;
+}
+
+.dp-jadwal-fixed{
+  padding: 10px 12px;
+  border: 1px solid #CFE0FF;
+  border-radius: 10px;
+  background:#E7F0FF;
+  color:#3B5E8C;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* toast alert */
+.dp-alert{
+  position: fixed;
+  left: 50%;
+  top: 18px;
+  transform: translateX(-50%);
+  z-index: 100500;
+  min-width: 280px;
+  max-width: calc(100% - 28px);
+  background:#fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+  border: 1px solid #CFE0FF;
+  font-weight: 800;
   color:#3B5E8C;
 }
-.dp-select:focus{
-  border-color:#89B2D9;
+.dp-alert.is-error{
+  border-color:#FFA3A3;
+  color:#B42318;
+}
+
+#dpEditJadwalBtn,
+#dpTambahJadwalBtn {
+  margin-top: 12px;
+}
+
+/* Modal group styling */
+.modal-group {
+  margin-bottom: 16px;
+}
+
+.modal-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #3B5E8C;
+}
+
+.modal-group input[type="text"],
+.modal-group input[type="time"] {
+  width: 100%;
+  height: 38px;
+  border: 1px solid #CFE0FF;
+  border-radius: 8px;
+  padding: 0 12px;
+  outline: none;
+  font-weight: 600;
+  color: #3B5E8C;
+  background: #fff;
+}
+
+.modal-group input:focus,
+.modal-group select:focus {
+  border-color: #89B2D9;
   box-shadow: 0 0 0 3px rgba(137,178,217,.25);
 }
 
-.dp-jadwal-btn{
-  height: 38px;
-  display:inline-flex;
-  align-items:center;
-  gap: 8px;
-  background:#E7F0FF;
-  color:#3B5E8C;
-  border: 1px solid #CFE0FF;
+.modal-btn {
+  width: 100% !important;
+  height: 42px;
+  background: #3B5E8C !important;
+  color: #fff !important;
+  border: none !important;
   border-radius: 10px;
-  padding: 0 14px;
   font-weight: 600;
-  cursor:pointer;
-  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
-}
-.dp-jadwal-btn:hover{
-  transform: translateY(-1px);
-  filter: brightness(1.02);
-  box-shadow: 0 8px 18px rgba(0,0,0,.10);
-}
-.dp-jadwal-btn:active{
-  transform: translateY(0);
-  filter: brightness(0.98);
+  cursor: pointer !important;
+  margin-top: 20px;
+  transition: all .15s ease;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 50;
 }
 
-.dp-edit{ color:#E58A1F; }
-.dp-del{ color:#E04A4A; } /* sudah ada, pastikan sama */
+.modal-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+
+.modal-btn:active {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+h3 {
+  margin: 0 0 20px 0;
+  color: #3B5E8C;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* ULTIMATE OVERRIDE - PAKSA SEMUA BUTTON BISA DIKLIK! */
+button,
+.dp-btn-add,
+.dp-jadwal-btn,
+.dp-edit-btn,
+.dp-search-btn,
+.dp-act,
+button[type="button"],
+button[type="submit"],
+a.dp-back-img {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+/* Pastikan SEMUA gambar di dalam button gak block klik */
+button img,
+.dp-btn-add img,
+.dp-jadwal-btn img,
+.dp-act img {
+  pointer-events: none !important;
+}
+/* Container Box untuk Resep Obat */
+.resep-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin: 20px 0;
+}
+
+.resep-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.resep-table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.resep-table th {
+    padding: 12px 15px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #475569;
+    text-align: left;
+}
+
+.resep-table td {
+    padding: 12px 15px;
+    font-size: 14px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Pengaturan Lebar & Aligment Kolom */
+.col-no { width: 50px; text-align: center; }
+.col-nama { text-align: left; }
+.col-jumlah { width: 120px; text-align: center; }
+.col-harga { width: 150px; text-align: right; }
+.col-subtotal { width: 150px; text-align: right; }
+
+/* Footer Biru Muda (Cyan) */
+.resep-footer {
+    background: #ecfeff; /* Sesuai desain figma */
+    font-weight: 700;
+}
+
+.resep-footer td {
+    border-top: 2px solid #cffafe;
+    color: #0e7490;
+    padding: 12px 15px;
+}
+.btn-upload-csv {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white !important;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}

@@ -4,25 +4,24 @@
 
 @section('content')
 <div class="dp-page">
-    <div class="dp-topbar">
-        <div class="dp-left">
-        <a href="{{ route('adminpoli.dashboard') }}" class="dp-back-img" title="Kembali">
-            <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
-        </a>
-        <div class="dp-heading">Dokter/Pemeriksa</div>
-        </div>
-
-        <button type="button" class="dp-btn-add" id="dpOpenTambah">
-            <img src="{{ asset('assets/adminPoli/plus1.png') }}" class="dp-ic" alt="+">
-            <span>Tambah Dokter/Pemeriksa</span>
-        </button>
+  <div class="dp-topbar">
+    <div class="dp-left">
+      <a href="{{ route('adminpoli.dashboard') }}" class="dp-back-img" title="Kembali">
+        <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Kembali">
+      </a>
+      <div class="dp-heading">Dokter/Pemeriksa</div>
     </div>
 
-    <div class="dp-card">
+    <button type="button" class="dp-btn-add" id="dpOpenTambah">
+      <img src="{{ asset('assets/adminPoli/plus1.png') }}" class="dp-ic" alt="+">
+      <span>Tambah Dokter/Pemeriksa</span>
+    </button>
+  </div>
 
+  <div class="dp-card">
     {{-- Search --}}
     <form class="dp-search" method="GET" action="{{ route('adminpoli.dokter_pemeriksa.index') }}">
-      <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari dokter/pemeriksa" class="dp-search-input">
+      <input type="text" name="q" value="{{ $q ?? request('q') }}" placeholder="Cari dokter/pemeriksa" class="dp-search-input">
       <button class="dp-search-btn" type="submit">
         <img src="{{ asset('assets/adminPoli/search.png') }}" class="dp-ic" alt="cari">
         <span>Cari</span>
@@ -40,13 +39,36 @@
 
     <div class="dp-table-body">
       @forelse($rows as $d)
-        <div class="dp-row"
-            data-tipe="{{ $d->tipe }}"
-            data-id="{{ $d->id }}"
-            data-nama="{{ e($d->nama) }}"
-            data-jenis="{{ e($d->jenis) }}"
-            data-status="{{ e($d->status) }}">
+        @php
+          $jadwalStr = '';
 
+          if ($d->tipe === 'dokter') {
+            $list = $d->jadwalDokter ?? $d->jadwal_dokter ?? [];
+            $parts = [];
+
+            if (is_iterable($list)) {
+              foreach ($list as $j) {
+                $hari = $j->hari ?? '';
+                $mulai = isset($j->jam_mulai) ? substr($j->jam_mulai,0,5) : '';
+                $selesai = isset($j->jam_selesai) ? substr($j->jam_selesai,0,5) : '';
+                if ($hari && $mulai && $selesai) $parts[] = $hari.'|'.$mulai.'|'.$selesai;
+              }
+            }
+
+            $jadwalStr = implode(';;', $parts);
+          } else {
+            $jadwalStr = 'Senin|07:00|16:00;;Selasa|07:00|16:00;;Rabu|07:00|16:00;;Kamis|07:00|16:00;;Jumat|07:00|16:00';
+          }
+        @endphp
+
+        <div class="dp-row"
+          data-tipe="{{ $d->tipe }}"
+          data-id="{{ $d->id }}"
+          data-nama="{{ e($d->nama) }}"
+          data-jenis="{{ e($d->jenis) }}"
+          data-status="{{ e($d->status) }}"
+          data-jadwal="{{ e($d->jadwalStr ?? '') }}"
+        >
           <div class="dp-cell">
             <span class="dp-celltext">{{ $d->nama }}</span>
           </div>
@@ -55,410 +77,369 @@
             <span class="dp-plain">{{ $d->jenis }}</span>
           </div>
 
-          <div class="dp-status-wrap">
-            <select class="dp-status-select" data-tipe="{{ $d->tipe }}" data-id="{{ $d->id }}">
-                <option value="Aktif" {{ ($d->status ?? 'Aktif') == 'Aktif' ? 'selected' : '' }}>
-                Aktif
-                </option>
-                <option value="Nonaktif" {{ ($d->status ?? 'Aktif') == 'Nonaktif' ? 'selected' : '' }}>
-                Nonaktif
-                </option>
-            </select>
-            <img
-                src="{{ asset('assets/adminPoli/dropdown.png') }}"
-                class="dp-status-arrow"
-                alt="dropdown"
-            >
-          </div>
-
-          <div class="dp-cell dp-center dp-cell-jadwal">
-            <button type="button" class="dp-jadwal-btn" data-tipe="{{ $d->tipe }}" data-id="{{ $d->id }}">
-                <span class="dp-jadwal-text">Lihat</span>
-                <span class="dp-jadwal-icons">
-                <img src="{{ asset('assets/adminPoli/eye.png') }}" class="dp-ic-sm" alt="lihat">
-                </span>
-            </button>
-          </div>
-
-
           <div class="dp-cell dp-center">
-            <div class="dp-actions">
-              <button type="button" class="dp-act dp-edit dp-edit-btn" data-tipe="{{ $d->tipe }}" data-id="{{ $d->id }}">
-                <img src="{{ asset('assets/adminPoli/edit.png') }}" class="dp-ic-sm" alt="edit">
-                <span>Edit</span>
-              </button>
-
-
-              <form class="dp-del-form" method="POST"
-                    action="{{ $d->tipe === 'dokter'
-                        ? route('adminpoli.dokter_pemeriksa.dokter.destroy', $d->id)
-                        : route('adminpoli.dokter_pemeriksa.pemeriksa.destroy', $d->id)
-                    }}"
-                    onsubmit="return confirm('Hapus data ini?')">
+            <div class="dp-status-wrap">
+              <form method="POST" action="{{ $d->tipe === 'dokter' ? route('adminpoli.dokter_pemeriksa.dokter.status', $d->id) : route('adminpoli.dokter_pemeriksa.pemeriksa.status', $d->id) }}">
                 @csrf
-                @method('DELETE')
-                <button type="submit" class="dp-act dp-del">
-                    <span>Hapus</span>
-                    <img src="{{ asset('assets/adminPoli/sampah.png') }}" class="dp-ic-sm" alt="hapus">
-                </button>
+                @method('PATCH')
+
+                <select name="status" class="dp-status-select" onchange="this.form.submit()">
+                  <option value="Aktif" {{ $d->status === 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                  <option value="Nonaktif" {{ $d->status === 'Nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+                </select>
               </form>
+              <img src="{{ asset('assets/adminPoli/dropdown.png') }}" class="dp-status-arrow" alt="v">
             </div>
           </div>
 
+          <div class="dp-cell dp-center dp-cell-jadwal">
+            <div class="dp-jadwal-wrap">
+              <button type="button"
+                class="dp-jadwal-btn"
+                data-tipe="{{ $d->tipe }}"
+                data-jadwal="{{ $d->jadwalStr ?? '' }}">
+                <span class="dp-jadwal-text">Lihat</span>
+                <span class="dp-jadwal-icons">
+                  <img src="{{ asset('assets/adminPoli/eye.png') }}" class="dp-ic-sm" alt="lihat">
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div class="dp-actions">
+            <button type="button"
+              class="dp-act dp-edit dp-edit-btn"
+              data-tipe="{{ $d->tipe }}"
+              data-id="{{ $d->id }}"
+              data-nama="{{ e($d->nama) }}"
+              data-jenis="{{ e($d->jenis) }}"
+              data-status="{{ e($d->status) }}"
+            >
+              <img src="{{ asset('assets/adminPoli/edit.png') }}" class="dp-ic-sm" alt="">
+              Edit
+            </button>
+          </div>
         </div>
       @empty
         <div class="dp-row dp-row-empty">
-          <div class="dp-empty-span">Tidak ada data</div>
+          <div class="dp-empty-span">
+            {{ request('q') ? 'Tidak ada dokter/pemeriksa ditemukan' : 'Belum ada data dokter/pemeriksa' }}
+          </div>
         </div>
       @endforelse
     </div>
 
+    <div class="dp-foot">
+      Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
+    </div>
   </div>
+</div>
 
-  <div class="dp-foot">
-    Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
-  </div>
 
-  {{-- =========================
-      MODAL: TAMBAH
-  ========================= --}}
-  <div class="dp-modal" id="dpModalTambah" aria-hidden="true">
-    <div class="dp-modal-backdrop" data-close="dpModalTambah"></div>
-    <div class="dp-modal-card">
-      <div class="dp-modal-title">Tambah Dokter/Pemeriksa</div>
 
-      <form method="POST" action="{{ route('adminpoli.dokter_pemeriksa.dokter.store') }}" id="dpFormTambah">
+  {{-- ================= MODAL TAMBAH ================= --}}
+  <div class="modal-overlay" id="dpModalTambah">
+    <div class="modal-card dp-modal-wide">
+      <h3>Tambah Dokter/Pemeriksa</h3>
+
+      <form method="POST" id="dpFormTambah" action="{{ route('adminpoli.dokter_pemeriksa.dokter.store') }}">
         @csrf
 
-        <div class="dp-form-row">
-          <label class="dp-label">ID</label>
-          <div class="dp-colon">:</div>
-          <input class="dp-input" name="id_dokter" type="text" maxlength="20" required placeholder="ID Dokter">
-        </div>
-
-        <div class="dp-form-row">
-          <label class="dp-label">Nama</label>
-          <div class="dp-colon">:</div>
-          <input class="dp-input" name="nama" type="text" required placeholder="Nama Dokter/Pemeriksa">
-        </div>
-
-        <div class="dp-form-row">
-          <label class="dp-label">Jenis Dokter/Pemeriksa</label>
-          <div class="dp-colon">:</div>
-
-          {{-- jika kamu pakai tabel pemeriksa --}}
-          <select class="dp-input dp-select2" name="jenis" required>
-            <option value="" disabled selected>Pilih Jenis Dokter/Pemeriksa</option>
-            @foreach($jenisList as $j)
-              <option value="{{ $j->nama_pemeriksa }}">{{ $j->nama_pemeriksa }}</option>
-            @endforeach
-          </select>
-
-          {{-- kalau tidak pakai pemeriksa, ganti jadi input text:
-          <input class="dp-input" name="jenis" type="text" required>
-          --}}
-        </div>
-
-        <div class="dp-form-row">
-          <label class="dp-label">Status</label>
-          <div class="dp-colon">:</div>
-          <select class="dp-input dp-select2" name="status">
-            <option value="Aktif" selected>Aktif</option>
-            <option value="Nonaktif">Nonaktif</option>
+        <div class="modal-group">
+          <label>Tipe</label>
+          <select name="tipe" id="dpTambahTipe" class="dp-modal-select" required>
+            <option value="dokter">Dokter</option>
+            <option value="pemeriksa">Pemeriksa</option>
           </select>
         </div>
 
-        <div class="dp-form-row dp-form-row-top">
-          <label class="dp-label">Jadwal</label>
-          <div class="dp-colon">:</div>
+        {{-- DOKTER --}}
+        <div class="dp-tambah-dokter">
+          <input type="hidden" name="id_dokter" id="dpTambahIdDokter">
+          <div class="modal-group">
+            <label>Nama Dokter</label>
+            <input type="text" name="nama" id="dpTambahNamaDokter" required>
+          </div>
 
-          <div class="dp-jadwal-wrap">
-            <div id="dpTambahJadwalList" class="dp-jadwal-list">
-              {{-- baris jadwal akan di-generate via JS --}}
-            </div>
+          <div class="modal-group">
+            <label>Jenis Dokter</label>
+            <input type="text" name="jenis_dokter" id="dpTambahJenisDokter" placeholder="Contoh: Dokter Umum" required>
+          </div>
 
-            <button type="button" class="dp-btn-soft" id="dpTambahJadwalBtn">
+          <div class="modal-group">
+            <label>Status</label>
+            <select name="status" id="dpTambahStatusDokter" class="dp-modal-select" required>
+              <option value="Aktif">Aktif</option>
+              <option value="Nonaktif">Nonaktif</option>
+            </select>
+          </div>
+
+          <div class="modal-group">
+            <label>Jadwal (boleh lebih dari satu)</label>
+            <div id="dpTambahJadwalList" class="dp-jadwal-list"></div>
+            <button type="button" class="dp-btn-soft dp-btn-soft-full" id="dpTambahJadwalBtn">
               <span class="dp-plus2">+</span> Tambah Jadwal
             </button>
           </div>
         </div>
 
-        <div class="dp-actions-bottom">
-          <button type="submit" class="dp-submit">Simpan</button>
+        {{-- PEMERIKSA --}}
+        <div class="dp-tambah-pemeriksa" style="display:none;">
+          <input type="hidden" name="id_pemeriksa" id="dpTambahIdPemeriksa">
+          <div class="modal-group">
+            <label>Nama Pemeriksa</label>
+            <input type="text" name="nama_pemeriksa" id="dpTambahNamaPemeriksa" required>
+          </div>
+
+          <div class="modal-group">
+            <label>Status</label>
+            <select name="status" id="dpTambahStatusPemeriksa" class="dp-modal-select" required>
+              <option value="Aktif">Aktif</option>
+              <option value="Nonaktif">Nonaktif</option>
+            </select>
+          </div>
+
+          <div class="modal-group">
+            <label>Jadwal</label>
+            <div class="dp-jadwal-fixed">Senin - Jumat, 07:00 - 16:00</div>
+          </div>
         </div>
+
+        <button type="submit" class="modal-btn">Simpan</button>
       </form>
     </div>
   </div>
 
-  {{-- =========================
-      MODAL: EDIT
-  ========================= --}}
-  <div class="dp-modal" id="dpModalEdit" aria-hidden="true">
-    <div class="dp-modal-backdrop" data-close="dpModalEdit"></div>
-    <div class="dp-modal-card">
-      <div class="dp-modal-title">Edit Dokter/Pemeriksa</div>
+{{-- ================= MODAL EDIT ================= --}}
+<div class="modal-overlay" id="dpModalEdit">
+  <div class="modal-card dp-modal-wide">
+    <h3>Edit Dokter/Pemeriksa</h3>
 
-      <form method="POST" action="#" id="dpFormEdit">
-        @csrf
-        @method('PUT')
+    <form method="POST" id="dpFormEdit">
+      @csrf
+      @method('PUT')
 
-        <div class="dp-form-row">
-          <label class="dp-label">Nama</label>
-          <div class="dp-colon">:</div>
-          <input class="dp-input" name="nama" id="dpEditNama" type="text" required>
+      <input type="hidden" id="dpEditTipe" value="dokter">
+
+      {{-- DOKTER --}}
+      <div class="dp-edit-dokter">
+        <div class="modal-group">
+          <label>Nama Dokter</label>
+          <input type="text" name="nama" id="dpEditNamaDokter" required>
         </div>
 
-        <div class="dp-form-row">
-          <label class="dp-label">Jenis Dokter/Pemeriksa</label>
-          <div class="dp-colon">:</div>
-          <select class="dp-input dp-select2" name="jenis" id="dpEditJenis" required>
-            @foreach($jenisList as $j)
-              <option value="{{ $j->nama_pemeriksa }}">{{ $j->nama_pemeriksa }}</option>
-            @endforeach
-          </select>
+        <div class="modal-group">
+          <label>Jenis Dokter</label>
+          <input type="text" name="jenis_dokter" id="dpEditJenisDokter" required>
         </div>
 
-        <div class="dp-form-row">
-          <label class="dp-label">Status</label>
-          <div class="dp-colon">:</div>
-          <select class="dp-input dp-select2" name="status" id="dpEditStatus">
+        <div class="modal-group">
+          <label>Status</label>
+          <select name="status" id="dpEditStatusDokter" class="dp-modal-select" required>
             <option value="Aktif">Aktif</option>
             <option value="Nonaktif">Nonaktif</option>
           </select>
         </div>
 
-        <div class="dp-form-row dp-form-row-top">
-          <label class="dp-label">Jadwal</label>
-          <div class="dp-colon">:</div>
-
-          <div class="dp-jadwal-wrap">
-            <div id="dpEditJadwalList" class="dp-jadwal-list"></div>
-
-            <button type="button" class="dp-btn-soft" id="dpEditTambahJadwalBtn">
-              <span class="dp-plus2">+</span> Tambah Jadwal
-            </button>
-          </div>
+        <div class="modal-group">
+          <label>Jadwal</label>
+          <div id="dpEditJadwalList" class="dp-jadwal-list"></div>
+          <button type="button" class="dp-btn-soft dp-btn-soft-full" id="dpEditJadwalBtn">
+            <span class="dp-plus2">+</span> Tambah Jadwal
+          </button>
         </div>
-
-        <div class="dp-actions-bottom">
-          <button type="submit" class="dp-submit">Simpan</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  {{-- =========================
-      MODAL: LIHAT JADWAL
-  ========================= --}}
-  <div class="dp-modal" id="dpModalJadwal" aria-hidden="true">
-    <div class="dp-modal-backdrop" data-close="dpModalJadwal"></div>
-    <div class="dp-modal-card dp-modal-card-small">
-      <div class="dp-modal-title">Jadwal Dokter/Pemeriksa</div>
-
-      <div class="dp-jadwal-view" id="dpJadwalViewBox">
-        {{-- isi via JS --}}
       </div>
 
-      <div class="dp-actions-bottom">
-        <button type="button" class="dp-submit" data-close-btn="dpModalJadwal">Simpan</button>
-      </div>
-    </div>
-  </div>
+      {{-- PEMERIKSA --}}
+      <div class="dp-edit-pemeriksa" style="display:none;">
+        <div class="modal-group">
+          <label>Nama Pemeriksa</label>
+          <input type="text" name="nama_pemeriksa" id="dpEditNamaPemeriksa" required>
+        </div>
 
+        <div class="modal-group">
+          <label>Status</label>
+          <select name="status" id="dpEditStatusPemeriksa" class="dp-modal-select" required>
+            <option value="Aktif">Aktif</option>
+            <option value="Nonaktif">Nonaktif</option>
+          </select>
+        </div>
+
+        <div class="modal-group">
+          <label>Jadwal</label>
+          <div class="dp-jadwal-fixed">Senin - Jumat, 07:00 - 16:00</div>
+        </div>
+      </div>
+
+      <button type="submit" class="modal-btn">Simpan</button>
+    </form>
+  </div>
 </div>
+@endsection
 
-{{-- =========================
-    JS Modal + Jadwal dynamic
-========================= --}}
+
+@push('scripts')
 <script>
-(function(){
-  const openModal = (id) => {
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.classList.add('is-open');
-    el.setAttribute('aria-hidden', 'false');
-  };
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Inisialisasi Elemen & URL
+  const dokterStoreUrl = "{{ route('adminpoli.dokter_pemeriksa.dokter.store') }}";
+  const pemeriksaStoreUrl = "{{ route('adminpoli.dokter_pemeriksa.pemeriksa.store') }}";
+  const dokterUpdateBase = "{{ url('adminpoli/dokter-pemeriksa/dokter') }}";
+  const pemeriksaUpdateBase = "{{ url('adminpoli/dokter-pemeriksa/pemeriksa') }}";
 
-  const closeModal = (id) => {
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.classList.remove('is-open');
-    el.setAttribute('aria-hidden', 'true');
-  };
-
-  // close backdrop
-  document.querySelectorAll('.dp-modal-backdrop').forEach(b => {
-    b.addEventListener('click', () => closeModal(b.dataset.close));
-  });
-  // close button (jadwal modal)
-  document.querySelectorAll('[data-close-btn]').forEach(btn => {
-    btn.addEventListener('click', () => closeModal(btn.dataset.closeBtn));
-  });
-
-  // =========================
-  // Row template jadwal
-  // =========================
-  const jadwalRow = (idx, data = {}) => {
-    const hari = data.hari || '';
-    const jm = data.jam_mulai || '';
-    const js = data.jam_selesai || '';
-
-    return `
-      <div class="dp-jrow">
-        <input class="dp-jinput" name="jadwal[${idx}][hari]" type="text" placeholder="Hari" value="${hari}">
-        <input class="dp-jinput" name="jadwal[${idx}][jam_mulai]" type="time" value="${jm}">
-        <span class="dp-jsep">-</span>
-        <input class="dp-jinput" name="jadwal[${idx}][jam_selesai]" type="time" value="${js}">
-        <button type="button" class="dp-jremove" title="Hapus jadwal">✕</button>
-      </div>
-    `;
-  };
-
-  const bindRemoveButtons = (wrap) => {
-    wrap.querySelectorAll('.dp-jremove').forEach(btn => {
-      btn.onclick = () => btn.closest('.dp-jrow')?.remove();
-    });
-  };
-
-  // =========================
-  // Tambah Modal
-  // =========================
   const btnOpenTambah = document.getElementById('dpOpenTambah');
-  const tambahList = document.getElementById('dpTambahJadwalList');
+  const modalTambah = document.getElementById('dpModalTambah');
+  const modalEdit = document.getElementById('dpModalEdit');
+
+  const formTambah = document.getElementById('dpFormTambah');
+  const tambahTipe = document.getElementById('dpTambahTipe');
+  const tambahDokterBox = document.querySelector('.dp-tambah-dokter');
+  const tambahPemeriksaBox = document.querySelector('.dp-tambah-pemeriksa');
+  const tambahJadwalList = document.getElementById('dpTambahJadwalList');
   const tambahJadwalBtn = document.getElementById('dpTambahJadwalBtn');
 
-  let tambahIdx = 0;
-  const addTambahRow = () => {
-    tambahList.insertAdjacentHTML('beforeend', jadwalRow(tambahIdx++));
-    bindRemoveButtons(tambahList);
-  };
+  const formEdit = document.getElementById('dpFormEdit');
+  const editTipe = document.getElementById('dpEditTipe');
+  const editDokterBox = document.querySelector('.dp-edit-dokter');
+  const editPemeriksaBox = document.querySelector('.dp-edit-pemeriksa');
+  const editJadwalList = document.getElementById('dpEditJadwalList');
+  const editJadwalBtn = document.getElementById('dpEditJadwalBtn');
+
+  // Helper Modal
+  function openModal(el){ if(el) el.style.display = 'flex'; }
+  function closeModal(el){ if(el) el.style.display = 'none'; }
+
+  window.addEventListener('click', (e) => {
+    if (e.target.classList && e.target.classList.contains('modal-overlay')) {
+      closeModal(e.target);
+    }
+  });
+
+  // Helper untuk mengaktifkan/mematikan field (agar 'required' tidak bentrok)
+  function setSectionEnabled(sectionEl, enabled){
+    if (!sectionEl) return;
+    const fields = sectionEl.querySelectorAll('input, select, textarea');
+    fields.forEach(el => {
+      if (enabled) {
+        el.disabled = false;
+        if (el.dataset.wasRequired === '1') el.setAttribute('required', 'required');
+      } else {
+        if (el.hasAttribute('required')) el.dataset.wasRequired = '1';
+        el.disabled = true;
+        el.removeAttribute('required');
+      }
+    });
+  }
+
+  // ========== LOGIKA TAMBAH ==========
+  function syncTambahTipe(){
+    const tipe = tambahTipe.value;
+    if (tipe === 'dokter'){
+      tambahDokterBox.style.display = 'block';
+      tambahPemeriksaBox.style.display = 'none';
+      setSectionEnabled(tambahDokterBox, true);
+      setSectionEnabled(tambahPemeriksaBox, false);
+      formTambah.action = dokterStoreUrl;
+    } else {
+      tambahDokterBox.style.display = 'none';
+      tambahPemeriksaBox.style.display = 'block';
+      setSectionEnabled(tambahDokterBox, false);
+      setSectionEnabled(tambahPemeriksaBox, true);
+      formTambah.action = pemeriksaStoreUrl;
+    }
+  }
 
   btnOpenTambah?.addEventListener('click', () => {
-    // reset jadwal list biar bersih saat buka
-    tambahList.innerHTML = '';
-    tambahIdx = 0;
-    addTambahRow(); // default 1 baris seperti desain
-    openModal('dpModalTambah');
+    formTambah.reset();
+    tambahJadwalList.innerHTML = '';
+    addJadwalRow(tambahJadwalList, 'jadwal');
+    tambahTipe.value = 'dokter';
+    syncTambahTipe();
+    openModal(modalTambah);
   });
 
-  tambahJadwalBtn?.addEventListener('click', addTambahRow);
+  tambahTipe?.addEventListener('change', syncTambahTipe);
+  tambahJadwalBtn?.addEventListener('click', () => addJadwalRow(tambahJadwalList, 'jadwal'));
 
-  // =========================
-  // Edit Modal
-  // =========================
-  const editNama = document.getElementById('dpEditNama');
-  const editJenis = document.getElementById('dpEditJenis');
-  const editStatus = document.getElementById('dpEditStatus');
-  const editForm = document.getElementById('dpFormEdit');
-  const editList = document.getElementById('dpEditJadwalList');
-  const editTambahJadwalBtn = document.getElementById('dpEditTambahJadwalBtn');
+  // ========== LOGIKA EDIT (Event Delegation) ==========
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.dp-edit-btn');
+    if (!btn) return;
 
-  let editIdx = 0;
-  const addEditRow = (data={}) => {
-    editList.insertAdjacentHTML('beforeend', jadwalRow(editIdx++, data));
-    bindRemoveButtons(editList);
-  };
+    const tipe = btn.dataset.tipe;
+    const id   = btn.dataset.id;
+    editJadwalList.innerHTML = '';
 
-  document.querySelectorAll('.dp-edit-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
+    if (tipe === 'dokter'){
+      editDokterBox.style.display = 'block';
+      editPemeriksaBox.style.display = 'none';
+      setSectionEnabled(editDokterBox, true);
+      setSectionEnabled(editPemeriksaBox, false);
+
+      document.getElementById('dpEditNamaDokter').value = btn.dataset.nama || '';
+      document.getElementById('dpEditJenisDokter').value = btn.dataset.jenis || '';
+      document.getElementById('dpEditStatusDokter').value = btn.dataset.status || 'Aktif';
+
+      formEdit.action = dokterUpdateBase + '/' + id;
+
       const row = btn.closest('.dp-row');
-      const id = row.dataset.id;
-
-      editNama.value = row.dataset.nama || '';
-      editJenis.value = row.dataset.jenis || '';
-      editStatus.value = row.dataset.status || 'Aktif';
-
-      editForm.action = `{{ url('admin/dokter-pemeriksa') }}/${id}`;
-
-      // load jadwal untuk edit
-      editList.innerHTML = '';
-      editIdx = 0;
-
-      try{
-        const res = await fetch(`{{ url('admin/dokter-pemeriksa') }}/${id}/jadwal`);
-        const json = await res.json();
-
-        if(json.jadwal && json.jadwal.length){
-          json.jadwal.forEach(j => addEditRow(j));
-        }else{
-          addEditRow();
-        }
-      }catch(e){
-        addEditRow();
-      }
-
-      openModal('dpModalEdit');
-    });
-  });
-
-  editTambahJadwalBtn?.addEventListener('click', () => addEditRow());
-
-  // =========================
-  // Jadwal Modal (lihat)
-  // =========================
-  const jadwalBox = document.getElementById('dpJadwalViewBox');
-
-  document.querySelectorAll('.dp-jadwal-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const tipe = btn.dataset.tipe;
-      const id   = btn.dataset.id;
-      jadwalBox.innerHTML = `<div class="dp-jadwal-line">Memuat...</div>`;
-
-      try{
-        const res = await fetch(`{{ url('admin/dokter-pemeriksa') }}/${tipe}/${id}/jadwal`);
-        const json = await res.json();
-
-        if(json.jadwal && json.jadwal.length){
-          jadwalBox.innerHTML = json.jadwal.map(j =>
-            `<div class="dp-jadwal-line">${j.hari}, ${j.jam_mulai}-${j.jam_selesai}</div>`
-          ).join('');
-        }else{
-          jadwalBox.innerHTML = `<div class="dp-jadwal-line">Belum ada jadwal</div>`;
-        }
-      }catch(e){
-        jadwalBox.innerHTML = `<div class="dp-jadwal-line">Gagal memuat jadwal</div>`;
-      }
-
-      openModal('dpModalJadwal');
-    });
-  });
-
-})();
-
-
-(function(){
-  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-  document.querySelectorAll('.dp-status-select').forEach(sel => {
-    sel.addEventListener('change', async () => {
-      const tipe = sel.dataset.tipe;
-      const id   = sel.dataset.id;
-      const val  = sel.value;
-
-      const url = (tipe === 'pemeriksa')
-        ? `/adminpoli/dokter-pemeriksa/pemeriksa/${id}/status`
-        : `/adminpoli/dokter-pemeriksa/dokter/${id}/status`;
-
-      try{
-        const res = await fetch(url, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            ...(token ? {'X-CSRF-TOKEN': token} : {})
-          },
-          body: JSON.stringify({ status: val })
+      const raw = row?.dataset?.jadwal || '';
+      if (raw.trim()) {
+        raw.split(';;').forEach((s) => {
+          const [hari, mulai, selesai] = s.split('|');
+          addJadwalRow(editJadwalList, 'jadwal', hari, mulai, selesai);
         });
-
-        if(!res.ok) throw new Error('HTTP ' + res.status);
-
-        if(typeof showDpAlert === 'function') showDpAlert('Status berhasil diperbarui.');
-      }catch(e){
-        if(typeof showDpAlert === 'function') showDpAlert('Gagal update status.', true);
+      } else {
+        addJadwalRow(editJadwalList, 'jadwal');
       }
-    });
-  });
-})();
+    } else {
+      editDokterBox.style.display = 'none';
+      editPemeriksaBox.style.display = 'block';
+      setSectionEnabled(editDokterBox, false);
+      setSectionEnabled(editPemeriksaBox, true);
 
+      document.getElementById('dpEditNamaPemeriksa').value = btn.dataset.nama || '';
+      document.getElementById('dpEditStatusPemeriksa').value = btn.dataset.status || 'Aktif';
+      formEdit.action = pemeriksaUpdateBase + '/' + id;
+    }
+    openModal(modalEdit);
+  });
+
+  editJadwalBtn?.addEventListener('click', () => addJadwalRow(editJadwalList, 'jadwal'));
+
+  // ========== LIHAT JADWAL ==========
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.dp-jadwal-btn');
+    if (!btn) return;
+
+    const raw = btn.dataset.jadwal || '';
+    let html = '';
+    if (raw.trim()) {
+      html = raw.split(';;').map((s) => {
+        const [hari, mulai, selesai] = s.split('|');
+        return `<div style="margin-bottom:5px;"><b>${hari}</b>: ${mulai} - ${selesai}</div>`;
+      }).join('');
+    } else {
+      html = 'Tidak ada jadwal praktik.';
+    }
+    Swal.fire({ title: 'Jadwal Praktik', html: `<div style="text-align:left;">${html}</div>`, icon: 'info' });
+  });
+
+  // Helper Tambah Baris Jadwal
+  function addJadwalRow(container, baseName, hari = '', jamMulai = '', jamSelesai = ''){
+    const idx = container.querySelectorAll('.dp-jrow').length;
+    const row = document.createElement('div');
+    row.className = 'dp-jrow';
+    row.innerHTML = `
+      <input class="dp-jinput" type="text" name="${baseName}[${idx}][hari]" placeholder="Hari" value="${hari}" required>
+      <input class="dp-jinput" type="time" name="${baseName}[${idx}][jam_mulai]" value="${jamMulai}" required>
+      <span class="dp-jsep">-</span>
+      <input class="dp-jinput" type="time" name="${baseName}[${idx}][jam_selesai]" value="${jamSelesai}" required>
+      <button type="button" class="dp-jremove">x</button>
+    `;
+    row.querySelector('.dp-jremove').addEventListener('click', () => row.remove());
+    container.appendChild(row);
+  }
+});
 </script>
-@endsection
+@endpush
