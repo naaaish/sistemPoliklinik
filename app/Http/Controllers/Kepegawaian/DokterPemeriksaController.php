@@ -213,15 +213,7 @@ class DokterPemeriksaController extends Controller
 
     }
 
-    public function destroyDokter($id)
-    {
-        DB::transaction(function () use ($id) {
-            JadwalDokter::where('id_dokter', $id)->delete();
-            Dokter::where('id_dokter', $id)->delete();
-        });
 
-        return back()->with('success', 'Dokter berhasil dihapus.');
-    }
 
     // =========================
     // CRUD PEMERIKSA
@@ -266,11 +258,6 @@ class DokterPemeriksaController extends Controller
         return back()->with('success', 'Pemeriksa berhasil diperbarui.');
     }
 
-    public function destroyPemeriksa($id)
-    {
-        Pemeriksa::where('id_pemeriksa', $id)->delete();
-        return back()->with('success', 'Pemeriksa berhasil dihapus.');
-    }
 
     public function updateStatusDokter(Request $request, $id)
     {

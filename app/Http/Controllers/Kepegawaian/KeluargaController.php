@@ -20,6 +20,7 @@ class KeluargaController extends Controller
             'urutan_anak' => 'nullable|integer'
         ]);
 
+        $this->reSyncActiveStatus($request->nip);
         $nip = $request->nip;
         $hubungan = $request->hubungan_keluarga;
 
@@ -161,7 +162,7 @@ class KeluargaController extends Controller
 
     // --- LOGIKA UTAMA SINKRONISASI ---
 
-    private function reSyncActiveStatus($nip)
+    public function reSyncActiveStatus($nip)
     {
         $pegawai = DB::table('pegawai')->where('nip', $nip)->first();
         if (!$pegawai) return;

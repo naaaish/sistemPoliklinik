@@ -1,5 +1,5 @@
 .header{
-    background:linear-gradient(90deg,#B4F2F4,#7DEAEE);
+    background:linear-gradient(90deg,#316BA1,#cad8e3);
     padding:24px 32px;
     border-radius:14px;
     display:flex;
@@ -9,7 +9,7 @@
 
 .header h3{
     font-size:20px;
-    color:#0319A7;
+    color:#ffffff;
 }
 
 .card-grid{

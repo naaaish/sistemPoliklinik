@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
+use App\Http\Controllers\Kepegawaian\KeluargaController;
 
 class KeluargaSeeder extends Seeder
 {
@@ -230,6 +231,11 @@ class KeluargaSeeder extends Seeder
         ];
 
         DB::table('keluarga')->insert($data_keluarga);
+        $nips = DB::table('keluarga')->distinct()->pluck('nip');
+
+        foreach ($nips as $nip) {
+            app(KeluargaController::class)->reSyncActiveStatus($nip);
+        }
     }
 
     /**

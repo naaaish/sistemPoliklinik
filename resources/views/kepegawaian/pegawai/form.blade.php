@@ -10,7 +10,6 @@
 
         <div class="page-header">
             <h4>{{ $mode == 'create' ? 'Tambah Pegawai' : 'Edit Pegawai' }}</h4>
-            <a href="{{ route('pegawai.index') }}" class="btn btn-secondary btn-sm">Kembali</a>
         </div>
 
         @if(session('success'))
@@ -81,14 +80,6 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="form-row-custom">
-                            <label class="form-label-custom">Tanggal Masuk</label>
-                            <input type="date" name="tgl_masuk" class="form-control-custom"
-                                   value="{{ old('tgl_masuk', $pegawai->tgl_masuk ?? '') }}">
-                        </div>
-                    </div>
-
 
                     <div class="col-md-6">
                         <div class="form-row-custom">
@@ -140,9 +131,41 @@
                     </div>
                 </div>
 
-                <div class="mt-4 text-end">
-                    <a href="{{ route('pegawai.index') }}" class="btn btn-secondary px-4 me-2">Batal</a>
-                    <button type="submit" class="btn btn-success px-4">Simpan</button>
+                {{-- BUTTONS SECTION - BALANCED & MODERN --}}
+                <div class="form-actions">
+                    {{-- Left Side - Back to Detail Button --}}
+                    <div class="form-actions-left">
+                        @if($mode == 'edit')
+                        @method('PUT')
+                        <a href="{{ route('pegawai.show', $pegawai->nip) }}" class="btn-form btn-back-detail">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M19 12H5M12 19l-7-7 7-7"/>
+                            </svg>
+                            Kembali ke Detail
+                        </a>
+                        @endif
+                    </div>
+
+                    {{-- Right Side - Action Buttons --}}
+                    <div class="form-actions-right">
+                        <a href="{{ $mode == 'create' ? route('pegawai.index') : route('pegawai.show', $pegawai->nip) }}" 
+                           class="btn-form btn-batal">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            Batal
+                        </a>
+                        
+                        <button type="submit" class="btn-form btn-simpan">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                <polyline points="7 3 7 8 15 8"></polyline>
+                            </svg>
+                            Simpan Data
+                        </button>
+                    </div>
                 </div>
 
                 </form>

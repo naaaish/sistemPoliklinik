@@ -539,7 +539,7 @@ body{ margin:0; }
 .dp-jinput{
   height: 38px;
   border: 1px solid #CFE0FF;
-  border-radius: 8px;
+  border-radius: 6px;
   padding: 0 10px;
   outline:none;
   font-weight: 600;
@@ -549,7 +549,7 @@ body{ margin:0; }
 
 .dp-jinput[type="text"]{ 
   flex: 1;              
-  min-width: 90px;     
+  min-width: 60px;     
 }
 
 .dp-jinput[type="time"]{ 
@@ -765,3 +765,4 @@ button img,
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
+

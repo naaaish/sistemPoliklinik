@@ -14,7 +14,7 @@
         <p>Total Riwayat</p>
     </div>
 
-    {{-- CARD TENGAH (yang ditonjolin) --}}
+    {{-- CARD TENGAH --}}
     <div class="card highlight">
         <h1>{{ $hariIni }}</h1>
         <p>Pemeriksaan Hari Ini</p>

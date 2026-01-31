@@ -11,9 +11,6 @@
         {{-- PAGE HEADER --}}
         <div class="page-header">
             <div class="d-flex align-items-center">
-                <a href="{{ route('pegawai.show', $pegawai->nip) }}" class="btn-back-icon">
-                    <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Back">
-                </a>
                 <h4 class="mb-0">{{ $mode == 'create' ? 'Tambah Anggota Keluarga' : 'Edit Anggota Keluarga' }}</h4>
             </div>
         </div>
@@ -93,14 +90,38 @@
                         </div>
                     </div>
 
-                    {{-- BUTTONS --}}
-                    <div class="mt-5 text-end border-top pt-4">
-                        <a href="{{ route('pegawai.show', $pegawai->nip) }}" class="btn btn-secondary px-4 me-2">
-                            Batal
-                        </a>
-                        <button type="submit" class="btn btn-success px-4">
-                            Simpan Data Keluarga
-                        </button>
+                    {{-- BUTTONS SECTION - BALANCED & MODERN --}}
+                    <div class="form-actions">
+                        {{-- Left Side - Back Button --}}
+                        <div class="form-actions-left">
+                            <a href="{{ route('pegawai.show', $pegawai->nip) }}" class="btn-form btn-back-detail">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                                </svg>
+                                Kembali ke Detail Pegawai
+                            </a>
+                        </div>
+
+                        {{-- Right Side - Action Buttons --}}
+                        <div class="form-actions-right">
+                            <a href="{{ route('pegawai.show', $pegawai->nip) }}" class="btn-form btn-batal">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                                Batal
+                            </a>
+                            
+                            <button type="submit" class="btn-form btn-simpan">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="9" cy="7" r="4"></circle>
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                </svg>
+                                Simpan Data Keluarga
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
