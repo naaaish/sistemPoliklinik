@@ -315,10 +315,19 @@ class DiagnosaController extends Controller
             );
         }
 
-        $pdf = Pdf::loadView('adminpoli.diagnosa.export_pdf', [
-            'data' => $data
-        ])->setPaper('A4','portrait');
+        if ($request->format === 'pdf') {
+            if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
+                return redirect()->route('adminpoli.diagnosa.index')
+                    ->with('error', 'Export PDF belum aktif (Dompdf belum terpasang).');
+            }
 
-        return $pdf->download($fileBase.'.pdf');
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('adminpoli.diagnosa.export_pdf', [
+                'data' => $data,
+                'from' => $request->from,
+                'to'   => $request->to,
+            ])->setPaper('A4', 'portrait');
+
+            return $pdf->download($fileBase . '.pdf');
+        }
     }
 }

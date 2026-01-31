@@ -63,7 +63,6 @@
 
         <button type="submit" name="action" value="preview" class="diag-btn-soft"><span>Preview</span></button>
         <button type="submit" name="action" value="download" class="diag-btn-soft">
-          <img src="{{ asset('assets/adminPoli/download.png') }}" alt="download" class="diag-ic">
           <span>Download</span>
         </button>
       </form>

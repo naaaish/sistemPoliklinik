@@ -3,18 +3,19 @@
 <head>
   <meta charset="utf-8">
   <style>
-    body{ font-family: DejaVu Sans, sans-serif; font-size:11px; }
-    table{ border-collapse:collapse; width:100%; }
-    th,td{ border:1px solid #000; padding:6px; vertical-align: top; }
-    th{ background:#eee; }
+    body { font-family: DejaVu Sans, sans-serif; font-size: 11px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border:1px solid #000; padding:6px; vertical-align: top; }
+    th { background:#eee; }
   </style>
 </head>
 <body>
   <h3>Data Diagnosa</h3>
+
   <table>
     <thead>
       <tr>
-        <th style="width:40px;">No</th>
+        <th>ID Diagnosa</th>
         <th>Diagnosa</th>
         <th>Keterangan</th>
         <th>Klasifikasi Nama</th>
@@ -22,9 +23,9 @@
       </tr>
     </thead>
     <tbody>
-      @forelse($data as $i => $row)
+      @forelse($data as $row)
         <tr>
-          <td>{{ $i + 1 }}</td>
+          <td>{{ $row->id_diagnosa }}</td>
           <td>{{ $row->diagnosa }}</td>
           <td>{{ $row->keterangan }}</td>
           <td>{{ $row->klasifikasi_nama }}</td>

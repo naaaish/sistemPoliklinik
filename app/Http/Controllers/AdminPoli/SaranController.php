@@ -15,16 +15,14 @@ class SaranController extends Controller
     public function index(Request $request)
     {
         $query = DB::table('saran')
-            ->join('diagnosa', 'diagnosa.id_diagnosa', '=', 'saran.id_diagnosa')
-            ->where('saran.is_active', '1')
+            ->where('is_active', '1')
             ->orderBy('created_at', 'desc');;
 
         if ($request->filled('q')) {
             $q = $request->q;
             $query->where(function ($w) use ($q) {
-                $w->where('saran.saran', 'like', '%' . $q . '%')
-                  ->orWhere('diagnosa.diagnosa', 'like', '%' . $q . '%')
-                  ->orWhere('saran.id_saran', 'like', '%' . $q . '%');
+                $w->where('saran', 'like', '%' . $q . '%')
+                  ->orWhere('id_saran', 'like', '%' . $q . '%');
             });
         }
 
@@ -37,14 +35,12 @@ class SaranController extends Controller
 
         $baseSelect = $query
             ->select(
-                'saran.id_saran',
-                'saran.saran as saran_text',
-                'saran.id_diagnosa',
-                'diagnosa.diagnosa as diagnosa_text',
-                'saran.is_active',
-                'saran.created_at'
+                'id_saran',
+                'saran as saran_text',
+                'is_active',
+                'created_at'
             )
-            ->orderBy('saran.created_at', 'desc');
+            ->orderBy('created_at', 'desc');
 
         if ($isAll) {
             $saran = $baseSelect->get();
@@ -64,20 +60,13 @@ class SaranController extends Controller
                 ])
                 ->count();
         }
-
-        $diagnosaList = DB::table('diagnosa')
-            ->select('id_diagnosa', 'diagnosa')
-            ->orderBy('diagnosa')
-            ->get();
-
-        return view('adminpoli.saran.index', compact('saran', 'previewCount', 'diagnosaList', 'perPageRaw'));
+        return view('adminpoli.saran.index', compact('saran', 'previewCount', 'perPageRaw'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'saran'      => 'required|string',
-            'id_diagnosa'=> 'required|string|max:20',
         ]);
 
         $saranText = trim($request->saran);
@@ -85,14 +74,13 @@ class SaranController extends Controller
         // cek duplikat saran aktif (biar konsisten seperti obat)
         $existsAktif = DB::table('saran')
             ->whereRaw('LOWER(saran) = ?', [mb_strtolower($saranText)])
-            ->where('id_diagnosa', $request->id_diagnosa)
             ->where('is_active', '1')
             ->exists();
 
         if ($existsAktif) {
             return redirect()->route('adminpoli.saran.index')
                 ->withInput()
-                ->with('error', 'Saran untuk diagnosa ini sudah ada. Gunakan teks lain.');
+                ->with('error', 'Saran ini sudah ada.');
         }
 
         // Ambil id_saran terakhir berdasarkan urutan terbesar (SRN-xxx)
@@ -110,7 +98,6 @@ class SaranController extends Controller
         DB::table('saran')->insert([
             'id_saran'   => $newId,
             'saran'      => $saranText,
-            'id_diagnosa'=> $request->id_diagnosa,
             'is_active'  => '1',
             'created_at' => now(),
             'updated_at' => now(),
@@ -124,14 +111,12 @@ class SaranController extends Controller
     {
         $request->validate([
             'saran'      => 'required|string',
-            'id_diagnosa'=> 'required|string|max:20',
         ]);
 
         $saranText = trim($request->saran);
 
         $existsAktif = DB::table('saran')
             ->whereRaw('LOWER(saran) = ?', [mb_strtolower($saranText)])
-            ->where('id_diagnosa', $request->id_diagnosa)
             ->where('is_active', '1')
             ->where('id_saran', '!=', $id)
             ->exists();
@@ -139,14 +124,13 @@ class SaranController extends Controller
         if ($existsAktif) {
             return redirect()->route('adminpoli.saran.index')
                 ->withInput()
-                ->with('error', 'Saran untuk diagnosa ini sudah ada.');
+                ->with('error', 'Saran ini sudah ada.');
         }
 
         DB::table('saran')
             ->where('id_saran', $id)
             ->update([
                 'saran'       => $saranText,
-                'id_diagnosa' => $request->id_diagnosa,
                 'updated_at'  => now(),
             ]);
 
@@ -185,13 +169,12 @@ class SaranController extends Controller
         $header = array_map(fn($h) => Str::slug((string)$h, '_'), $rows[0]);
 
         // header yang diterima:
-        // saran | id_diagnosa
+        // saran
         $idxSaran = array_search('saran', $header);
-        $idxDiag  = array_search('id_diagnosa', $header);
 
-        if ($idxSaran === false || $idxDiag === false) {
+        if ($idxSaran === false) {
             return redirect()->route('adminpoli.saran.index')
-                ->with('error', 'Header harus mengandung: saran, id_diagnosa');
+                ->with('error', 'Header harus mengandung: saran');
         }
 
         $inserted = 0;
@@ -199,24 +182,14 @@ class SaranController extends Controller
 
         foreach (array_slice($rows, 1) as $r) {
             $saranText = trim((string)($r[$idxSaran] ?? ''));
-            $idDiag    = trim((string)($r[$idxDiag] ?? ''));
 
-            if ($saranText === '' || $idDiag === '') {
+            if ($saranText === '') {
                 $skipped++;
                 continue;
             }
-
-            // pastikan diagnosa ada
-            $diagExists = DB::table('diagnosa')->where('id_diagnosa', $idDiag)->exists();
-            if (!$diagExists) {
-                $skipped++;
-                continue;
-            }
-
-            // duplikat aktif (saran+diagnosa)
+            
             $existsAktif = DB::table('saran')
                 ->whereRaw('LOWER(saran) = ?', [mb_strtolower($saranText)])
-                ->where('id_diagnosa', $idDiag)
                 ->where('is_active', '1')
                 ->exists();
 
@@ -237,7 +210,6 @@ class SaranController extends Controller
             DB::table('saran')->insert([
                 'id_saran'    => $newId,
                 'saran'       => $saranText,
-                'id_diagnosa' => $idDiag,
                 'is_active'   => '1',
                 'created_at'  => now(),
                 'updated_at'  => now(),
@@ -267,18 +239,15 @@ class SaranController extends Controller
         $to   = $request->to   . ' 23:59:59';
 
         $data = DB::table('saran')
-            ->join('diagnosa', 'diagnosa.id_diagnosa', '=', 'saran.id_diagnosa')
             ->select(
-                'saran.id_saran',
-                'saran.saran',
-                'saran.id_diagnosa',
-                'diagnosa.diagnosa as diagnosa_text',
-                'saran.created_at',
-                'saran.is_active'
+                'id_saran',
+                'saran',
+                'created_at',
+                'is_active'
             )
-            ->where('saran.is_active', '1')
-            ->whereBetween('saran.created_at', [$from, $to])
-            ->orderBy('saran.created_at', 'desc')
+            ->where('is_active', '1')
+            ->whereBetween('created_at', [$from, $to])
+            ->orderBy('created_at', 'desc')
             ->get();
 
         // ====== PREVIEW ======
@@ -302,10 +271,10 @@ class SaranController extends Controller
                 $out = fopen('php://output', 'w');
                 fprintf($out, chr(0xEF).chr(0xBB).chr(0xBF)); // BOM UTF-8
 
-                fputcsv($out, ['ID Saran', 'Saran', 'ID Diagnosa', 'Diagnosa']);
+                fputcsv($out, ['ID Saran', 'Saran']);
 
                 foreach ($data as $row) {
-                    fputcsv($out, [$row->id_saran, $row->saran, $row->id_diagnosa, $row->diagnosa_text]);
+                    fputcsv($out, [$row->id_saran, $row->saran]);
                 }
 
                 fclose($out);
