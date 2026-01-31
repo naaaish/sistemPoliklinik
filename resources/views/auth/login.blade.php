@@ -39,23 +39,28 @@ body{
     height:100%;
     z-index:1;
     
+    /* PAKAI GAMBAR - upload ke public/images/login-bg.jpg */
     background-image: url('/assets/home/login.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     
+    /* Atau pakai gradient kalau tidak ada gambar */
+    /* background: linear-gradient(135deg, #1a3a52 0%, #2c5f7f 50%, #1a3a52 100%); */
+}
 
+/* OVERLAY BIRU di atas gambar - ini yang bikin efek kebiruan */
 .bg-overlay-blue{
     position:absolute;
     top:0;
     left:0;
     width:100%;
     height:100%;
-    background: rgba(26, 58, 82, 0.45); 
+    background: rgba(26, 58, 82, 0.45); /* Blue overlay - bisa diatur transparansinya */
     z-index:2;
 }
 
-/* Dark Overlay */
+/* Dark Overlay tambahan */
 .bg-overlay{
     position:absolute;
     top:0;
@@ -66,7 +71,7 @@ body{
     z-index:3;
 }
 
-/* Radial Overlay */
+/* Radial Overlay untuk depth */
 .radial-overlay{
     position:absolute;
     top:0;
@@ -77,7 +82,7 @@ body{
     z-index:4;
 }
 
-/* Floating Circles  */
+/* Floating Circles - buat dekorasi */
 .bg-circle{
     position:absolute;
     border-radius:50%;
@@ -119,7 +124,7 @@ body{
     max-width:92%;
     border-radius:24px;
     
-    /* SHADOW */
+    /* SHADOW - bukan outline/border */
     box-shadow:
         0 30px 80px rgba(0,0,0,.4),
         0 15px 40px rgba(0,0,0,.3),
@@ -128,7 +133,10 @@ body{
     overflow:hidden;
     position:relative;
     z-index:10;
-   
+    
+    /* Border dihapus - diganti shadow aja */
+    /* border: none; */
+    
     animation: slideUp 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -146,11 +154,15 @@ body{
 /* ========== HEADER - LEBIH PUDAR ========== */
 
 .login-header{
+    /* Background lebih soft/pudar dengan opacity */
     background: linear-gradient(135deg, 
         rgba(26, 58, 82, 0.85), 
         rgba(44, 95, 127, 0.85)
     );
-
+    
+    /* Atau pakai warna solid yang lebih soft */
+    /* background: linear-gradient(135deg, #405a6f, #5a7f97); */
+    
     color:white;
     padding:40px 35px;
     text-align:center;
@@ -158,6 +170,7 @@ body{
     overflow:hidden;
 }
 
+/* Dekorasi di header - lebih subtle */
 .login-header::before{
     content:"";
     position:absolute;
@@ -187,12 +200,13 @@ body{
     position:relative;
     z-index:2;
     text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    /* Opacity sedikit dikurangi supaya lebih soft */
     opacity: 0.98;
 }
 
 .login-header p{
     margin-top:10px;
-    opacity:.88; 
+    opacity:.88; /* Dikurangi dari .92 supaya lebih soft */
     font-size:15px;
     position:relative;
     z-index:2;
@@ -255,6 +269,69 @@ input::placeholder{
     color:#cbd5e1;
 }
 
+/* ========== REMEMBER ME & FORGOT PASSWORD ========== */
+
+.form-options{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:24px;
+    margin-top:8px;
+}
+
+.remember-me{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    cursor:pointer;
+    user-select:none;
+}
+
+.remember-me input[type="checkbox"]{
+    width:18px;
+    height:18px;
+    cursor:pointer;
+    accent-color:var(--blue-main);
+    margin:0;
+    padding:0;
+}
+
+.remember-me span{
+    font-size:13px;
+    font-weight:400;
+    color:#475569;
+    margin:0;
+    cursor:pointer;
+}
+
+.forgot-password{
+    font-size:13px;
+    color:var(--blue-main);
+    text-decoration:none;
+    font-weight:500;
+    transition: all 0.3s ease;
+    position:relative;
+}
+
+.forgot-password::after{
+    content:'';
+    position:absolute;
+    bottom:-2px;
+    left:0;
+    width:0;
+    height:2px;
+    background:var(--blue-main);
+    transition: width 0.3s ease;
+}
+
+.forgot-password:hover::after{
+    width:100%;
+}
+
+.forgot-password:hover{
+    color:#2c4a5e;
+}
+
 /* ========== BUTTON ========== */
 
 .login-btn{
@@ -267,7 +344,7 @@ input::placeholder{
     font-weight:600;
     font-size:16px;
     cursor:pointer;
-    margin-top:8px;
+    margin-top:0;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow:
         0 8px 20px rgba(64, 90, 111,.35),
@@ -386,6 +463,12 @@ input::placeholder{
     .bg-circle{
         display:none;
     }
+
+    .form-options{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:12px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -410,6 +493,12 @@ input::placeholder{
         padding:15px;
         font-size:15px;
     }
+
+    .form-options{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+    }
 }
 </style>
 </head>
@@ -418,7 +507,7 @@ input::placeholder{
 <!-- Background Image -->
 <div class="bg-image"></div>
 
-<!-- Blue Overlay -->
+<!-- Blue Overlay - ini yang bikin efek kebiruan di gambar -->
 <div class="bg-overlay-blue"></div>
 
 <!-- Dark Overlay -->
@@ -475,6 +564,15 @@ input::placeholder{
                     </svg>
                     <input type="password" name="password" placeholder="Masukkan password" required>
                 </div>
+            </div>
+
+            <!-- Remember Me & Forgot Password -->
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" name="remember" id="remember">
+                    <span>Remember me</span>
+                </label>
+                <a href="#" class="forgot-password">Lupa Password?</a>
             </div>
 
             <button class="login-btn">Masuk</button>

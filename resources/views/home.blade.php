@@ -34,9 +34,9 @@
                 Login
             </a>
 
-            <a href="#layanan" class="btn-outline">
+            <button class="btn-outline" onclick="openKonsultasiModal()">
                 Konsultasi Online
-            </a>
+            </button>
         </div>
     </div>
 
@@ -44,6 +44,83 @@
         <img src="{{ asset('images/bg5.png') }}" alt="Healthcare">
     </div>
 </section>
+
+{{-- ================= MODAL KONSULTASI ================= --}}
+<div id="konsultasiModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Pilih Layanan Konsultasi</h3>
+            <span class="close-modal" onclick="closeKonsultasiModal()">&times;</span>
+        </div>
+        
+        <div class="modal-body">
+            {{-- TENAGA MEDIS --}}
+            <div class="konsultasi-section">
+                <h4 class="section-label">Tenaga Medis</h4>
+                <div class="konsultasi-buttons">
+                    <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Dokter%20Poliklinik" 
+                       target="_blank" 
+                       class="konsultasi-btn">
+                        <img src="{{ asset('assets/home/doctor.png') }}" alt="Dokter">
+                        <span>Dokter Poliklinik</span>
+                    </a>
+                    <a href="https://wa.me/6281234567891?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Dokter%20Perusahaan" 
+                       target="_blank" 
+                       class="konsultasi-btn">
+                        <img src="{{ asset('assets/home/doctor.png') }}" alt="Dokter">
+                        <span>Dokter Perusahaan</span>
+                    </a>
+                </div>
+            </div>
+
+            {{-- TENAGA KESEHATAN --}}
+            <div class="konsultasi-section">
+                <h4 class="section-label">Tenaga Kesehatan</h4>
+                <div class="konsultasi-buttons">
+                    <a href="https://wa.me/6281234567892?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Perawat" 
+                       target="_blank" 
+                       class="konsultasi-btn">
+                        <img src="{{ asset('assets/home/chat.png') }}" alt="Perawat">
+                        <span>Perawat</span>
+                    </a>
+                </div>
+            </div>
+
+            {{-- APOTIK --}}
+            <div class="konsultasi-section">
+                <h4 class="section-label">Apotik</h4>
+                <div class="konsultasi-buttons">
+                    <a href="https://wa.me/6281234567893?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Apoteker" 
+                       target="_blank" 
+                       class="konsultasi-btn">
+                        <img src="{{ asset('assets/home/drugs.png') }}" alt="Apoteker">
+                        <span>Apoteker</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openKonsultasiModal() {
+    document.getElementById('konsultasiModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeKonsultasiModal() {
+    document.getElementById('konsultasiModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal ketika klik di luar modal
+window.onclick = function(event) {
+    const modal = document.getElementById('konsultasiModal');
+    if (event.target === modal) {
+        closeKonsultasiModal();
+    }
+}
+</script>
 
 {{-- ================= LAYANAN ================= --}}
 <section id="layanan" class="services">

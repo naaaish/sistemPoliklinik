@@ -25,7 +25,11 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        if (Auth::attempt($credentials)) {
+        // Cek apakah remember me di-centang
+        $remember = $request->has('remember');
+
+        // Login dengan remember me
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             $role = strtolower(Auth::user()->role);
@@ -45,7 +49,7 @@ class AuthController extends Controller
             return redirect('/');
         }
 
-        return back()->withErrors(['username' => 'Login gagal']);
+        return back()->withErrors(['username' => 'Username atau password salah'])->onlyInput('username');
     }
 
 

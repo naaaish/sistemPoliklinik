@@ -126,12 +126,7 @@
                 : route('kepegawaian.dokter_pemeriksa.pemeriksa.destroy', $d->id)
               }}"
             >
-              @csrf
-              @method('DELETE')
-              <button type="submit" class="dp-act dp-del">
-                <span>Hapus</span>
-                <img src="{{ asset('assets/adminPoli/sampah.png') }}" class="dp-ic-sm" alt="">
-              </button>
+
             </form>
           </div>
         </div>
@@ -440,25 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
     Swal.fire({ title: 'Jadwal Praktik', html: `<div style="text-align:left;">${html}</div>`, icon: 'info' });
   });
 
-  // ========== KONFIRMASI HAPUS ==========
-  document.addEventListener('submit', (e) => {
-    if (e.target.classList.contains('js-dp-delete')) {
-      e.preventDefault();
-      const form = e.target;
-      Swal.fire({
-        title: 'Hapus data ini?',
-        text: 'Data tidak dapat dikembalikan.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3B5E8C',
-        confirmButtonText: 'Ya, Hapus!',
-        cancelButtonText: 'Batal'
-      }).then((result) => {
-        if (result.isConfirmed) form.submit();
-      });
-    }
-  });
+
 
   // Helper Tambah Baris Jadwal
   function addJadwalRow(container, baseName, hari = '', jamMulai = '', jamSelesai = ''){

@@ -4,21 +4,22 @@
 }
 
 /* =================== DETAIL PEGAWAI PAGE =================== */
+
 .detail-pegawai-container {
     padding: 28px 60px;
     background: #F1F8FF;
+    min-height: 100vh;
 }
 
-/* PAGE HEADER */
+/* =================== PAGE HEADER =================== */
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
     padding: 0;
 }
 
-.page-header h1,
 .page-header h4 {
     font-size: 24px;
     font-weight: 700;
@@ -32,10 +33,32 @@
     align-items: center;
 }
 
-.btn-back {
-    font-size: 20px;
+.btn-back-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     text-decoration: none;
-    color: #316BA1;
+}
+
+.btn-back-icon:hover {
+    background: #316BA1;
+    transform: translateX(-4px);
+    box-shadow: 0 4px 12px rgba(49, 107, 161, 0.3);
+}
+
+.btn-back-icon svg {
+    stroke: #316BA1;
+    transition: stroke 0.3s ease;
+}
+
+.btn-back-icon:hover svg {
+    stroke: white;
 }
 
 /* Edit Button */
@@ -59,165 +82,256 @@
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4);
     color: white !important;
-    text-decoration: none;
 }
 
-.btn-edit svg {
-    width: 16px;
-    height: 16px;
-}
-
-.page-header {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    background: #f6f9fc;
-    padding-top: 4px;
-}
-
-.btn-tambah {
-    display: inline-flex;
+/* =================== PROFILE CARD NEW =================== */
+.profile-card-new {
+    background: linear-gradient(135deg, #316BA1 0%, #4A89C5 100%);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 10px 30px rgba(49, 107, 161, 0.2);
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 8px;
-    background: #2563eb;
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: 10px;
-    font-weight: 600;
-    text-decoration: none;
+    gap: 32px;
+    color: white;
 }
 
-.btn-tambah:hover {
-    background: #1d4ed8;
-    color: #fff;
+.profile-left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
 }
 
-
-/* PROFILE CARD */
-.profile-card {
-    background: #fff;
-    border-radius: 14px;
-    overflow: hidden;
-    margin-bottom: 28px;
-}
-
-.profile-cover {
-    height: 70px;
-    background: #6B93B8;
-}
-
-.profile-body {
-    padding: 0 24px 24px;
-    text-align: center;
-}
-
-.profile-avatar {
+.profile-avatar-new {
     width: 120px;
     height: 120px;
-    border-radius: 50%;
+    border-radius: 20px;
     overflow: hidden;
-    margin: -60px auto 0;
-    border: 5px solid white;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    position: relative;
-    z-index: 10;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.profile-avatar img {
+.profile-avatar-new img {
     width: 100%;
     height: 100%;
-    border-radius: 50%;
     object-fit: cover;
 }
 
-.profile-body h2 {
-    margin: 6px 0 2px;
-    font-size: 20px;
-}
-
-.profile-bagian {
-    font-size: 14px;
-    color: #777;
-    margin-bottom: 10px;
-}
-
-/* Profile Meta - Status Dropdown Inline */
-.profile-meta {
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
     display: flex;
-    justify-content: center;
-    gap: 12px;
     align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.avatar-placeholder svg {
+    width: 60px;
+    height: 60px;
+    stroke: rgba(255, 255, 255, 0.6);
+}
+
+.profile-info h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: white;
+}
+
+.nip-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.nip-badge svg {
+    stroke: white;
+}
+
+.profile-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    font-size: 12px;
+    opacity: 0.8;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.status-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.status-label {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.9;
 }
 
 .status-form-inline {
     margin: 0;
 }
 
-.status-dropdown-inline {
-    min-width: 120px;
+.status-dropdown-new {
+    min-width: 140px;
     font-weight: 600;
-    border-radius: 20px;
-    padding: 6px 14px;
-    border: 2px solid;
+    border-radius: 12px;
+    padding: 8px 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
     transition: all 0.3s ease;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
+    backdrop-filter: blur(10px);
 }
 
-.status-dropdown-inline.status-active {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+.status-dropdown-new.status-active {
+    background: rgba(16, 185, 129, 0.25);
     border-color: #10b981;
-    color: #065f46;
+    color: #121212;
 }
 
-.status-dropdown-inline.status-inactive {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+.status-dropdown-new.status-inactive {
+    background: rgba(239, 68, 68, 0.25);
     border-color: #ef4444;
-    color: #991b1b;
+    color: #080808;
 }
 
-.status-dropdown-inline:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.status-dropdown-new:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.nip {
-    font-size: 13px;
-    color: #666;
+/* =================== DATA GRID 2 COLUMNS =================== */
+.data-grid-2col {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* =================== DATA CARD NEW =================== */
+.data-card-new {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+.data-card-new:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.card-header-new {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.card-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #316BA1 0%, #4A89C5 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(49, 107, 161, 0.2);
+}
+
+.card-icon svg {
+    width: 22px;
+    height: 22px;
+    stroke: white;
+}
+
+.card-header-new h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.card-body-new {
+    padding: 24px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-size: 14px;
+    color: #64748b;
     font-weight: 500;
 }
 
-/* Badge Status */
-.badge {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 13px;
+.detail-value {
+    font-size: 14px;
+    color: #1e293b;
     font-weight: 600;
 }
 
-.badge-active {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-    color: #065f46;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    display: inline-block;
-    border: 2px solid #10b981;
+.alamat-text {
+    font-size: 14px;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
 }
 
-.badge-inactive {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    color: #991b1b;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 600;
-    display: inline-block;
-    border: 2px solid #ef4444;
-}
-
-/* DATA CARD */
+/* =================== TABLE KELUARGA (TETAP) =================== */
 .data-card {
     background: #fff;
     border-radius: 14px;
@@ -227,14 +341,10 @@
 
 .card-header {
     height: 56px;
-    background: #5B88B2;
+    background: #316BA1;
     display: flex;
     align-items: center;
     padding: 0 28px;
-}
-
-.card-header.alt {
-    background: #5283B0;
 }
 
 .card-header-inner {
@@ -255,39 +365,119 @@
     color: #fff;
     font-size: 18px;
     font-weight: 500;
-    line-height: 1;
 }
 
-/* BODY */
 .card-body {
     padding: 24px 28px 30px;
 }
 
-.grid-2 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 22px 40px;
+.btn-tambah {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2563eb;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-.grid-1 {
-    display: grid;
-    gap: 20px;
+.btn-tambah:hover {
+    background: #1d4ed8;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
 }
 
-.card-body label {
-    font-size: 13px;
-    color: #888;
-    display: block;
-    margin-bottom: 4px;
+.table {
+    width: 100%;
+    margin-bottom: 0;
 }
 
-.card-body p {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 500;
-    color: #111;
+.table-light {
+    background: #f8fafc;
 }
 
+.table-hover tbody tr:hover {
+    background: #f1f5f9;
+}
+
+.table th {
+    font-weight: 600;
+    color: #475569;
+    padding: 12px;
+    font-size: 14px;
+}
+
+.table td {
+    padding: 12px;
+    color: #1e293b;
+    font-size: 14px;
+}
+
+/* =================== RESPONSIVE =================== */
+@media (max-width: 1024px) {
+    .profile-card-new {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-left {
+        flex-direction: column;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .data-grid-2col {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .detail-pegawai-container {
+        padding: 20px;
+    }
+
+    .profile-card-new {
+        padding: 24px;
+    }
+
+    .profile-avatar-new {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-info h2 {
+        font-size: 22px;
+    }
+
+    .page-header h4 {
+        font-size: 20px;
+    }
+}
+
+/* =================== ANIMATIONS =================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.profile-card-new,
+.data-card-new,
+.data-card {
+    animation: fadeIn 0.5s ease-out;
+}
 /* Alert Success */
 .alert-success {
     border-radius: 12px;
@@ -457,7 +647,7 @@ select.status-akun option[value="0"] {
     background: #e16d6d;
     border: none;
     border-radius: 10px;
-    padding: 12px 24px;
+    padding: px 24px;
     font-weight: 600;
     transition: all 0.3s ease;
     margin-top: 15px;
@@ -566,4 +756,144 @@ select.status-akun option[value="0"] {
     background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
     box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3);
     margin-right: 10px;
+}
+
+/* =================== PERBAIKAN BUTTON SECTION =================== */
+
+/* Container untuk tombol - lebih rapi dan seimbang */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 2px solid #e2e8f0;
+}
+
+.form-actions-left {
+    display: flex;
+    gap: 10px;
+}
+
+.form-actions-right {
+    display: flex;
+    gap: 10px;
+}
+
+/* =================== BUTTON STYLES - MODERN & BALANCED =================== */
+
+/* Base Button Style */
+.btn-form {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 24px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+.btn-form:hover {
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.btn-form svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.5;
+}
+
+/* Tombol Back/Kembali - Slate Gray */
+.btn-back-detail {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);
+}
+
+.btn-back-detail:hover {
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
+    box-shadow: 0 6px 16px rgba(100, 116, 139, 0.35);
+    color: white !important;
+}
+
+/* Tombol Batal - Soft Red */
+.btn-batal {
+    background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.btn-batal:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+    color: white !important;
+}
+
+/* Tombol Simpan - Emerald Green */
+.btn-simpan {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.btn-simpan:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+    color: white !important;
+}
+
+/* Active/Focus States */
+.btn-form:active {
+    transform: translateY(0);
+}
+
+.btn-form:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* =================== RESPONSIVE BUTTON =================== */
+
+@media (max-width: 768px) {
+    .form-actions {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form-actions-left,
+    .form-actions-right {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .btn-form {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .btn-form {
+        padding: 10px 18px;
+        font-size: 13px;
+    }
+
+    .btn-form svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }

@@ -3,7 +3,7 @@
 @section('title','Rincian Data Pegawai')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/pegawai-detail.css') }}">
+<link rel="stylesheet" href="{{ asset('css/kepegawaian/detail-pegawai.css') }}">
 @endpush
 
 @section('content')
@@ -12,15 +12,15 @@
 
     {{-- PAGE HEADER --}}
     <div class="page-header">
-        {{-- Sisi Kiri: Icon Back + Judul --}}
         <div class="d-flex align-items-center">
             <a href="{{ route('kepegawaian.pegawai') }}" class="btn-back-icon me-3">
-                <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="Back" style="width: 38px; height: 38px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
             </a>
             <h4 class="mb-0">Detail Pegawai</h4>
         </div>
 
-        {{-- Sisi Kanan: Tombol Edit --}}
         <div class="d-flex gap-2 align-items-center">
             <a href="{{ route('pegawai.edit', $pegawai->nip) }}" class="btn btn-edit">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -32,84 +32,118 @@
         </div>
     </div>
 
+    {{-- PROFILE CARD  --}}
+    <div class="profile-card-new">
+        <div class="profile-left">
 
-    {{-- PROFIL --}}
-    <div class="profile-card">
-        <div class="profile-cover"></div>
+            <div class="profile-info">
+                <h2>{{ $pegawai->nama_pegawai }}</h2>
+                <p class="nip-badge">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    NIP: {{ $pegawai->nip }}
+                </p>
+            </div>
+        </div>
 
-        <div class="profile-body">
-            <div class="profile-avatar">
-                @if(!empty($pegawai->foto))
-                    {{-- Hapus 'storage/' karena file ada di public/profile-pegawai --}}
-                    <img src="{{ asset('profile-pegawai/' . $pegawai->foto) }}" alt="Foto Pegawai">
-                @else
-                    <img src="{{ asset('assets/default-avatar.png') }}" alt="Avatar Default">
-                @endif
+        <div class="profile-right">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Jabatan</span>
+                    <span class="info-value">{{ $pegawai->jabatan ?? '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Bagian</span>
+                    <span class="info-value">{{ $pegawai->bagian }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Jenis Kelamin</span>
+                    <span class="info-value">{{ $pegawai->jenis_kelamin ?? '-' }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Umur</span>
+                    <span class="info-value">{{ $pegawai->tgl_lahir ? \Carbon\Carbon::parse($pegawai->tgl_lahir)->age.' Tahun' : '-' }}</span>
+                </div>
             </div>
 
-            <h2>{{ $pegawai->nama_pegawai }}</h2>
-            <p class="profile-bagian">{{ $pegawai->bagian }}</p>
-
-            <div class="profile-meta">
+            <div class="status-section">
+                <span class="status-label">Status Pegawai:</span>
                 <form action="{{ route('pegawai.update', $pegawai->nip) }}" method="POST" class="status-form-inline">
                     @csrf
-                    <select name="is_active" onchange="this.form.submit()" class="form-select status-dropdown-inline {{ $pegawai->is_active ? 'status-active' : 'status-inactive' }}">
+                    <select name="is_active" onchange="this.form.submit()" class="status-dropdown-new {{ $pegawai->is_active ? 'status-active' : 'status-inactive' }}">
                         <option value="1" {{ $pegawai->is_active == 1 ? 'selected' : '' }}>🟢 Aktif</option>
                         <option value="0" {{ $pegawai->is_active == 0 ? 'selected' : '' }}>🔴 Non Aktif</option>
                     </select>
                 </form>
-                <span class="nip">NIP : {{ $pegawai->nip }}</span>
             </div>
         </div>
     </div>
 
-    {{-- DATA PRIBADI --}}
-    <div class="data-card">
-        <div class="card-header">
-            <div class="card-header-inner">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>
-                <span>Data Pribadi</span>
+    {{-- DATA DETAIL - 2 COLUMNS --}}
+    <div class="data-grid-2col">
+        {{-- INFORMASI PRIBADI --}}
+        <div class="data-card-new">
+            <div class="card-header-new">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <h3>Informasi Pribadi</h3>
+            </div>
+            <div class="card-body-new">
+                <div class="detail-row">
+                    <span class="detail-label">Tanggal Lahir</span>
+                    <span class="detail-value">{{ $pegawai->tgl_lahir ? \Carbon\Carbon::parse($pegawai->tgl_lahir)->translatedFormat('d F Y') : '-' }}</span>
+                </div>
             </div>
         </div>
-        <div class="card-body grid-2">
-            <div><label>Nama Lengkap</label><p>{{ $pegawai->nama_pegawai }}</p></div>
-            <div><label>Jenis Kelamin</label><p>{{ $pegawai->jenis_kelamin ?? '-' }}</p></div>
-            <div><label>Tanggal Lahir</label><p>{{ $pegawai->tgl_lahir ? \Carbon\Carbon::parse($pegawai->tgl_lahir)->translatedFormat('d F Y') : '-' }}</p></div>
-            <div><label>Umur</label><p>{{ $pegawai->tgl_lahir ? \Carbon\Carbon::parse($pegawai->tgl_lahir)->age.' Tahun' : '-' }}</p></div>
+
+        {{-- KONTAK --}}
+        <div class="data-card-new">
+            <div class="card-header-new">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                </div>
+                <h3>Kontak</h3>
+            </div>
+            <div class="card-body-new">
+                <div class="detail-row">
+                    <span class="detail-label">No. Telepon</span>
+                    <span class="detail-value">{{ $pegawai->no_telp ?? '-' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value">{{ $pegawai->email ?? '-' }}</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    {{-- DATA KEPEGAWAIAN --}}
-    <div class="data-card">
-        <div class="card-header alt">
-            <div class="card-header-inner">
-                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M9 4v18M15 4v18"/></svg>
-                <span>Data Kepegawaian</span>
+    {{-- ALAMAT - FULL WIDTH --}}
+    <div class="data-card-new">
+        <div class="card-header-new">
+            <div class="card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
             </div>
+            <h3>Alamat</h3>
         </div>
-        <div class="card-body grid-2">
-            <div><label>NIP</label><p>{{ $pegawai->nip }}</p></div>
-            <div><label>Jabatan</label><p>{{ $pegawai->jabatan ?? '-' }}</p></div>
-            <div><label>Bagian</label><p>{{ $pegawai->bagian }}</p></div>
+        <div class="card-body-new">
+            <p class="alamat-text">{{ $pegawai->alamat ?? '-' }}</p>
         </div>
     </div>
 
-    {{-- KONTAK --}}
-    <div class="data-card">
-        <div class="card-header">
-            <div class="card-header-inner">
-                <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                <span>Kontak & Alamat</span>
-            </div>
-        </div>
-        <div class="card-body grid-1">
-            <div><label>No. Telepon</label><p>{{ $pegawai->no_telp ?? '-' }}</p></div>
-            <div><label>Email</label><p>{{ $pegawai->email ?? '-' }}</p></div>
-            <div><label>Alamat</label><p>{{ $pegawai->alamat ?? '-' }}</p></div>
-        </div>
-    </div>
-
-    {{-- DAFTAR KELUARGA --}}
+    {{-- DAFTAR KELUARGA - TIDAK DIUBAH --}}
     <div class="data-card">
         <div class="card-header" style="background: #316BA1; display: flex; justify-content: space-between; align-items: center;">
             <div class="card-header-inner">
@@ -121,13 +155,12 @@
                 </svg>
                 <span>Daftar Keluarga</span>
             </div>
-            {{-- Tombol Tambah Keluarga yang lebih rapi --}}
             <a href="{{ route('keluarga.create', $pegawai->nip) }}" class="btn-tambah">
                 <span>+</span> Tambah Keluarga
             </a>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
+            <div class="table-wrapper">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
@@ -140,7 +173,6 @@
                     </thead>
                     <tbody>
                         @forelse($keluarga as $k)
-                        {{-- LOGIC BUREM: Jika is_active adalah 0 --}}
                         <tr style="{{ $k->is_active == 0 ? 'opacity: 0.5; background-color: #f8f9fa; color: #94a3b8;' : '' }}">
                             <td class="fw-bold text-secondary">
                                 {{ ucfirst($k->hubungan_keluarga) }} 
@@ -173,20 +205,22 @@
     </div>
 </div>
 
-
-
 <script>
-// Auto-hide alert after 5 seconds
-setTimeout(function() {
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(function(alert) {
-        alert.style.transition = 'opacity 0.5s ease-out';
-        alert.style.opacity = '0';
-        setTimeout(function() {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        }, 500);
+// Toast notification untuk success/error messages
+@if(session('success'))
+    window.AdminPoliToast.fire({
+        icon: 'success',
+        title: '{{ session("success") }}'
     });
-}, 5000);
+@endif
+
+@if(session('error'))
+    Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: '{{ session("error") }}',
+        confirmButtonColor: '#316BA1'
+    });
+@endif
 </script>
 @endsection

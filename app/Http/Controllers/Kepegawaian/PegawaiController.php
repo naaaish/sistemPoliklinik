@@ -111,6 +111,17 @@ class PegawaiController extends Controller
             // Update langsung dengan query builder
             Pegawai::where('nip', $nip)->update(['is_active' => $newStatus]);
             
+            // 🔥 JIKA PEGAWAI DINONAKTIFKAN, NONAKTIFKAN SEMUA KELUARGANYA
+            if ($newStatus == 0) {
+                DB::table('keluarga')
+                    ->where('nip', $nip)
+                    ->update(['is_active' => 0]);
+            } else {
+                // Jika diaktifkan kembali, jalankan sync untuk set ulang status keluarga
+                $keluargaController = app(\App\Http\Controllers\Kepegawaian\KeluargaController::class);
+                $keluargaController->reSyncActiveStatus($nip);
+            }
+            
             $statusText = $newStatus ? 'Aktif' : 'Non Aktif';
             return redirect()->back()
                 ->with('success', "Status pegawai berhasil diubah menjadi {$statusText}!");
