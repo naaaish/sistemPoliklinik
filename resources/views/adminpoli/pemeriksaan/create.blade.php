@@ -148,23 +148,6 @@
         </div>
       </div>
 
-      <div class="ap-row">
-        <div class="ap-label">Saran</div><div class="ap-colon">:</div>
-        <div class="ap-input">
-          <select id="inpSaran" class="ap-select">
-            <option value="">-- pilih (boleh kosong) --</option>
-            @foreach($saran as $s)
-                <option value="{{ $s->id_saran }}" data-diagnosa="{{ $s->id_diagnosa }}">{{ $s->saran }}</option>
-            @endforeach
-          </select>
-
-          <button type="button" id="btnAddSaran" class="ap-btn-small">Tambah Saran</button>
-
-          <div id="chipSaran" style="margin-top:10px;"></div>
-          <div id="hiddenSaran"></div>
-        </div>
-      </div>
-
       @php
         $isPoliklinik = (($pendaftaran->tipe_pasien ?? '') === 'poliklinik');
         $awalJenis = ($pendaftaran->jenis_pemeriksaan ?? '');
@@ -333,21 +316,6 @@ function alreadyAddedPenyakit(id){
   return !!document.querySelector(`#penyakitWrap input.penyakit-id-hidden[value="${CSS.escape(id)}"]`);
 }
 
-function filterSaran(){
-  const selected = new Set(getSelectedPenyakitIds());
-  const saranSelect = document.getElementById('inpSaran');
-
-  [...saranSelect.options].forEach((opt, idx) => {
-    if(idx === 0) return;
-    const diagId = opt.dataset.diagnosa;
-    opt.hidden = selected.size > 0 ? !selected.has(diagId) : false;
-  });
-
-  if (saranSelect.selectedIndex > 0 && saranSelect.options[saranSelect.selectedIndex].hidden) {
-    saranSelect.value = "";
-  }
-}
-
 document.getElementById('btnAddPenyakit')?.addEventListener('click', async () => {
   const sel = document.getElementById('inpPenyakit');
   if(!sel.value) return;
@@ -394,14 +362,12 @@ document.getElementById('btnAddPenyakit')?.addEventListener('click', async () =>
 
   node.querySelector('.btnDelPenyakit').addEventListener('click', () => {
     node.remove();
-    filterSaran();
   });
 
   document.getElementById('penyakitWrap').appendChild(node);
 
   // reset select
   sel.value = '';
-  filterSaran();
 });
 
   const penyakitPick = document.getElementById('penyakitPick');
@@ -437,51 +403,14 @@ document.getElementById('btnAddPenyakit')?.addEventListener('click', async () =>
     penyakitPick.value = '';
   });
 
-  function filterSaran(){
-    const selected = new Set(getSelectedPenyakitIds());
-    const saranSelect = document.getElementById('inpSaran');
-
-    [...saranSelect.options].forEach((opt, idx) => {
-      if(idx === 0) return; // keep placeholder
-      const diagId = opt.dataset.diagnosa;
-      opt.hidden = selected.size > 0 ? !selected.has(diagId) : false;
-    });
-
-    // reset kalau pilihan jadi tidak valid
-    if (saranSelect.selectedIndex > 0 && saranSelect.options[saranSelect.selectedIndex].hidden) {
-      saranSelect.value = "";
-    }
-  }
-
-  function filterSaranByDiagnosa(diagnosaId){
-    const sel = document.getElementById('inpSaran');
-    [...sel.options].forEach((opt, idx) => {
-      if(idx === 0) return; // placeholder
-      opt.hidden = diagnosaId ? (opt.dataset.diagnosa !== diagnosaId) : false;
-    });
-    sel.value = ""; // reset pilihan
-  }
-
   // Penyakit (text)
   document.getElementById('btnAddPenyakit').addEventListener('click', () => {
     const sel = document.getElementById('inpPenyakit');
     if(!sel.value) return;
-
-    filterSaran();
-
     sel.value = '';
   }); 
 
-  // Saran (select)
-  document.getElementById('btnAddSaran').addEventListener('click', () => {
-    const sel = document.getElementById('inpSaran');
-    if(!sel.value) return;
-
-    sel.value = '';
-  });
-
-  // ===== OBAT LOGIC (TANPA JSON) =====
-    // helper rupiah kamu
+  // helper rupiah
   function rupiah(n){
     n = Number(n || 0);
     return 'Rp' + n.toLocaleString('id-ID');
@@ -645,7 +574,6 @@ document.getElementById('btnAddPenyakit')?.addEventListener('click', async () =>
           scrollbarPadding: false 
         }).then(() => {
           obatDuplicateAlertOpen = false;
-          // fokus balik ke select biar user enak ganti
           setTimeout(() => e.target.focus(), 50);
         });
       }
@@ -745,7 +673,6 @@ document.getElementById('btnAddPenyakit')?.addEventListener('click', async () =>
     }
   });
 
-
   // ===== NAVIGASI KEYBOARD INPUT PEMERIKSAAN =====
   document.addEventListener('DOMContentLoaded', () => {
     const vitals = Array.from(
@@ -808,7 +735,6 @@ document.getElementById('btnAddPenyakit')?.addEventListener('click', async () =>
   } else {
     display.style.display = 'inline-block';
     select.style.display = 'none';
-    // optional: reset biar ga nyangkut
     select.value = '';
   }
 }

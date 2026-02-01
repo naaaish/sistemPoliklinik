@@ -81,8 +81,6 @@ class PemeriksaanInputController extends Controller
             'penyakit_id.*'   => 'nullable|string',
             'id_nb'           => 'nullable|array',
             'id_nb.*'         => 'nullable|string',
-            'id_saran'        => 'nullable|array',
-            'id_saran.*'      => 'nullable|string',
 
             // resep
             'obat_id'        => 'nullable|array',
@@ -128,21 +126,7 @@ class PemeriksaanInputController extends Controller
                     return back()->withInput()->withErrors(["id_nb.$i" => "ID NB wajib diisi untuk penyakit yang dipilih."]);
                 }
             }
-            // $saranIdsUI  = array_values(array_filter($validated['id_saran'] ?? []));
 
-            // $autoSaranIds = [];
-            // if (count($penyakitIds) > 0) {
-            //     // sesuaikan nama kolom jika beda: id_saran / saran_id
-            //     $autoSaranIds = Saran::whereIn('id_diagnosa', $penyakitIds)
-            //         ->pluck('id_saran')
-            //         ->filter()
-            //         ->unique()
-            //         ->values()
-            //         ->all();
-            // }
-
-            // gabung UI + auto, lalu unique
-            // $saranIds = array_values(array_unique(array_merge($saranIdsUI, $autoSaranIds)));
             // ========= SIMPAN PEMERIKSAAN =========
             $pemeriksaan = Pemeriksaan::create([
                 'id_pemeriksaan' => $idPemeriksaan,
@@ -179,15 +163,23 @@ class PemeriksaanInputController extends Controller
                 DB::table('detail_pemeriksaan_penyakit')->insert($rows);
             }
 
-            // saran
-            // if (count($saranIds) > 0) {
-            //     $rows = array_map(fn($id) => [
-            //         'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
-            //         'id_saran' => $id,
-            //     ], $saranIds);
+            $autoSaranIds = $this->generateSaranFromVitals($validated);
 
-            //     DB::table('detail_pemeriksaan_saran')->insert($rows);
-            // }
+            // optional: filter biar cuma yang ada & aktif
+            $autoSaranIds = Saran::whereIn('id_saran', $autoSaranIds)
+                ->where('is_active', 1)
+                ->pluck('id_saran')
+                ->values()
+                ->all();
+
+            if (count($autoSaranIds) > 0) {
+                $rowsSaran = array_map(fn($id) => [
+                    'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
+                    'id_saran'       => $id,
+                ], $autoSaranIds);
+
+                DB::table('detail_pemeriksaan_saran')->insert($rowsSaran);
+            }
 
             // ========= SIMPAN RESEP + DETAIL_RESEP =========
             $obatIds = $validated['obat_id'] ?? [];
@@ -319,5 +311,75 @@ class PemeriksaanInputController extends Controller
         } 
         $next = $max + 1;
         return 'PMX-00' . $next;
+    }
+
+    private function generateSaranFromVitals(array $v): array
+    {
+        // Ambil nilai dari request/validated
+        $sistol  = $v['sistol'] ?? null;
+        $diastol = $v['diastol'] ?? null;
+
+        $gdp  = $v['gula_puasa'] ?? null;
+        $gdpp = $v['gula_2jam_pp'] ?? null;
+        $gds  = $v['gula_sewaktu'] ?? null;
+
+        $asam = $v['asam_urat'] ?? null;
+        $chol = $v['cholesterol'] ?? null;
+        $tg   = $v['trigliseride'] ?? null;
+
+        // kalau semua kosong/null/0 → TIDAK ADA SARAN
+        $fields = [$sistol, $diastol, $gdp, $gdpp, $gds, $asam, $chol, $tg];
+
+        $hasAny = false;
+        foreach ($fields as $x) {
+            // anggap 0 itu "kosong" (umumnya input lab 0 = tidak diisi)
+            if ($x !== null && $x !== '' && is_numeric($x) && (float)$x > 0) {
+                $hasAny = true;
+                break;
+            }
+        }
+        if (!$hasAny) return [];
+
+        $hasil = [];
+
+        // ===== TENSI =====
+        if ((is_numeric($sistol) && $sistol > 140) || (is_numeric($diastol) && $diastol > 90)) {
+            $hasil[] = 'SRN-TENS-01';
+        }
+        if (is_numeric($sistol) && $sistol > 0 && $sistol < 90) {
+            $hasil[] = 'SRN-TENS-02';
+        }
+
+        // ===== GULA DARAH =====
+        $gulaHigh = (is_numeric($gdp)  && $gdp  > 100)
+            || (is_numeric($gdpp) && $gdpp > 140)
+            || (is_numeric($gds)  && $gds  > 200);
+
+        $gulaLow = (is_numeric($gdp)  && $gdp  > 0 && $gdp  < 70)
+            || (is_numeric($gdpp) && $gdpp > 0 && $gdpp < 70)
+            || (is_numeric($gds)  && $gds  > 0 && $gds  < 70);
+
+        if ($gulaHigh) $hasil[] = 'SRN-GULA-01';
+        if ($gulaLow)  $hasil[] = 'SRN-GULA-02';
+
+        // ===== ASAM URAT =====
+        if (is_numeric($asam) && $asam > 7.0) {
+            $hasil[] = 'SRN-ASAM-01';
+        }
+
+        // ===== KOLESTEROL & TRIGLISERIDA =====
+        if (is_numeric($chol) && $chol >= 200) {
+            $hasil[] = 'SRN-LEMK-01';
+        }
+        if (is_numeric($tg) && $tg >= 150) {
+            $hasil[] = 'SRN-LEMK-02';
+        }
+
+        // Kalau ada data tapi semua normal → baru normal
+        if (empty($hasil)) {
+            $hasil[] = 'SRN-NORM-01';
+        }
+
+        return array_values(array_unique($hasil));
     }
 }

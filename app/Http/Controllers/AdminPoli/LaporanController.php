@@ -275,7 +275,8 @@ class LaporanController extends Controller
             $v->saran_list = DB::table('detail_pemeriksaan_saran as ds')
                 ->join('saran as s', 's.id_saran', '=', 'ds.id_saran')
                 ->where('ds.id_pemeriksaan', $v->id_pemeriksaan)
-                ->pluck('s.saran')
+                ->orderBy('ds.id_saran') // optional biar urut stabil
+                ->pluck('s.saran')  // << GANTI INI
                 ->toArray();
 
             $v->obat_list = DB::table('resep as r')
@@ -354,10 +355,11 @@ class LaporanController extends Controller
                 $kodeDx   = $diagObj ? ($diagObj->kode_diagnosa ?? '-') : ($isFirst ? '-' : '');
                 $ob = $obatList[$i] ?? null;
 
+                $saranText = '-';
                 $saranArr = $v->saran_list ?? [];
-                $hasDiagLine = ($i < count($diagUmum));
-                $saranLine = $hasDiagLine ? ($saranArr[$i] ?? '-') : '';
-
+                if (!empty($saranArr)) {
+                    $saranText = implode("\n", array_values(array_unique($saranArr)));
+                }
                 $subtotalObat = '-';
                 if ($ob) {
                     $subtotalObat = $ob->subtotal ?? null;
@@ -394,7 +396,7 @@ class LaporanController extends Controller
                     'HARGA_OBAT_SATUAN' => $ob ? ($ob->harga ?? 0) : ($isFirst ? '-' : ''),
                     'TOTAL_HARGA_OBAT' => $ob ? ($subtotalObat ?? '-') : ($isFirst ? '-' : ''),
 
-                    'SARAN' => $saranLine,
+                    'SARAN' => $isFirst ? $saranText : '',
                     'PEMERIKSA' => $isFirst ? ($v->pemeriksa ?? '-') : '',
 
                     'KODE_DIAGNOSA_K3' => $kodeK3 !== '' ? $kodeK3 : ($isFirst ? '-' : ''),
