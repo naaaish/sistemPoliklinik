@@ -40,8 +40,9 @@
         <th>TOTAL HARGA OBAT</th>
         <th>SARAN</th>
         <th>PEMERIKSA</th>
-        <th>NB</th>
-        <th>PERIKSA KE :</th>
+        <th>KODE DIAGNOSA K3</th>
+        <th>PERIKSA KE</th>
+        <th>KODE DIAGNOSA</th>
       </tr>
     </thead>
     <tbody>
@@ -73,8 +74,9 @@
           <td>{{ $r['TOTAL_HARGA_OBAT'] ?? '-' }}</td>
           <td>{{ $r['SARAN'] ?? '-' }}</td>
           <td>{{ $r['PEMERIKSA'] ?? '-' }}</td>
-          <td>{{ $r['NB'] ?? '-' }}</td>
+          <td>{{ $r['KODE_DIAGNOSA_K3'] ?? '-' }}</td>
           <td>{{ $r['PERIKSA_KE'] ?? '-' }}</td>
+          <td>{{ $r['KODE_DIAGNOSA'] ?? '-' }}</td>
         </tr>
       @empty
         <tr>

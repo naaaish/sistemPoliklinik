@@ -201,8 +201,9 @@ body{ margin:0; }
     140px  /* HARGA OBAT (SATUAN) */
     150px  /* TOTAL HARGA OBAT */
     160px  /* PEMERIKSA */
-    140px  /* NB */
-    110px; /* PERIKSA KE */
+    200px  /* KODE DIAGNOSA K3 */
+    110px /* PERIKSA KE */
+    180px; /* KODE DIAGNOSA */
 }
 
 .lap-thead{
@@ -318,6 +319,7 @@ html, body{
     220px
 
     160px
-    70px
-    100px;
+    150px
+    100px
+    110px;
 }
