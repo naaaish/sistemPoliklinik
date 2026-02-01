@@ -854,56 +854,102 @@ class LaporanController extends Controller
 
     public function downloadExcelTotal(Request $request)
     {
-        $dari   = $request->dari;
-        $sampai = $request->sampai;
+        $dari   = $request->query('dari');
+        $sampai = $request->query('sampai');
 
-        $data = $this->buildPemeriksaan('total', $dari, $sampai);
+        // 1. Panggil buildTotalOperasional agar datanya detail (sama dengan view laporan pegawai)
+        // Kita buat data manual dari request agar buildTotalOperasional bisa membaca filter tanggalnya
+        $rows = $this->buildPemeriksaan('total', $dari, $sampai);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1','REKAPAN TOTAL OPERASIONAL');
-        $sheet->mergeCells('A1:B1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        // 2. Header Judul
+        $sheet->setCellValue('A1', 'LAPORAN OPERASIONAL KESELURUHAN (DETAIL)');
+        $sheet->mergeCells('A1:L1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]
+        ]);
 
-        $sheet->setCellValue('A2','Periode: '.(
-            $dari && $sampai
-                ? \Carbon\Carbon::parse($dari)->translatedFormat('d F Y').' - '.
-                \Carbon\Carbon::parse($sampai)->translatedFormat('d F Y')
-                : 'Semua Data'
-        ));
+        // Baris Periode
+        $periodeText = ($dari && $sampai) 
+            ? \Carbon\Carbon::parse($dari)->translatedFormat('d F Y') . ' - ' . \Carbon\Carbon::parse($sampai)->translatedFormat('d F Y')
+            : 'Semua Data';
+        $sheet->setCellValue('A2', 'Periode: ' . $periodeText);
         $sheet->mergeCells('A2:B2');
 
-        $row = 4;
-        $sheet->setCellValue("A$row",'Nama Biaya');
-        $sheet->setCellValue("B$row",'Total');
-        $sheet->getStyle("A$row:B$row")->getFont()->setBold(true);
+        // 3. Header Tabel
+        $headers = [
+            'A4' => 'No',
+            'B4' => 'Tanggal',
+            'C4' => 'Nama Pasien',
+            'D4' => 'Bagian',
+            'E4' => 'Diagnosa',
+            'F4' => 'Nama Obat/Alkes',
+            'G4' => 'Jumlah',
+            'H4' => 'Satuan',
+            'I4' => 'Harga Satuan',
+            'J4' => 'Subtotal',
+            'K4' => 'Pemeriksa',
+            'L4' => 'Keterangan'
+        ];
 
-        $row++;
-        $grandTotal = 0;
+        foreach ($headers as $cell => $text) {
+            $sheet->setCellValue($cell, $text);
+        }
+        
+        // Style Header Biru
+        $sheet->getStyle('A4:L4')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4472C4']],
+            'alignment' => ['horizontal' => 'center'],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]
+        ]);
 
-        foreach ($data as $item) {
-            $sheet->setCellValue("A$row", $item->nama);
-            $sheet->setCellValue("B$row", $item->total);
+        // 4. Isi Data
+        $currentRow = 5;
+        $no = 1;
+        foreach ($rows as $item) {
+            $sheet->setCellValue("A$currentRow", $no++);
+            $sheet->setCellValue("B$currentRow", $item->tanggal);
+            $sheet->setCellValue("C$currentRow", $item->nama_pasien);
+            $sheet->setCellValue("D$currentRow", $item->bagian);
+            $sheet->setCellValue("E$currentRow", $item->diagnosa);
+            $sheet->setCellValue("F$currentRow", $item->nama_obat);
+            $sheet->setCellValue("G$currentRow", $item->jumlah);
+            $sheet->setCellValue("H$currentRow", $item->satuan);
+            
+            // Sesuai dengan property di buildTotalOperasional
+            $sheet->setCellValue("I$currentRow", $item->harga_satuan ?? 0);
+            $sheet->setCellValue("J$currentRow", $item->subtotal_obat ?? 0);
+            
+            $sheet->setCellValue("K$currentRow", $item->pemeriksa);
+            $sheet->setCellValue("L$currentRow", $item->hub_kel ?? $item->kategori); 
 
-            $grandTotal += $item->total;
-            $row++;
+            // Format Rupiah
+            $sheet->getStyle("I$currentRow:J$currentRow")->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle("A$currentRow:L$currentRow")->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            
+            $currentRow++;
         }
 
-        $sheet->setCellValue("A$row",'TOTAL');
-        $sheet->setCellValue("B$row",$grandTotal);
-        $sheet->getStyle("A$row:B$row")->getFont()->setBold(true);
-
-        foreach (['A','B'] as $c) {
-            $sheet->getColumnDimension($c)->setAutoSize(true);
+        // 5. Auto Size Kolom
+        foreach (range('A', 'L') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
+        // 6. Download
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $path = storage_path('app/Laporan_Keseluruhan_Operasional.xlsx');
-        $writer->save($path);
-
-        return response()->download($path)->deleteFileAfterSend(true);
+        $fileName = 'Laporan_Detail_Operasional_Keseluruhan_' . date('Ymd_His') . '.xlsx';
+        
+        return response()->streamDownload(function() use ($writer) {
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
+
 
     private function applyTanggal($query, $request)
     {
