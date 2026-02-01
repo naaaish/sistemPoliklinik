@@ -168,27 +168,58 @@
       @php
         $isPoliklinik = (($pendaftaran->tipe_pasien ?? '') === 'poliklinik');
         $awalJenis = ($pendaftaran->jenis_pemeriksaan ?? '');
+
+        $petugasLabel = '-';
+        $petugasType  = null; // 'dokter' | 'pemeriksa'
+        $petugasId    = null;
+
+        if (!empty($pendaftaran->id_dokter)) {
+            $d = collect($dokter)->firstWhere('id_dokter', $pendaftaran->id_dokter);
+            $petugasLabel = $d ? ($d->nama.' ('.$d->jenis_dokter.')') : '(Dokter tidak ditemukan)';
+            $petugasType = 'dokter';
+            $petugasId   = $pendaftaran->id_dokter;
+        } elseif (!empty($pendaftaran->id_pemeriksa)) {
+            $p = collect($pemeriksa)->firstWhere('id_pemeriksa', $pendaftaran->id_pemeriksa);
+            $petugasLabel = $p ? $p->nama_pemeriksa : '(Pemeriksa tidak ditemukan)';
+            $petugasType = 'pemeriksa';
+            $petugasId   = $pendaftaran->id_pemeriksa;
+        }
       @endphp
 
-      @if(!$isPoliklinik && $awalJenis === 'cek_kesehatan')
-        <div id="petugasAfterObatWrap" style="display:none;">
-          <div class="ap-row">
-            <div class="ap-label">Dokter</div>
-            <div class="ap-colon">:</div>
-            <div class="ap-input">
-              <select name="petugas_after_obat" id="petugasAfterObat" class="ap-select">
-                <option value="">-- pilih dokter --</option>
-                @foreach($dokter as $d)
-                  <option value="dokter:{{ $d->id_dokter }}">{{ $d->nama }} ({{ $d->jenis_dokter }})</option>
-                @endforeach
-              </select>
-              @error('petugas_after_obat')
-                <div style="color:#d00;font-size:12px;margin-top:6px;">{{ $message }}</div>
-              @enderror
-            </div>
-          </div>
-        </div> 
-      @endif
+      <div id="pendaftaranMeta"
+          data-tipe="{{ $pendaftaran->tipe_pasien }}"
+          data-awal-jenis="{{ $awalJenis }}"
+          data-petugas-type="{{ $petugasType }}"
+          data-petugas-id="{{ $petugasId }}"
+          style="display:none;"></div>
+
+      {{-- 1 BARIS SAJA --}}
+      <div class="ap-row" style="margin-top:10px;">
+        <div class="ap-label">Dokter / Pemeriksa</div>
+        <div class="ap-colon">:</div>
+
+        <div class="ap-input" id="petugasRow">
+          {{-- mode tampilan awal (readonly) --}}
+          <span id="petugasDisplay" style="display:inline-block;">
+            {{ $petugasLabel }}
+          </span>
+
+          {{-- mode edit (muncul setelah ada obat) --}}
+          <select name="petugas_after_obat" id="petugasAfterObat"
+                  class="ap-select" style="display:none;">
+            <option value="">-- pilih dokter --</option>
+            @foreach($dokter as $d)
+              <option value="dokter:{{ $d->id_dokter }}">
+                {{ $d->nama }} ({{ $d->jenis_dokter }})
+              </option>
+            @endforeach
+          </select>
+
+          @error('petugas_after_obat')
+            <div style="color:#d00;font-size:12px;margin-top:6px;">{{ $message }}</div>
+          @enderror
+        </div>
+      </div>
 
       {{-- ===== OBAT & HARGA ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Obat & Harga</div>
@@ -521,6 +552,7 @@ document.getElementById('btnAddPenyakit')?.addEventListener('click', async () =>
     row.querySelector('.obat-hapus')?.addEventListener('click', () => {
       row.remove();
       hitungTotal();
+      refreshPetugasUI();
     });
 
     // format awal (buat row dari DB)
@@ -550,6 +582,7 @@ document.getElementById('btnAddPenyakit')?.addEventListener('click', async () =>
     obatWrap.appendChild(row);
     bindRowEvents(row);
     hitungTotal();
+    refreshPetugasUI();
   });
 
   // ambil semua value obat yang sudah kepilih (kecuali row yang sedang dicek)
@@ -620,10 +653,10 @@ document.getElementById('btnAddPenyakit')?.addEventListener('click', async () =>
       return;
     }
     if (e.target && e.target.matches('select[name="obat_id[]"]')) {
-      syncPetugasAfterObat();
+      refreshPetugasUI();
     }
   });
-  syncPetugasAfterObat();
+  // syncPetugasAfterObat();
 
   function showWarn(title, text, cb) {
     if (window.Swal && Swal.fire) {
@@ -679,7 +712,7 @@ document.getElementById('btnAddPenyakit')?.addEventListener('click', async () =>
       showWarn('Satuan belum diisi', 'Jika obat dipilih, satuan wajib diisi.', () => {
         firstInvalidSatuan.focus();
       });
-      return; // << PENTING
+      return;
     }
 
     const fields = [
@@ -753,42 +786,36 @@ document.getElementById('btnAddPenyakit')?.addEventListener('click', async () =>
       .some(s => (s.value || '').trim() !== '');
   }
 
-  function syncPetugasAfterObat(){
-    const tipePasienEl = document.getElementById('tipePasien');
-    const tipePasien = tipePasienEl ? tipePasienEl.value : '';
-
-    const wrap = document.getElementById('petugasAfterObatWrap');
-    const sel  = document.getElementById('petugasAfterObat');
-    if (!wrap || !sel) return; // kalau poliklinik / awal jenis bukan cek_kesehatan, elemen ini memang ga ada
-
-    const meta = document.getElementById('pendaftaranMeta');
-    const tipe = meta ? (meta.dataset.tipe || '') : '';
-    const awalJenis = meta ? (meta.dataset.awalJenis || '') : '';
-
-    // poliklinik ga pernah butuh dokter after obat
-    if (tipe === 'poliklinik') {
-      wrap.style.display = 'none';
-      sel.required = false;
-      sel.value = '';
-      return;
-    }
-
-    // kalau awalnya bukan cek_kesehatan, jangan pernah pakai field ini
-    if (awalJenis !== 'cek_kesehatan') {
-      wrap.style.display = 'none';
-      sel.required = false;
-      sel.value = '';
-      return;
-    }
-
-    // awal cek_kesehatan: kalau ada obat → wajib pilih dokter
-    const on = adaObatTerpilih();
-    wrap.style.display = on ? '' : 'none';
-    sel.required = on;
-    if (!on) sel.value = '';
-  }
-
   // panggil saat load
-  syncPetugasAfterObat();
+  refreshPetugasUI();
+
+  function togglePetugasEditable(hasObat) {
+  const meta = document.getElementById('pendaftaranMeta');
+  const tipe = meta ? (meta.dataset.tipe || '') : '';
+  const awalJenis = meta ? (meta.dataset.awalJenis || '') : '';
+
+  // cuma kasus ini yang butuh "ubah jadi bisa pilih dokter"
+  const shouldEditable = (tipe !== 'poliklinik' && awalJenis === 'cek_kesehatan' && hasObat);
+
+  const display = document.getElementById('petugasDisplay');
+  const select  = document.getElementById('petugasAfterObat');
+
+  if (!display || !select) return;
+
+  if (shouldEditable) {
+    display.style.display = 'none';
+    select.style.display = 'inline-block';
+  } else {
+    display.style.display = 'inline-block';
+    select.style.display = 'none';
+    // optional: reset biar ga nyangkut
+    select.value = '';
+  }
+}
+
+function refreshPetugasUI(){
+  togglePetugasEditable(adaObatTerpilih());
+}
+
 </script>
 @endsection

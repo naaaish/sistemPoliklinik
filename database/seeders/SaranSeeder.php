@@ -52,7 +52,7 @@ class SaranSeeder extends Seeder
             // ==========================
             // 4. ASAM URAT
             // ==========================
-            // Tinggi (> 7.0 mg/dL untuk Laki, > 6.0 untuk Wanita)
+            // Tinggi (> 7.0 mg/dL untuk Laki, > 5.6 untuk Wanita)
             [
                 'id_saran' => 'SRN-ASAM-01',
                 'saran'    => 'Asam urat tinggi. Hindari jeroan, emping, kacang-kacangan, makanan laut (seafood), dan sayuran hijau tertentu (bayam/kangkung). Perbanyak minum air putih.',
