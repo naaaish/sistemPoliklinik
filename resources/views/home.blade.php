@@ -64,7 +64,7 @@
                         <img src="{{ asset('assets/home/doctor.png') }}" alt="Dokter">
                         <span>Dokter Poliklinik</span>
                     </a>
-                    <a href="https://wa.me/6281234567891?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Dokter%20Perusahaan" 
+                    <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Dokter%20Perusahaan" 
                        target="_blank" 
                        class="konsultasi-btn">
                         <img src="{{ asset('assets/home/doctor.png') }}" alt="Dokter">
@@ -77,7 +77,7 @@
             <div class="konsultasi-section">
                 <h4 class="section-label">Tenaga Kesehatan</h4>
                 <div class="konsultasi-buttons">
-                    <a href="https://wa.me/6281234567892?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Perawat" 
+                    <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Perawat" 
                        target="_blank" 
                        class="konsultasi-btn">
                         <img src="{{ asset('assets/home/chat.png') }}" alt="Perawat">
@@ -90,7 +90,7 @@
             <div class="konsultasi-section">
                 <h4 class="section-label">Apotik</h4>
                 <div class="konsultasi-buttons">
-                    <a href="https://wa.me/6281234567893?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Apoteker" 
+                    <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Apoteker" 
                        target="_blank" 
                        class="konsultasi-btn">
                         <img src="{{ asset('assets/home/drugs.png') }}" alt="Apoteker">

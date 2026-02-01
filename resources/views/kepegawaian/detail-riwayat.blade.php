@@ -6,13 +6,18 @@
 
 @section('content')
 <div class="detail-container">
-    <div class="detail-header">
-        <a href="{{ route('pasien.riwayat') }}">
-            <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" width="38">
-        </a>
-        <h1>Rincian Pemeriksaan Pasien</h1>
+    <div class="page-header">
+        <div class="d-flex align-items-center">
+            <a href="{{ route('kepegawaian.riwayat') }}" class="btn-back-icon me-3">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <h4 class="mb-0">Rincian Pemeriksaan Pasien</h4>
+        </div>
+
     </div>
-    {{-- MAIN CARD --}}
+        {{-- MAIN CARD --}}
     <div class="detail-card">
         {{-- DATA PENDAFTARAN --}}
         <h2 class="section-title">Data Pendaftaran Pasien</h2>
