@@ -71,6 +71,12 @@
                                 <th>Tanggal</th>
                                 <th>Jumlah</th>
                                 <th>Total</th>
+                            @elseif ($key === 'total')
+                                <th>ID Pemeriksaan</th>
+                                <th>Nama Pasien</th>
+                                <th>Tanggal</th>
+                                <th>Nama Pemeriksa</th>
+                                <th>Total Obat Pasien</th>
                             @else
                             {{-- Pegawai / Pensiunan / Keseluruhan --}}
                                 <th>ID Pemeriksaan</th>
