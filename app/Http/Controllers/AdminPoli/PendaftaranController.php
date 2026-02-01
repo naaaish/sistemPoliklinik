@@ -122,7 +122,7 @@ class PendaftaranController extends Controller
             'nama_pegawai' => ['nullable', 'string', 'max:255'],
             'bagian' => ['nullable', 'string', 'max:255'],
 
-            'tipe_pasien' => ['required', 'in:pegawai,keluarga,pensiunan,unit_lain,ojt,poliklinik'],
+            'tipe_pasien' => ['required', 'in:pegawai,keluarga,pensiunan,unit lain,ojt,poliklinik'],
             'nama_pasien' => ['required', 'string', 'max:255'],
             'hub_kel' => ['required', 'in:YBS,Pasangan,Anak'],
             'tgl_lahir' => ['nullable', 'date'],
@@ -134,7 +134,7 @@ class PendaftaranController extends Controller
             'keluhan' => ['nullable', 'string'],
         ]);
 
-        $isPoli = ($validated['tipe_pasien'] === 'poliklinik');
+        $isPoli = ($validated['nip'] === '001');
 
         if ($isPoli) {
             $validated['nip'] = '001';
@@ -142,6 +142,7 @@ class PendaftaranController extends Controller
             $validated['nama_pegawai'] = '-';
             $validated['bagian'] = '-';
             $validated['nama_pasien'] = '-';
+            $validated['tipe_pasien'] = 'poliklinik';
 
             $validated['hub_kel'] = 'YBS';
             $validated['id_keluarga'] = null;
@@ -149,9 +150,9 @@ class PendaftaranController extends Controller
         }
 
 
-        $BU_META_ID = 'PMR001';
+        $idPemeriksaFirst = 'PMR001';
         if ($validated['jenis_pemeriksaan'] === 'cek_kesehatan') {
-            $validated['petugas'] = 'pemeriksa:' . $BU_META_ID;
+            $validated['petugas'] = 'pemeriksa:' . $idPemeriksaFirst;
         }
 
         $pegawai = DB::table('pegawai')->where('nip', $validated['nip'])->first();
@@ -268,7 +269,7 @@ class PendaftaranController extends Controller
             }
         }
 
-        if (in_array($validated['tipe_pasien'], ['pegawai','unit_lain','ojt','poliklinik'], true)) {
+        if (in_array($validated['tipe_pasien'], ['pegawai','unit lain','ojt','poliklinik'], true)) {
             if ($validated['hub_kel'] !== 'YBS') {
                 return back()->withInput()->withErrors(['hub_kel' => 'Tipe ini harus YBS.']);
             }
@@ -315,18 +316,17 @@ class PendaftaranController extends Controller
     }
 
     private function generateIdPendaftaran() {
-    $ids = DB::table('pendaftaran')
-        ->pluck('id_pendaftaran'); 
-    $max = 0; 
-    foreach ($ids as $id) 
-    {
-        if (preg_match('/(\d+)$/', $id, $m)){ 
-            $num = (int) $m[1]; 
-            if ($num > $max) $max = $num; 
+        $ids = DB::table('pendaftaran')
+            ->pluck('id_pendaftaran'); 
+        $max = 0; 
+        foreach ($ids as $id) 
+        {
+            if (preg_match('/(\d+)$/', $id, $m)){ 
+                $num = (int) $m[1]; 
+                if ($num > $max) $max = $num; 
+            } 
         } 
-    } 
-    $next = $max + 1;
-    return 'REG-00' . $next;
+        $next = $max + 1;
+        return 'REG-00' . $next;
     }
-    
 }

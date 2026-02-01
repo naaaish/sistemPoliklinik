@@ -59,8 +59,9 @@
           <div class="lap-th">TOTAL HARGA OBAT</div>
           <div class="lap-th">SARAN</div>
           <div class="lap-th">PEMERIKSA</div>
-          <div class="lap-th">NB</div>
+          <div class="lap-th">KODE DIAGNOSA K3</div>
           <div class="lap-th">PERIKSA KE</div>
+          <div class="lap-th">KODE DIAGNOSA</div>
         </div>
 
         {{-- Rows --}}
@@ -102,8 +103,9 @@
             </div>
             <div class="lap-td lap-center">{{ $r['SARAN'] }}</div>
             <div class="lap-td lap-center">{{ $r['PEMERIKSA'] }}</div>
-            <div class="lap-td lap-center">{{ $r['NB'] }}</div>
-            <div class="lap-td lap-center">{{ $r['PERIKSA_KE'] }}</div>
+            <div class="lap-td lap-center">{{ $r['KODE_DIAGNOSA_K3'] ?? '-' }}</div>
+            <div class="lap-td lap-center">{{ $r['PERIKSA_KE'] ?? '-' }}</div>
+            <div class="lap-td lap-center">{{ $r['KODE_DIAGNOSA'] ?? '-' }}</div>
           </div>
         @empty
           <div class="lap-empty">Tidak ada data pada rentang ini.</div>

@@ -19,7 +19,7 @@
 @endphp
 
 @section('content')
-<div class="ap-page">
+<div class="ap-page pemeriksaan-page">
   <div class="ap-topbar">
     <a href="{{ route('adminpoli.dashboard') }}" class="ap-back-inline">
       <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="kembali">
@@ -181,6 +181,45 @@
           </div>
         </div>
       </div>
+
+      <div class="ap-section-title">Penyakit</div>
+        <div class="ap-row">
+          <div class="ap-label">Pilih Penyakit</div>
+          <div class="ap-colon">:</div>
+          <div class="ap-input">
+            <div style="display:flex; gap:10px; align-items:center;">
+              <select id="penyakitPick" class="ap-select">
+                <option value="">-- pilih penyakit --</option>
+                @foreach($penyakit as $p)
+                  <option value="{{ $p->id_diagnosa }}">{{ $p->diagnosa }}</option>
+                @endforeach
+              </select>
+              <button type="button" id="btnAddPenyakit" class="ap-btn">Tambah</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="penyakitWrap"></div>
+
+        <!-- template item penyakit -->
+        <div id="penyakitTemplate" style="display:none;">
+          <div class="penyakit-item" style="border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin-top:10px;">
+            <!-- row atas -->
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+              <div class="penyakit-name" style="font-weight:600;"></div>
+              <button type="button" class="btnDelPenyakit ap-btn ap-btn--danger">Hapus</button>
+            </div>
+
+            <!-- row bawah: input id_nb -->
+            <div style="display:grid;grid-template-columns:140px 1fr;gap:10px;margin-top:10px;align-items:center;">
+              <div style="color:#6b7280;">ID NB</div>
+              <input type="text" name="id_nb[]" class="ap-input id-nb-input" placeholder="Masukkan ID NB..." />
+            </div>
+
+            <!-- hidden penyakit_id[] (ngikut index yang sama dengan id_nb[]) -->
+            <input type="hidden" name="penyakit_id[]" class="penyakit-id-hidden" value="">
+          </div>
+        </div>
 
       <div class="ap-form-row">
         <div class="ap-form-label">Saran</div>

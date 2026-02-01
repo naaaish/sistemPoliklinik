@@ -170,9 +170,6 @@ class PemeriksaanController extends Controller
      */
     public function update(Request $request, $pendaftaranId)
     {
-        $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
-        $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaran->id_pendaftaran)->firstOrFail();
-
         $validated = $request->validate([
             'sistol'        => 'nullable|numeric',
             'diastol'       => 'nullable|numeric',
@@ -202,7 +199,6 @@ class PemeriksaanController extends Controller
         ]);
 
         return DB::transaction(function () use ($validated, $pendaftaranId) {
-
             $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
 
             // update data pemeriksaan (mapping ke kolom tabel kamu)
