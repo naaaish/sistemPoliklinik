@@ -17,58 +17,61 @@ class LaporanController extends Controller
     /* =========================
        INDEX (PREVIEW)
     ========================= */
+
+    private function buildPreviewPemeriksaan($jenis, $dari, $sampai)
+    {
+        $q = DB::table('pemeriksaan')
+            ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
+            ->join('pegawai','pendaftaran.nip','=','pegawai.nip')
+            ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
+            ->leftJoin('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
+            ->leftJoin('pemeriksa','pendaftaran.id_pemeriksa','=','pemeriksa.id_pemeriksa');
+
+        // FILTER JENIS
+        if ($jenis === 'pegawai') {
+            $q->whereIn('pendaftaran.tipe_pasien',['pegawai','keluarga'])
+            ->whereNotIn('pegawai.bagian',['Pensiunan','OJT']);
+        }
+
+        if ($jenis === 'pensiun') {
+            $q->where('pegawai.bagian','Pensiunan');
+        }
+
+        if ($jenis === 'total') {
+            // TANPA FILTER
+        }
+
+        if ($dari && $sampai) {
+            $q->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari,$sampai]);
+        }
+
+        return $q->select(
+            'pemeriksaan.id_pemeriksaan',
+            DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
+            DB::raw("DATE(pemeriksaan.created_at) as tanggal"),
+            DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as nama_pemeriksa")
+        )
+        ->orderByDesc('pemeriksaan.created_at')
+        ->limit(5)
+        ->get();
+    }
+
     public function index(Request $request)
     {
 
         $dari   = $request->dari;
         $sampai = $request->sampai;
         $rekapan = [
-            'pegawai' => 'Rekapan Pemeriksaan Pegawai',
-            'pensiun' => 'Rekapan Pemeriksaan Pensiunan',
-            'dokter'  => 'Rekapan Pemeriksaan Dokter',
-            'obat'    => 'Rekapan Penggunaan Obat',
-            'total'   => 'Rekapan Total Operasional',
+            'pegawai' => 'Rekap Pemeriksaan Pegawai',
+            'pensiun' => 'Rekap Pemeriksaan Pensiunan',
+            'dokter'  => 'Rekap Pemeriksaan Dokter',
+            'obat'    => 'Rekap Penggunaan Obat',
+            'total'   => 'Rekap Keseluruhan Operasional',
         ];
 
         $preview = [];
 
-        // ================= PEGAWAI & PENSIUN =================
-        foreach (['pegawai','pensiun'] as $tipe) {
-            $preview[$tipe] = DB::table('pemeriksaan')
-                ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
-                ->join('pegawai','pendaftaran.nip','=','pegawai.nip')
-                ->leftJoin('keluarga','pendaftaran.id_keluarga','=','keluarga.id_keluarga')
-                ->leftJoin('dokter','pendaftaran.id_dokter','=','dokter.id_dokter')
-                ->leftJoin('pemeriksa','pendaftaran.id_pemeriksa','=','pemeriksa.id_pemeriksa')
-                ->where(function($q) use ($tipe) {
-                            if ($tipe === 'pegawai') {
-                                // Ambil yang tipe pasien pegawai/keluarga, TAPI bagiannya bukan Pensiunan
-                                $q->whereIn('pendaftaran.tipe_pasien', ['pegawai','keluarga'])
-                                ->where('pegawai.bagian', '!=', 'Pensiunan');
-                            } else {
-                                // Khusus untuk tab Pensiunan
-                                $q->where('pegawai.bagian', 'Pensiunan');
-                            }
-                        })
-                ->select(
-                    'pemeriksaan.id_pemeriksaan',
-                    DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
-                    DB::raw("DATE(pemeriksaan.created_at) as tanggal"),
-                    DB::raw("
-                        COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as nama_pemeriksa
-                    ")
-                )
-                ->when($dari && $sampai, fn($q) =>
-                    $q->whereBetween(
-                        DB::raw('DATE(pemeriksaan.created_at)'),
-                        [$dari, $sampai]
-                    )
-                )
-                ->orderByDesc('pemeriksaan.created_at')
-                ->limit(5)
-                ->get();
 
-        }
 
         // ================= DOKTER =================
     $preview['dokter'] = DB::table('pemeriksaan')
@@ -111,15 +114,21 @@ class LaporanController extends Controller
             ->limit(5)
             ->get();
 
-        // ================= TOTAL =================
-        $preview['total'] = $this->buildTotalOperasional('total', $dari, $sampai)->take(5);
+        // ================= PEGAWAI DAN KELUARGA PEGAWAI =================
+        $preview['pegawai'] = $this->buildPreviewPemeriksaan('pegawai', $dari, $sampai);
+
+        // ================= PENSIUNAN DAN KELUARGA PENSIUNAN =================        
+        $preview['pensiun'] = $this->buildPreviewPemeriksaan('pensiun', $dari, $sampai);
+
+        // ================= SEMUA =================
+        $preview['total']   = $this->buildPreviewPemeriksaan('total', $dari, $sampai);
 
         return view('kepegawaian.laporan.index', compact(
             'rekapan',
             'preview',
             'dari',
             'sampai'
-        ));
+));
 
     }
 
@@ -134,11 +143,8 @@ class LaporanController extends Controller
 
         
         /* ================= PEGAWAI / PENSIUN / KESELURUHAN OPERASIONAL ================= */
-        if (in_array($jenis, ['pegawai', 'pensiun'])) {
-            $data = $this->buildPegawaiPensiunData($jenis, $dari, $sampai);
-        }
-        elseif ($jenis === 'total') {
-            $data = $this->buildTotalOperasional('total', $dari, $sampai);
+        if (in_array($jenis, ['pegawai', 'pensiun', 'total'])) {
+            $data = $this->buildPemeriksaan($jenis, $dari, $sampai);
         }
 
         
@@ -160,7 +166,6 @@ class LaporanController extends Controller
                     'dokter.nama as nama_dokter',
                     'dokter.jenis_dokter',
 
-                    // 🔑 INI PENTING
                     'pendaftaran.nip',
 
                     DB::raw("COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien"),
@@ -296,7 +301,7 @@ class LaporanController extends Controller
         /* ================= TOTAL ================= */
 
         elseif ($jenis === 'total') {
-            $data = $this->buildTotalOperasional('total', $dari, $sampai);
+            $data = $this->buildPemeriksaan('total', $dari, $sampai);
         }
 
 
@@ -337,52 +342,67 @@ class LaporanController extends Controller
        LOGIC UTAMA (DIPAKAI ULANG)
     ========================= */
     
-    private function buildPegawaiPensiunData($jenis, $dari, $sampai)
+    private function buildPemeriksaan($jenis, $dari, $sampai)
     {
-        // 1. QUERY UTAMA
         $query = DB::table('pemeriksaan')
             ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
             ->join('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
             ->leftJoin('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
             ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
-            ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
-            ->where(function ($q) use ($jenis) {
-                if ($jenis === 'pegawai') {
-                    $q->whereIn('pendaftaran.tipe_pasien', ['pegawai','keluarga'])
-                    ->where('pegawai.bagian', '!=', 'Pensiunan');
-                } elseif ($jenis === 'pensiun') {
-                    $q->where('pegawai.bagian', 'Pensiunan');
-                }
-            })
+            ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa');
+
+        $query->when($jenis !== 'total', function ($q) use ($jenis) {
+
+            // ================= PEGAWAI =================
+            if ($jenis === 'pegawai') {
+                $q->whereIn('pendaftaran.tipe_pasien', ['pegawai', 'keluarga'])
+                ->whereNotIn('pegawai.bagian', ['Pensiunan', 'OJT']);
+            }
+
+            // ================= PENSIUNAN =================
+            if ($jenis === 'pensiun') {
+                $q->where('pegawai.bagian', 'Pensiunan');
+            }
+        });
 
 
-            ->select(
-                'pemeriksaan.id_pemeriksaan',
-                DB::raw('DATE(pemeriksaan.created_at) as tanggal'),
-                'pemeriksaan.created_at as full_created_at', 
-                'pegawai.nama_pegawai',
-                'pegawai.nip', 
-                DB::raw('TIMESTAMPDIFF(YEAR, COALESCE(keluarga.tgl_lahir, pegawai.tgl_lahir), CURDATE()) as umur'),
-                'pegawai.bagian',
-                DB::raw('COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien'),
-                DB::raw("COALESCE(keluarga.hubungan_keluarga,'pegawai') as hub_kel"),
-                'pemeriksaan.sistol',
-                'pemeriksaan.gd_puasa',
-                'pemeriksaan.gd_duajam',
-                'pemeriksaan.gd_sewaktu',
-                'pemeriksaan.asam_urat',
-                'pemeriksaan.chol',
-                'pemeriksaan.tg',
-                'pemeriksaan.suhu',
-                'pemeriksaan.berat',
-                'pemeriksaan.tinggi',
-                DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as nama_pemeriksa")
 
-            );
+
+        $query->select(
+            'pemeriksaan.id_pemeriksaan',
+            DB::raw('DATE(pemeriksaan.created_at) as tanggal'),
+            'pemeriksaan.created_at as full_created_at',
+
+            'pegawai.nama_pegawai',
+            'pegawai.nip',
+            'pegawai.bagian',
+
+            DB::raw('COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien'),
+            DB::raw("COALESCE(keluarga.hubungan_keluarga, 'pegawai') as hub_kel"),
+            DB::raw('TIMESTAMPDIFF(YEAR, COALESCE(keluarga.tgl_lahir, pegawai.tgl_lahir), CURDATE()) as umur'),
+
+            'pemeriksaan.sistol',
+            'pemeriksaan.gd_puasa',
+            'pemeriksaan.gd_duajam',
+            'pemeriksaan.gd_sewaktu',
+            'pemeriksaan.asam_urat',
+            'pemeriksaan.chol',
+            'pemeriksaan.tg',
+            'pemeriksaan.suhu',
+            'pemeriksaan.berat',
+            'pemeriksaan.tinggi',
+
+            DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as pemeriksa")
+        );
+
 
         if ($dari && $sampai) {
-            $query->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari, $sampai]);
+            $query->whereBetween(
+                DB::raw('DATE(pemeriksaan.created_at)'),
+                [$dari, $sampai]
+            );
         }
+
 
         $raw = $query->orderBy('pemeriksaan.created_at', 'asc')->get();
         $ids = $raw->pluck('id_pemeriksaan');
@@ -483,91 +503,16 @@ class LaporanController extends Controller
         return $final;
     }
 
-    private function buildTotalOperasional($jenis, $dari, $sampai) {
-        $query = DB::table('pemeriksaan')
-            ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
-            ->join('pegawai', 'pendaftaran.nip', '=', 'pegawai.nip')
-            ->leftJoin('keluarga', 'pendaftaran.id_keluarga', '=', 'keluarga.id_keluarga')
-            ->leftJoin('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
-            ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa');
-
-        // Filter berdasarkan jenis jika bukan 'total'
-        if ($jenis === 'pegawai') {
-            $query->where('pendaftaran.tipe_pasien', 'pegawai');
-        } elseif ($jenis === 'pensiun') {
-            $query->where('pendaftaran.tipe_pasien', 'pensiunan');
-        }
-
-        $query->select(
-            'pemeriksaan.id_pemeriksaan',
-            DB::raw('DATE(pemeriksaan.created_at) as tanggal'),
-            'pegawai.nama_pegawai', 'pegawai.nip', 'pegawai.bagian',
-            DB::raw('COALESCE(keluarga.nama_keluarga, pegawai.nama_pegawai) as nama_pasien'),
-            DB::raw("COALESCE(keluarga.hubungan_keluarga, 'Pegawai') as hub_kel"),
-            DB::raw('TIMESTAMPDIFF(YEAR, COALESCE(keluarga.tgl_lahir, pegawai.tgl_lahir), CURDATE()) as umur'),
-            'pemeriksaan.sistol', 'pemeriksaan.diastol',
-            'pemeriksaan.gd_puasa', 'pemeriksaan.gd_duajam', 'pemeriksaan.gd_sewaktu',
-            'pemeriksaan.asam_urat', 'pemeriksaan.chol', 'pemeriksaan.tg', 'pemeriksaan.suhu',
-            'pemeriksaan.berat', 'pemeriksaan.tinggi',
-            DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as nama_pemeriksa")
-        );
-
-        if ($dari && $sampai) {
-            $query->whereBetween(DB::raw('DATE(pemeriksaan.created_at)'), [$dari, $sampai]);
-        }
-
-        $raw = $query->orderBy('pemeriksaan.created_at', 'asc')->get();
-        $ids = $raw->pluck('id_pemeriksaan');
-
-        $diagnosaMap = DB::table('detail_pemeriksaan_penyakit as dpp')
-            ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dpp.id_diagnosa')
-            ->whereIn('dpp.id_pemeriksaan', $ids)->get()->groupBy('id_pemeriksaan');
-
-        $obatMap = DB::table('resep')
-            ->join('detail_resep', 'resep.id_resep', '=', 'detail_resep.id_resep')
-            ->join('obat', 'detail_resep.id_obat', '=', 'obat.id_obat')
-            ->whereIn('resep.id_pemeriksaan', $ids)
-            ->select('resep.id_pemeriksaan', 'obat.nama_obat', 'detail_resep.jumlah', 'obat.harga', 'detail_resep.satuan')
-            ->get()->groupBy('id_pemeriksaan');
-
-        $final = collect();
-        foreach ($raw as $r) {
-            $id = $r->id_pemeriksaan;
-            $diags = $diagnosaMap[$id] ?? collect([(object)['diagnosa' => '-']]);
-            $obats = $obatMap[$id] ?? collect([(object)['nama_obat' => '-', 'jumlah' => 0, 'harga' => 0, 'satuan' => '']]);
-
-            $maxRows = max($diags->count(), $obats->count());
-            $totalObatPasien = $obats->sum(fn($o) => (int)$o->jumlah * (int)$o->harga);
-
-            for ($i = 0; $i < $maxRows; $i++) {
-                $row = clone $r;
-
-                
-                $row->diagnosa = $diags[$i]->diagnosa ?? '-';
-                $o = $obats[$i] ?? null;
-                $row->nama_obat = $o->nama_obat ?? '-';
-                $row->jumlah = $o->jumlah ?? 0;
-                $row->satuan = $o->satuan ?? '';
-                $row->harga = $o->harga ?? 0;
-                $row->subtotal_obat = (int)$row->jumlah * (int)$row->harga;
-                $row->total_obat_pasien = ($i === 0) ? $totalObatPasien : null;
-                $row->is_first = ($i === 0);
-                $final->push($row);
-            }
-        }
-        return $final;
-    }
-
     
     private function getJudul($jenis)
     {
         return match ($jenis) {
-            'pegawai'  => 'Rekapan Pemeriksaan Pegawai',
-            'pensiun'  => 'Rekapan Pemeriksaan Pensiunan',
-            'dokter'   => 'Rekapan Pemeriksaan Dokter',
-            'obat'     => 'Rekapan Penggunaan Obat',
-            'total'    => 'Rekapan Total Operasional',
-            default    => 'Rekapan Laporan',
+            'pegawai'  => 'Rekap Pemeriksaan Pegawai',
+            'pensiun'  => 'Rekap Pemeriksaan Pensiunan',
+            'dokter'   => 'Rekap Pemeriksaan Dokter',
+            'obat'     => 'Rekap Penggunaan Obat',
+            'total'    => 'Rekap Keseluruhan Operasional',
+            default    => 'Rekap Laporan',
         };
     }
 
@@ -582,7 +527,7 @@ class LaporanController extends Controller
         $dari   = $request->dari;
         $sampai = $request->sampai;
 
-        $data = $this->buildPegawaiPensiunData($jenis, $dari, $sampai);
+        $data = $this->buildPemeriksaan($jenis, $dari, $sampai);
         $totalTagihan = $data->sum('total_obat_pasien');
 
         $grouped = $data->groupBy('id_pemeriksaan');
@@ -912,7 +857,7 @@ class LaporanController extends Controller
         $dari   = $request->dari;
         $sampai = $request->sampai;
 
-        $data = $this->buildTotalOperasional('total', $dari, $sampai);
+        $data = $this->buildPemeriksaan('total', $dari, $sampai);
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -954,7 +899,7 @@ class LaporanController extends Controller
         }
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $path = storage_path('app/Laporan_Total_Operasional.xlsx');
+        $path = storage_path('app/Laporan_Keseluruhan_Operasional.xlsx');
         $writer->save($path);
 
         return response()->download($path)->deleteFileAfterSend(true);

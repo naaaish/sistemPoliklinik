@@ -135,14 +135,6 @@
             </div>
         </div>
 
-        {{-- <div class="info-box">
-            <div class="info-header"><h3>Diagnosa K3 (NB)</h3></div>
-            <div class="info-content">
-                @forelse($diagnosa_k3 as $k3) 
-                    <p>• <strong>[{{ $k3->id_nb }}]</strong> {{ $k3->nama_penyakit }}</p> 
-                @empty <p class="text-muted italic">Tidak ada data diagnosa K3.</p> @endforelse
-            </div>
-        </div> --}}
 
         <h2 class="section-title" style="text-align: center; border-bottom: none;">Data Resep Obat</h2>
 

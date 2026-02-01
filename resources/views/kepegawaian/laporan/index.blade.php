@@ -78,6 +78,7 @@
                                 <th>Nama Pemeriksa</th>
                                 <th>Total Obat Pasien</th>
                             @else
+                            {{-- Pegawai / Pensiunan / Keseluruhan --}}
                                 <th>ID Pemeriksaan</th>
                                 <th>Nama Pasien</th>
                                 <th>Tanggal</th>
@@ -87,23 +88,9 @@
                     </thead>
                     <tbody>
 
-                    {{-- ================= TOTAL OPERASIONAL ================= --}}
-                    @if($key === 'total')
-                        @forelse($preview['total'] as $row)
-                        <tr>
-                            <td>{{ $row->nama_pasien }}</td>
-                            <td>{{ \Carbon\Carbon::parse($row->tanggal)->format('d/m/Y') }}</td>
-                            <td>{{ $row->nama_pemeriksa }}</td>
-                            <td style="font-weight:600;">
-                                Rp {{ number_format($row->total_obat_pasien ?? 0, 0, ',', '.') }}
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="4">Tidak ada data</td></tr>
-                    @endforelse
 
                     {{-- ================= DOKTER ================= --}}
-                    @elseif($key === 'dokter')
+                    @if($key === 'dokter')
                         @forelse($preview['dokter'] as $p)
                             <tr>
                                 <td>{{ $p->nama_dokter }}</td>
@@ -127,7 +114,7 @@
                             <tr><td colspan="4">Tidak ada data</td></tr>
                         @endforelse
 
-                    {{-- ================= PEGAWAI / PENSIUN ================= --}}
+                    {{-- ================= PEGAWAI / PENSIUN  / KESELURUHAN ================= --}}
                     @else
                         @forelse($preview[$key] as $p)
                             <tr>
