@@ -96,20 +96,37 @@
         <div class="ap-label">Penyakit</div><div class="ap-colon">:</div>
         <div class="ap-input">
             <select id="inpPenyakit" class="ap-select">
-            <option value="">-- pilih (boleh kosong) --</option>
-            @foreach($penyakit as $p)
+              <option value="">-- pilih (boleh kosong) --</option>
+              @foreach($penyakit as $p)
                 <option value="{{ $p->id_diagnosa }}"
                         data-nb="{{ $p->id_nb ?? '' }}"
                         data-k3="{{ $p->nama_k3 ?? '' }}">
-                        {{ $p->diagnosa }}
+                  {{ $p->diagnosa }}
                 </option>
-            @endforeach
+              @endforeach
             </select>
 
             <button type="button" id="btnAddPenyakit" class="ap-btn-small">Tambah Penyakit</button>
 
-            <div id="chipPenyakit" style="margin-top:10px;"></div>
-            <div id="hiddenPenyakit"></div>
+            {{-- daftar penyakit yang sudah ditambahkan --}}
+            <div id="penyakitWrap" style="margin-top:10px;"></div>
+
+            <!-- template card penyakit -->
+            <div id="penyakitTemplate" style="display:none;">
+              <div class="penyakit-item" style="border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin-top:10px;">
+                <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+                  <div class="penyakit-name" style="font-weight:600;"></div>
+                  <button type="button" class="btnDelPenyakit ap-btn ap-btn--danger">Hapus</button>
+                </div>
+
+                <div style="display:grid;grid-template-columns:140px 1fr;gap:10px;margin-top:10px;align-items:center;">
+                  <div style="color:#6b7280;">Kode Diagnosa K3</div>
+                  <input type="text" name="id_nb[]" class="ap-input id-nb-input" placeholder="Masukkan ID NB..." />
+                </div>
+
+                <input type="hidden" name="penyakit_id[]" class="penyakit-id-hidden" value="">
+              </div>
+            </div>
         </div>
 
         <!-- template item penyakit -->
@@ -121,13 +138,11 @@
               <button type="button" class="btnDelPenyakit ap-btn ap-btn--danger">Hapus</button>
             </div>
 
-            <!-- row bawah: input id_nb -->
             <div style="display:grid;grid-template-columns:140px 1fr;gap:10px;margin-top:10px;align-items:center;">
-              <div style="color:#6b7280;">ID NB</div>
+              <div style="color:#6b7280;">Kode Diagnosa K3</div>
               <input type="text" name="id_nb[]" class="ap-input id-nb-input" placeholder="Masukkan ID NB..." />
             </div>
 
-            <!-- hidden penyakit_id[] (ngikut index yang sama dengan id_nb[]) -->
             <input type="hidden" name="penyakit_id[]" class="penyakit-id-hidden" value="">
           </div>
         </div>
@@ -152,9 +167,10 @@
 
       @php
         $isPoliklinik = (($pendaftaran->tipe_pasien ?? '') === 'poliklinik');
+        $awalJenis = ($pendaftaran->jenis_pemeriksaan ?? '');
       @endphp
 
-      @if(!$isPoliklinik)
+      @if(!$isPoliklinik && $awalJenis === 'cek_kesehatan')
         <div id="petugasAfterObatWrap" style="display:none;">
           <div class="ap-row">
             <div class="ap-label">Dokter</div>
@@ -278,41 +294,84 @@
     return val !== '' && !isNaN(val) && isFinite(val);
   }
 
-  // ===== CHIP UTILITY =====
-  function addChip({value, label, chipContainer, hiddenContainer, inputName}) {
-    if(!value) return;
-
-    const exists = [...hiddenContainer.querySelectorAll(`input[name="${inputName}[]"]`)]
-      .some(i => i.value == value);
-    if(exists) return;
-
-    const chip = document.createElement('span');
-    chip.style.cssText =
-    'display:inline-flex;align-items:center;gap:6px;background:#eef3ff;border:1px solid #c7d7f5;' +
-    'color:#316BA1;padding:4px 8px;border-radius:10px;margin:3px 6px 0 0;font-size:13px;';
-
-    chip.innerHTML =
-    `<span>${label}</span>` +
-    `<button type="button" style="border:none;background:transparent;cursor:pointer;font-weight:700;color:#316BA1;font-size:14px;line-height:1;">×</button>`;
-
-    const hidden = document.createElement('input');
-    hidden.type = 'hidden';
-    hidden.name = `${inputName}[]`;
-    hidden.value = value;
-
-    chip.querySelector('button').addEventListener('click', () => {
-      chip.remove();
-      hidden.remove();
-
-      if (inputName === 'penyakit_id') filterSaran();
-    });
-
-    chipContainer.appendChild(chip);
-    hiddenContainer.appendChild(hidden);
-  }
   function getSelectedPenyakitIds(){
-    return [...document.querySelectorAll('#hiddenPenyakit input[name="penyakit_id[]"]')].map(i => i.value);
+  return [...document.querySelectorAll('#penyakitWrap input[name="penyakit_id[]"]')].map(i => i.value);
+}
+
+function alreadyAddedPenyakit(id){
+  return !!document.querySelector(`#penyakitWrap input.penyakit-id-hidden[value="${CSS.escape(id)}"]`);
+}
+
+function filterSaran(){
+  const selected = new Set(getSelectedPenyakitIds());
+  const saranSelect = document.getElementById('inpSaran');
+
+  [...saranSelect.options].forEach((opt, idx) => {
+    if(idx === 0) return;
+    const diagId = opt.dataset.diagnosa;
+    opt.hidden = selected.size > 0 ? !selected.has(diagId) : false;
+  });
+
+  if (saranSelect.selectedIndex > 0 && saranSelect.options[saranSelect.selectedIndex].hidden) {
+    saranSelect.value = "";
   }
+}
+
+document.getElementById('btnAddPenyakit')?.addEventListener('click', async () => {
+  const sel = document.getElementById('inpPenyakit');
+  if(!sel.value) return;
+
+  const id = sel.value;
+
+  if(alreadyAddedPenyakit(id)){
+    // optional: kasih toast
+    sel.value = '';
+    return;
+  }
+
+  const opt = sel.options[sel.selectedIndex];
+  const label = opt.text;
+  const defaultNb = (opt.dataset.nb || '').trim(); // kalau ada, auto isi
+
+  const { value: nb } = await Swal.fire({
+    title: 'Input ID NB',
+    text: `Penyakit: ${label}`,
+    input: 'text',
+    inputValue: defaultNb,
+    inputPlaceholder: 'Masukkan ID NB...',
+    showCancelButton: true,
+    confirmButtonText: 'Simpan',
+    cancelButtonText: 'Batal',
+    confirmButtonColor: '#316BA1',
+    heightAuto: false,
+    scrollbarPadding: false,
+    inputValidator: (v) => {
+      if (!v || !v.trim()) return 'ID NB wajib diisi.';
+      return null;
+    }
+  });
+
+  if(!nb) return; // batal
+
+  // render card penyakit
+  const tpl = document.querySelector('#penyakitTemplate .penyakit-item');
+  const node = tpl.cloneNode(true);
+
+  node.querySelector('.penyakit-name').textContent = label;
+  node.querySelector('.penyakit-id-hidden').value = id;
+  node.querySelector('.id-nb-input').value = nb.trim();
+
+  node.querySelector('.btnDelPenyakit').addEventListener('click', () => {
+    node.remove();
+    filterSaran();
+  });
+
+  document.getElementById('penyakitWrap').appendChild(node);
+
+  // reset select
+  sel.value = '';
+  filterSaran();
+});
 
   const penyakitPick = document.getElementById('penyakitPick');
   const btnAddPenyakit = document.getElementById('btnAddPenyakit');
@@ -377,14 +436,6 @@
     const sel = document.getElementById('inpPenyakit');
     if(!sel.value) return;
 
-    addChip({
-        value: sel.value,
-        label: sel.options[sel.selectedIndex].text,
-        chipContainer: document.getElementById('chipPenyakit'),
-        hiddenContainer: document.getElementById('hiddenPenyakit'),
-        inputName: 'penyakit_id'
-    });
-
     filterSaran();
 
     sel.value = '';
@@ -394,13 +445,7 @@
   document.getElementById('btnAddSaran').addEventListener('click', () => {
     const sel = document.getElementById('inpSaran');
     if(!sel.value) return;
-    addChip({
-      value: sel.value,
-      label: sel.options[sel.selectedIndex].text,
-      chipContainer: document.getElementById('chipSaran'),
-      hiddenContainer: document.getElementById('hiddenSaran'),
-      inputName: 'id_saran'
-    });
+
     sel.value = '';
   });
 
@@ -574,7 +619,11 @@
 
       return;
     }
+    if (e.target && e.target.matches('select[name="obat_id[]"]')) {
+      syncPetugasAfterObat();
+    }
   });
+  syncPetugasAfterObat();
 
   function showWarn(title, text, cb) {
     if (window.Swal && Swal.fire) {
@@ -597,18 +646,17 @@
     let firstInvalidSatuan = null;
     const tipePasienEl = document.getElementById('tipePasien');
     const tipePasien = tipePasienEl ? tipePasienEl.value : '';
+    const meta = document.getElementById('pendaftaranMeta');
+    const tipe = meta ? (meta.dataset.tipe || '') : '';
+    const awalJenis = meta ? (meta.dataset.awalJenis || '') : '';
     const adaObat = adaObatTerpilih();
 
     // non poliklinik + ada obat => dokter wajib
-    if (tipePasien !== 'poliklinik' && adaObat) {
+    if (tipe !== 'poliklinik' && awalJenis === 'cek_kesehatan' && adaObat) {
       const dokter = document.getElementById('petugasAfterObat');
       if (dokter && !dokter.value) {
         e.preventDefault();
-        showWarn(
-          'Dokter belum dipilih',
-          'Jika ada obat, wajib pilih dokter.',
-          () => dokter.focus()
-        );
+        showWarn('Dokter belum dipilih', 'Jika awalnya cek kesehatan lalu ditambah obat, wajib pilih dokter.', () => dokter.focus());
         return;
       }
     }
@@ -711,24 +759,32 @@
 
     const wrap = document.getElementById('petugasAfterObatWrap');
     const sel  = document.getElementById('petugasAfterObat');
+    if (!wrap || !sel) return; // kalau poliklinik / awal jenis bukan cek_kesehatan, elemen ini memang ga ada
 
-    // kalau poliklinik: elemen dokter memang tidak ada / tidak dipakai
-    if (tipePasien === 'poliklinik') {
-      if (wrap) wrap.style.display = 'none';
-      if (sel) {
-        sel.required = false;
-        sel.value = '';
-      }
+    const meta = document.getElementById('pendaftaranMeta');
+    const tipe = meta ? (meta.dataset.tipe || '') : '';
+    const awalJenis = meta ? (meta.dataset.awalJenis || '') : '';
+
+    // poliklinik ga pernah butuh dokter after obat
+    if (tipe === 'poliklinik') {
+      wrap.style.display = 'none';
+      sel.required = false;
+      sel.value = '';
       return;
     }
 
-    // non poliklinik
-    if (!wrap || !sel) return;
+    // kalau awalnya bukan cek_kesehatan, jangan pernah pakai field ini
+    if (awalJenis !== 'cek_kesehatan') {
+      wrap.style.display = 'none';
+      sel.required = false;
+      sel.value = '';
+      return;
+    }
 
+    // awal cek_kesehatan: kalau ada obat → wajib pilih dokter
     const on = adaObatTerpilih();
     wrap.style.display = on ? '' : 'none';
     sel.required = on;
-
     if (!on) sel.value = '';
   }
 

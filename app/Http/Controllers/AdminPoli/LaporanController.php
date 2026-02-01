@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\LaporanMultiTipeExport;
 use App\Exports\LaporanSingleTipeExport;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class LaporanController extends Controller
 {
@@ -250,16 +251,24 @@ class LaporanController extends Controller
             ->get();
 
         foreach ($visits as $v) {
+            // cari nama kolom kode yang bener-bener ada di tabel diagnosa
+            $kodeK3Col = null;
+            foreach (['kode_diagnosa_k3', 'kode_k3', 'kode_k3_diagnosa', 'id_diagnosa_k3'] as $c) {
+                if (Schema::hasColumn('diagnosa', $c)) { $kodeK3Col = $c; break; }
+            }
+            $kodeCol = null;
+            foreach (['kode_diagnosa', 'kode', 'kode_icd', 'icd10', 'kode_icd10'] as $c) {
+                if (Schema::hasColumn('diagnosa', $c)) { $kodeCol = $c; break; }
+            }
+
             $v->diagnosa_list = DB::table('detail_pemeriksaan_penyakit as dp')
                 ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dp.id_diagnosa')
                 ->where('dp.id_pemeriksaan', $v->id_pemeriksaan)
-                ->pluck('d.diagnosa')
-                ->toArray();
-
-            $v->diagnosa_k3_items = DB::table('detail_pemeriksaan_diagnosa_k3 as dk')
-                ->join('diagnosa_k3 as k3', 'k3.id_nb', '=', 'dk.id_nb')
-                ->where('dk.id_pemeriksaan', $v->id_pemeriksaan)
-                ->select(['k3.id_nb', 'k3.nama_penyakit'])
+                ->select([
+                    'd.diagnosa as diagnosa',
+                    DB::raw("CAST(dp.id_nb AS CHAR) as kode_diagnosa_k3"),
+                    DB::raw("CAST(dp.id_diagnosa AS CHAR) as kode_diagnosa"),
+                    ])
                 ->get()
                 ->toArray();
 
@@ -319,33 +328,43 @@ class LaporanController extends Controller
             }
 
             $diagUmum = $v->diagnosa_list ?? [];
-            $nbItems = $v->diagnosa_k3_items ?? [];
             $obatList = $v->obat_list ?? [];
 
-            if (count($diagUmum) === 0) $diagUmum = ['-'];
-            if (count($nbItems) === 0) $nbItems = []; 
+            if (count($diagUmum) === 0) {
+                $diagUmum = [(object)[
+                    'diagnosa' => '-',
+                    'kode_diagnosa_k3' => '-',
+                    'kode_diagnosa' => '-',
+                ]];
+            }
             
             $totalHarga = 0;
             foreach ($obatList as $ob) {
                 $totalHarga += (int)($ob->subtotal ?? 0);
             }
             
-            $maxLines = max(count($diagUmum), count($nbItems), count($obatList), 1);
+            $maxLines = max(count($diagUmum), count($obatList), 1);
 
             for ($i = 0; $i < $maxLines; $i++) {
                 $isFirst = ($i === 0);
 
-                // diagnosa hanya dari tabel diagnosa
-                $diag = $diagUmum[$i] ?? ($isFirst ? '-' : '');
-                
-                // NB hanya dari diagnosa_k3 (zip by index)
-                $nbLine = isset($nbItems[$i]) ? ($nbItems[$i]->id_nb ?? '-') : '-';
-
+                $diagObj = $diagUmum[$i] ?? null;
+                $diagNama = $diagObj ? ($diagObj->diagnosa ?? '-') : ($isFirst ? '-' : '');
+                $kodeK3   = $diagObj ? ($diagObj->kode_diagnosa_k3 ?? '-') : ($isFirst ? '-' : '');
+                $kodeDx   = $diagObj ? ($diagObj->kode_diagnosa ?? '-') : ($isFirst ? '-' : '');
                 $ob = $obatList[$i] ?? null;
 
                 $saranArr = $v->saran_list ?? [];
                 $hasDiagLine = ($i < count($diagUmum));
                 $saranLine = $hasDiagLine ? ($saranArr[$i] ?? '-') : '';
+
+                $subtotalObat = '-';
+                if ($ob) {
+                    $subtotalObat = $ob->subtotal ?? null;
+                    if ($subtotalObat === null || $subtotalObat === '') {
+                        $subtotalObat = (int)($ob->harga ?? 0) * (int)($ob->jumlah ?? 0);
+                    }
+                }
 
                 $rows[] = [
                     'NO' => $isFirst ? $no : '',
@@ -369,17 +388,18 @@ class LaporanController extends Controller
                     'BB' => $isFirst ? ($v->berat ?? '-') : '',
                     'TB' => $isFirst ? ($v->tinggi ?? '-') : '',
 
-                    'DIAGNOSA' => $diag !== '' ? $diag : ($isFirst ? '-' : ''),
-
+                    'DIAGNOSA' => $diagNama !== '' ? $diagNama : ($isFirst ? '-' : ''),
                     'TERAPHY' => $ob ? ($ob->nama_obat ?? '-') : ($isFirst ? '-' : ''),
                     'JUMLAH_OBAT' => $ob ? trim(($ob->jumlah ?? 0) . ' ' . ($ob->satuan ?? '')) : ($isFirst ? '-' : ''),
                     'HARGA_OBAT_SATUAN' => $ob ? ($ob->harga ?? 0) : ($isFirst ? '-' : ''),
-                    'TOTAL_HARGA_OBAT' => $isFirst ? ($totalHarga ?: '-') : '',
+                    'TOTAL_HARGA_OBAT' => $ob ? ($subtotalObat ?? '-') : ($isFirst ? '-' : ''),
+
                     'SARAN' => $saranLine,
                     'PEMERIKSA' => $isFirst ? ($v->pemeriksa ?? '-') : '',
 
-                    'NB' => $isPegawai ? ($nbLine ?: '-') : '',
+                    'KODE_DIAGNOSA_K3' => $kodeK3 !== '' ? $kodeK3 : ($isFirst ? '-' : ''),
                     'PERIKSA_KE' => $isPegawai ? ($isFirst ? $periksaKe : '') : '',
+                    'KODE_DIAGNOSA' => $kodeDx !== '' ? $kodeDx : ($isFirst ? '-' : ''),
                 ];
             }
 

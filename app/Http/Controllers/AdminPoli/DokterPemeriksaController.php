@@ -132,17 +132,17 @@ class DokterPemeriksaController extends Controller
             'jadwal.*.jam_selesai' => 'required',
         ]);
 
+        DB::transaction(function () use ($request) {
 
-        // Auto-generate ID
-        $lastDokter = Dokter::orderBy('id_dokter', 'desc')->first();
-        if ($lastDokter) {
-            $lastNumber = (int) substr($lastDokter->id_dokter, 1);
-            $newId = 'DOK' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-        } else {
-            $newId = 'DOK001';
-        }
+            // ambil angka terbesar dari DOKxxx, lalu +1 (di-lock biar gak tabrakan)
+            $max = DB::table('dokter')
+                ->lockForUpdate()
+                ->selectRaw("MAX(CAST(SUBSTRING(id_dokter, 4) AS UNSIGNED)) as max_no")
+                ->value('max_no');
 
-        DB::transaction(function () use ($request, $newId) {
+            $next = ((int) $max) + 1;
+            $newId = 'DOK' . str_pad((string)$next, 3, '0', STR_PAD_LEFT);
+
             Dokter::create([
                 'id_dokter' => $newId,
                 'nama' => $request->nama,
@@ -151,9 +151,7 @@ class DokterPemeriksaController extends Controller
             ]);
 
             foreach ($request->jadwal as $j) {
-                if (empty($j['hari']) || empty($j['jam_mulai']) || empty($j['jam_selesai'])) {
-                    continue;
-                }
+                if (empty($j['hari']) || empty($j['jam_mulai']) || empty($j['jam_selesai'])) continue;
 
                 JadwalDokter::create([
                     'id_dokter' => $newId,
@@ -163,12 +161,10 @@ class DokterPemeriksaController extends Controller
                 ]);
             }
         });
-    
 
         return redirect()
-        ->route('adminpoli.dokter_pemeriksa.index')
-        ->with('success', 'Data dokter berhasil ditambahkan');
-
+            ->route('adminpoli.dokter_pemeriksa.index')
+            ->with('success', 'Data dokter berhasil ditambahkan');
     }
 
     public function updateDokter(Request $request, $id)
@@ -223,19 +219,21 @@ class DokterPemeriksaController extends Controller
         ]);
 
         // Auto-generate ID
-        $lastPemeriksa = Pemeriksa::orderBy('id_pemeriksa', 'desc')->first();
-        if ($lastPemeriksa) {
-            $lastNumber = (int) substr($lastPemeriksa->id_pemeriksa, 1);
-            $newId = 'PMR' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-        } else {
-            $newId = 'PMR001';
-        }
+        DB::transaction(function () use ($request) {
+            $max = DB::table('pemeriksa')
+                ->lockForUpdate()
+                ->selectRaw("MAX(CAST(SUBSTRING(id_pemeriksa, 4) AS UNSIGNED)) as max_no")
+                ->value('max_no');
 
-        Pemeriksa::create([
-            'id_pemeriksa' => $newId,
-            'nama_pemeriksa' => $request->nama_pemeriksa,
-            'status' => $request->status,
-        ]);
+            $next = ((int) $max) + 1;
+            $newId = 'PMR' . str_pad((string)$next, 3, '0', STR_PAD_LEFT);
+
+            Pemeriksa::create([
+                'id_pemeriksa' => $newId,
+                'nama_pemeriksa' => $request->nama_pemeriksa,
+                'status' => $request->status,
+            ]);
+        });
 
         return back()->with('success', 'Pemeriksa berhasil ditambahkan');
     }
