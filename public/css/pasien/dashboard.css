@@ -21,14 +21,13 @@ body {
     max-width: 1200px;
     margin: auto;
 }
+
 /* ================= HERO REVISED ================= */
 .hero {
     display: grid;
     grid-template-columns: 1fr 1fr;
     min-height: 85vh;
-    /* Memberikan jarak atas agar tidak menempel navbar */
     padding-top: 40px; 
-    /* Memastikan konten di dalamnya berada di tengah secara vertikal */
     align-items: center; 
     
     background: linear-gradient(rgba(26, 58, 82, 0.5), rgba(26, 58, 82, 0.5)), 
@@ -39,7 +38,6 @@ body {
     color: white;
 }
 
-/* Animasi untuk konten teks */
 .hero-content {
     padding: 90px 60px;
     z-index: 2;
@@ -55,13 +53,13 @@ body {
     line-height: 1.25;
     margin-bottom: 20px;
     opacity: 0;
-    animation: fadeInLeft 0.8s ease-out 0.3s forwards; /* Muncul setelah badge */
+    animation: fadeInLeft 0.8s ease-out 0.3s forwards;
 }
 
 .hero p {
     max-width: 480px;
     opacity: 0;
-    animation: fadeInLeft 0.8s ease-out 0.5s forwards; /* Muncul setelah judul */
+    animation: fadeInLeft 0.8s ease-out 0.5s forwards;
 }
 
 .hero-actions {
@@ -74,22 +72,20 @@ body {
     animation: fadeInUp 0.8s ease-out 0.7s forwards;
 }
 
-/* Animasi melayang untuk gambar dokter di kanan */
 .hero-image img {
-    max-width: 70%;         /* Sedikit diperbesar agar proporsional */
+    max-width: 70%;
     height: auto;
     filter: drop-shadow(0 20px 30px rgba(0,0,0,0.5));
     animation: floatingDoctor 4s ease-in-out infinite;
-    /* Menghapus margin negatif jika ada agar tidak menabrak navbar */
     margin-top: 0;
     border-radius: 20px;
 }
 
-/* ================= KEYFRAMES ANIMASI ================= */
+/* ================= KEYFRAMES ANIMASI - SUBTLE ================= */
 @keyframes fadeInLeft {
     from {
         opacity: 0;
-        transform: translateX(-50px);
+        transform: translateX(-30px); /* Lebih kecil dari -50px */
     }
     to {
         opacity: 1;
@@ -100,7 +96,7 @@ body {
 @keyframes fadeInDown {
     from {
         opacity: 0;
-        transform: translateY(-30px);
+        transform: translateY(-20px); /* Lebih kecil dari -30px */
     }
     to {
         opacity: 1;
@@ -111,7 +107,7 @@ body {
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(20px); /* Lebih kecil dari 30px */
     }
     to {
         opacity: 1;
@@ -121,12 +117,12 @@ body {
 
 @keyframes floatingDoctor {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
+    50% { transform: translateY(-10px); } /* Lebih kecil dari -15px */
 }
 
 /* ================= LAYANAN (SERVICES) ================= */
 .services {
-    margin-top: -60px; /* Biar kartu agak naik ke area hero */
+    margin-top: -60px;
     padding: 0 60px 80px;
     position: relative;
     z-index: 10;
@@ -141,21 +137,25 @@ body {
 }
 
 .service-card {
-    background: #1a3a52; /* Warna gelap sesuai pict */
+    background: #1a3a52;
     padding: 35px 25px;
     border-radius: 16px;
     text-align: center;
     color: white;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    transition: 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15); /* Shadow lebih tipis */
+    transition: all 0.25s ease; /* Lebih cepat */
 }
 
 .service-card:hover {
-    transform: translateY(-8px);
+    transform: translateY(-4px); /* Naik 4px aja, bukan 8px */
     background: #244b6b;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.2);
 }
 
-/* STYLE UNTUK ICON GAMBAR */
+.service-card:active {
+    transform: translateY(-2px);
+}
+
 .service-icon {
     width: 65px;
     height: 65px;
@@ -182,6 +182,7 @@ body {
     opacity: 0.8;
     margin: 0;
 }
+
 /* ================= SECTION ================= */
 .section {
     padding: 90px 60px;
@@ -197,76 +198,208 @@ body {
     margin-bottom: 40px;
 }
 
-/* ================= JADWAL DOKTER ================= */
+/* ================= JADWAL DOKTER - HORIZONTAL CARDS ================= */
+
 .doctor-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 26px;
+    grid-template-columns: repeat(2, 1fr); /* Maksimal 2 kolom */
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .doctor-card-modern {
     display: flex;
+    flex-direction: row; /* Horizontal layout */
     background: white;
-    border-radius: 18px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,.08);
-    transition: .3s;
+    box-shadow: 0 4px 16px rgba(0,0,0,.08);
+    transition: all 0.25s ease;
+    min-height: 200px; /* Tinggi minimum */
 }
 
 .doctor-card-modern:hover {
-    transform: translateY(-6px);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.12);
 }
 
+.doctor-card-modern:active {
+    transform: translateY(-1px);
+}
+
+/* Photo Section - Lebih besar */
 .doctor-photo {
-    width: 110px;
-    background: #eaf4ff;
+    min-width: 140px;
+    width: 140px;
+    background: linear-gradient(135deg, #eaf4ff 0%, #d0e7ff 100%);
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Dekorasi background photo */
+.doctor-photo::before {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -50px;
+    right: -50px;
 }
 
 .doctor-photo .initials {
-    font-size: 26px;
-    font-weight: 600;
+    font-size: 36px;
+    font-weight: 700;
     color: #1e3a8a;
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+/* Body Section - Lebih luas */
 .doctor-body {
-    padding: 20px;
+    padding: 24px 28px;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Doctor Info Header */
+.doctor-info-header {
+    margin-bottom: 16px;
 }
 
 .doctor-body h4 {
-    margin: 0;
-    font-size: 17px;
+    margin: 0 0 6px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
 }
 
 .doctor-body span {
-    font-size: 13px;
+    display: inline-block;
+    font-size: 14px;
     color: #2563eb;
-    font-weight: 500;
+    font-weight: 600;
+    background: #eff6ff;
+    padding: 4px 12px;
+    border-radius: 6px;
 }
 
+/* Schedule List - Horizontal untuk space efficiency */
 .doctor-schedule-list {
-    margin-top: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
 }
 
 .doctor-schedule {
+    background: #f8fafc;
     border-left: 3px solid #3b82f6;
-    padding-left: 12px;
+    padding: 10px 12px;
+    border-radius: 0 8px 8px 0;
+    transition: all 0.2s ease;
+}
+
+.doctor-schedule:hover {
+    background: #eff6ff;
+    border-left-color: #2563eb;
+    transform: translateX(2px);
 }
 
 .doctor-schedule p {
-    margin: 0;
-    font-size: 13px;
+    margin: 0 0 4px 0;
+    font-size: 12px;
     color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .doctor-schedule strong {
     font-size: 14px;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+/* Responsive - Tablet */
+@media (max-width: 1024px) {
+    .doctor-grid {
+        grid-template-columns: 1fr; /* Stack jadi 1 kolom di tablet */
+        gap: 20px;
+    }
+    
+    .doctor-card-modern {
+        min-height: 180px;
+    }
+    
+    .doctor-photo {
+        min-width: 120px;
+        width: 120px;
+    }
+    
+    .doctor-photo .initials {
+        font-size: 32px;
+    }
+    
+    .doctor-body {
+        padding: 20px 24px;
+    }
+    
+    .doctor-schedule-list {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+    .doctor-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .doctor-card-modern {
+        flex-direction: column; /* Stack vertical di mobile */
+        min-height: auto;
+    }
+    
+    .doctor-photo {
+        width: 100%;
+        min-width: 100%;
+        height: 140px;
+        min-height: 140px;
+    }
+    
+    .doctor-photo .initials {
+        font-size: 40px;
+    }
+    
+    .doctor-body {
+        padding: 20px;
+    }
+    
+    .doctor-body h4 {
+        font-size: 18px;
+    }
+    
+    .doctor-schedule-list {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
+/* Jika hanya ada 1 dokter, buat full width tapi tetap ada max-width */
+.doctor-grid:has(.doctor-card-modern:only-child) {
+    grid-template-columns: 1fr;
+    max-width: 800px;
 }
 
 /* ================= ARTIKEL ================= */
@@ -282,6 +415,27 @@ body {
     color: #2563eb;
     text-decoration: none;
     font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.lihat-semua::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: #2563eb;
+    transition: width 0.25s ease;
+}
+
+.lihat-semua:hover::after {
+    width: 100%;
+}
+
+.lihat-semua:hover {
+    color: #1d4ed8;
 }
 
 .artikel-home-grid {
@@ -291,15 +445,27 @@ body {
 }
 
 .artikel-home-card {
+    display: block;
+    color: inherit;
+    text-decoration: none;
     background: white;
     border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 10px 28px rgba(0,0,0,.1);
-    transition: .3s;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08); /* Shadow lebih tipis */
+    transition: all 0.25s ease;
 }
 
 .artikel-home-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-3px); /* Naik 3px aja, bukan 6px */
+    box-shadow: 0 8px 20px rgba(0,0,0,.12);
+}
+
+.artikel-home-card:active {
+    transform: translateY(-1px);
+}
+
+.artikel-home-card * {
+    pointer-events: none;
 }
 
 .artikel-home-image {
@@ -340,61 +506,28 @@ body {
     gap: 16px;
 }
 
-/* ================= RESPONSIVE ================= */
-@media (max-width: 1024px) {
-    .hero {
-        grid-template-columns: 1fr;
-    }
-
-    .services-grid,
-    .about-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .services-grid,
-    .doctor-grid,
-    .about-grid,
-    .artikel-home-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .hero-content,
-    .section {
-        padding: 60px 30px;
-    }
-
-    .services {
-        padding: 0 30px 60px;
-    }
-}
-
-/* BUNGKUS LINK CARD */
+/* ================= ARTICLE CARD DETAIL ================= */
 .article-card-link {
     display: block;
     text-decoration: none;
     color: inherit;
 }
 
-/* CARD */
 .article-card {
     background: #fff;
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
     cursor: pointer;
     height: 100%;
 }
 
-/* HOVER */
 .article-card-link:hover .article-card {
-    transform: translateY(-6px);
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
-/* IMAGE */
 .article-image img {
     width: 100%;
     height: 180px;
@@ -402,7 +535,6 @@ body {
     display: block;
 }
 
-/* CONTENT */
 .article-content {
     padding: 16px;
 }
@@ -420,28 +552,7 @@ body {
     color: #6b7280;
 }
 
-.artikel-home-card {
-    display: block;
-    color: inherit;
-    text-decoration: none;
-    position: relative;
-    z-index: 1;
-}
-.artikel-home-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0);
-    transition: background 0.3s ease;
-    z-index: -1;
-}
-
-.artikel-home-card * {
-    pointer-events: none;
-}
+/* ================= BUTTONS - SUBTLE ANIMATIONS ================= */
 
 /* Style Tombol Login (Primary) */
 .btn-primary {
@@ -451,15 +562,26 @@ body {
     border-radius: 10px;
     text-decoration: none !important;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease; /* Lebih cepat */
     display: inline-block;
     border: none;
+    user-select: none;
 }
 
 .btn-primary:hover {
     background: #1d4ed8;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    transform: translateY(-1px); /* Naik 1px aja, bukan 2px */
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2); /* Shadow lebih tipis */
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(37, 99, 235, 0.15);
+}
+
+.btn-primary:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
 }
 
 /* Style Tombol Konsultasi (Outline) */
@@ -471,13 +593,25 @@ body {
     text-decoration: none !important;
     font-weight: 600;
     border: 2px solid rgba(255, 255, 255, 0.5);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     display: inline-block;
+    user-select: none;
 }
 
 .btn-outline:hover {
     background: white;
     color: #1a3a52 !important;
+    border-color: white;
+    transform: translateY(-1px);
+}
+
+.btn-outline:active {
+    transform: translateY(0);
+}
+
+.btn-outline:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
 }
 
 /* ================= MODAL KONSULTASI ================= */
@@ -545,7 +679,7 @@ body {
     font-weight: 300;
     color: white;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.2s ease; /* Lebih cepat */
     width: 36px;
     height: 36px;
     display: flex;
@@ -556,7 +690,11 @@ body {
 
 .close-modal:hover {
     background: rgba(255, 255, 255, 0.2);
-    transform: rotate(90deg);
+    transform: rotate(45deg); /* Rotate 45deg aja, bukan 90deg */
+}
+
+.close-modal:active {
+    transform: rotate(45deg) scale(0.95);
 }
 
 .modal-body {
@@ -609,53 +747,77 @@ body {
     color: #1e293b;
     font-weight: 600;
     font-size: 15px;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease; /* Sedikit lebih lambat tapi smooth */
     position: relative;
     overflow: hidden;
 }
 
-.konsultasi-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-    transition: left 0.5s ease;
-}
-
-.konsultasi-btn:hover::before {
-    left: 100%;
-}
+/* HAPUS shine animation yang heboh */
 
 .konsultasi-btn:hover {
     background: linear-gradient(135deg, #316BA1 0%, #1a3a52 100%);
     color: white;
     border-color: #316BA1;
-    transform: translateY(-4px);
-    box-shadow: 0 10px 25px rgba(49, 107, 161, 0.3);
+    transform: translateY(-2px); /* Naik 2px aja, bukan 4px */
+    box-shadow: 0 4px 12px rgba(49, 107, 161, 0.2); /* Shadow lebih tipis */
+}
+
+.konsultasi-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(49, 107, 161, 0.15);
+}
+
+.konsultasi-btn:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
 }
 
 .konsultasi-btn img {
     width: 40px;
     height: 40px;
     object-fit: contain;
-    transition: all 0.3s ease;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    transition: all 0.25s ease;
 }
 
 .konsultasi-btn:hover img {
-    filter: brightness(0) invert(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-    transform: scale(1.1);
+    filter: brightness(0) invert(1);
+    transform: scale(1.05); /* Scale 1.05 aja, bukan 1.1 */
 }
 
 .konsultasi-btn span {
     flex: 1;
 }
 
-/* Responsive Modal */
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1024px) {
+    .hero {
+        grid-template-columns: 1fr;
+    }
+
+    .services-grid,
+    .about-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 768px) {
+    .services-grid,
+    .doctor-grid,
+    .about-grid,
+    .artikel-home-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-content,
+    .section {
+        padding: 60px 30px;
+    }
+
+    .services {
+        padding: 0 30px 60px;
+    }
+
+    /* Modal Responsive */
     .modal-content {
         width: 95%;
         max-height: 90vh;
@@ -680,4 +842,9 @@ body {
     .konsultasi-btn {
         padding: 16px 18px;
     }
+}
+
+/* ================= SMOOTH SCROLLING ================= */
+html {
+    scroll-behavior: smooth;
 }

@@ -566,15 +566,6 @@ input::placeholder{
                 </div>
             </div>
 
-            <!-- Remember Me & Forgot Password -->
-            <div class="form-options">
-                <label class="remember-me">
-                    <input type="checkbox" name="remember" id="remember">
-                    <span>Remember me</span>
-                </label>
-                <a href="#" class="forgot-password">Lupa Password?</a>
-            </div>
-
             <button class="login-btn">Masuk</button>
         </form>
 

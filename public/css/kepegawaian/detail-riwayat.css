@@ -14,7 +14,7 @@
 
 .detail-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     margin-bottom: 25px;
     color: var(--blue-main);
@@ -26,7 +26,10 @@
     font-weight: 700;
     color: var(--blue-main);
     margin: 0;
+    text-align: left;
+    margin-right: auto; 
 }
+
 
 .detail-card {
     background: #ffffff;
@@ -158,3 +161,8 @@
     margin-bottom: 8px;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}

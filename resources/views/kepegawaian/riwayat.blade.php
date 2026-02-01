@@ -4,7 +4,9 @@
 
 @section('content')
 
-<h1 class="page-title">Riwayat Pemeriksaan</h1>
+<div class="page-header">
+    <h4>Riwayat Pemeriksaan Pegawai</h4>
+    </div>
 
 <div class="riwayat-card">
    <div class="table-box">
@@ -81,5 +83,6 @@
 
 </div>
 </div>
+
 
 @endsection

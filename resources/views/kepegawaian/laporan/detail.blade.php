@@ -335,28 +335,33 @@
                             <th>No</th>
                             <th>Tanggal</th>
                             <th>Nama Pegawai</th>
+                            <th>NIP</th>
                             <th>Umur</th>
                             <th>Bagian</th>
                             <th>Nama Pasien</th>
                             <th>Hub. Kel</th>
-                            <th>TD</th>
+                            <th>TD (S/D)</th>
                             <th>GDP</th>
                             <th>GD 2 Jam</th>
                             <th>GDS</th>
                             <th>AU</th>
-                            <th>Chol</th>
+                            <th>CHOL</th>
                             <th>TG</th>
                             <th>Suhu</th>
                             <th>BB</th>
                             <th>TB</th>
+
                             <th>Diagnosa</th>
                             <th>NB</th>
                             <th>Therapy</th>
-                            <th>Jml Obat</th>
-                            <th>Harga Obat</th>
+                            <th>Jumlah</th>
+                            <th>Harga Satuan</th>
+                            <th>Subtotal</th>
+
                             <th>Total Obat</th>
                             <th>Pemeriksa</th>
-                            <th>Periksa Ke</th> {{-- Kolom Periksa Ke diletakkan di paling kanan --}}
+                            <th>Periksa Ke</th>
+
                         </tr>
                     </thead>
 
@@ -377,6 +382,7 @@
                                         <td rowspan="{{ $rowspan }}" class="text-center">{{ $no++ }}</td>
                                         <td rowspan="{{ $rowspan }}">{{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('d F Y') }}</td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->nama_pegawai }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->nip }}</td>
                                         <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->umur }}</td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->bagian }}</td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->nama_pasien }}</td>
@@ -395,18 +401,29 @@
 
                                     {{-- Kolom yang TIDAK menggunakan rowspan (mengikuti jumlah diagnosa/obat) --}}
                                     <td>{{ $item->diagnosa }}</td>
-                                    <td class="text-center">{{ $item->nb }}</td>
+                                    <td class="text-center">{{ $item->nb ?? '-' }}</td>
                                     <td>{{ $item->nama_obat }}</td>
-                                    <td class="text-center">{{ $item->jumlah }} {{ $item->satuan }}</td>
-                                    <td class="text-right">Rp {{ number_format($item->harga,0,',','.') }}</td>
+                                    <td>{{ $item->jumlah }} {{ $item->satuan }}</td>
+                                    <td class="text-right">
+                                        Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}
+                                    </td>
+                                    <td class="text-right">
+                                        Rp {{ number_format($item->subtotal_obat, 0, ',', '.') }}
+                                    </td>
 
-                                    @if($loop->first)
+                                    @if($item->is_first)
                                         <td rowspan="{{ $rowspan }}" class="text-right fw-bold">
-                                            Rp {{ number_format($item->total_obat_pasien ?? 0,0,',','.') }}
+                                            Rp {{ number_format($item->total_obat_pasien ?? 0, 0, ',', '.') }}
                                         </td>
-                                        <td rowspan="{{ $rowspan }}">{{ $item->pemeriksa }}</td>
-                                        {{-- Kolom Periksa Ke sekarang sejajar dengan header terakhir --}}
-                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->periksa_ke }}</td>
+
+                                        <td rowspan="{{ $rowspan }}">
+                                            {{ $item->nama_pemeriksa }}
+                                        </td>
+
+                                        {{-- Kolom Periksa Ke --}}
+                                        <td rowspan="{{ $rowspan }}" class="text-center">
+                                            {{ $item->periksa_ke }}
+                                        </td>
                                     @endif
                                 </tr>
                             @endforeach

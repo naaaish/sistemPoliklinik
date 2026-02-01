@@ -134,10 +134,13 @@ class LaporanController extends Controller
 
         
         /* ================= PEGAWAI / PENSIUN / KESELURUHAN OPERASIONAL ================= */
-        if (in_array($jenis, ['pegawai', 'pensiun', 'total'])) {
-                $data = $this->buildTotalOperasional($jenis, $dari, $sampai);
-                return view('kepegawaian.laporan.detail', compact('judul', 'jenis', 'data', 'dari', 'sampai'));
-            }
+        if (in_array($jenis, ['pegawai', 'pensiun'])) {
+            $data = $this->buildPegawaiPensiunData($jenis, $dari, $sampai);
+        }
+        elseif ($jenis === 'total') {
+            $data = $this->buildTotalOperasional('total', $dari, $sampai);
+        }
+
         
         /* ================= DOKTER ================= */
 
@@ -345,11 +348,14 @@ class LaporanController extends Controller
             ->leftJoin('pemeriksa', 'pendaftaran.id_pemeriksa', '=', 'pemeriksa.id_pemeriksa')
             ->where(function ($q) use ($jenis) {
                 if ($jenis === 'pegawai') {
-                        $$q->where('pendaftaran.tipe_pasien', 'pegawai');
-                    } elseif ($jenis === 'pensiun') {
-                        $$q->where('pendaftaran.tipe_pasien', 'pensiunan');
-                    }
+                    $q->whereIn('pendaftaran.tipe_pasien', ['pegawai','keluarga'])
+                    ->where('pegawai.bagian', '!=', 'Pensiunan');
+                } elseif ($jenis === 'pensiun') {
+                    $q->where('pegawai.bagian', 'Pensiunan');
+                }
             })
+
+
             ->select(
                 'pemeriksaan.id_pemeriksaan',
                 DB::raw('DATE(pemeriksaan.created_at) as tanggal'),
@@ -370,7 +376,8 @@ class LaporanController extends Controller
                 'pemeriksaan.suhu',
                 'pemeriksaan.berat',
                 'pemeriksaan.tinggi',
-                DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as pemeriksa")
+                DB::raw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as nama_pemeriksa")
+
             );
 
         if ($dari && $sampai) {
@@ -383,27 +390,36 @@ class LaporanController extends Controller
         // Ambil Map Diagnosa, NB, dan Obat (Kode kamu yang sudah ada tetap sama)
         $diagnosaMap = DB::table('detail_pemeriksaan_penyakit as dpp')
             ->join('diagnosa as d','d.id_diagnosa','=','dpp.id_diagnosa')
-            ->whereIn('dpp.id_pemeriksaan',$ids)->get()->groupBy('id_pemeriksaan');
+            ->select(
+                'dpp.id_pemeriksaan',
+                'd.diagnosa',
+                'dpp.id_nb'
+            )
+            ->whereIn('dpp.id_pemeriksaan',$ids)
+            ->get()
+            ->groupBy('id_pemeriksaan');
 
-
-        // BERESIN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // $nbMap = DB::table('detail_pemeriksaan_diagnosa_k3 as dpk3')
-        //     ->join('diagnosa_k3 as dk3','dk3.id_nb','=','dpk3.id_nb')
-        //     ->whereIn('dpk3.id_pemeriksaan',$ids)->get()->groupBy('id_pemeriksaan');
 
         $obatMap = DB::table('resep')
             ->join('detail_resep','resep.id_resep','=','detail_resep.id_resep')
             ->join('obat','detail_resep.id_obat','=','obat.id_obat')
-            ->whereIn('resep.id_pemeriksaan',$ids)->get()->groupBy('id_pemeriksaan');
+            ->select(
+                'resep.id_pemeriksaan',
+                'obat.nama_obat',
+                'detail_resep.jumlah',
+                'detail_resep.satuan',
+                'obat.harga'
+            )
+            ->whereIn('resep.id_pemeriksaan',$ids)
+            ->get()
+            ->groupBy('id_pemeriksaan');
+
 
         $final = collect();
 
         foreach ($raw as $r) {
             $id = $r->id_pemeriksaan;
 
-            // 🟢 LOGIKA PERIKSA KE- (Dynamic dari Riwayat)
-            // Hitung berapa kali pasien ini sudah melakukan pemeriksaan yang berisi Gula darah/Kolesterol/dll
-            // sampai dengan detik ini (full_created_at)
             $periksaKe = DB::table('pemeriksaan')
                 ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
                 ->where('pendaftaran.nip', $r->nip) 
@@ -425,25 +441,40 @@ class LaporanController extends Controller
 
             // Data pendukung baris (Diagnosa & Obat)
             $diag = $diagnosaMap[$id] ?? collect([(object)['diagnosa'=>'-']]);
-            $nb   = $nbMap[$id] ?? collect([(object)['id_nb'=>'-']]);
             $obat = $obatMap[$id] ?? collect([(object)['nama_obat'=>'-','jumlah'=>'-','satuan'=>'','harga'=>0]]);
 
-            $max = max($diag->count(), $nb->count(), $obat->count());
+            $max = max($diag->count(), $obat->count());
             $totalObat = $obat->sum(fn($o)=>((int)$o->jumlah*(int)$o->harga));
 
             for ($i=0; $i<$max; $i++) {
                 $row = clone $r;
-                $row->diagnosa = $diag[$i]->diagnosa ?? '-';
-                $row->nb = isset($nb[$i]) ? $nb[$i]->id_nb : '-';
-                $row->nama_obat = $obat[$i]->nama_obat ?? '-';
-                $row->jumlah = $obat[$i]->jumlah ?? '-';
-                $row->satuan = $obat[$i]->satuan ?? '';
-                $row->harga = $obat[$i]->harga ?? 0;
 
-                $row->total_obat_pasien = $i === 0 ? $totalObat : null;
-                
-                // 🔑 MASUKKAN HASIL HITUNGAN KE PROPERTY PERIKSA_KE
-                $row->periksa_ke = $displayPeriksaKe; 
+                $row->diagnosa = $diag[$i]->diagnosa ?? '-';
+                $row->nb       = $diag[$i]->id_nb ?? '-';
+
+                $o = $obat[$i] ?? null;
+
+                $row->nama_obat    = $o->nama_obat ?? '-';
+                $row->jumlah = (int) ($o->jumlah ?? 0);
+                $row->satuan       = $o ? $o->satuan : '-';
+                $row->harga_satuan = (int) ($o->harga ?? 0);
+
+                // subtotal per baris (AMAN)
+                $row->subtotal_obat = $row->jumlah * $row->harga_satuan;
+
+
+                // total per pasien (row pertama saja)
+                $row->total_obat_pasien = ($i === 0) ? $totalObat : null;
+
+                // penanda row pertama (dipakai blade git)
+                $row->is_first = ($i === 0);
+
+                // nama pemeriksa
+                $row->nama_pemeriksa = $r->nama_pemeriksa ?? '-';
+
+                // periksa ke
+                $row->periksa_ke = $displayPeriksaKe;
+
 
                 $final->push($row);
             }
@@ -510,13 +541,15 @@ class LaporanController extends Controller
 
             for ($i = 0; $i < $maxRows; $i++) {
                 $row = clone $r;
+
+                
                 $row->diagnosa = $diags[$i]->diagnosa ?? '-';
                 $o = $obats[$i] ?? null;
                 $row->nama_obat = $o->nama_obat ?? '-';
                 $row->jumlah = $o->jumlah ?? 0;
                 $row->satuan = $o->satuan ?? '';
-                $row->harga_satuan = $o->harga ?? 0;
-                $row->subtotal_obat = (int)$row->jumlah * (int)$row->harga_satuan;
+                $row->harga = $o->harga ?? 0;
+                $row->subtotal_obat = (int)$row->jumlah * (int)$row->harga;
                 $row->total_obat_pasien = ($i === 0) ? $totalObatPasien : null;
                 $row->is_first = ($i === 0);
                 $final->push($row);
