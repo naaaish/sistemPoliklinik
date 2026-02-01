@@ -156,7 +156,7 @@
           </select>
 
           <input name="jumlah[]" type="number" min="1" placeholder="Jumlah" class="obat-jumlah">
-          <input name="satuan[]" type="text" placeholder="Satuan" class="obat-satuan">
+          <input name="satuan[]" type="text" list="satuanList" placeholder="Satuan" class="obat-satuan">
           <input type="hidden" name="harga_satuan[]" class="obat-harga-raw">
           <input type="text" class="ap-input obat-harga" placeholder="Harga Satuan">
 
@@ -168,6 +168,16 @@
       </div>
 
       <div id="obatWrap">
+
+        <datalist id="satuanList">
+          <option value="Tablet"></option>
+          <option value="Botol"></option>
+          <option value="Box"></option>
+          <option value="Flexpen"></option>
+          <option value="Bungkus/puyer"></option>
+          <option value="Vial"></option>
+          <option value="Ampul"></option>
+        </datalist>
         @if(isset($detailResep) && $detailResep->count())
           @foreach($detailResep as $dr)
             <div class="obat-row">
@@ -197,6 +207,8 @@
           @endforeach
         @endif
       </div>
+
+      
 
       <button type="button" id="btnAddObat" class="ap-btn-small">Tambah Obat/Alkes</button>
 
@@ -506,7 +518,6 @@
       cb?.();
     }
   }
-
 
   document.getElementById('formPemeriksaan')?.addEventListener('submit', function (e) {
     let firstInvalidSatuan = null;

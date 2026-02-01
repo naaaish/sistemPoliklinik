@@ -328,4 +328,5 @@ class PendaftaranController extends Controller
     $next = $max + 1;
     return 'REG-00' . $next;
     }
+    
 }

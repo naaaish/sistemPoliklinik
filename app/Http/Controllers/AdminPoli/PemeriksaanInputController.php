@@ -19,7 +19,6 @@ class PemeriksaanInputController extends Controller
 {
     public function index()
     {
-        // sesuai yang kamu tulis: list pasien/pendaftaran
         $pendaftaran = Pendaftaran::orderBy('tanggal', 'desc')->get();
         return view('adminpoli.pemeriksaan.index', compact('pendaftaran'));
     }

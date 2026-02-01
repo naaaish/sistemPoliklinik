@@ -11,7 +11,6 @@ use App\Models\Pendaftaran;
 use App\Models\Pemeriksaan;
 use App\Models\DetailResep;
 use App\Models\Obat;
-use App\Models\DiagnosaK3;
 use App\Models\Saran;
 use App\Models\Diagnosa;
 use App\Models\Resep;
@@ -83,12 +82,6 @@ class PemeriksaanController extends Controller
             ->pluck('d.diagnosa')
             ->toArray();
 
-        $diagnosaK3Terpilih = DB::table('detail_pemeriksaan_diagnosa_k3 as dk')
-            ->join('diagnosa_k3 as k3', 'k3.id_nb', '=', 'dk.id_nb')
-            ->where('dk.id_pemeriksaan', $hasil->id_pemeriksaan)
-            ->pluck('k3.nama_penyakit')
-            ->toArray();
-
         $saranTerpilih = DB::table('detail_pemeriksaan_saran as ds')
             ->join('saran as s', 's.id_saran', '=', 'ds.id_saran')
             ->where('ds.id_pemeriksaan', $hasil->id_pemeriksaan)
@@ -123,7 +116,6 @@ class PemeriksaanController extends Controller
             'detailResep',
             'obat',
             'penyakitTerpilih',
-            'diagnosaK3Terpilih',
             'saranTerpilih'
         ));
     }
@@ -154,9 +146,6 @@ class PemeriksaanController extends Controller
         $obat = Obat::where('is_active', 1)
             ->orderBy('nama_obat', 'asc')
             ->get();
-        $diagnosaK3 = DiagnosaK3::where('is_active', 1)
-            ->orderBy('nama_penyakit', 'asc')
-            ->get();
         $saran = Saran::where('is_active', 1)
             ->orderBy('saran', 'asc')
             ->get();
@@ -170,7 +159,6 @@ class PemeriksaanController extends Controller
             'resep',
             'detailResep',
             'obat',
-            'diagnosaK3',
             'saran',
             'penyakit'
         ));
@@ -321,15 +309,4 @@ class PemeriksaanController extends Controller
         });
     }
     
-    public function getNbByDiagnosa($id)
-    {
-        $row = DB::table('diagnosa_k3')
-            ->where('tipe','penyakit')
-            ->where('is_active',1)
-            ->where('id_diagnosa',$id)
-            ->select('id_nb')
-            ->first();
-
-        return response()->json($row);
-    }
 }
