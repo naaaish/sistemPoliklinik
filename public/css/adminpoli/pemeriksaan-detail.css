@@ -268,3 +268,9 @@
 }
 
 .ap-form-value .ap-readonly-pill{ width:auto; }
+
+.periksa-page .obat-row > .obat-hapus{
+  grid-column: 6;
+  justify-self: stretch;
+  width: 100%;
+}

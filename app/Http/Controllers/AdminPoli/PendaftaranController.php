@@ -117,65 +117,99 @@ class PendaftaranController extends Controller
     {
         $validated = $request->validate([
             'tanggal' => ['required', 'date'],
-            'nip' => ['required', 'string'],
-
-            'nama_pegawai' => ['nullable', 'string', 'max:255'],
-            'bagian' => ['nullable', 'string', 'max:255'],
-
             'tipe_pasien' => ['required', 'in:pegawai,keluarga,pensiunan,unit_lain,ojt,poliklinik'],
-            'nama_pasien' => ['required', 'string', 'max:255'],
-            'hub_kel' => ['required', 'in:YBS,Pasangan,Anak'],
-            'tgl_lahir' => ['nullable', 'date'],
 
-            'id_keluarga' => ['nullable','string','max:32'],
+            // hanya dipakai saat pegawai/keluarga/pensiunan
+            'nip' => ['nullable', 'string', 'max:32'],
+
+            // dipakai semua tipe (ojt/unit_lain wajib, poliklinik auto '-')
+            'nama_pasien' => ['nullable', 'string', 'max:255'],
+
+            // hanya untuk keluarga/pensiunan
+            'hub_kel' => ['nullable', 'in:YBS,Pasangan,Anak'],
+            'id_keluarga' => ['nullable', 'string', 'max:32'],
+
             'jenis_pemeriksaan' => ['required', 'in:cek_kesehatan,periksa,konsultasi'],
-            'petugas' => ['required', 'string'],
-
+            'petugas' => ['required', 'string'], // dokter:ID atau pemeriksa:ID
             'keluhan' => ['nullable', 'string'],
         ]);
 
-        $isPoli = ($validated['tipe_pasien'] === 'poliklinik');
+        $tipe = $validated['tipe_pasien'];
 
-        if ($isPoli) {
-            $validated['nip'] = '001';
-
-            $validated['nama_pegawai'] = '-';
-            $validated['bagian'] = '-';
-            $validated['nama_pasien'] = '-';
-
-            $validated['hub_kel'] = 'YBS';
-            $validated['id_keluarga'] = null;
-            $validated['tgl_lahir'] = null;
+        // ========== Parse petugas ==========
+        $petugas = explode(':', (string) $validated['petugas']);
+        if (count($petugas) !== 2) {
+            return back()->withInput()->withErrors(['petugas' => 'Format dokter/pemeriksa tidak valid.']);
         }
 
+        [$petugasType, $petugasId] = $petugas;
+        $petugasId = (string) $petugasId;
 
-        $BU_META_ID = 'PMR001';
-        if ($validated['jenis_pemeriksaan'] === 'cek_kesehatan') {
-            $validated['petugas'] = 'pemeriksa:' . $BU_META_ID;
+        $idDokter = null;
+        $idPemeriksa = null;
+        if ($petugasType === 'dokter') $idDokter = $petugasId;
+        if ($petugasType === 'pemeriksa') $idPemeriksa = $petugasId;
+
+        // poliklinik harus pemeriksa
+        if ($tipe === 'poliklinik' && $petugasType !== 'pemeriksa') {
+            return back()->withInput()->withErrors(['petugas' => 'Poliklinik harus memilih Pemeriksa.']);
         }
 
-        $pegawai = DB::table('pegawai')->where('nip', $validated['nip'])->first();
-        if (!$pegawai) {
-            return back()->withInput()->withErrors(['nip' => 'NIP tidak ditemukan di data pegawai.']);
-        }
-
+        // ========== Normalisasi field per tipe ==========
+        $nipFinal = null;
         $idKeluarga = null;
+        $namaFinal = $validated['nama_pasien'] ?? null;
 
-        // 1) Pegawai: wajib YBS
-        // if ($validated['tipe_pasien'] === 'pegawai') {
-        //     if ($validated['hub_kel'] !== 'YBS') {
-        //         return back()->withInput()->withErrors(['hub_kel' => 'Tipe Pegawai harus YBS.']);
-        //     }
-        //     $idKeluarga = null;
-        // }
+        // --- POLIKLINIK ---
+        if ($tipe === 'poliklinik') {
+            $nipFinal = null;       // poliklinik bukan pegawai
+            $idKeluarga = null;
+            $namaFinal = '-';
+        }
 
-        // 2) Keluarga: wajib Pasangan/Anak + wajib id_keluarga
-        if ($validated['tipe_pasien'] === 'keluarga') {
-            if ($validated['hub_kel'] === 'YBS') {
+        // --- OJT / UNIT LAIN ---
+        if (in_array($tipe, ['ojt', 'unit_lain'], true)) {
+            if (empty($namaFinal)) {
+                return back()->withInput()->withErrors([
+                    'nama_pasien' => 'Nama pasien wajib diisi untuk OJT / Unit Lain.'
+                ]);
+            }
+            $nipFinal = null;
+            $idKeluarga = null;
+        }
+
+        // --- PEGAWAI ---
+        if ($tipe === 'pegawai') {
+            if (empty($validated['nip'])) {
+                return back()->withInput()->withErrors(['nip' => 'NIP wajib diisi untuk Pegawai.']);
+            }
+
+            $pegawai = DB::table('pegawai')->where('nip', $validated['nip'])->first();
+            if (!$pegawai) {
+                return back()->withInput()->withErrors(['nip' => 'NIP tidak ditemukan di data pegawai.']);
+            }
+
+            $nipFinal = $pegawai->nip;
+
+            // kalau kamu mau “autoload nama pasien” dari pegawai:
+            $namaFinal = $pegawai->nama_pegawai ?? $namaFinal;
+        }
+
+        // --- KELUARGA PEGAWAI ---
+        if ($tipe === 'keluarga') {
+            if (empty($validated['nip'])) {
+                return back()->withInput()->withErrors(['nip' => 'Pilih YBS (NIP pegawai).']);
+            }
+            if (($validated['hub_kel'] ?? null) === 'YBS') {
                 return back()->withInput()->withErrors(['hub_kel' => 'Tipe Keluarga tidak boleh YBS.']);
             }
             if (empty($validated['id_keluarga'])) {
                 return back()->withInput()->withErrors(['id_keluarga' => 'Pilih anggota keluarga.']);
+            }
+
+            $pegawai = DB::table('pegawai')->where('nip', $validated['nip'])->first();
+            if (!$pegawai) {
+                return back()->withInput()->withErrors(['nip' => 'NIP YBS tidak ditemukan di data pegawai.']);
             }
 
             $kel = DB::table('keluarga')
@@ -203,9 +237,7 @@ class PendaftaranController extends Controller
                 $coveredIds = [];
                 foreach ($anak as $a) {
                     $umur = \Carbon\Carbon::parse($a->tgl_lahir)->age;
-                    if ($umur <= 23 && count($coveredIds) < 3) {
-                        $coveredIds[] = $a->id_keluarga;
-                    }
+                    if ($umur <= 23 && count($coveredIds) < 3) $coveredIds[] = $a->id_keluarga;
                 }
 
                 if (!in_array($kel->id_keluarga, $coveredIds, true)) {
@@ -215,15 +247,32 @@ class PendaftaranController extends Controller
                 }
             }
 
+            $nipFinal = $pegawai->nip;
             $idKeluarga = $kel->id_keluarga;
+
+            // autoload nama pasien keluarga
+            $namaFinal = $kel->nama_keluarga ?? $namaFinal;
         }
 
-        // 3) Pensiunan: boleh YBS atau keluarga (Pasangan/Anak)
-        if ($validated['tipe_pasien'] === 'pensiunan') {
-            if ($validated['hub_kel'] === 'YBS') {
+        // --- PENSIUNAN ---
+        // (asumsi: pensiunan masih pakai tabel pegawai juga, hanya beda tipe_pasien)
+        if ($tipe === 'pensiunan') {
+            if (empty($validated['nip'])) {
+                return back()->withInput()->withErrors(['nip' => 'Pilih YBS (NIP pensiunan).']);
+            }
+
+            $pegawai = DB::table('pegawai')->where('nip', $validated['nip'])->first();
+            if (!$pegawai) {
+                return back()->withInput()->withErrors(['nip' => 'NIP pensiunan tidak ditemukan.']);
+            }
+
+            $nipFinal = $pegawai->nip;
+
+            $hub = $validated['hub_kel'] ?? 'YBS';
+            if ($hub === 'YBS') {
                 $idKeluarga = null;
+                $namaFinal = $pegawai->nama_pegawai ?? $namaFinal;
             } else {
-                // sama kayak keluarga: wajib pilih id_keluarga + validasi covered anak
                 if (empty($validated['id_keluarga'])) {
                     return back()->withInput()->withErrors(['id_keluarga' => 'Pilih anggota keluarga.']);
                 }
@@ -237,7 +286,7 @@ class PendaftaranController extends Controller
                     return back()->withInput()->withErrors(['id_keluarga' => 'Anggota keluarga tidak valid.']);
                 }
 
-                $expected = ($validated['hub_kel'] === 'Pasangan') ? 'pasangan' : 'anak';
+                $expected = ($hub === 'Pasangan') ? 'pasangan' : 'anak';
                 if ($kel->hubungan_keluarga !== $expected) {
                     return back()->withInput()->withErrors(['hub_kel' => 'Hubungan keluarga tidak sesuai data keluarga.']);
                 }
@@ -252,9 +301,7 @@ class PendaftaranController extends Controller
                     $coveredIds = [];
                     foreach ($anak as $a) {
                         $umur = \Carbon\Carbon::parse($a->tgl_lahir)->age;
-                        if ($umur <= 23 && count($coveredIds) < 3) {
-                            $coveredIds[] = $a->id_keluarga;
-                        }
+                        if ($umur <= 23 && count($coveredIds) < 3) $coveredIds[] = $a->id_keluarga;
                     }
 
                     if (!in_array($kel->id_keluarga, $coveredIds, true)) {
@@ -265,33 +312,14 @@ class PendaftaranController extends Controller
                 }
 
                 $idKeluarga = $kel->id_keluarga;
+                $namaFinal = $kel->nama_keluarga ?? $namaFinal;
             }
         }
 
-        if (in_array($validated['tipe_pasien'], ['pegawai','unit_lain','ojt','poliklinik'], true)) {
-            if ($validated['hub_kel'] !== 'YBS') {
-                return back()->withInput()->withErrors(['hub_kel' => 'Tipe ini harus YBS.']);
-            }
-            $idKeluarga = null;
-        }
-
-        // ===== parse petugas: dokter:ID atau pemeriksa:ID =====
-        $petugas = explode(':', $validated['petugas']);
-        if (count($petugas) !== 2) {
-            return back()->withInput()->withErrors(['petugas' => 'Format dokter/pemeriksa tidak valid.']);
-        }
-
-        [$petugasType, $petugasId] = $petugas;
-        $petugasId = (string) $petugasId;
-
-        $idDokter = null;
-        $idPemeriksa = null;
-        if ($petugasType === 'dokter') $idDokter = $petugasId;
-        if ($petugasType === 'pemeriksa') $idPemeriksa = $petugasId;
-
-        // ===== insert pendaftaran =====
-        DB::transaction(function () use ($validated, $pegawai, $idKeluarga, $idDokter, $idPemeriksa) {
+        // ========== Insert pendaftaran ==========
+        DB::transaction(function () use ($validated, $nipFinal, $idKeluarga, $namaFinal, $idDokter, $idPemeriksa) {
             $idPendaftaran = $this->generateIdPendaftaran();
+
             DB::table('pendaftaran')->insert([
                 'id_pendaftaran' => $idPendaftaran,
                 'tanggal' => $validated['tanggal'],
@@ -299,7 +327,8 @@ class PendaftaranController extends Controller
                 'keluhan' => $validated['keluhan'] ?? null,
 
                 'tipe_pasien' => $validated['tipe_pasien'],
-                'nip' => $pegawai->nip,
+                'nama_pasien' => $namaFinal,      // <<< ini yang bikin “autoload nama” bener
+                'nip' => $nipFinal,               // nullable untuk ojt/unit_lain/poliklinik
                 'id_keluarga' => $idKeluarga,
 
                 'id_dokter' => $idDokter,
@@ -328,5 +357,5 @@ class PendaftaranController extends Controller
     $next = $max + 1;
     return 'REG-00' . $next;
     }
-    
+
 }

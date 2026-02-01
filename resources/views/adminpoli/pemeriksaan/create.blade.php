@@ -3,8 +3,7 @@
 @section('title', 'Input Hasil Pemeriksaan Pasien')
 
 @section('content')
-<div class="ap-page">
-
+<div class="ap-page periksa-page pemeriksaan-page">
   <div class="ap-topbar">
     <a href="{{ route('adminpoli.dashboard') }}" class="ap-back-inline">
       <img src="{{ asset('assets/adminPoli/back-arrow.png') }}" alt="kembali">
@@ -92,26 +91,46 @@
 
       {{-- ===== DIAGNOSA ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Diagnosa</div>
-        <div class="ap-row">
-          <div class="ap-label">Penyakit</div><div class="ap-colon">:</div>
-          <div class="ap-input">
-              <select id="inpPenyakit" class="ap-select">
-              <option value="">-- pilih (boleh kosong) --</option>
-              @foreach($penyakit as $p)
-                  <option value="{{ $p->id_diagnosa }}"
-                          data-nb="{{ $p->id_nb ?? '' }}"
-                          data-k3="{{ $p->nama_k3 ?? '' }}">
-                          {{ $p->diagnosa }}
-                  </option>
-              @endforeach
-              </select>
+      <div class="ap-row">
+        <div class="ap-label">Penyakit</div><div class="ap-colon">:</div>
+        <div class="ap-input">
+            <select id="inpPenyakit" class="ap-select">
+            <option value="">-- pilih (boleh kosong) --</option>
+            @foreach($penyakit as $p)
+                <option value="{{ $p->id_diagnosa }}"
+                        data-nb="{{ $p->id_nb ?? '' }}"
+                        data-k3="{{ $p->nama_k3 ?? '' }}">
+                        {{ $p->diagnosa }}
+                </option>
+            @endforeach
+            </select>
 
-              <button type="button" id="btnAddPenyakit" class="ap-btn-small">Tambah Penyakit</button>
+            <button type="button" id="btnAddPenyakit" class="ap-btn-small">Tambah Penyakit</button>
 
-              <div id="chipPenyakit" style="margin-top:10px;"></div>
-              <div id="hiddenPenyakit"></div>
+            <div id="chipPenyakit" style="margin-top:10px;"></div>
+            <div id="hiddenPenyakit"></div>
+        </div>
+
+        <!-- template item penyakit -->
+        <div id="penyakitTemplate" style="display:none;">
+          <div class="penyakit-item" style="border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin-top:10px;">
+            <!-- row atas -->
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+              <div class="penyakit-name" style="font-weight:600;"></div>
+              <button type="button" class="btnDelPenyakit ap-btn ap-btn--danger">Hapus</button>
+            </div>
+
+            <!-- row bawah: input id_nb -->
+            <div style="display:grid;grid-template-columns:140px 1fr;gap:10px;margin-top:10px;align-items:center;">
+              <div style="color:#6b7280;">ID NB</div>
+              <input type="text" name="id_nb[]" class="ap-input id-nb-input" placeholder="Masukkan ID NB..." />
+            </div>
+
+            <!-- hidden penyakit_id[] (ngikut index yang sama dengan id_nb[]) -->
+            <input type="hidden" name="penyakit_id[]" class="penyakit-id-hidden" value="">
           </div>
         </div>
+      </div>
 
       <div class="ap-row">
         <div class="ap-label">Saran</div><div class="ap-colon">:</div>
@@ -129,6 +148,30 @@
           <div id="hiddenSaran"></div>
         </div>
       </div>
+
+      @php
+        $isPoliklinik = (($pendaftaran->tipe ?? '') === 'poliklinik'); // ganti sesuai kolommu
+      @endphp
+
+      @if(!$isPoliklinik)
+        <div id="petugasAfterObatWrap" style="display:none;">
+          <div class="ap-row">
+            <div class="ap-label">Dokter</div>
+            <div class="ap-colon">:</div>
+            <div class="ap-input">
+              <select name="petugas_after_obat" id="petugasAfterObat" class="ap-select">
+                <option value="">-- pilih dokter --</option>
+                @foreach($dokter as $d)
+                  <option value="dokter:{{ $d->id_dokter }}">{{ $d->nama }} ({{ $d->jenis_dokter }})</option>
+                @endforeach
+              </select>
+              @error('petugas_after_obat')
+                <div style="color:#d00;font-size:12px;margin-top:6px;">{{ $message }}</div>
+              @enderror
+            </div>
+          </div>
+        </div> 
+      @endif
 
       {{-- ===== OBAT & HARGA ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Obat & Harga</div>
@@ -167,8 +210,7 @@
         </div>
       </div>
 
-      <div id="obatWrap">
-
+      <div id="obatWrap" class="periksa-page">
         <datalist id="satuanList">
           <option value="Tablet"></option>
           <option value="Botol"></option>
@@ -208,14 +250,12 @@
         @endif
       </div>
 
-      
-
       <button type="button" id="btnAddObat" class="ap-btn-small">Tambah Obat/Alkes</button>
 
       <div class="total-harga" style="text-align:right;margin-top:10px;font-weight:600;color:#787676;">
         Total : <strong id="totalHarga">Rp0</strong>
       </div>
-
+      
       <button class="ap-register" type="submit" style="margin-top:18px;">Submit</button>
     </form>
   </div>
@@ -272,6 +312,39 @@
   function getSelectedPenyakitIds(){
     return [...document.querySelectorAll('#hiddenPenyakit input[name="penyakit_id[]"]')].map(i => i.value);
   }
+
+  const penyakitPick = document.getElementById('penyakitPick');
+  const btnAddPenyakit = document.getElementById('btnAddPenyakit');
+  const penyakitWrap = document.getElementById('penyakitWrap');
+  const tpl = document.getElementById('penyakitTemplate');
+
+  function alreadyAdded(id){
+    return !!penyakitWrap.querySelector(`input.penyakit-id-hidden[value="${CSS.escape(id)}"]`);
+  }
+
+  btnAddPenyakit.addEventListener('click', () => {
+    const id = penyakitPick.value;
+    if(!id) return;
+
+    if(alreadyAdded(id)){
+      // kalau mau: alert kecil / toast
+      penyakitPick.value = '';
+      return;
+    }
+
+    const text = penyakitPick.options[penyakitPick.selectedIndex].text;
+
+    const node = tpl.firstElementChild.cloneNode(true);
+    node.querySelector('.penyakit-name').textContent = text;
+    node.querySelector('.penyakit-id-hidden').value = id;
+
+    node.querySelector('.btnDelPenyakit').addEventListener('click', () => {
+      node.remove();
+    });
+
+    penyakitWrap.appendChild(node);
+    penyakitPick.value = '';
+  });
 
   function filterSaran(){
     const selected = new Set(getSelectedPenyakitIds());
@@ -609,5 +682,54 @@
     });
   });
 
+  const jenisRuntime = document.getElementById('jenisRuntime');
+  const petugasAfterObat = document.getElementById('petugasAfterObat');
+
+  function hasAnyObat(){
+    return !!document.querySelector('#obatWrap select[name="obat_id[]"] option:checked:not([value=""])')
+      || [...document.querySelectorAll('#obatWrap select[name="obat_id[]"]')].some(s => (s.value || '') !== '');
+  }
+
+  function applyCekKesehatanRule(){
+    const awalJenis = (jenisRuntime?.dataset?.awalJenis) || (jenisRuntime?.value || '');
+    const adaObat = hasAnyObat();
+
+    if (!petugasAfterObat || !jenisRuntime) return;
+
+    if (awalJenis === 'cek_kesehatan' && !adaObat) {
+      // tetap cek kesehatan, petugasAfterObat dikunci
+      jenisRuntime.value = 'cek_kesehatan';
+      petugasAfterObat.disabled = true;
+    } else {
+      // ada obat -> auto jadi periksa dan petugasAfterObat aktif
+      jenisRuntime.value = 'periksa';
+      petugasAfterObat.disabled = false;
+    }
+  }
+
+  function adaObatTerpilih(){
+    return [...document.querySelectorAll('select[name="obat_id[]"]')]
+      .some(s => (s.value || '').trim() !== '');
+  }
+
+  function syncPetugasAfterObat(){
+    const wrap = document.getElementById('petugasAfterObatWrap');
+    const sel  = document.getElementById('petugasAfterObat');
+    const on = adaObatTerpilih();
+
+    wrap.style.display = on ? '' : 'none';
+    sel.required = on;
+
+    if (!on) sel.value = ''; // reset biar ga “nyangkut”
+  }
+
+  document.addEventListener('change', (e) => {
+    if (e.target && e.target.matches('select[name="obat_id[]"]')) {
+      syncPetugasAfterObat();
+    }
+  });
+
+  // panggil saat load
+  syncPetugasAfterObat();
 </script>
 @endsection

@@ -43,11 +43,16 @@ class PemeriksaanInputController extends Controller
             ->orderBy('saran', 'asc')
             ->get();
 
+        $dokter = DB::table('dokter')->where('status', 'aktif')->orderBy('nama')->get();
+        $pemeriksa = DB::table('pemeriksa')->where('status', 'aktif')->orderBy('id_pemeriksa')->get();
+
         return view('adminpoli.pemeriksaan.create', compact(
             'pendaftaran',
             'obat',
             'saran',
             'penyakit',
+            'dokter',
+            'pemeriksa'
         ));
 
     }
@@ -74,8 +79,10 @@ class PemeriksaanInputController extends Controller
 
             'penyakit_id'     => 'nullable|array',
             'penyakit_id.*'   => 'nullable|string',
-            'id_saran'    => 'nullable|array',
-            'id_saran.*'  => 'nullable|string',
+            'id_nb'           => 'nullable|array',
+            'id_nb.*'         => 'nullable|string',
+            'id_saran'        => 'nullable|array',
+            'id_saran.*'      => 'nullable|string',
 
             // resep
             'obat_id'        => 'nullable|array',
@@ -108,13 +115,21 @@ class PemeriksaanInputController extends Controller
         // pastikan pendaftaran ada
         Pendaftaran::findOrFail($pendaftaranId);
 
-        return DB::transaction(function () use ($validated, $pendaftaranId) {
+        return DB::transaction(function () use ($validated, $pendaftaranId, $request) {
             // ========= GENERATE ID (20 char) =========
             // 2(prefix) + 12(ymdHis) + 6(random) = 20
             $idPemeriksaan = 'PM' . date('ymdHis') . Str::upper(Str::random(6));
 
             $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
+            $idNbs       = $validated['id_nb'] ?? [];
 
+            // validasi: tiap penyakit wajib punya id_nb
+            foreach ($penyakitIds as $i => $idDiag) {
+                $idNb = $idNbs[$i] ?? null;
+                if (!$idNb || trim((string)$idNb) === '') {
+                    return back()->withInput()->withErrors(["id_nb.$i" => "ID NB wajib diisi untuk penyakit yang dipilih."]);
+                }
+            }
             // $saranIdsUI  = array_values(array_filter($validated['id_saran'] ?? []));
 
             // $autoSaranIds = [];
@@ -155,11 +170,14 @@ class PemeriksaanInputController extends Controller
             
             // penyakit
             if (count($penyakitIds) > 0) {
-                $rows = array_map(fn($id) => [
-                    'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
-                    'id_diagnosa' => $id,
-                ], $penyakitIds);
-
+                $rows = [];
+                foreach ($penyakitIds as $i => $idDiag) {
+                    $rows[] = [
+                        'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
+                        'id_diagnosa'    => $idDiag,
+                        'id_nb'          => trim((string)($idNbs[$i] ?? '')),
+                    ];
+                }
                 DB::table('detail_pemeriksaan_penyakit')->insert($rows);
             }
 
@@ -208,6 +226,34 @@ class PemeriksaanInputController extends Controller
                     'satuan'   => $satuan,
                     'subtotal' => $subtotal,
                 ];
+            }
+
+            $adaObat = count($detailRows) > 0;
+            $pendaftaran = Pendaftaran::findOrFail($pendaftaranId);
+            $isPoliklinik = (($pendaftaran->tipe ?? '') === 'poliklinik');
+
+            if ($adaObat && !$isPoliklinik) {
+                $pendaftaran->jenis_pemeriksaan = 'periksa';
+
+                $petugasAfter = (string) $request->input('petugas_after_obat', '');
+
+                // WAJIB dokter
+                if (!$petugasAfter || !str_starts_with($petugasAfter, 'dokter:')) {
+                    return back()
+                        ->withInput()
+                        ->withErrors(['petugas_after_obat' => 'Jika ada obat, wajib memilih Dokter.']);
+                }
+
+                $idDokter = explode(':', $petugasAfter, 2)[1] ?? null;
+                if (!$idDokter) {
+                    return back()
+                        ->withInput()
+                        ->withErrors(['petugas_after_obat' => 'Dokter tidak valid.']);
+                }
+
+                $pendaftaran->id_dokter = $idDokter;
+                $pendaftaran->id_pemeriksa = null;
+                $pendaftaran->save();
             }
 
             if (count($detailRows) > 0) {

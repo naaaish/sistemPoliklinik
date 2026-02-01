@@ -444,24 +444,18 @@ async function onNipDone(){
 async function onTipeChange(){
   resetNamaPasien();
 
-  if(!pegawaiData){
-    // belum isi NIP / gagal fetch pegawai
-    return;
-  }
-
   const tipe = tipeEl.value;
 
-  // 2A) pegawai: dropdown hanya pegawai, auto select
-  if(tipe === 'pegawai' || tipe === 'unit_lain' || tipe === 'ojt'){
-    namaPasSelect.innerHTML =
-      `<option value="${escapeHtml(pegawaiData.nama_pegawai)}"
-        data-hub="YBS"
-        data-tgl="${(pegawaiData.tgl_lahir || '').substring(0,10)}"
-        data-idkel="">
-        ${escapeHtml(pegawaiData.nama_pegawai)}
-      </option>`;
-    namaPasSelect.selectedIndex = 0;
-    applySelectedPasien();
+  // 0) poliklinik: tidak butuh NIP/pegawaiData
+  if(tipe === 'poliklinik'){
+    setPoliklinikMode(true);
+    return;
+  } else {
+    setPoliklinikMode(false);
+  }
+
+  // selain poliklinik WAJIB ada pegawaiData (autoload dari NIP)
+  if(!pegawaiData){
     return;
   }
 
@@ -560,48 +554,37 @@ if (jenisEl) {
 applyAutoPetugasByJenis();
 
 function setPoliklinikMode(on){
-  const nipEl = document.getElementById('nip');
-  const namaPegawaiEl = document.getElementById('nama_pegawai');
-  const bagianEl = document.getElementById('bagian');
-  const namaPasienEl = document.getElementById('nama_pasien');
-  const hubKelEl = document.getElementById('hub_kel');
-  const idKeluargaEl = document.getElementById('id_keluarga');
-
+  // pakai referensi global yang udah ada: nipEl, namaPegEl, bagianEl, dll
   if(on){
-    if(nipEl) nipEl.value = '001';
-    if(namaPegawaiEl) namaPegawaiEl.value = '-';
-    if(bagianEl) bagianEl.value = '-';
-    if(namaPasienEl){
-      namaPasienEl.innerHTML = `<option value="-" data-hub="YBS" data-tgl="" data-idkel="">-</option>`;
-      namaPasienEl.selectedIndex = 0;
-    }
-    if(hubKelEl) hubKelEl.value = 'YBS';
-    if(idKeluargaEl) idKeluargaEl.value = '';
+    // matiin autoload pegawai
+    pegawaiData = null;
+    keluargaData = [];
+    closeSuggest();
 
-    // kalau ada dropdown keluarga / section keluarga, hide
-    const keluargaSection = document.getElementById('keluarga_section');
-    if(keluargaSection) keluargaSection.style.display = 'none';
+    // NIP dimatiin, bukan diisi 001
+    nipEl.value = '';
+    nipEl.required = false;
+    nipEl.disabled = true;
+
+    namaPegEl.value = '-';
+    bagianEl.value = '-';
+
+    // nama pasien fix "-"
+    namaPasSelect.innerHTML = `<option value="-" data-hub="YBS" data-tgl="" data-idkel="">-</option>`;
+    namaPasSelect.selectedIndex = 0;
+
+    hubEl.value = 'YBS';
+    idKelEl.value = '';
+    tglEl.value = '';
   } else {
-    // balik normal: kosongin biar autoload ngisi lagi
-    // (atau biarin, tergantung UX kamu)
+    // balikin normal
+    nipEl.disabled = false;
+    nipEl.required = true;
+
+    // jangan auto kosongin semuanya (biar UX enak), tapi minimal reset pasien
+    resetNamaPasien();
   }
 }
-
-function checkPoliklinik() {
-  const bagianEl = document.getElementById('bagian');
-  const nipEl = document.getElementById('nip');
-  const namaPegawaiEl = document.getElementById('nama_pegawai');
-
-  const bagian = (bagianEl?.value || '').toLowerCase().trim();
-  const nip = (nipEl?.value || '').trim();
-  const namaPegawai = (namaPegawaiEl?.value || '').toLowerCase().trim();
-
-  const isPoli = (bagian === 'poliklinik') || (nip === '001') || (namaPegawai === 'poliklinik');
-  setPoliklinikMode(isPoli);
-}
-
-// panggil saat halaman load & setelah autofill nip
-checkPoliklinik();
 
 document.getElementById('formPendaftaran').addEventListener('submit', () => {
   hubEl.disabled = false;

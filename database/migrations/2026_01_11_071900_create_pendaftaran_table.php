@@ -18,7 +18,7 @@ return new class extends Migration
             $table->text('keluhan')->nullable();
 
             // pengganti pasien:
-            $table->enum('tipe_pasien', ['pegawai','keluarga', 'pensiunan', 'unit lain', 'OJT']);
+            $table->enum('tipe_pasien', ['pegawai','keluarga', 'pensiunan', 'unit lain', 'OJT', 'poliklinik']);
             $table->string('nip', 20)->nullable();
             $table->string('id_keluarga', 32)->nullable();
 
