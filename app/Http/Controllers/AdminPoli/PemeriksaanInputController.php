@@ -19,7 +19,6 @@ class PemeriksaanInputController extends Controller
 {
     public function index()
     {
-        // sesuai yang kamu tulis: list pasien/pendaftaran
         $pendaftaran = Pendaftaran::orderBy('tanggal', 'desc')->get();
         return view('adminpoli.pemeriksaan.index', compact('pendaftaran'));
     }
@@ -116,21 +115,21 @@ class PemeriksaanInputController extends Controller
 
             $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
 
-            $saranIdsUI  = array_values(array_filter($validated['id_saran'] ?? []));
+            // $saranIdsUI  = array_values(array_filter($validated['id_saran'] ?? []));
 
-            $autoSaranIds = [];
-            if (count($penyakitIds) > 0) {
-                // sesuaikan nama kolom jika beda: id_saran / saran_id
-                $autoSaranIds = Saran::whereIn('id_diagnosa', $penyakitIds)
-                    ->pluck('id_saran')
-                    ->filter()
-                    ->unique()
-                    ->values()
-                    ->all();
-            }
+            // $autoSaranIds = [];
+            // if (count($penyakitIds) > 0) {
+            //     // sesuaikan nama kolom jika beda: id_saran / saran_id
+            //     $autoSaranIds = Saran::whereIn('id_diagnosa', $penyakitIds)
+            //         ->pluck('id_saran')
+            //         ->filter()
+            //         ->unique()
+            //         ->values()
+            //         ->all();
+            // }
 
             // gabung UI + auto, lalu unique
-            $saranIds = array_values(array_unique(array_merge($saranIdsUI, $autoSaranIds)));
+            // $saranIds = array_values(array_unique(array_merge($saranIdsUI, $autoSaranIds)));
             // ========= SIMPAN PEMERIKSAAN =========
             $pemeriksaan = Pemeriksaan::create([
                 'id_pemeriksaan' => $idPemeriksaan,
@@ -165,14 +164,14 @@ class PemeriksaanInputController extends Controller
             }
 
             // saran
-            if (count($saranIds) > 0) {
-                $rows = array_map(fn($id) => [
-                    'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
-                    'id_saran' => $id,
-                ], $saranIds);
+            // if (count($saranIds) > 0) {
+            //     $rows = array_map(fn($id) => [
+            //         'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
+            //         'id_saran' => $id,
+            //     ], $saranIds);
 
-                DB::table('detail_pemeriksaan_saran')->insert($rows);
-            }
+            //     DB::table('detail_pemeriksaan_saran')->insert($rows);
+            // }
 
             // ========= SIMPAN RESEP + DETAIL_RESEP =========
             $obatIds = $validated['obat_id'] ?? [];

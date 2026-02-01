@@ -183,24 +183,6 @@
       </div>
 
       <div class="ap-form-row">
-        <div class="ap-form-label">Diagnosa K3</div>
-        <div class="ap-form-sep">:</div>
-        <div class="ap-form-value">
-          <div class="hasil-list">
-            @if(count($diagnosaK3Terpilih ?? []))
-              <ul>
-                @foreach($diagnosaK3Terpilih as $d)
-                  <li>{{ $d }}</li>
-                @endforeach
-              </ul>
-            @else
-              -
-            @endif
-          </div>
-        </div>
-      </div>
-
-      <div class="ap-form-row">
         <div class="ap-form-label">Saran</div>
         <div class="ap-form-sep">:</div>
         <div class="ap-form-value">
@@ -244,7 +226,7 @@
           </select>
 
           <input name="jumlah[]" type="number" min="1" placeholder="Jumlah" class="obat-jumlah">
-          <input name="satuan[]" type="text" placeholder="Satuan" class="obat-satuan">
+          <input name="satuan[]" type="text" list="satuanList" placeholder="Satuan" class="obat-satuan">
           <input type="hidden" name="harga_satuan[]" class="obat-harga-raw">
           <input type="text" class="ap-input obat-harga" placeholder="Harga Satuan">
 
