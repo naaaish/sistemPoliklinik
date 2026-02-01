@@ -572,6 +572,7 @@ applyAutoPetugasByJenis();
 
 function setPoliklinikMode(on){
   const nipEl = document.getElementById('nip');
+  const tipeEl = document.getElementById('tipe_pasien');
   const namaPegawaiEl = document.getElementById('nama_pegawai');
   const bagianEl = document.getElementById('bagian');
   const namaPasienEl = document.getElementById('nama_pasien');
@@ -580,6 +581,10 @@ function setPoliklinikMode(on){
 
   if(on){
     if(nipEl) nipEl.value = '001';
+    if(tipeEl){
+      tipeEl.value = 'poliklinik';
+      tipeEl.disabled = true;
+    }
     if(namaPegawaiEl) namaPegawaiEl.value = '-';
     if(bagianEl) bagianEl.value = '-';
     if(namaPasienEl){
@@ -611,7 +616,6 @@ function checkPoliklinik() {
   setPoliklinikMode(isPoli);
 }
 
-// panggil saat halaman load & setelah autofill nip
 checkPoliklinik();
 
 document.getElementById('formPendaftaran').addEventListener('submit', () => {
@@ -622,5 +626,4 @@ document.getElementById('formPendaftaran').addEventListener('submit', () => {
   if (namaPasienEl) namaPasienEl.disabled = false;
 });
 </script>
-
 @endsection

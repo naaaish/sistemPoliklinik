@@ -116,9 +116,7 @@ class PemeriksaanInputController extends Controller
         Pendaftaran::findOrFail($pendaftaranId);
 
         return DB::transaction(function () use ($validated, $pendaftaranId, $request) {
-            // ========= GENERATE ID (20 char) =========
-            // 2(prefix) + 12(ymdHis) + 6(random) = 20
-            $idPemeriksaan = 'PM' . date('ymdHis') . Str::upper(Str::random(6));
+            $idPemeriksaan = $this->generateIDPemeriksaan();
 
             $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
             $idNbs       = $validated['id_nb'] ?? [];
@@ -230,30 +228,57 @@ class PemeriksaanInputController extends Controller
 
             $adaObat = count($detailRows) > 0;
             $pendaftaran = Pendaftaran::findOrFail($pendaftaranId);
-            $isPoliklinik = (($pendaftaran->tipe ?? '') === 'poliklinik');
 
-            if ($adaObat && !$isPoliklinik) {
-                $pendaftaran->jenis_pemeriksaan = 'periksa';
+            if ($adaObat) {
+                $pendaftaran = Pendaftaran::findOrFail($pendaftaranId);
 
-                $petugasAfter = (string) $request->input('petugas_after_obat', '');
+                // ====== PENGECUALIAN: POLIKLINIK ======
+                if ($pendaftaran->tipe_pasien === 'poliklinik') {
 
-                // WAJIB dokter
-                if (!$petugasAfter || !str_starts_with($petugasAfter, 'dokter:')) {
-                    return back()
-                        ->withInput()
-                        ->withErrors(['petugas_after_obat' => 'Jika ada obat, wajib memilih Dokter.']);
+                    // poliklinik boleh ada obat, tapi jenis tetap cek_kesehatan
+                    $pendaftaran->jenis_pemeriksaan = 'cek_kesehatan';
+
+                    // petugas tetap pemeriksa (ambil id paling awal dari pemeriksa aktif)
+                    $firstPemeriksaId = DB::table('pemeriksa')
+                        ->where('status', 'aktif')
+                        ->orderBy('id_pemeriksa', 'asc')
+                        ->value('id_pemeriksa');
+
+                    $pendaftaran->id_dokter = null;
+                    $pendaftaran->id_pemeriksa = $firstPemeriksaId ?: $pendaftaran->id_pemeriksa;
+
+                    $pendaftaran->save();
+
+                } else {
+
+                    // ====== NON-POLIKLINIK ======
+                    // Kalau awalnya cek_kesehatan lalu ada obat -> jadi periksa
+                    if ($pendaftaran->jenis_pemeriksaan === 'cek_kesehatan') {
+                        $pendaftaran->jenis_pemeriksaan = 'periksa';
+                    }
+
+                    // Setelah ada obat, petugas HARUS dokter
+                    $petugasAfter = (string) $request->input('petugas_after_obat', '');
+
+                    if (!$petugasAfter || !str_contains($petugasAfter, ':')) {
+                        return back()->withInput()->withErrors([
+                            'petugas_after_obat' => 'Pilih dokter (wajib) jika ada obat.'
+                        ]);
+                    }
+
+                    [$tipeAfter, $idAfter] = explode(':', $petugasAfter, 2);
+
+                    if ($tipeAfter !== 'dokter') {
+                        return back()->withInput()->withErrors([
+                            'petugas_after_obat' => 'Jika ada obat, petugas harus Dokter.'
+                        ]);
+                    }
+
+                    $pendaftaran->id_dokter = $idAfter;
+                    $pendaftaran->id_pemeriksa = null;
+
+                    $pendaftaran->save();
                 }
-
-                $idDokter = explode(':', $petugasAfter, 2)[1] ?? null;
-                if (!$idDokter) {
-                    return back()
-                        ->withInput()
-                        ->withErrors(['petugas_after_obat' => 'Dokter tidak valid.']);
-                }
-
-                $pendaftaran->id_dokter = $idDokter;
-                $pendaftaran->id_pemeriksa = null;
-                $pendaftaran->save();
             }
 
             if (count($detailRows) > 0) {
@@ -279,5 +304,20 @@ class PemeriksaanInputController extends Controller
                 ->route('adminpoli.dashboard')
                 ->with('success', 'Hasil pemeriksaan berhasil disimpan.');
         });
+    }
+
+    private function generateIDPemeriksaan() {
+        $ids = DB::table('pemeriksaan')
+            ->pluck('id_pemeriksaan'); 
+        $max = 0; 
+        foreach ($ids as $id) 
+        {
+            if (preg_match('/(\d+)$/', $id, $m)){ 
+                $num = (int) $m[1]; 
+                if ($num > $max) $max = $num; 
+            } 
+        } 
+        $next = $max + 1;
+        return 'PMX-00' . $next;
     }
 }

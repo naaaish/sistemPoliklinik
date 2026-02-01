@@ -134,7 +134,7 @@ class PendaftaranController extends Controller
             'keluhan' => ['nullable', 'string'],
         ]);
 
-        $isPoli = ($validated['tipe_pasien'] === 'poliklinik');
+        $isPoli = ($validated['nip'] === '001');
 
         if ($isPoli) {
             $validated['nip'] = '001';
@@ -142,6 +142,7 @@ class PendaftaranController extends Controller
             $validated['nama_pegawai'] = '-';
             $validated['bagian'] = '-';
             $validated['nama_pasien'] = '-';
+            $validated['tipe_pasien'] = 'poliklinik';
 
             $validated['hub_kel'] = 'YBS';
             $validated['id_keluarga'] = null;
@@ -149,9 +150,9 @@ class PendaftaranController extends Controller
         }
 
 
-        $BU_META_ID = 'PMR001';
+        $idPemeriksaFirst = 'PMR001';
         if ($validated['jenis_pemeriksaan'] === 'cek_kesehatan') {
-            $validated['petugas'] = 'pemeriksa:' . $BU_META_ID;
+            $validated['petugas'] = 'pemeriksa:' . $idPemeriksaFirst;
         }
 
         $pegawai = DB::table('pegawai')->where('nip', $validated['nip'])->first();
@@ -315,18 +316,17 @@ class PendaftaranController extends Controller
     }
 
     private function generateIdPendaftaran() {
-    $ids = DB::table('pendaftaran')
-        ->pluck('id_pendaftaran'); 
-    $max = 0; 
-    foreach ($ids as $id) 
-    {
-        if (preg_match('/(\d+)$/', $id, $m)){ 
-            $num = (int) $m[1]; 
-            if ($num > $max) $max = $num; 
+        $ids = DB::table('pendaftaran')
+            ->pluck('id_pendaftaran'); 
+        $max = 0; 
+        foreach ($ids as $id) 
+        {
+            if (preg_match('/(\d+)$/', $id, $m)){ 
+                $num = (int) $m[1]; 
+                if ($num > $max) $max = $num; 
+            } 
         } 
-    } 
-    $next = $max + 1;
-    return 'REG-00' . $next;
+        $next = $max + 1;
+        return 'REG-00' . $next;
     }
-    
 }

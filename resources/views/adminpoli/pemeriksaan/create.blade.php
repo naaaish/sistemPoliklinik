@@ -19,9 +19,10 @@
 
     <form method="POST" action="{{ route('adminpoli.pemeriksaan.store', $pendaftaran->id_pendaftaran) }}" id="formPemeriksaan">
       @csrf
-
+      <input type="hidden" id="tipePasien" value="{{ $pendaftaran->tipe_pasien }}">
+      
       {{-- ===== DATA PEMERIKSAAN ===== --}}  
-    <div style="color:#316BA1;font-size:19px;margin:18px 0 10px;">
+      <div style="color:#316BA1;font-size:19px;margin:18px 0 10px;">
         Data Pemeriksaan Kesehatan
       </div>
 
@@ -150,7 +151,7 @@
       </div>
 
       @php
-        $isPoliklinik = (($pendaftaran->tipe ?? '') === 'poliklinik'); // ganti sesuai kolommu
+        $isPoliklinik = (($pendaftaran->tipe_pasien ?? '') === 'poliklinik');
       @endphp
 
       @if(!$isPoliklinik)
@@ -594,6 +595,23 @@
 
   document.getElementById('formPemeriksaan')?.addEventListener('submit', function (e) {
     let firstInvalidSatuan = null;
+    const tipePasienEl = document.getElementById('tipePasien');
+    const tipePasien = tipePasienEl ? tipePasienEl.value : '';
+    const adaObat = adaObatTerpilih();
+
+    // non poliklinik + ada obat => dokter wajib
+    if (tipePasien !== 'poliklinik' && adaObat) {
+      const dokter = document.getElementById('petugasAfterObat');
+      if (dokter && !dokter.value) {
+        e.preventDefault();
+        showWarn(
+          'Dokter belum dipilih',
+          'Jika ada obat, wajib pilih dokter.',
+          () => dokter.focus()
+        );
+        return;
+      }
+    }
 
     document.querySelectorAll('#obatWrap .obat-row').forEach((row) => {
       const obatSelect = row.querySelector('select[name="obat_id[]"]');
@@ -682,52 +700,37 @@
     });
   });
 
-  const jenisRuntime = document.getElementById('jenisRuntime');
-  const petugasAfterObat = document.getElementById('petugasAfterObat');
-
-  function hasAnyObat(){
-    return !!document.querySelector('#obatWrap select[name="obat_id[]"] option:checked:not([value=""])')
-      || [...document.querySelectorAll('#obatWrap select[name="obat_id[]"]')].some(s => (s.value || '') !== '');
-  }
-
-  function applyCekKesehatanRule(){
-    const awalJenis = (jenisRuntime?.dataset?.awalJenis) || (jenisRuntime?.value || '');
-    const adaObat = hasAnyObat();
-
-    if (!petugasAfterObat || !jenisRuntime) return;
-
-    if (awalJenis === 'cek_kesehatan' && !adaObat) {
-      // tetap cek kesehatan, petugasAfterObat dikunci
-      jenisRuntime.value = 'cek_kesehatan';
-      petugasAfterObat.disabled = true;
-    } else {
-      // ada obat -> auto jadi periksa dan petugasAfterObat aktif
-      jenisRuntime.value = 'periksa';
-      petugasAfterObat.disabled = false;
-    }
-  }
-
   function adaObatTerpilih(){
     return [...document.querySelectorAll('select[name="obat_id[]"]')]
       .some(s => (s.value || '').trim() !== '');
   }
 
   function syncPetugasAfterObat(){
+    const tipePasienEl = document.getElementById('tipePasien');
+    const tipePasien = tipePasienEl ? tipePasienEl.value : '';
+
     const wrap = document.getElementById('petugasAfterObatWrap');
     const sel  = document.getElementById('petugasAfterObat');
-    const on = adaObatTerpilih();
 
+    // kalau poliklinik: elemen dokter memang tidak ada / tidak dipakai
+    if (tipePasien === 'poliklinik') {
+      if (wrap) wrap.style.display = 'none';
+      if (sel) {
+        sel.required = false;
+        sel.value = '';
+      }
+      return;
+    }
+
+    // non poliklinik
+    if (!wrap || !sel) return;
+
+    const on = adaObatTerpilih();
     wrap.style.display = on ? '' : 'none';
     sel.required = on;
 
-    if (!on) sel.value = ''; // reset biar ga “nyangkut”
+    if (!on) sel.value = '';
   }
-
-  document.addEventListener('change', (e) => {
-    if (e.target && e.target.matches('select[name="obat_id[]"]')) {
-      syncPetugasAfterObat();
-    }
-  });
 
   // panggil saat load
   syncPetugasAfterObat();
