@@ -228,7 +228,7 @@ Route::middleware(['auth', 'ensureKepegawaian'])
     Route::get('/laporan/{jenis}', [LaporanController::class, 'detail'])
         ->name('laporan.detail');
 
-    Route::get('/laporan/{jenis}/download', [LaporanController::class, 'downloadPdf'])
+    Route::get('/laporan/{jenis}/download', [LaporanController::class, 'downloadExcel'])
         ->name('laporan.download');
 
     /* ================= DOKTER & PEMERIKSA ================= */
@@ -323,8 +323,8 @@ Route::prefix('kepegawaian/laporan')
         Route::get('/dokter/excel', [LaporanController::class, 'downloadExcelDokter'])
             ->name('laporan.excel.dokter');
 
-    Route::get('/laporan/{jenis}/pdf', [LaporanController::class, 'downloadPdf'])
-       ->name('laporan.pdf');
+    Route::get('/laporan/{jenis}/excel', [LaporanController::class, 'downloadExcel'])
+       ->name('laporan.excel');
 });
 
 
