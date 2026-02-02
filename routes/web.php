@@ -294,7 +294,7 @@ Route::prefix('kepegawaian')->middleware(['auth'])->group(function () {
         ->name('kepegawaian.kelolaUser.import');
 
     Route::post('/kelola-user/{id}/reset-password', [KelolaUserController::class, 'resetPassword'])
-        ->name('kelolaUser.resetPassword');
+        ->name('kepegawaian.kelolaUser.resetPassword');
 });
 
 // Route::get('/pasien/riwayat', [RiwayatController::class, 'index'])

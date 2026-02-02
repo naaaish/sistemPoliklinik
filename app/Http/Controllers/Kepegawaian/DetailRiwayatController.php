@@ -95,6 +95,14 @@ class DetailRiwayatController extends Controller
                 ->select('d.diagnosa as nama_diagnosa')
                 ->get();
 
+        // ================= KELUHAN (MANY TO MANY) =================
+        $keluhan = DB::table('pemeriksaan')
+            ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
+            ->where('pemeriksaan.id_pemeriksaan', $id_pemeriksaan)
+            ->select('pendaftaran.keluhan')
+            ->first();
+
+
         // =================================================
         // SARAN (MANY TO MANY)
         // =================================================
@@ -137,6 +145,7 @@ class DetailRiwayatController extends Controller
             'pasien',
             'pegawai',
             'namaPemeriksa',
+            'keluhan',
             'diagnosa',
             'saran',
             'detailResep'

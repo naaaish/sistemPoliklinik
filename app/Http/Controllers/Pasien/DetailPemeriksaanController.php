@@ -75,13 +75,20 @@ class DetailPemeriksaanController extends Controller
             ->get();
 
 
-        // =================================================
-        // DIAGNOSA K3
-        // =================================================
-        $diagnosa_k3 = DB::table('detail_pemeriksaan_penyakit as dpp')
-            ->where('dpp.id_pemeriksaan', $id_pemeriksaan)
-            ->whereNotNull('dpp.id_nb')
-            ->pluck('dpp.id_nb');
+        // // =================================================
+        // // DIAGNOSA K3
+        // // =================================================
+        // $diagnosa_k3 = DB::table('detail_pemeriksaan_penyakit as dpp')
+        //     ->where('dpp.id_pemeriksaan', $id_pemeriksaan)
+        //     ->whereNotNull('dpp.id_nb')
+        //     ->pluck('dpp.id_nb');
+
+        // ================= KELUHAN (MANY TO MANY) =================
+        $keluhan = DB::table('pemeriksaan')
+            ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
+            ->where('pemeriksaan.id_pemeriksaan', $id_pemeriksaan)
+            ->select('pendaftaran.keluhan')
+            ->first();
 
         // =================================================
         // SARAN (MANY TO MANY)
@@ -120,8 +127,8 @@ class DetailPemeriksaanController extends Controller
             'pasien',
             'pegawai',
             'namaPemeriksa',
+            'keluhan',
             'diagnosa',
-            'diagnosa_k3',
             'saran',
             'detailResep'
         ));
