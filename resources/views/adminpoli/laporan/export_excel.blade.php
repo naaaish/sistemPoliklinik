@@ -37,6 +37,7 @@
         <th>TERAPHY</th>
         <th>JUMLAH OBAT</th>
         <th>HARGA OBAT (SATUAN)</th>
+        <th>SUBTOTAL HARGA OBAT</th>
         <th>TOTAL HARGA OBAT</th>
         <th>SARAN</th>
         <th>PEMERIKSA</th>
@@ -71,6 +72,7 @@
           <td>{{ $r['TERAPHY'] ?? '-' }}</td>
           <td>{{ $r['JUMLAH_OBAT'] ?? '-' }}</td>
           <td>{{ $r['HARGA_OBAT_SATUAN'] ?? '-' }}</td>
+          <td>{{ $r['SUBTOTAL_HARGA_OBAT'] ?? '-' }}</td>
           <td>{{ $r['TOTAL_HARGA_OBAT'] ?? '-' }}</td>
           <td>{{ $r['SARAN'] ?? '-' }}</td>
           <td>{{ $r['PEMERIKSA'] ?? '-' }}</td>
@@ -80,7 +82,7 @@
         </tr>
       @empty
         <tr>
-          <td colspan="25">Tidak ada data pada rentang ini.</td>
+          <td colspan="30">Tidak ada data pada rentang ini.</td>
         </tr>
       @endforelse
     </tbody>
