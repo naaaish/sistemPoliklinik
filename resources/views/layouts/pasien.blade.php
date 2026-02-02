@@ -27,7 +27,7 @@
 <nav class="navbar-pasien">
     <a href="{{ route('home') }}" class="brand">
         <img src="{{ asset('images/logo-poliklinik.png') }}">
-        <span>SISTEM POLIKLINIK</span>
+        <span>HETORICA</span>
     </a>
 
     <div class="nav-menu">

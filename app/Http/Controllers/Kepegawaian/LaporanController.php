@@ -233,7 +233,12 @@ class LaporanController extends Controller
             $dokterPerusahaan = $rows
                 ->where('jenis_dokter', 'Dokter Perusahaan')
                 ->groupBy('id_dokter')
-                ->map(function ($items) use ($gajiPerusahaan) {
+                ->map(function ($items) use ($gajiPerusahaan, $dari, $sampai) {
+                    
+                    // Hitung bulan gaji berdasarkan periode
+                    $bulanGaji = $this->hitungBulanGaji($dari, $sampai);
+                    $totalGaji = $bulanGaji->count() * $gajiPerusahaan;
+                    
                     return (object) [
                         'id_dokter'    => $items->first()->id_dokter,
                         'nama_dokter'  => $items->first()->nama_dokter,
@@ -245,15 +250,10 @@ class LaporanController extends Controller
                             ];
                         }),
                         'total_pasien' => $items->count(),
-                        'gaji'         => $gajiPerusahaan
+                        'bulanGaji'    => $bulanGaji,
+                        'gaji'         => $totalGaji
                     ];
                 })
-                ->when($dari && $sampai, fn($q) =>
-                    $q->whereBetween(
-                        DB::raw('DATE(pemeriksaan.created_at)'),
-                        [$dari, $sampai]
-                    )
-                )
                 ->values();
 
             return view('kepegawaian.laporan.detail', compact(
@@ -318,24 +318,38 @@ class LaporanController extends Controller
 
 
     private function hitungBulanGaji($dari, $sampai)
-{
-    $start = \Carbon\Carbon::parse($dari)->startOfMonth();
-    $end   = \Carbon\Carbon::parse($sampai)->startOfMonth();
-
-    $bulan = collect();
-
-    while ($start <= $end) {
-        $tglGajian = $start->copy()->day(25);
-
-        if ($tglGajian >= $dari && $tglGajian <= $sampai) {
-            $bulan->push($start->translatedFormat('F Y'));
+    {
+        // Jika tidak ada dari/sampai, return 1 bulan saja (bulan sekarang)
+        if (!$dari || !$sampai) {
+            return collect([now()->translatedFormat('F Y')]);
         }
 
-        $start->addMonth();
-    }
+        $start = \Carbon\Carbon::parse($dari);
+        $end   = \Carbon\Carbon::parse($sampai);
 
-    return $bulan;
-}
+        $bulan = collect();
+
+        // Cari bulan pertama dari tanggal mulai
+        $currentMonth = $start->copy()->startOfMonth();
+
+        // Loop sampai melewati tanggal akhir
+        while ($currentMonth->copy()->endOfMonth() <= $end->copy()->endOfMonth()) {
+            
+            // Tanggal gajian di bulan ini adalah tgl 25
+            $tglGajian = $currentMonth->copy()->day(25);
+
+            // Cek apakah tanggal gajian ada dalam rentang periode
+            if ($tglGajian >= $start && $tglGajian <= $end) {
+                $bulan->push($currentMonth->translatedFormat('F Y'));
+            }
+
+            // Pindah ke bulan berikutnya
+            $currentMonth->addMonth();
+        }
+
+        // Jika tidak ada bulan gaji (misalnya periode terlalu pendek), return array kosong
+        return $bulan;
+    }
 
 
     /* =========================
@@ -599,7 +613,7 @@ class LaporanController extends Controller
                     $r->nb,
                     $r->nama_obat,
                     $r->jumlah.' '.$r->satuan,
-                    $r->harga,
+                    $r->harga_satuan ?? $r->harga ?? 0,
                     $i === 0 ? $first->total_obat_pasien : '',
                     $i === 0 ? $first->pemeriksa : '',
                     $i === 0 ? $first->periksa_ke : '',
@@ -854,55 +868,124 @@ class LaporanController extends Controller
 
     public function downloadExcelTotal(Request $request)
     {
-        $dari   = $request->dari;
-        $sampai = $request->sampai;
+        $dari   = $request->query('dari');
+        $sampai = $request->query('sampai');
 
         $data = $this->buildPemeriksaan('total', $dari, $sampai);
+        $totalTagihan = $data->sum('total_obat_pasien');
+        
+        $grouped = $data->groupBy('id_pemeriksaan');
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1','REKAPAN TOTAL OPERASIONAL');
-        $sheet->mergeCells('A1:B1');
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        // Header Judul
+        $sheet->setCellValue('A1', 'LAPORAN OPERASIONAL KESELURUHAN (DETAIL)');
+        $sheet->mergeCells('A1:Y1');
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]
+        ]);
 
-        $sheet->setCellValue('A2','Periode: '.(
-            $dari && $sampai
-                ? \Carbon\Carbon::parse($dari)->translatedFormat('d F Y').' - '.
-                \Carbon\Carbon::parse($sampai)->translatedFormat('d F Y')
-                : 'Semua Data'
-        ));
-        $sheet->mergeCells('A2:B2');
+        // Baris Periode
+        $periodeText = ($dari && $sampai) 
+            ? \Carbon\Carbon::parse($dari)->translatedFormat('d F Y') . ' - ' . \Carbon\Carbon::parse($sampai)->translatedFormat('d F Y')
+            : 'Semua Data';
+        $sheet->setCellValue('A2', 'Periode: ' . $periodeText);
+        $sheet->mergeCells('A2:Y2');
 
+        // Header Tabel - SAMA PERSIS dengan Pegawai/Pensiun
         $row = 4;
-        $sheet->setCellValue("A$row",'Nama Biaya');
-        $sheet->setCellValue("B$row",'Total');
-        $sheet->getStyle("A$row:B$row")->getFont()->setBold(true);
+        $headers = [
+            'No', 'Tanggal', 'Nama Pegawai', 'Bagian',
+            'Nama Pasien', 'Umur', 'Hub. Kel', 'TD', 'GDP', 'GD 2 Jam',
+            'GDS', 'AU', 'Chol', 'TG', 'Suhu', 'BB', 'TB',
+            'Diagnosa', 'NB', 'Therapy', 'Jml Obat', 'Harga Obat',
+            'Total Obat', 'Pemeriksa', 'Periksa Ke'
+        ];
+
+        $col = 'A';
+        foreach ($headers as $h) {
+            $sheet->setCellValue($col . $row, $h);
+            $col++;
+        }
+        
+        // Style Header Biru
+        $sheet->getStyle('A4:Y4')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4472C4']],
+            'alignment' => ['horizontal' => 'center'],
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]
+        ]);
 
         $row++;
-        $grandTotal = 0;
+        $no = 1;
 
-        foreach ($data as $item) {
-            $sheet->setCellValue("A$row", $item->nama);
-            $sheet->setCellValue("B$row", $item->total);
+        foreach ($grouped as $rows) {
+            $first = $rows->first();
+            $totalObat = $rows->sum('total_obat_pasien');
 
-            $grandTotal += $item->total;
-            $row++;
+            foreach ($rows as $i => $r) {
+                $sheet->fromArray([
+                    $i === 0 ? $no++ : '',
+                    $i === 0 ? $first->tanggal : '',
+                    $i === 0 ? $first->nama_pegawai : '',
+                    $i === 0 ? $first->umur : '',
+                    $i === 0 ? $first->bagian : '',
+                    $i === 0 ? $first->nama_pasien : '',
+                    $i === 0 ? $first->hub_kel : '',
+                    $i === 0 ? $first->sistol : '',
+                    $i === 0 ? $first->gd_puasa : '',
+                    $i === 0 ? $first->gd_duajam : '',
+                    $i === 0 ? $first->gd_sewaktu : '',
+                    $i === 0 ? $first->asam_urat : '',
+                    $i === 0 ? $first->chol : '',
+                    $i === 0 ? $first->tg : '',
+                    $i === 0 ? $first->suhu : '',
+                    $i === 0 ? $first->berat : '',
+                    $i === 0 ? $first->tinggi : '',
+                    $r->diagnosa,
+                    $r->nb,
+                    $r->nama_obat,
+                    $r->jumlah.' '.$r->satuan,
+                    $r->harga_satuan ?? $r->harga ?? 0,
+                    $i === 0 ? $first->total_obat_pasien : '',
+                    $i === 0 ? $first->pemeriksa : '',
+                    $i === 0 ? $first->periksa_ke : '',
+                ], null, "A$row");
+
+                // Border untuk setiap baris data
+                $sheet->getStyle("A$row:Y$row")->getBorders()->getAllBorders()
+                    ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+                $row++;
+            }
         }
 
-        $sheet->setCellValue("A$row",'TOTAL');
-        $sheet->setCellValue("B$row",$grandTotal);
-        $sheet->getStyle("A$row:B$row")->getFont()->setBold(true);
+        // Total Tagihan
+        $row++;
+        $sheet->setCellValue("A$row", 'TOTAL TAGIHAN PERIODE');
+        $sheet->mergeCells("A$row:W$row");
+        $sheet->setCellValue("X$row", $totalTagihan);
+        $sheet->getStyle("A$row:X$row")->getFont()->setBold(true);
+        
+        // Format Rupiah untuk Total
+        $sheet->getStyle("X$row")->getNumberFormat()->setFormatCode('#,##0');
 
-        foreach (['A','B'] as $c) {
+        // Auto Size Kolom
+        foreach (range('A', 'Y') as $c) {
             $sheet->getColumnDimension($c)->setAutoSize(true);
         }
 
+        // Download
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-        $path = storage_path('app/Laporan_Keseluruhan_Operasional.xlsx');
-        $writer->save($path);
-
-        return response()->download($path)->deleteFileAfterSend(true);
+        $fileName = 'Laporan_Detail_Operasional_Keseluruhan_' . date('Ymd_His') . '.xlsx';
+        
+        return response()->streamDownload(function() use ($writer) {
+            $writer->save('php://output');
+        }, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 
     private function applyTanggal($query, $request)

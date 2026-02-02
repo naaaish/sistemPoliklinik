@@ -93,7 +93,7 @@
 <body>
     {{-- ================= SIDEBAR ================= --}}
     <div class="sidebar">
-        <h2>SISTEM POLIKLINIK</h2>
+        <h2>HETORICA</h2>
         <small>ADMIN KEPEGAWAIAN PANEL</small>
 
         <div class="menu">
