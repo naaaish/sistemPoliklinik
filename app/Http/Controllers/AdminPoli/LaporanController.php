@@ -394,8 +394,8 @@ class LaporanController extends Controller
                     'TERAPHY' => $ob ? ($ob->nama_obat ?? '-') : ($isFirst ? '-' : ''),
                     'JUMLAH_OBAT' => $ob ? trim(($ob->jumlah ?? 0) . ' ' . ($ob->satuan ?? '')) : ($isFirst ? '-' : ''),
                     'HARGA_OBAT_SATUAN' => $ob ? ($ob->harga ?? 0) : ($isFirst ? '-' : ''),
-                    'TOTAL_HARGA_OBAT' => $ob ? ($subtotalObat ?? '-') : ($isFirst ? '-' : ''),
-
+                    'SUBTOTAL_HARGA_OBAT' => $ob ? ($subtotalObat ?? '-') : ($isFirst ? '-' : ''),
+                    'TOTAL_HARGA_OBAT' => $isFirst ? (count($obatList) ? $totalHarga : '-') : '',
                     'SARAN' => $isFirst ? $saranText : '',
                     'PEMERIKSA' => $isFirst ? ($v->pemeriksa ?? '-') : '',
 

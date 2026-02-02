@@ -56,6 +56,7 @@
           <div class="lap-th">TERAPHY</div>
           <div class="lap-th">JUMLAH OBAT</div>
           <div class="lap-th">HARGA OBAT (SATUAN)</div>
+          <div class="lap-th">SUBTOTAL HARGA OBAT</div>
           <div class="lap-th">TOTAL HARGA OBAT</div>
           <div class="lap-th">SARAN</div>
           <div class="lap-th">PEMERIKSA</div>
@@ -94,6 +95,10 @@
                 $hs = $r['HARGA_OBAT_SATUAN'];
               @endphp
               {{ is_numeric($hs) ? number_format($hs, 0, ',', '.') : $hs }}
+            </div>
+            <div class="lap-td lap-center">
+              @php $st = $r['SUBTOTAL_HARGA_OBAT'] ?? '-'; @endphp
+              {{ is_numeric($st) ? number_format($st, 0, ',', '.') : $st }}
             </div>
             <div class="lap-td lap-center">
               @php
