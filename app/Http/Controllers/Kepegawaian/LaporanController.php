@@ -396,6 +396,7 @@ class LaporanController extends Controller
             DB::raw('TIMESTAMPDIFF(YEAR, COALESCE(keluarga.tgl_lahir, pegawai.tgl_lahir), CURDATE()) as umur'),
 
             'pemeriksaan.sistol',
+            'pemeriksaan.diastol',
             'pemeriksaan.gd_puasa',
             'pemeriksaan.gd_duajam',
             'pemeriksaan.gd_sewaktu',
@@ -569,7 +570,7 @@ class LaporanController extends Controller
             'No','Tanggal','Nama Pegawai','Umur','Bagian',
             'Nama Pasien','Hub. Kel','TD','GDP','GD 2 Jam',
             'GDS','AU','Chol','TG','Suhu','BB','TB',
-            'Diagnosa','NB','Therapy','Jml Obat','Harga Obat',
+            'Diagnosa','NB','Therapy','Jml Obat','Harga Obat', 'Subtotal Obat',
             'Total Obat','Pemeriksa','Periksa Ke'
         ];
 
@@ -614,6 +615,7 @@ class LaporanController extends Controller
                     $r->nama_obat,
                     $r->jumlah.' '.$r->satuan,
                     $r->harga_satuan ?? $r->harga ?? 0,
+                    $r->subtotal_obat ?? '-',
                     $i === 0 ? $first->total_obat_pasien : '',
                     $i === 0 ? $first->pemeriksa : '',
                     $i === 0 ? $first->periksa_ke : '',
@@ -900,7 +902,7 @@ class LaporanController extends Controller
             'No', 'Tanggal', 'Nama Pegawai', 'Bagian',
             'Nama Pasien', 'Umur', 'Hub. Kel', 'TD', 'GDP', 'GD 2 Jam',
             'GDS', 'AU', 'Chol', 'TG', 'Suhu', 'BB', 'TB',
-            'Diagnosa', 'NB', 'Therapy', 'Jml Obat', 'Harga Obat',
+            'Diagnosa', 'NB', 'Therapy', 'Jml Obat', 'Harga Obat', 'Subtotal Obat',
             'Total Obat', 'Pemeriksa', 'Periksa Ke'
         ];
 
@@ -949,6 +951,7 @@ class LaporanController extends Controller
                     $r->nama_obat,
                     $r->jumlah.' '.$r->satuan,
                     $r->harga_satuan ?? $r->harga ?? 0,
+                    $r->subtotal_obat ?? '-',
                     $i === 0 ? $first->total_obat_pasien : '',
                     $i === 0 ? $first->pemeriksa : '',
                     $i === 0 ? $first->periksa_ke : '',
