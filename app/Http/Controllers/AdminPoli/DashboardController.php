@@ -38,7 +38,7 @@ class DashboardController extends Controller
             ->leftJoin('keluarga as k', 'k.id_keluarga', '=', 'p.id_keluarga')
             ->leftJoin('pemeriksaan as pm', 'pm.id_pendaftaran', '=', 'p.id_pendaftaran')
             ->whereNull('pm.id_pendaftaran')
-            ->orderBy('p.tanggal', 'desc')
+            ->orderBy('p.tanggal', 'asc')
             ->select([
                 'p.id_pendaftaran',
                 'p.tanggal',

@@ -40,7 +40,7 @@
     {{-- Sidebar --}}
     <aside class="ap-sidebar">
         <div class="ap-brand">
-            <div class="ap-brand__title">SISTEM POLIKLINIK</div>
+            <div class="ap-brand__title">HETORICA</div>
             <div class="ap-brand__subtitle">ADMIN POLIKLINIK PANEL</div>
         </div>
         <div class="ap-sep"></div>

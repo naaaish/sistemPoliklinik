@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Login - SISTEM POLIKLINIK</title>
+<title>Login - HETORICA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -523,7 +523,7 @@ input::placeholder{
 <div class="login-container">
 
     <div class="login-header">
-        <h2>SISTEM POLIKLINIK</h2>
+        <h2>HETORICA</h2>
         <p>Silakan login untuk melanjutkan</p>
     </div>
 

@@ -14,6 +14,7 @@ use App\Models\Saran;
 use App\Models\Diagnosa;
 use App\Models\DetailResep;
 use App\Models\Resep;
+use Illuminate\Validation\ValidationException;
 
 class PemeriksaanInputController extends Controller
 {
@@ -111,15 +112,45 @@ class PemeriksaanInputController extends Controller
         }
 
         // pastikan pendaftaran ada
-        Pendaftaran::findOrFail($pendaftaranId);
+        $pendaftaran = Pendaftaran::findOrFail($pendaftaranId);
 
-        return DB::transaction(function () use ($validated, $pendaftaranId, $request) {
+        $obatIdsRaw = $validated['obat_id'] ?? [];
+        $adaObatInput = collect($obatIdsRaw)->filter(fn($x) => $x !== null && $x !== '' && $x !== '0')->isNotEmpty();
+
+        $dokterIdAfter = null;
+
+        if ($adaObatInput && $pendaftaran->tipe_pasien !== 'poliklinik') {
+
+            $petugasAfter = (string) $request->input('petugas_after_obat', '');
+
+            // ✅ FALLBACK: kalau field ga kepost tapi pendaftaran sudah ada dokter, pakai itu
+            if (($petugasAfter === '' || !str_contains($petugasAfter, ':')) && !empty($pendaftaran->id_dokter)) {
+                $petugasAfter = 'dokter:' . $pendaftaran->id_dokter;
+            }
+
+            if (!$petugasAfter || !str_contains($petugasAfter, ':')) {
+                throw ValidationException::withMessages([
+                    'petugas_after_obat' => 'Pilih dokter (wajib) jika ada obat.'
+                ]);
+            }
+
+            [$tipeAfter, $idAfter] = explode(':', $petugasAfter, 2);
+
+            if ($tipeAfter !== 'dokter') {
+                throw ValidationException::withMessages([
+                    'petugas_after_obat' => 'Jika ada obat, petugas harus Dokter.'
+                ]);
+            }
+
+            $dokterIdAfter = $idAfter;
+        }
+
+        return DB::transaction(function () use ($validated, $pendaftaranId, $dokterIdAfter) {
             $idPemeriksaan = $this->generateIDPemeriksaan();
 
             $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
             $idNbs       = $validated['id_nb'] ?? [];
 
-            // validasi: tiap penyakit wajib punya id_nb
             foreach ($penyakitIds as $i => $idDiag) {
                 $idNb = $idNbs[$i] ?? null;
                 if (!$idNb || trim((string)$idNb) === '') {
@@ -242,33 +273,13 @@ class PemeriksaanInputController extends Controller
                     $pendaftaran->save();
 
                 } else {
-
                     // ====== NON-POLIKLINIK ======
-                    // Kalau awalnya cek_kesehatan lalu ada obat -> jadi periksa
                     if ($pendaftaran->jenis_pemeriksaan === 'cek_kesehatan') {
                         $pendaftaran->jenis_pemeriksaan = 'periksa';
                     }
-
-                    // Setelah ada obat, petugas HARUS dokter
-                    $petugasAfter = (string) $request->input('petugas_after_obat', '');
-
-                    if (!$petugasAfter || !str_contains($petugasAfter, ':')) {
-                        return back()->withInput()->withErrors([
-                            'petugas_after_obat' => 'Pilih dokter (wajib) jika ada obat.'
-                        ]);
-                    }
-
-                    [$tipeAfter, $idAfter] = explode(':', $petugasAfter, 2);
-
-                    if ($tipeAfter !== 'dokter') {
-                        return back()->withInput()->withErrors([
-                            'petugas_after_obat' => 'Jika ada obat, petugas harus Dokter.'
-                        ]);
-                    }
-
-                    $pendaftaran->id_dokter = $idAfter;
+                  
+                    $pendaftaran->id_dokter = $dokterIdAfter;
                     $pendaftaran->id_pemeriksa = null;
-
                     $pendaftaran->save();
                 }
             }

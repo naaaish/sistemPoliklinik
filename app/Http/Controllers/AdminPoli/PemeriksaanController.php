@@ -76,12 +76,19 @@ class PemeriksaanController extends Controller
         $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
         $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
 
-        $penyakitTerpilih = DB::table('detail_pemeriksaan_penyakit as dp')
+        // ===== detail penyakit: (buat render card + id_nb editable) =====
+        $penyakitDetail = DB::table('detail_pemeriksaan_penyakit as dp')
             ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dp.id_diagnosa')
             ->where('dp.id_pemeriksaan', $hasil->id_pemeriksaan)
-            ->pluck('d.diagnosa')
-            ->toArray();
+            ->select([
+                'dp.id_diagnosa',
+                'dp.id_nb',
+                'd.diagnosa',
+            ])
+            ->orderBy('d.diagnosa')
+            ->get();
 
+        // ===== saran (optional tampil list aja) =====
         $saranTerpilih = DB::table('detail_pemeriksaan_saran as ds')
             ->join('saran as s', 's.id_saran', '=', 'ds.id_saran')
             ->where('ds.id_pemeriksaan', $hasil->id_pemeriksaan)
@@ -91,23 +98,27 @@ class PemeriksaanController extends Controller
         // ===== resep berdasarkan id_pemeriksaan =====
         $resep = Resep::where('id_pemeriksaan', $hasil->id_pemeriksaan)->first();
 
-        // ===== detail resep berdasarkan id_resep (join obat biar ada nama & harga) =====
+        // ===== detail resep join obat =====
         $detailResep = collect();
         if ($resep) {
             $detailResep = DetailResep::where('id_resep', $resep->id_resep)
                 ->join('obat', 'obat.id_obat', '=', 'detail_resep.id_obat')
                 ->select([
                     'detail_resep.*',
-                    'obat.nama_obat as nama_obat',
-                    'obat.harga as harga_satuan',
+                    'obat.nama_obat',
+                    DB::raw('COALESCE(obat.harga, 0) as harga_satuan'),
+                    DB::raw('COALESCE(detail_resep.satuan, "") as satuan_default'),
                 ])
                 ->get();
         }
 
-        // ===== master obat (buat dropdown obat editable di show) =====
-        $obat = Obat::where('is_active', 1)
-            ->orderBy('nama_obat', 'asc')
-            ->get();
+        // ===== master dropdown =====
+        $obat = Obat::where('is_active', 1)->orderBy('nama_obat', 'asc')->get();
+        $penyakit = Diagnosa::where('is_active', 1)->orderBy('diagnosa', 'asc')->get();
+
+        // ===== dokter/pemeriksa buat baris petugas =====
+        $dokter = DB::table('dokter')->where('status', 'aktif')->orderBy('nama')->get();
+        $pemeriksa = DB::table('pemeriksa')->where('status', 'aktif')->orderBy('id_pemeriksa')->get();
 
         return view('adminpoli.pemeriksaan.show', compact(
             'pendaftaran',
@@ -115,8 +126,11 @@ class PemeriksaanController extends Controller
             'resep',
             'detailResep',
             'obat',
-            'penyakitTerpilih',
-            'saranTerpilih'
+            'penyakit',
+            'penyakitDetail',
+            'saranTerpilih',
+            'dokter',
+            'pemeriksa'
         ));
     }
 
@@ -126,7 +140,6 @@ class PemeriksaanController extends Controller
     public function edit($pendaftaranId)
     {
         $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
-
         $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
 
         $resep = Resep::where('id_pemeriksaan', $hasil->id_pemeriksaan)->first();
@@ -138,29 +151,29 @@ class PemeriksaanController extends Controller
                 ->select([
                     'detail_resep.*',
                     'obat.nama_obat',
+                    DB::raw('COALESCE(obat.harga, 0) as harga_satuan'),
+                    DB::raw('COALESCE(detail_resep.satuan, "") as satuan_default'),
                 ])
                 ->get();
         }
 
-        // dropdown data (kalau halaman edit kamu butuh)
-        $obat = Obat::where('is_active', 1)
-            ->orderBy('nama_obat', 'asc')
-            ->get();
-        $saran = Saran::where('is_active', 1)
-            ->orderBy('saran', 'asc')
-            ->get();
-        $penyakit = Diagnosa::where('is_active', 1)
-            ->orderBy('diagnosa', 'asc')
+        $penyakitDetail = DB::table('detail_pemeriksaan_penyakit as dp')
+            ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dp.id_diagnosa')
+            ->where('dp.id_pemeriksaan', $hasil->id_pemeriksaan)
+            ->select(['dp.id_diagnosa','dp.id_nb','d.diagnosa'])
+            ->orderBy('d.diagnosa')
             ->get();
 
+        $obat = Obat::where('is_active', 1)->orderBy('nama_obat', 'asc')->get();
+        $saran = Saran::where('is_active', 1)->orderBy('saran', 'asc')->get();
+        $penyakit = Diagnosa::where('is_active', 1)->orderBy('diagnosa', 'asc')->get();
+
+        $dokter = DB::table('dokter')->where('status', 'aktif')->orderBy('nama')->get();
+        $pemeriksa = DB::table('pemeriksa')->where('status', 'aktif')->orderBy('id_pemeriksa')->get();
+
         return view('adminpoli.pemeriksaan.edit', compact(
-            'pendaftaran',
-            'hasil',
-            'resep',
-            'detailResep',
-            'obat',
-            'saran',
-            'penyakit'
+            'pendaftaran','hasil','resep','detailResep','obat','saran','penyakit',
+            'penyakitDetail','dokter','pemeriksa'
         ));
     }
 
@@ -196,6 +209,12 @@ class PemeriksaanController extends Controller
             'satuan.*'       => 'nullable|string',
             'harga_satuan'   => 'nullable|array',
             'harga_satuan.*' => 'nullable|numeric',
+
+            'penyakit_id'     => 'nullable|array',
+            'penyakit_id.*'   => ['nullable', Rule::exists('diagnosa', 'id_diagnosa')->where('is_active', 1)],
+            'id_nb'           => 'nullable|array',
+            'id_nb.*'         => 'nullable|string',
+            'petugas_after_obat' => 'nullable|string',
         ]);
 
         return DB::transaction(function () use ($validated, $pendaftaranId) {
@@ -219,6 +238,37 @@ class PemeriksaanController extends Controller
                 'berat'      => $validated['berat_badan'] ?? null,
                 'tinggi'     => $validated['tinggi_badan'] ?? null,
             ]);
+
+            $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
+
+            // ====== UPDATE PENYAKIT ======
+            $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
+            $idNbs       = $validated['id_nb'] ?? [];
+
+            // validasi: tiap penyakit wajib punya id_nb
+            foreach ($penyakitIds as $i => $idDiag) {
+                $idNb = $idNbs[$i] ?? null;
+                if (!$idNb || trim((string)$idNb) === '') {
+                    return back()->withInput()->withErrors(["id_nb.$i" => "ID NB wajib diisi untuk penyakit yang dipilih."]);
+                }
+            }
+
+            // replace detail penyakit
+            DB::table('detail_pemeriksaan_penyakit')
+                ->where('id_pemeriksaan', $hasil->id_pemeriksaan)
+                ->delete();
+
+            if (count($penyakitIds) > 0) {
+                $rows = [];
+                foreach ($penyakitIds as $i => $idDiag) {
+                    $rows[] = [
+                        'id_pemeriksaan' => $hasil->id_pemeriksaan,
+                        'id_diagnosa'    => $idDiag,
+                        'id_nb'          => trim((string)($idNbs[$i] ?? '')),
+                    ];
+                }
+                DB::table('detail_pemeriksaan_penyakit')->insert($rows);
+            }
 
             // ===== RESEP & DETAIL_RESEP =====
             $obatIds = $validated['obat_id'] ?? [];
@@ -276,6 +326,48 @@ class PemeriksaanController extends Controller
                     ->with('success', 'Hasil pemeriksaan berhasil diupdate (tanpa resep).');
             }
 
+            $adaObat = count($detailToInsert) > 0;
+
+            if ($adaObat) {
+                if ($pendaftaran->tipe_pasien === 'poliklinik') {
+                    // poliklinik: tetap cek_kesehatan & petugas pemeriksa
+                    $pendaftaran->jenis_pemeriksaan = 'cek_kesehatan';
+
+                    $firstPemeriksaId = DB::table('pemeriksa')
+                        ->where('status', 'aktif')
+                        ->orderBy('id_pemeriksa', 'asc')
+                        ->value('id_pemeriksa');
+
+                    $pendaftaran->id_dokter = null;
+                    $pendaftaran->id_pemeriksa = $firstPemeriksaId ?: $pendaftaran->id_pemeriksa;
+                    $pendaftaran->save();
+                } else {
+                    // non-poliklinik: kalau awalnya cek_kesehatan lalu ada obat -> jadi periksa & wajib dokter
+                    if ($pendaftaran->jenis_pemeriksaan === 'cek_kesehatan') {
+                        $pendaftaran->jenis_pemeriksaan = 'periksa';
+
+                        $petugasAfter = (string) request()->input('petugas_after_obat', '');
+                        if (!$petugasAfter || !str_contains($petugasAfter, ':')) {
+                            return back()->withInput()->withErrors([
+                                'petugas_after_obat' => 'Pilih dokter (wajib) jika awalnya cek kesehatan lalu ditambah obat.'
+                            ]);
+                        }
+
+                        [$tipeAfter, $idAfter] = explode(':', $petugasAfter, 2);
+                        if ($tipeAfter !== 'dokter') {
+                            return back()->withInput()->withErrors([
+                                'petugas_after_obat' => 'Jika ada obat, petugas harus Dokter.'
+                            ]);
+                        }
+
+                        $pendaftaran->id_dokter = $idAfter;
+                        $pendaftaran->id_pemeriksa = null;
+                        $pendaftaran->save();
+                    }
+                    // kalau sudah 'periksa' dari awal, kita biarin petugas existing (nggak maksa pilih ulang)
+                }
+            }
+            
             // kalau belum ada resep → buat
             if (!$resep) {
                 $resep = Resep::create([

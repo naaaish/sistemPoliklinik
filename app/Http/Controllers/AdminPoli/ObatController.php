@@ -165,88 +165,177 @@ class ObatController extends Controller
             ->with('success', 'Obat berhasil dihapus');
     }
 
+    // public function import(Request $request)
+    // {
+    //     $request->validate([
+    //         'file' => 'required|file|mimes:csv,xlsx,xls|max:5120', // max 5MB
+    //     ]);
+
+    //     // baca file jadi array (1 sheet)
+    //     $rows = Excel::toArray([], $request->file('file'))[0] ?? [];
+
+    //     if (count($rows) <= 1) {
+    //         return redirect()->route('adminpoli.obat.index')
+    //             ->with('error', 'File kosong / format tidak sesuai.');
+    //     }
+
+    //     // anggap baris pertama header
+    //     $header = array_map(fn($h) => Str::slug((string)$h, '_'), $rows[0]);
+
+    //     // mapping nama kolom yang kita butuhin
+    //     // contoh header yang diterima:
+    //     // nama_obat | harga
+    //     $idxNama = array_search('nama_obat', $header);
+    //     $idxHarga = array_search('harga', $header);
+
+    //     if ($idxNama === false || $idxHarga === false) {
+    //         return redirect()->route('adminpoli.obat.index')
+    //             ->with('error', 'Header harus mengandung: nama_obat, harga');
+    //     }
+
+    //     $inserted = 0;
+    //     $skipped = 0;
+
+    //     foreach (array_slice($rows, 1) as $r) {
+    //         $nama = trim((string)($r[$idxNama] ?? ''));
+    //         $harga = $r[$idxHarga] ?? null;
+
+    //         if ($nama === '' || $harga === null) {
+    //             $skipped++;
+    //             continue;
+    //         }
+
+    //         // normalisasi harga (kalau ada "Rp", titik, koma)
+    //         $hargaNum = (int) preg_replace('/[^0-9]/', '', (string)$harga);
+    //         if ($hargaNum <= 0) {
+    //             $skipped++;
+    //             continue;
+    //         }
+
+    //         // aturan kamu: nama sama yang masih aktif = tidak boleh
+    //         $existsAktif = DB::table('obat')
+    //             ->whereRaw('LOWER(nama_obat) = ?', [mb_strtolower($nama)])
+    //             ->where('is_active', '1') // enum '0'/'1'
+    //             ->exists();
+
+    //         if ($existsAktif) {
+    //             $skipped++;
+    //             continue;
+    //         }
+
+    //         // generate id_obat OBT-XXX (lanjut dari terbesar)
+    //         $last = DB::table('obat')
+    //             ->select('id_obat')
+    //             ->orderByRaw("CAST(SUBSTRING(id_obat, 5) AS UNSIGNED) DESC")
+    //             ->value('id_obat');
+
+    //         $nextNum = $last ? ((int)substr($last, 4) + 1) : 1;
+    //         $newId = 'OBT-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+
+    //         DB::table('obat')->insert([
+    //             'id_obat' => $newId,
+    //             'nama_obat' => $nama,
+    //             'harga' => $hargaNum,
+    //             'is_active' => '1',
+    //             'created_at' => now(),
+    //             'updated_at' => now(),
+    //         ]);
+
+    //         $inserted++;
+    //     }
+
+    //     return redirect()->route('adminpoli.obat.index')
+    //         ->with('success', "Import selesai. Berhasil: $inserted, Dilewati: $skipped");
+    // }
+
     public function import(Request $request)
-    {
-        $request->validate([
-            'file' => 'required|file|mimes:csv,xlsx,xls|max:5120', // max 5MB
+{
+    $request->validate([
+        'file' => 'required|file|mimes:csv,xlsx,xls|max:5120',
+    ]);
+
+    $sheets = Excel::toArray([], $request->file('file'));
+
+    // cari sheet yang punya header nama_obat & harga
+    $rows = [];
+    foreach ($sheets as $sheet) {
+        if (count($sheet) < 2) continue;
+
+        $header = array_map(fn($h) => Str::slug((string)$h, '_'), $sheet[0] ?? []);
+        if (in_array('nama_obat', $header) && in_array('harga', $header)) {
+            $rows = $sheet;
+            break;
+        }
+    }
+
+    if (count($rows) <= 1) {
+        return redirect()->route('adminpoli.obat.index')
+            ->with('error', 'Sheet dengan header nama_obat & harga tidak ditemukan.');
+    }
+
+    $header = array_map(fn($h) => Str::slug((string)$h, '_'), $rows[0]);
+    $idxNama  = array_search('nama_obat', $header);
+    $idxHarga = array_search('harga', $header);
+
+    $inserted = 0;
+    $skipped  = 0;
+
+    // ambil last ID sekali aja (biar gak query tiap loop + aman urut)
+    $last = DB::table('obat')
+        ->select('id_obat')
+        ->orderByRaw("CAST(SUBSTRING(id_obat, 5) AS UNSIGNED) DESC")
+        ->value('id_obat');
+
+    $nextNum = $last ? ((int)substr($last, 4) + 1) : 1;
+
+    foreach (array_slice($rows, 1) as $r) {
+        $nama  = trim((string)($r[$idxNama] ?? ''));
+        $harga = $r[$idxHarga] ?? null;
+
+        if ($nama === '' || $harga === null) { $skipped++; continue; }
+
+        // === NORMALISASI HARGA (AMAN + SESUAI EXCEL) ===
+        if (is_numeric($harga)) {
+            // contoh: 546.666666667 -> 547
+            $hargaNum = (int) round((float) $harga);
+        } else {
+            // fallback kalau string (Rp, titik, koma, dll)
+            $raw = str_ireplace(['rp', ' '], '', (string)$harga);
+            $raw = str_replace('.', '', $raw);
+            $raw = str_replace(',', '.', $raw);
+
+            $hargaNum = (int) round((float) $raw);
+        }
+
+        if ($hargaNum <= 0) {
+            $skipped++;
+            continue;
+        }
+        $existsAktif = DB::table('obat')
+            ->whereRaw('LOWER(nama_obat) = ?', [mb_strtolower($nama)])
+            ->where('is_active', '1')
+            ->exists();
+
+        if ($existsAktif) { $skipped++; continue; }
+
+        $newId = 'OBT-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+        $nextNum++;
+
+        DB::table('obat')->insert([
+            'id_obat'    => $newId,
+            'nama_obat'  => $nama,
+            'harga'      => $hargaNum,
+            'is_active'  => '1',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        // baca file jadi array (1 sheet)
-        $rows = Excel::toArray([], $request->file('file'))[0] ?? [];
-
-        if (count($rows) <= 1) {
-            return redirect()->route('adminpoli.obat.index')
-                ->with('error', 'File kosong / format tidak sesuai.');
-        }
-
-        // anggap baris pertama header
-        $header = array_map(fn($h) => Str::slug((string)$h, '_'), $rows[0]);
-
-        // mapping nama kolom yang kita butuhin
-        // contoh header yang diterima:
-        // nama_obat | harga
-        $idxNama = array_search('nama_obat', $header);
-        $idxHarga = array_search('harga', $header);
-
-        if ($idxNama === false || $idxHarga === false) {
-            return redirect()->route('adminpoli.obat.index')
-                ->with('error', 'Header harus mengandung: nama_obat, harga');
-        }
-
-        $inserted = 0;
-        $skipped = 0;
-
-        foreach (array_slice($rows, 1) as $r) {
-            $nama = trim((string)($r[$idxNama] ?? ''));
-            $harga = $r[$idxHarga] ?? null;
-
-            if ($nama === '' || $harga === null) {
-                $skipped++;
-                continue;
-            }
-
-            // normalisasi harga (kalau ada "Rp", titik, koma)
-            $hargaNum = (int) preg_replace('/[^0-9]/', '', (string)$harga);
-            if ($hargaNum <= 0) {
-                $skipped++;
-                continue;
-            }
-
-            // aturan kamu: nama sama yang masih aktif = tidak boleh
-            $existsAktif = DB::table('obat')
-                ->whereRaw('LOWER(nama_obat) = ?', [mb_strtolower($nama)])
-                ->where('is_active', '1') // enum '0'/'1'
-                ->exists();
-
-            if ($existsAktif) {
-                $skipped++;
-                continue;
-            }
-
-            // generate id_obat OBT-XXX (lanjut dari terbesar)
-            $last = DB::table('obat')
-                ->select('id_obat')
-                ->orderByRaw("CAST(SUBSTRING(id_obat, 5) AS UNSIGNED) DESC")
-                ->value('id_obat');
-
-            $nextNum = $last ? ((int)substr($last, 4) + 1) : 1;
-            $newId = 'OBT-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
-
-            DB::table('obat')->insert([
-                'id_obat' => $newId,
-                'nama_obat' => $nama,
-                'harga' => $hargaNum,
-                'is_active' => '1',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $inserted++;
-        }
-
-        return redirect()->route('adminpoli.obat.index')
-            ->with('success', "Import selesai. Berhasil: $inserted, Dilewati: $skipped");
+        $inserted++;
     }
+
+    return redirect()->route('adminpoli.obat.index')
+        ->with('success', "Import selesai.");
+}
 
     public function export(Request $request)
     {
