@@ -73,6 +73,7 @@
                         <td rowspan="{{ $rowspan }}">{{ $r->nama_pasien }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $r->hub_kel }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $r->sistol }}</td>
+                        <td rowspan="{{ $rowspan }}">{{ $r->diastol }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $r->gd_puasa }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $r->gd_duajam }}</td>
                         <td rowspan="{{ $rowspan }}">{{ $r->gd_sewaktu }}</td>
