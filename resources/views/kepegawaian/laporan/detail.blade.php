@@ -230,7 +230,8 @@
                     <th>Bagian</th>
                     <th>Nama Pasien</th>
                     <th>Hub Kel</th>
-                    <th>TD (S/D)</th>
+                    <th>Sistol</th>
+                    <th>Diastol</th>
                     <th>GDP</th>
                     <th>GD 2Jam</th>
                     <th>GDS</th>
@@ -261,7 +262,8 @@
                     <td>{{ $r->is_first ? $r->bagian : '' }}</td>
                     <td>{{ $r->is_first ? $r->nama_pasien : '' }}</td>
                     <td>{{ $r->is_first ? $r->hub_kel : '' }}</td>
-                    <td>{{ $r->is_first ? ($r->sistol . '/' . ($r->diastol ?? '-')) : '' }}</td>
+                    <td>{{ $r->is_first ? $r->sistol : '' }}</td>
+                    <td>{{ $r->is_first ? $r->diastol : '' }}</td>
                     <td>{{ $r->is_first ? $r->gd_puasa : '' }}</td>
                     <td>{{ $r->is_first ? $r->gd_duajam : '' }}</td>
                     <td>{{ $r->is_first ? $r->gd_sewaktu : '' }}</td>
@@ -346,7 +348,8 @@
                             <th>Bagian</th>
                             <th>Nama Pasien</th>
                             <th>Hub. Kel</th>
-                            <th>TD (S/D)</th>
+                            <th>Sistol</th>
+                            <th>Diastol</th>
                             <th>GDP</th>
                             <th>GD 2 Jam</th>
                             <th>GDS</th>
@@ -393,7 +396,8 @@
                                         <td rowspan="{{ $rowspan }}">{{ $item->bagian }}</td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->nama_pasien }}</td>
                                         <td rowspan="{{ $rowspan }}">{{ ucfirst($item->hub_kel) }}</td>
-                                        <td rowspan="{{ $rowspan }}" class="text-center">{{  $item->is_first ? ($item->sistol . '/' . ($item->diastol ?? '-')) : '' }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{  $item->sistol }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{  $item->diastol }}</td>
                                         <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->gd_puasa }}</td>
                                         <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->gd_duajam }}</td>
                                         <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->gd_sewaktu }}</td>

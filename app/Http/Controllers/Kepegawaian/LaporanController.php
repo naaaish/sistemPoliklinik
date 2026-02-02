@@ -568,7 +568,7 @@ class LaporanController extends Controller
         $row = 4;
         $headers = [
             'No','Tanggal','Nama Pegawai','Umur','Bagian',
-            'Nama Pasien','Hub. Kel','TD','GDP','GD 2 Jam',
+            'Nama Pasien','Hub. Kel','Sistol', 'Diastol', 'GDP','GD 2 Jam',
             'GDS','AU','Chol','TG','Suhu','BB','TB',
             'Diagnosa','NB','Therapy','Jml Obat','Harga Obat', 'Subtotal Obat',
             'Total Obat','Pemeriksa','Periksa Ke'
@@ -601,6 +601,7 @@ class LaporanController extends Controller
                     $i === 0 ? $first->nama_pasien : '',
                     $i === 0 ? $first->hub_kel : '',
                     $i === 0 ? $first->sistol : '',
+                    $i === 0 ? $first->diastol : '',
                     $i === 0 ? $first->gd_puasa : '',
                     $i === 0 ? $first->gd_duajam : '',
                     $i === 0 ? $first->gd_sewaktu : '',
@@ -900,7 +901,7 @@ class LaporanController extends Controller
         $row = 4;
         $headers = [
             'No', 'Tanggal', 'Nama Pegawai', 'Bagian',
-            'Nama Pasien', 'Umur', 'Hub. Kel', 'TD', 'GDP', 'GD 2 Jam',
+            'Nama Pasien', 'Umur', 'Hub. Kel', 'Sistol', 'Diastol', 'GDP', 'GD 2 Jam',
             'GDS', 'AU', 'Chol', 'TG', 'Suhu', 'BB', 'TB',
             'Diagnosa', 'NB', 'Therapy', 'Jml Obat', 'Harga Obat', 'Subtotal Obat',
             'Total Obat', 'Pemeriksa', 'Periksa Ke'
@@ -937,6 +938,7 @@ class LaporanController extends Controller
                     $i === 0 ? $first->nama_pasien : '',
                     $i === 0 ? $first->hub_kel : '',
                     $i === 0 ? $first->sistol : '',
+                    $i === 0 ? $first->diastol : '',
                     $i === 0 ? $first->gd_puasa : '',
                     $i === 0 ? $first->gd_duajam : '',
                     $i === 0 ? $first->gd_sewaktu : '',
