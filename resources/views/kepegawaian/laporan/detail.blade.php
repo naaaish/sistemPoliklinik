@@ -5,9 +5,15 @@
 
 <div class="laporan-page">
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-        <h2 class="page-title">{{ $judul }}</h2>
-
+    <div class="page-header">
+        <div class="d-flex align-items-center">
+            <a href="{{ route('kepegawaian.laporan') }}" class="btn-back-icon me-3">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <h4 class="mb-0">{{ $judul }}</h4>
+        </div>
         @if($jenis === 'pegawai')
             <a href="{{ route('laporan.excel.pegawai-pensiun', ['jenis'=>$jenis] + request()->query()) }}"
             class="btn-download">
