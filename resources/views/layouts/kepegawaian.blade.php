@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/dokter-pemeriksa.css') }}?v={{ filemtime(public_path('css/kepegawaian/dokter-pemeriksa.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/modal.css') }}?v={{ filemtime(public_path('css/kepegawaian/modal.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/kepegawaian/pagination.css') }}?v={{ filemtime(public_path('css/kepegawaian/pagination.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/kepegawaian/kelolauser.css') }}?v={{ filemtime(public_path('css/kepegawaian/kelolauser.css')) }}">
 
 
     {{-- Sweet Alert --}}
@@ -126,6 +127,12 @@
                 <img src="{{ asset('assets/adminPoli/doctor.png') }}" alt="dokter">
                 <span>Dokter & Pemeriksa</span>
             </a>
+
+            <a href="{{ route('kepegawaian.kelolaUser.index') }}"
+               class="{{ request()->is('kepegawaian/kelolaUser*') ? 'active' : '' }}">
+                <img src="{{ asset('assets/adminPoli/akun.png') }}" alt="user">
+                <span>Kelola User</span>
+            </a>    
         </div>
 
         <form action="{{ route('logout') }}" method="POST" class="logout-form">

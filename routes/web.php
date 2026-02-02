@@ -25,6 +25,7 @@ use App\Http\Controllers\Kepegawaian\DokterPemeriksaController;
 use App\Http\Controllers\Kepegawaian\DetailRiwayatController;
 use App\Http\Controllers\Pasien\ArtikelController;
 use App\Http\Controllers\Kepegawaian\KeluargaController;
+use App\Http\Controllers\Kepegawaian\KelolaUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -276,22 +277,31 @@ Route::middleware(['auth', 'ensureKepegawaian'])
         [LaporanController::class, 'exportExcel']
     )->name('laporan.excel');
 
+
+
+
 });
 
+
+Route::prefix('kepegawaian')->middleware(['auth'])->group(function () {
+    Route::get('/kelola-user', [KelolaUserController::class, 'index'])
+        ->name('kepegawaian.kelolaUser.index');
+
+    Route::get('/kelola-user/{id}', [KelolaUserController::class, 'show']);
+    Route::put('/kelola-user/{id}', [KelolaUserController::class, 'update']);
+
+    Route::post('/kelola-user/import', [KelolaUserController::class, 'import'])
+        ->name('kepegawaian.kelolaUser.import');
+
+    Route::post('/kelola-user/{id}/reset-password', [KelolaUserController::class, 'resetPassword'])
+        ->name('kelolaUser.resetPassword');
+});
 
 // Route::get('/pasien/riwayat', [RiwayatController::class, 'index'])
 //     ->name('pasien.riwayat');
 
 
 Route::middleware(['auth'])->group(function () {
-
-    Route::get('/pasien/artikel', 
-        [ArtikelController::class, 'index']
-    )->name('pasien.artikel');
-
-    Route::get('/pasien/artikel/{id}', 
-        [ArtikelController::class, 'show']
-    )->name('pasien.artikel.detail');
 
     Route::get('/pasien/pemeriksaan/{id}', 
         [DetailPemeriksaanController::class, 'show']
@@ -302,6 +312,11 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+Route::get('/pasien/artikel', [ArtikelController::class, 'indexPublic'])
+    ->name('pasien.artikel');
+
+Route::get('/pasien/artikel/{id}', [ArtikelController::class, 'show'])
+    ->name('pasien.artikel.detail');
 
 
 // LAPORAN
