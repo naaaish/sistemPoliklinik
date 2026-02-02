@@ -273,9 +273,7 @@ class PemeriksaanInputController extends Controller
                     $pendaftaran->save();
 
                 } else {
-
                     // ====== NON-POLIKLINIK ======
-                    // Kalau awalnya cek_kesehatan lalu ada obat -> jadi periksa
                     if ($pendaftaran->jenis_pemeriksaan === 'cek_kesehatan') {
                         $pendaftaran->jenis_pemeriksaan = 'periksa';
                     }
