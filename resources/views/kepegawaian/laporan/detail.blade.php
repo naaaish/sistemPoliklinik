@@ -51,7 +51,7 @@
     <div class="dokter-summary">
         <h4>Dokter Poliklinik (Bayar per Pasien)</h4>
 
-        <div class="table-wrapper">
+        <div class="laporan-card table">
             <table class="laporan-table">
 
                 <thead>
@@ -135,7 +135,7 @@
     <div class="dokter-summary">
         <h4>Dokter Perusahaan (Gaji Tetap)</h4>
 
-        <div class="table-wrapper">
+        <div class="laporan-card table-wrapper">
             <table class="laporan-table">
 
                 <thead>
@@ -152,9 +152,9 @@
                         <tr class="expandable-row">
                             <td>
                                 {{ $dokter->nama_dokter }}
-                                <button class="btn-expand" onclick="toggleDetail({{ $dokter->id_dokter }}_p)">
+                                {{-- <button class="btn-expand" onclick="toggleDetail({{ $dokter->id_dokter }}_p)">
                                     <i class="bi bi-chevron-down" id="icon-{{ $dokter->id_dokter }}_p"></i>
-                                </button>
+                                </button> --}}
                             </td>
                             <td class="text-center">{{ $dokter->total_pasien }}</td>
                             <td>
@@ -211,7 +211,7 @@
     {{-- ===================== TOTAL OPERASIONAL ===================== --}}
     @elseif($jenis === 'total')
 
-        <div class="table-wrapper">
+        <div class="laporan-card table-wrapper">
             <table class="laporan-table">
 
             <thead>
@@ -289,7 +289,7 @@
     {{-- ===================== OBAT ===================== --}}
     @elseif($jenis === 'obat')
 
-        <div class="table-wrapper">
+        <div class="laporan-card table-wrapper">
             <table class="laporan-table">
 
                 <thead>
@@ -328,7 +328,7 @@
     {{-- ===================== PEGAWAI & PENSIUN ===================== --}}
         @else
             {{-- Tabel Biasa untuk Jenis Laporan Lain --}}
-            <div class="table-wrapper">
+            <div class="laporan-card table-wrapper">
                 <table class="laporan-table">
                     <thead>
                         <tr>
