@@ -396,6 +396,7 @@ class LaporanController extends Controller
             DB::raw('TIMESTAMPDIFF(YEAR, COALESCE(keluarga.tgl_lahir, pegawai.tgl_lahir), CURDATE()) as umur'),
 
             'pemeriksaan.sistol',
+            'pemeriksaan.diastol',
             'pemeriksaan.gd_puasa',
             'pemeriksaan.gd_duajam',
             'pemeriksaan.gd_sewaktu',

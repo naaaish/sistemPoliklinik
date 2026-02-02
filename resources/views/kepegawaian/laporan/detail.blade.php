@@ -393,7 +393,7 @@
                                         <td rowspan="{{ $rowspan }}">{{ $item->bagian }}</td>
                                         <td rowspan="{{ $rowspan }}">{{ $item->nama_pasien }}</td>
                                         <td rowspan="{{ $rowspan }}">{{ ucfirst($item->hub_kel) }}</td>
-                                        <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->sistol }}</td>
+                                        <td rowspan="{{ $rowspan }}" class="text-center">{{  $item->is_first ? ($item->sistol . '/' . ($item->diastol ?? '-')) : '' }}</td>
                                         <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->gd_puasa }}</td>
                                         <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->gd_duajam }}</td>
                                         <td rowspan="{{ $rowspan }}" class="text-center">{{ $item->gd_sewaktu }}</td>
