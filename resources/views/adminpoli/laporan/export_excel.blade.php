@@ -37,6 +37,7 @@
         <th>TERAPHY</th>
         <th>JUMLAH OBAT</th>
         <th>HARGA OBAT (SATUAN)</th>
+        <th>SUBTOTAL HARGA OBAT</th>
         <th>TOTAL HARGA OBAT</th>
         <th>SARAN</th>
         <th>PEMERIKSA</th>
