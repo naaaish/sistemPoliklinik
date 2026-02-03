@@ -219,7 +219,9 @@ body{ margin:0; }
   transition: transform .15s ease, box-shadow .15s ease, filter .15s ease, background .15s ease;
 }
 
-.saran-file input{ display:none; }
+.saran-file input{ 
+  display:none; 
+}
 
 .saran-file:hover{
   transform: translateY(-1px);
@@ -337,7 +339,6 @@ body{ margin:0; }
   border-bottom: 1px solid #E6EEF8;
   padding: 6px 0;
 }
-
 
 .saran-cell{
   min-height: 34px;
