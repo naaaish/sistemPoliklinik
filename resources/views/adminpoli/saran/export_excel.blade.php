@@ -14,7 +14,6 @@
             <tr>
                 <th>ID Saran</th>
                 <th>Saran</th>
-                <th>Created At</th>
             </tr>
         </thead>
         <tbody>
@@ -22,7 +21,6 @@
                 <tr>
                     <td>{{ $row->id_saran }}</td>
                     <td>{{ $row->saran }}</td>
-                    <td>{{ $row->created_at }}</td>
                 </tr>
             @empty
                 <tr>
