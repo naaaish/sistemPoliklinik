@@ -121,7 +121,7 @@
 
                 <div style="display:grid;grid-template-columns:140px 1fr;gap:10px;margin-top:10px;align-items:center;">
                   <div style="color:#6b7280;">Kode Diagnosa K3</div>
-                  <input type="text" name="id_nb[]" class="ap-input id-nb-input" placeholder="Masukkan ID NB..." required/>
+                  <input type="text" name="id_nb[]" class="ap-input id-nb-input" placeholder="Masukkan ID NB..." />
                 </div>
 
                 <input type="hidden" name="penyakit_id[]" class="penyakit-id-hidden" value="">
@@ -140,7 +140,7 @@
 
             <div style="display:grid;grid-template-columns:140px 1fr;gap:10px;margin-top:10px;align-items:center;">
               <div style="color:#6b7280;">Kode Diagnosa K3</div>
-              <input type="text" name="id_nb[]" class="ap-input id-nb-input" placeholder="Masukkan ID NB..." required/>
+              <input type="text" name="id_nb[]" class="ap-input id-nb-input" placeholder="Masukkan ID NB..." />
             </div>
 
             <input type="hidden" name="penyakit_id[]" class="penyakit-id-hidden" value="">
