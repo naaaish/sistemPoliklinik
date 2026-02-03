@@ -351,7 +351,9 @@ Route::prefix('pegawai')->group(function () {
     Route::post('/store', [PegawaiController::class, 'store'])->name('pegawai.store');
     Route::get('/{nip}', [PegawaiController::class, 'show'])->name('pegawai.show');
     Route::get('/{nip}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
-    Route::post('/{nip}/update', [PegawaiController::class, 'update'])->name('pegawai.update');
+    Route::put('/pegawai/{nip}/update', [PegawaiController::class, 'update'])
+    ->name('pegawai.update');
+
 
     // ROUTE BARU UNTUK IMPORT MULTI (PEGAWAI & KELUARGA)
     Route::post('/import-multi', [PegawaiController::class, 'importMulti'])->name('pegawai.import.multi');

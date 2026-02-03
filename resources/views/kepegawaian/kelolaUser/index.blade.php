@@ -294,7 +294,7 @@ function updatePassword(event) {
         timer: 3000,
         timerProgressBar: true,
         didOpen: (toast) => {
-            toast.style.zIndex = '1000000'; // Agar muncul di depan modal
+            toast.style.zIndex = '1000000';
         }
     });
 
@@ -308,13 +308,11 @@ function updatePassword(event) {
         return;
     }
 
-    // Ubah teks tombol jadi Loading
     const btnSubmit = document.querySelector('.user-modal-footer .btn-primary');
     const originalText = btnSubmit.innerHTML;
     btnSubmit.disabled = true;
     btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
 
-    // URL HARUS menyertakan prefix /kepegawaian/ sesuai web.php
     fetch(`/kepegawaian/kelola-user/${userId}/reset-password`, { 
         method: 'POST',
         headers: {
@@ -329,24 +327,36 @@ function updatePassword(event) {
     })
     .then(async response => {
         const data = await response.json();
-        if (response.ok && data.status) {
-            Toast.fire({ icon: 'success', title: data.message || 'Password berhasil diperbarui' });
-            closeUserModal(); // Pastikan fungsi ini ada untuk tutup modal
-            setTimeout(() => location.reload(), 1500); // Reload agar data bersih
-        } else {
+
+        if (!response.ok) {
             throw new Error(data.message || 'Terjadi kesalahan pada server');
         }
+
+        // ✅ SUCCESS
+        Toast.fire({
+            icon: 'success',
+            title: data.message || 'Password berhasil diperbarui'
+        });
+
+        // Tutup modal TANPA reload
+        closeUserModal();
+
+        // Optional: bersihin input
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+
     })
     .catch(error => {
         console.error('Error:', error);
         Toast.fire({ icon: 'error', title: error.message });
     })
     .finally(() => {
-        // Kembalikan tombol ke status awal
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = originalText;
     });
 }
+
+
 // ========== UTIL ==========
 function ucfirst(str) {
     if (!str) return '';
