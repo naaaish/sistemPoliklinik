@@ -104,6 +104,18 @@
             </div>
         </div>
 
+
+        <h2 class="section-title">Keluhan</h2>
+        <div class="info-box">
+            @if($keluhan && $keluhan->keluhan)
+                <div class="mb-4">
+                    <div class="info-content">
+                        {{ $keluhan->keluhan }}
+                    </div>
+                </div>
+            @endif
+        </div>
+        
         {{-- DIAGNOSA & TERAPI --}}
         <h2 class="section-title">Diagnosa & Terapi</h2>
         

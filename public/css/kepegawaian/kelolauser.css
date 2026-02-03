@@ -112,6 +112,22 @@
 
 }
 
+.btn-reset-password,
+.btn-edit {
+    min-height: 38px;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.btn-reset-password svg,
+.btn-edit svg {
+    margin-right: 2px;
+}
+
+
 .csv-modal-body {
     padding: 24px;
 }
@@ -352,4 +368,8 @@
         flex-direction: column;
         gap: 6px;
     }
+}
+
+.swal2-container {
+    z-index: 1000000 !important;
 }

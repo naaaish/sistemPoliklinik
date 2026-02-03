@@ -41,7 +41,6 @@
                     enctype="multipart/form-data"
                 >
                 @csrf
-
                 <div class="row g-3">
                     @if($mode == 'create')
                     <div class="col-md-6">

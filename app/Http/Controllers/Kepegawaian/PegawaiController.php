@@ -50,7 +50,6 @@ class PegawaiController extends Controller
         $data = $request->validate([
             'nip' => 'required|unique:pegawai,nip',
             'nama_pegawai' => 'required',
-            'nik' => 'nullable',
             'jenis_kelamin' => 'nullable',
             'tgl_lahir' => 'nullable|date',
             'no_telp' => 'nullable',
@@ -130,7 +129,6 @@ class PegawaiController extends Controller
         // Update full data dari form edit
         $data = $request->validate([
             'nama_pegawai' => 'required',
-            'nik' => 'nullable',
             'jenis_kelamin' => 'nullable',
             'tgl_lahir' => 'nullable|date',
             'no_telp' => 'nullable',
@@ -179,14 +177,13 @@ class PegawaiController extends Controller
                             ['nip' => $row[0]], 
                             [
                                 'nama_pegawai'      => $row[1] ?? '',
-                                'nik'               => $row[2] ?? '-',
-                                'jenis_kelamin'     => $row[4] ?? '-',
-                                'tgl_lahir'         => $row[5] ?? null,
-                                'no_telp'           => $row[8] ?? '-',
-                                'email'             => $row[9] ?? '-',
-                                'alamat'            => $row[10] ?? '-',
-                                'jabatan'           => $row[11] ?? '-',
-                                'bagian'            => $row[12] ?? '-',
+                                'jenis_kelamin'     => $row[2] ?? '-',
+                                'tgl_lahir'         => $row[3] ?? null,
+                                'no_telp'           => $row[4] ?? '-',
+                                'email'             => $row[5] ?? '-',
+                                'alamat'            => $row[6] ?? '-',
+                                'jabatan'           => $row[7] ?? '-',
+                                'bagian'            => $row[8] ?? '-',
                                 'is_active'         => 1,
                                 'updated_at'        => now(),
                             ]

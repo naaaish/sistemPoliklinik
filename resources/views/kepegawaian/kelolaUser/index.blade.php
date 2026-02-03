@@ -18,7 +18,7 @@
     </div>
 </div>
 
-<div class="table-box">
+<div class="table-box table-wrapper">
     {{-- Search Form --}}
     <form method="GET" action="{{ route('kepegawaian.kelolaUser.index') }}" class="pegawai-search">
         <input 
@@ -235,48 +235,41 @@
 
 @endsection
 
+
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
-// ========== MODAL UPLOAD CSV ==========
-function openCsvModal() {
-    document.getElementById('csvModal').classList.add('show');
-}
-
-function closeCsvModal() {
-    document.getElementById('csvModal').classList.remove('show');
-}
-
-document.getElementById('csvModal').addEventListener('click', function(e) {
-    if (e.target === this) closeCsvModal();
-});
-
 // ========== MODAL RESET PASSWORD ==========
 function openUserModal(userId) {
     document.getElementById('displayUsername').textContent = 'Loading...';
     document.getElementById('displayNamaUser').textContent = 'Loading...';
     document.getElementById('displayRole').textContent = 'Loading...';
     document.getElementById('displayNip').textContent = 'Loading...';
-    
+
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmPassword').value = '';
     document.getElementById('userId').value = userId;
-    
+
     document.getElementById('userModal').classList.add('show');
-    
+
     fetch(`/kepegawaian/kelola-user/${userId}`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('displayUsername').textContent = data.username || '-';
-            document.getElementById('displayNamaUser').textContent = data.nama_user || '-';
-            document.getElementById('displayRole').textContent = data.role ? ucfirst(data.role) : '-';
-            document.getElementById('displayNip').textContent = data.nip || '-';
+        .then(res => {
+            if (!res.ok) throw new Error('Gagal load data');
+            return res.json();
         })
-        .catch(error => {
-            console.error('Error:', error);
+        .then(data => {
+            document.getElementById('displayUsername').textContent = data.username ?? '-';
+            document.getElementById('displayNamaUser').textContent = data.nama_user ?? '-';
+            document.getElementById('displayRole').textContent = data.role ? ucfirst(data.role) : '-';
+            document.getElementById('displayNip').textContent = data.nip ?? '-';
+        })
+        .catch(err => {
+            console.error(err);
             Swal.fire({
                 icon: 'error',
-                title: 'Gagal!',
-                text: 'Tidak dapat memuat data user',
+                title: 'Gagal',
+                text: 'Tidak dapat memuat data user'
             });
             closeUserModal();
         });
@@ -286,6 +279,7 @@ function closeUserModal() {
     document.getElementById('userModal').classList.remove('show');
 }
 
+// ========== UPDATE PASSWORD ==========
 function updatePassword(event) {
     event.preventDefault();
     
@@ -293,109 +287,86 @@ function updatePassword(event) {
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     
-    if (newPassword !== confirmPassword) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Password Tidak Cocok',
-            text: 'Password dan konfirmasi password harus sama!',
-        });
-        return false;
-    }
-    
-    if (newPassword.length < 6) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Password Terlalu Pendek',
-            text: 'Password minimal 6 karakter!',
-        });
-        return false;
-    }
-    
-    Swal.fire({
-        title: 'Memproses...',
-        text: 'Sedang mereset password',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.style.zIndex = '1000000';
         }
     });
-    
-    fetch(`/kepegawaian/kelola-user/${userId}/reset-password`, {
+
+    if (!newPassword || !confirmPassword) {
+        Toast.fire({ icon: 'warning', title: 'Password tidak boleh kosong!' });
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        Toast.fire({ icon: 'error', title: 'Konfirmasi password tidak cocok!' });
+        return;
+    }
+
+    const btnSubmit = document.querySelector('.user-modal-footer .btn-primary');
+    const originalText = btnSubmit.innerHTML;
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+    fetch(`/kepegawaian/kelola-user/${userId}/reset-password`, { 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
         },
         body: JSON.stringify({
             password: newPassword,
             password_confirmation: confirmPassword
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: data.message || 'Password berhasil direset',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            closeUserModal();
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: data.message || 'Gagal mereset password',
-            });
+    .then(async response => {
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Terjadi kesalahan pada server');
         }
+
+        // ✅ SUCCESS
+        Toast.fire({
+            icon: 'success',
+            title: data.message || 'Password berhasil diperbarui'
+        });
+
+        // Tutup modal TANPA reload
+        closeUserModal();
+
+        // Optional: bersihin input
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+
     })
     .catch(error => {
         console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error!',
-            text: 'Terjadi kesalahan saat mereset password',
-        });
+        Toast.fire({ icon: 'error', title: error.message });
+    })
+    .finally(() => {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = originalText;
     });
-    
-    return false;
 }
 
-function ucfirst(string) {
-    if (!string) return '';
-    return string.charAt(0).toUpperCase() + string.slice(1);
+
+// ========== UTIL ==========
+function ucfirst(str) {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-document.getElementById('userModal').addEventListener('click', function(e) {
+// klik luar modal → close
+document.getElementById('userModal').addEventListener('click', function (e) {
     if (e.target === this) closeUserModal();
 });
-
-// ========== TOAST NOTIFICATIONS ==========
-@if(session('success'))
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: '{{ session("success") }}',
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-    });
-@endif
-
-@if(session('error'))
-    Swal.fire({
-        icon: 'error',
-        title: 'Gagal!',
-        text: '{{ session("error") }}',
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-    });
-@endif
 </script>
+
 @endpush

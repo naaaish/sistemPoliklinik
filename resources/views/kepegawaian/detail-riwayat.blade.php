@@ -127,6 +127,18 @@
             </div>
         </div>
 
+
+        <h2 class="section-title">Keluhan</h2>
+        <div class="info-box">
+            @if($keluhan && $keluhan->keluhan)
+                <div class="mb-4">
+                    <div class="info-content">
+                        {{ $keluhan->keluhan ?? '-' }}
+                    </div>
+                </div>
+            @endif
+        </div>
+
         <h2 class="section-title">Diagnosa & Terapi</h2>
         <div class="info-box">
             <div class="info-header"><h3>Diagnosa Dokter</h3></div>
