@@ -240,6 +240,20 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+
+// ========== MODAL UPLOAD CSV ==========
+function openCsvModal() {
+    document.getElementById('csvModal').classList.add('show');
+}
+
+function closeCsvModal() {
+    document.getElementById('csvModal').classList.remove('show');
+}
+
+document.getElementById('csvModal').addEventListener('click', function(e) {
+    if (e.target === this) closeCsvModal();
+});
+
 // ========== MODAL RESET PASSWORD ==========
 function openUserModal(userId) {
     document.getElementById('displayUsername').textContent = 'Loading...';

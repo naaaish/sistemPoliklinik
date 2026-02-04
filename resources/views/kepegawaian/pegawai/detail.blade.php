@@ -74,6 +74,7 @@
                 <span class="status-label">Status Pegawai:</span>
                 <form action="{{ route('pegawai.update', $pegawai->nip) }}" method="POST" class="status-form-inline">
                     @csrf
+                    @method('PUT')
                     <select name="is_active" onchange="this.form.submit()" class="status-dropdown-new {{ $pegawai->is_active ? 'status-active' : 'status-inactive' }}">
                         <option value="1" {{ $pegawai->is_active == 1 ? 'selected' : '' }}>🟢 Aktif</option>
                         <option value="0" {{ $pegawai->is_active == 0 ? 'selected' : '' }}>🔴 Non Aktif</option>

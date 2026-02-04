@@ -51,100 +51,104 @@ class KelolaUserController extends Controller
         return response()->json($user);
     }
 
-    /**
-     * RESET PASSWORD USER
-     * Method baru khusus untuk reset password saja
-     */
-    public function resetPassword(Request $request, $id)
+    private function detectDelimiter($filePath)
     {
-        // Validasi input
-        $validator = Validator::make($request->all(), [
-            'password' => 'required|min:6|confirmed',
-            'password_confirmation' => 'required|min:6',
-        ], [
-            'password.required' => 'Password wajib diisi',
-            'password.min' => 'Password minimal 6 karakter',
-            'password.confirmed' => 'Konfirmasi password tidak cocok',
-            'password_confirmation.required' => 'Konfirmasi password wajib diisi',
-        ]);
+        $delimiters = [',', ';'];
+        $firstLine = '';
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => $validator->errors()->first()
-            ], 422);
+        $handle = fopen($filePath, 'r');
+        if ($handle) {
+            $firstLine = fgets($handle);
+            fclose($handle);
         }
 
-        // Cek user exist
-        $user = DB::table('users')->where('id', $id)->first();
+        $bestDelimiter = ',';
+        $maxCount = 0;
 
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'User tidak ditemukan'
-            ], 404);
+        foreach ($delimiters as $delimiter) {
+            $count = substr_count($firstLine, $delimiter);
+            if ($count > $maxCount) {
+                $maxCount = $count;
+                $bestDelimiter = $delimiter;
+            }
         }
 
-        // Update password
-        try {
-            DB::table('users')
-                ->where('id', $id)
-                ->update([
-                    'password' => Hash::make($request->password),
-                    'updated_at' => now(),
-                ]);
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Password berhasil direset untuk user: ' . $user->username
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Gagal mereset password: ' . $e->getMessage()
-            ], 500);
-        }
+        return $bestDelimiter;
     }
 
     /**
-     * IMPORT CSV
+     * RESET PASSWORD USER
+     * Method baru khusus untuk reset password saja
      */
     public function import(Request $request)
     {
         $request->validate([
             'file' => 'required|mimes:csv,txt'
         ]);
+        
 
-        $file = fopen($request->file('file'), 'r');
-        fgetcsv($file); // skip header
+        $filePath  = $request->file('file')->getRealPath();
+        $delimiter = $this->detectDelimiter($filePath);
+
+        $file = fopen($filePath, 'r');
+        fgetcsv($file, 1000, $delimiter); // skip header
 
         $success = 0;
-        $errors = [];
+        $updated = 0;
 
-        while (($row = fgetcsv($file, 1000, ',')) !== false) {
-            try {
+        while (($row = fgetcsv($file, 1000, $delimiter)) !== false) {
+
+            // pastikan kolom cukup
+            if (count($row) < 5) continue;
+
+            // rapihin data
+            $username  = trim($row[0]);
+            $username  = preg_replace('/^\xEF\xBB\xBF/', '', $username); // bersihin BOM
+            $password  = trim($row[1]);
+            $role      = trim($row[2]);
+            $nama_user = trim($row[3]);
+            $nip       = trim($row[4]);
+
+            if ($username === '' || $nip === '') continue;
+
+            // 🔑 CEK USER BERDASARKAN NIP ATAU USERNAME
+            $existingUser = DB::table('users')
+                ->where('nip', $nip)
+                ->orWhere('username', $username)
+                ->first();
+
+            if ($existingUser) {
+                // ============ UPDATE ============
+                DB::table('users')
+                    ->where('id', $existingUser->id)
+                    ->update([
+                        'username'   => $username,
+                        'role'       => $role,
+                        'nama_user'  => $nama_user,
+                        'nip'        => $nip,
+                        'updated_at' => now(),
+                    ]);
+                $updated++;
+            } else {
+                // ============ INSERT ============
                 DB::table('users')->insert([
-                    'username'   => $row[0],
-                    'password'   => Hash::make($row[1]),
-                    'role'       => $row[2],
-                    'nama_user'  => $row[3],
-                    'nip'        => $row[4] ?? null,
+                    'username'   => $username,
+                    'password'   => Hash::make($password),
+                    'role'       => $role,
+                    'nama_user'  => $nama_user,
+                    'nip'        => $nip,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
                 $success++;
-            } catch (\Exception $e) {
-                $errors[] = "Gagal import user: " . $row[0];
             }
         }
 
         fclose($file);
 
-        if ($success > 0) {
-            return back()->with('success', "Berhasil import {$success} user");
-        } else {
-            return back()->with('error', 'Gagal import user. ' . implode(', ', $errors));
-        }
+        return back()->with(
+            'success',
+            "Import selesai: {$success} data baru, {$updated} data diperbarui"
+        );
     }
 }
