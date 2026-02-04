@@ -129,9 +129,9 @@
       @endforelse
     </div>
 
-    <div class="dp-foot">
-      Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
-    </div>
+  </div>
+  <div class="dp-foot">
+    Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
   </div>
 </div>
 
