@@ -55,61 +55,6 @@ class KelolaUserController extends Controller
      * RESET PASSWORD USER
      * Method baru khusus untuk reset password saja
      */
-    public function resetPassword(Request $request, $id)
-    {
-        // Validasi input
-        $validator = Validator::make($request->all(), [
-            'password' => 'required|min:6|confirmed',
-            'password_confirmation' => 'required|min:6',
-        ], [
-            'password.required' => 'Password wajib diisi',
-            'password.min' => 'Password minimal 6 karakter',
-            'password.confirmed' => 'Konfirmasi password tidak cocok',
-            'password_confirmation.required' => 'Konfirmasi password wajib diisi',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'message' => $validator->errors()->first()
-            ], 422);
-        }
-
-        // Cek user exist
-        $user = DB::table('users')->where('id', $id)->first();
-
-        if (!$user) {
-            return response()->json([
-                'status' => false,
-                'message' => 'User tidak ditemukan'
-            ], 404);
-        }
-
-        // Update password
-        try {
-            DB::table('users')
-                ->where('id', $id)
-                ->update([
-                    'password' => Hash::make($request->password),
-                    'updated_at' => now(),
-                ]);
-
-            return response()->json([
-                'status' => true,
-                'message' => 'Password berhasil direset untuk user: ' . $user->username
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Gagal mereset password: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * IMPORT CSV
-     */
     public function import(Request $request)
     {
         $request->validate([
@@ -120,31 +65,51 @@ class KelolaUserController extends Controller
         fgetcsv($file); // skip header
 
         $success = 0;
-        $errors = [];
+        $updated = 0;
 
         while (($row = fgetcsv($file, 1000, ',')) !== false) {
-            try {
+
+            if (empty($row[4])) continue; // NIP WAJIB ADA
+
+            // cek user berdasarkan NIP
+            $existingUser = DB::table('users')
+                ->where('nip', $row[4])
+                ->first();
+
+            if ($existingUser) {
+                // ================= UPDATE =================
+                DB::table('users')
+                    ->where('nip', $row[4])
+                    ->update([
+                        'username'   => $row[0],          // boleh berubah
+                        'role'       => $row[2],
+                        'nama_user'  => $row[3],
+                        'updated_at' => now(),
+                    ]);
+
+                $updated++;
+            } else {
+                // ================= INSERT =================
                 DB::table('users')->insert([
                     'username'   => $row[0],
                     'password'   => Hash::make($row[1]),
                     'role'       => $row[2],
                     'nama_user'  => $row[3],
-                    'nip'        => $row[4] ?? null,
+                    'nip'        => $row[4],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+
                 $success++;
-            } catch (\Exception $e) {
-                $errors[] = "Gagal import user: " . $row[0];
             }
         }
 
         fclose($file);
 
-        if ($success > 0) {
-            return back()->with('success', "Berhasil import {$success} user");
-        } else {
-            return back()->with('error', 'Gagal import user. ' . implode(', ', $errors));
-        }
+        return back()->with(
+            'success',
+            "Import selesai: {$success} data baru, {$updated} data diperbarui"
+        );
     }
+
 }

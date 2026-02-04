@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class PegawaiController extends Controller
 {
@@ -74,11 +76,22 @@ class PegawaiController extends Controller
         $pegawai = DB::table('pegawai')->where('nip', $nip)->firstOrFail();
         
         // Ambil data keluarga berdasarkan NIP pegawai
+        // Urutkan: pasangan dulu, lalu anak berdasarkan tanggal lahir (tua ke muda)
         $keluarga = DB::table('keluarga')
             ->where('nip', $nip)
-            ->orderBy('is_active', 'desc')   
-            ->orderBy('urutan_anak', 'asc')  
+            ->orderByRaw("CASE WHEN hubungan_keluarga = 'pasangan' THEN 0 ELSE 1 END")
+            ->orderBy('tgl_lahir', 'asc')
             ->get();
+        
+        // Tambahkan urutan anak untuk display
+        $urutanAnak = 1;
+        foreach ($keluarga as $k) {
+            if ($k->hubungan_keluarga === 'anak') {
+                $k->urutan_display = $urutanAnak++;
+            } else {
+                $k->urutan_display = null;
+            }
+        }
         
         return view('kepegawaian.pegawai.detail', compact('pegawai', 'keluarga'));
     }
@@ -153,75 +166,163 @@ class PegawaiController extends Controller
 
     public function importMulti(Request $request)
     {
+        // 1. Tambahkan mimes xlsx dan xls agar Laravel tidak menolak file Excel
         $request->validate([
-            'file' => 'required|mimes:csv,txt',
+            'file' => 'required|mimes:csv,txt,xlsx,xls',
             'type' => 'required|in:pegawai,keluarga'
         ]);
 
-        $file = fopen($request->file('file')->getRealPath(), 'r');
-            fgetcsv($file);
-
-        $rowCount = 0;
+        $file = $request->file('file');
         $type = $request->input('type');
-        while (($row = fgetcsv($file, 2000, ",")) !== false) {
-            if (empty($row[0])) continue;
 
         try {
-                DB::beginTransaction();
-                while (($row = fgetcsv($file, 2000, ",")) !== FALSE) {
-                    if (empty($row[0])) continue;
+            DB::beginTransaction();
 
-                    if ($type == 'pegawai') {
-                        // LOGIK IMPORT PEGAWAI
-                        DB::table('pegawai')->updateOrInsert(
-                            ['nip' => $row[0]], 
-                            [
-                                'nama_pegawai'      => $row[1] ?? '',
-                                'jenis_kelamin'     => $row[2] ?? '-',
-                                'tgl_lahir'         => $row[3] ?? null,
-                                'no_telp'           => $row[4] ?? '-',
-                                'email'             => $row[5] ?? '-',
-                                'alamat'            => $row[6] ?? '-',
-                                'jabatan'           => $row[7] ?? '-',
-                                'bagian'            => $row[8] ?? '-',
-                                'is_active'         => 1,
-                                'updated_at'        => now(),
-                            ]
-                        );
-                    } else {
-                        // LOGIK IMPORT KELUARGA
-                        // Kolom CSV Keluarga: 0:NIP, 1:Hubungan, 2:Nama, 3:Tgl Lahir, 4:JK, 5:Anak Ke
-                        $hubungan = strtolower($row[1]);
-                        $urutan = ($hubungan == 'anak') ? ($row[5] ?? null) : null;
-                        
-                        // Generate ID Keluarga otomatis
-                        $id_keluarga = $row[0] . '-' . strtoupper(substr($hubungan, 0, 1)) . ($urutan ?? rand(10, 99));
+            // 2. Gunakan IOFactory untuk membaca file (Otomatis deteksi Excel/CSV)
+            $spreadsheet = IOFactory::load($file->getRealPath());
+            $sheet = $spreadsheet->getActiveSheet();
+            $rows = $sheet->toArray(); // Mengubah baris Excel jadi array PHP
 
-                        DB::table('keluarga')->updateOrInsert(
-                            [
-                                'nip' => $row[0], 
-                                'hubungan_keluarga' => $hubungan,
-                                'urutan_anak' => $urutan
-                            ],
-                            [
-                                'id_keluarga'   => $id_keluarga,
-                                'nama_keluarga' => $row[2],
-                                'tgl_lahir'     => $row[3],
-                                'jenis_kelamin' => $row[4],
-                                'updated_at'    => now()
-                            ]
-                        );
+            $rowCount = 0;
+            foreach ($rows as $index => $row) {
+                // Lewati baris pertama (Header)
+                if ($index === 0) continue;
+                
+                // Lewati jika kolom pertama (NIP) kosong
+                if (empty($row[0])) continue;
+
+                if ($type === 'pegawai') {
+                    // Mapping: 0:NIP, 1:Nama, 2:NIK, 3:JK, 4:TglLahir, 5:Telp, 6:Email, 7:Alamat, 8:Jabatan, 9:Bagian
+                    DB::table('pegawai')->updateOrInsert(
+                        // B = NIP (index 1)
+                        ['nip' => $row[1]],
+
+                        [
+                            // C = Nama
+                            'nama_pegawai'  => $row[2],
+
+                            // D = Gender
+                            'jenis_kelamin' => $row[3] ?? null,
+
+                            // E = Tanggal Lahir
+                            'tgl_lahir'     => $this->transformDate($row[4]),
+
+                            // F = Telp
+                            'no_telp'       => $row[5] ?? null,
+
+                            // tidak harus ada email
+                            'email'         => null,
+
+                            // G = Alamat
+                            'alamat'        => $row[6] ?? null,
+
+                            // H = Jabatan
+                            'jabatan'       => $row[7] ?? null,
+
+                            // I = Bagian
+                            'bagian'        => $row[8] ?? null,
+
+                            'is_active'     => 1,
+                            'updated_at'    => now()
+                        ]
+                    );
+                } else {
+                    // ===== KELUARGA =====
+
+                    // ambil & rapihin NIP
+                    $nip = trim($row[1] ?? '');
+                    if ($nip === '') continue;
+
+                    // FOREIGN KEY GUARD
+                    if (!DB::table('pegawai')->where('nip', $nip)->exists()) {
+                        continue;
                     }
-                    $rowCount++;
-                }
-                DB::commit();
-                fclose($file);
 
-                return redirect()->back()->with('success', "Berhasil mengimport $rowCount data $type.");
-            } catch (\Exception $e) {
-                DB::rollBack();
-                return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
+                    // ===== HUBUNGAN =====
+                    $hubunganExcel = strtoupper(trim($row[3] ?? ''));
+
+                    if (str_contains($hubunganExcel, 'ISTRI') || str_contains($hubunganExcel, 'SUAMI')) {
+                        $hubunganFix = 'pasangan';
+                        $kodeHubungan = 'P';
+                    } elseif (str_contains($hubunganExcel, 'ANAK')) {
+                        $hubunganFix = 'anak';
+                        $kodeHubungan = 'A';
+                    } else {
+                        // DEFAULT AMAN
+                        $hubunganFix = 'anak';
+                        $kodeHubungan = 'A';
+                    }
+
+                    // ===== TANGGAL LAHIR =====
+                    $tglLahir = $this->transformDate($row[4]);
+                    if ($tglLahir === null) {
+                        // tanggal lahir wajib → skip kalau invalid
+                        continue;
+                    }
+
+                    // ===== JENIS KELAMIN =====
+                    $jkMap = [
+                        'L' => 'L',
+                        'LAKI-LAKI' => 'L',
+                        'LAKI LAKI' => 'L',
+                        'PRIA' => 'L',
+
+                        'P' => 'P',
+                        'PEREMPUAN' => 'P',
+                        'WANITA' => 'P',
+                    ];
+
+                    $jkExcel = strtoupper(trim($row[5] ?? ''));
+                    if (!isset($jkMap[$jkExcel])) {
+                        $jkExcel = 'L'; // default aman
+                    }
+
+                    // ===== ID KELUARGA =====
+                    $id_keluarga = $nip . '-' . $kodeHubungan . '-' . rand(1000, 9999);
+
+                    // ===== INSERT =====
+                    DB::table('keluarga')->insert([
+                        'id_keluarga'        => $id_keluarga,
+                        'nip'                => $nip,
+                        'hubungan_keluarga'  => $hubunganFix,
+                        'nama_keluarga'      => $row[2],
+                        'jenis_kelamin'      => $jkMap[$jkExcel],
+                        'tgl_lahir'          => $tglLahir,
+                        'is_active'          => 0,
+                        'created_at'         => now(),
+                        'updated_at'         => now(),
+                    ]);
+                }
+
+                $rowCount++;
             }
+
+            DB::commit();
+            return redirect()->back()->with('success', "Berhasil mengimport $rowCount data $type.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Helper untuk konversi tanggal Excel (angka serial) ke format Y-m-d
+     */
+    private function transformDate($value)
+    {
+        if (empty($value)) return null;
+
+        try {
+            // Jika Excel mengirim format angka (misal: 44561)
+            if (is_numeric($value)) {
+                return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format('Y-m-d');
+            }
+            
+            // Jika formatnya sudah string tanggal (misal: 1990-01-01 atau 01-01-1990)
+            return date('Y-m-d', strtotime($value));
+        } catch (\Exception $e) {
+            return null;
         }
     }
 }

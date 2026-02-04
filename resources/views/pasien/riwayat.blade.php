@@ -29,8 +29,8 @@
                                     <option value="{{ $k->id_keluarga }}" {{ $k->id_keluarga == $keluargaAktifId ? 'selected' : '' }}>
                                         @if($k->hubungan_keluarga === 'pegawai')
                                             Pegawai (YBS)
-                                        @elseif($k->hubungan_keluarga === 'anak')
-                                            Anak ke-{{ $k->urutan_anak }}
+                                        {{-- @elseif($k->hubungan_keluarga === 'anak')
+                                            Anak ke-{{ $k->urutan_anak }} --}}
                                         @else
                                             {{ ucfirst($k->hubungan_keluarga) }}
                                         @endif

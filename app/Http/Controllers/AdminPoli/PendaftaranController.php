@@ -80,7 +80,7 @@ class PendaftaranController extends Controller
         $keluarga = DB::table('keluarga')
             ->where('nip', $nip)
             ->orderByRaw("CASE WHEN hubungan_keluarga = 'pasangan' THEN 0 ELSE 1 END")
-            ->orderBy('urutan_anak')
+            // ->orderBy('urutan_anak')
             ->get();
 
         // hitung umur + covered anak max 3 (umur <= 23)
@@ -198,7 +198,7 @@ class PendaftaranController extends Controller
                 $anak = DB::table('keluarga')
                     ->where('nip', $pegawai->nip)
                     ->where('hubungan_keluarga', 'anak')
-                    ->orderBy('urutan_anak')
+                    // ->orderBy('urutan_anak')
                     ->get();
 
                 $coveredIds = [];
@@ -247,7 +247,7 @@ class PendaftaranController extends Controller
                     $anak = DB::table('keluarga')
                         ->where('nip', $pegawai->nip)
                         ->where('hubungan_keluarga', 'anak')
-                        ->orderBy('urutan_anak')
+                        // ->orderBy('urutan_anak')
                         ->get();
 
                     $coveredIds = [];

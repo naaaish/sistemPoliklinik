@@ -59,13 +59,13 @@
                         </div>
 
                         {{-- URUTAN ANAK (Hanya muncul jika hubungan = anak) --}}
-                        <div class="col-md-6" id="urutan_anak_row" style="display: none;">
+                        {{-- <div class="col-md-6" id="urutan_anak_row" style="display: none;">
                             <div class="form-row-custom">
                                 <label class="form-label-custom">Anak Ke-</label>
                                 <input type="number" name="urutan_anak" class="form-control-custom" min="1"
                                     value="{{ old('urutan_anak', $nextChildNumber ?? '') }}">
                             </div>
-                        </div>
+                        </div> --}}
 
                         {{-- JENIS KELAMIN --}}
                         <div class="col-md-6">

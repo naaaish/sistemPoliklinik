@@ -17,10 +17,8 @@ class KeluargaController extends Controller
             'hubungan_keluarga' => 'required',
             'tgl_lahir' => 'required|date',
             'jenis_kelamin' => 'required',
-            'urutan_anak' => 'nullable|integer'
         ]);
 
-        $this->reSyncActiveStatus($request->nip);
         $nip = $request->nip;
         $hubungan = $request->hubungan_keluarga;
 
@@ -36,32 +34,9 @@ class KeluargaController extends Controller
             }
         }
 
-        // 2. 🔒 VALIDASI ANAK (Mencegah Duplikat Nomor Anak)
-        if ($hubungan === 'anak') {
-            $exists = DB::table('keluarga')
-                ->where('nip', $nip)
-                ->where('hubungan_keluarga', 'anak')
-                ->where('urutan_anak', $request->urutan_anak)
-                ->exists();
-
-            if ($exists) {
-                return redirect()->back()->withInput()->with('error', "Pegawai ini sudah memiliki data Anak ke-{$request->urutan_anak}!");
-            }
-        }
-        // 3. ⚙️ LOGIKA STATUS TANGGUNGAN (Maksimal 3 Anak & Umur < 23)
-        $isActive = 1; // Default Aktif
-        if ($hubungan === 'anak') {
-            $umur = Carbon::parse($request->tgl_lahir)->age;
-            
-            // Cek jika urutan anak lebih dari 3 ATAU umur >= 23
-            if ($request->urutan_anak > 3 || $umur >= 23) {
-                $isActive = 0; // Set Non-Aktif (Tidak ditanggung)
-            }
-        }
-
         // Generate ID Keluarga
-        $suffix = substr($request->hubungan_keluarga, 0, 1) . ($request->urutan_anak ?? '');
-        $id_keluarga = $request->nip . '-' . strtoupper($suffix) . '-' . rand(10, 99);
+        $suffix = substr($request->hubungan_keluarga, 0, 1);
+        $id_keluarga = $request->nip . '-' . strtoupper($suffix) . '-' . rand(1000, 9999);
 
         DB::table('keluarga')->insert([
             'id_keluarga' => $id_keluarga,
@@ -70,7 +45,6 @@ class KeluargaController extends Controller
             'nama_keluarga' => $request->nama_keluarga,
             'tgl_lahir' => $request->tgl_lahir,
             'jenis_kelamin' => $request->jenis_kelamin,
-            'urutan_anak' => $request->urutan_anak,
             'is_active' => 0, // Default 0, nanti diaktifkan oleh reSync
             'created_at' => now(),
             'updated_at' => now(),
@@ -91,48 +65,33 @@ class KeluargaController extends Controller
             'hubungan_keluarga' => 'required',
             'tgl_lahir' => 'required|date',
             'jenis_kelamin' => 'required',
-            'urutan_anak' => 'nullable|integer'
         ]);
 
         $keluargaLama = DB::table('keluarga')->where('id_keluarga', $id)->first();
         $hubungan = $request->hubungan_keluarga;
 
-        // Validasi Duplikat Anak saat Update
-        if ($hubungan === 'anak') {
-            $isDuplicate = DB::table('keluarga')
+        // Validasi Pasangan jika diubah menjadi pasangan
+        if ($hubungan === 'pasangan' && $keluargaLama->hubungan_keluarga !== 'pasangan') {
+            $pasanganExists = DB::table('keluarga')
                 ->where('nip', $keluargaLama->nip)
-                ->where('hubungan_keluarga', 'anak')
-                ->where('urutan_anak', $request->urutan_anak)
+                ->where('hubungan_keluarga', 'pasangan')
                 ->where('id_keluarga', '!=', $id)
                 ->exists();
 
-            if ($isDuplicate) {
-                return redirect()->back()->withInput()->with('error', "Nomor Anak ke-{$request->urutan_anak} sudah terdaftar!");
+            if ($pasanganExists) {
+                return redirect()->back()->withInput()->with('error', "Pegawai ini sudah memiliki data Pasangan terdaftar!");
             }
         }
-        
-        // Re-Kalkulasi Status Tanggungan saat Update
-        $isActive = 1;
-        if ($hubungan === 'anak') {
-            $umur = Carbon::parse($request->tgl_lahir)->age;
-            if ($request->urutan_anak > 3 || $umur >= 23) {
-                $isActive = 0;
-                }
-                }
-                
-        $keluarga = DB::table('keluarga')->where('id_keluarga', $id)->first();
 
         DB::table('keluarga')->where('id_keluarga', $id)->update([
             'hubungan_keluarga' => $hubungan,
             'nama_keluarga' => $request->nama_keluarga,
             'tgl_lahir' => $request->tgl_lahir,
             'jenis_kelamin' => $request->jenis_kelamin,
-            'urutan_anak' => $hubungan === 'anak' ? $request->urutan_anak : null,
-            'is_active' => $isActive,
             'updated_at' => now(),
         ]);
 
-        $this->reSyncActiveStatus($keluarga->nip);
+        $this->reSyncActiveStatus($keluargaLama->nip);
 
         return redirect()->route('pegawai.show', $keluargaLama->nip)
             ->with('success', 'Data keluarga berhasil diperbarui!');
@@ -141,15 +100,8 @@ class KeluargaController extends Controller
     public function create($nip)
     {
         $pegawai = DB::table('pegawai')->where('nip', $nip)->firstOrFail();
-        
-        // Hitung jumlah anak yang sudah ada, lalu tambah 1 untuk saran urutan berikutnya
-        $nextChildNumber = DB::table('keluarga')
-            ->where('nip', $nip)
-            ->where('hubungan_keluarga', 'anak')
-            ->count() + 1;
-
         $mode = 'create';
-        return view('kepegawaian.pegawai.keluarga-form', compact('pegawai', 'mode', 'nextChildNumber'));
+        return view('kepegawaian.pegawai.keluarga-form', compact('pegawai', 'mode'));
     }
 
     public function edit($id)
@@ -175,7 +127,7 @@ class KeluargaController extends Controller
             ->limit(1)
             ->update(['is_active' => 1]);
 
-        // 2. Ambil Semua Anak Urut Tua -> Muda
+        // 2. Ambil Semua Anak Urut Tua -> Muda (berdasarkan tanggal lahir)
         $allAnak = DB::table('keluarga')
             ->where('nip', $nip)
             ->where('hubungan_keluarga', 'anak')
@@ -208,8 +160,7 @@ class KeluargaController extends Controller
             }
 
             DB::table('keluarga')->where('id_keluarga', $anak->id_keluarga)->update([
-                'is_active' => $statusBaru,
-                'urutan_anak' => $index + 1
+                'is_active' => $statusBaru
             ]);
         }
     }
@@ -232,9 +183,25 @@ class KeluargaController extends Controller
             }
 
             DB::table('keluarga')->where('id_keluarga', $anak->id_keluarga)->update([
-                'is_active' => $statusBaru,
-                'urutan_anak' => $index + 1
+                'is_active' => $statusBaru
             ]);
         }
     }
-}    
+
+    /**
+     * Helper function untuk mendapatkan urutan anak berdasarkan tanggal lahir
+     * Digunakan untuk display di view
+     */
+    public function getUrutanAnak($nip, $id_keluarga)
+    {
+        $allAnak = DB::table('keluarga')
+            ->where('nip', $nip)
+            ->where('hubungan_keluarga', 'anak')
+            ->orderBy('tgl_lahir', 'asc')
+            ->pluck('id_keluarga')
+            ->toArray();
+
+        $urutan = array_search($id_keluarga, $allAnak);
+        return $urutan !== false ? $urutan + 1 : null;
+    }
+}
