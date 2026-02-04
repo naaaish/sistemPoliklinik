@@ -251,16 +251,6 @@ class LaporanController extends Controller
             ->get();
 
         foreach ($visits as $v) {
-            // cari nama kolom kode yang bener-bener ada di tabel diagnosa
-            $kodeK3Col = null;
-            foreach (['kode_diagnosa_k3', 'kode_k3', 'kode_k3_diagnosa', 'id_diagnosa_k3'] as $c) {
-                if (Schema::hasColumn('diagnosa', $c)) { $kodeK3Col = $c; break; }
-            }
-            $kodeCol = null;
-            foreach (['kode_diagnosa', 'kode', 'kode_icd', 'icd10', 'kode_icd10'] as $c) {
-                if (Schema::hasColumn('diagnosa', $c)) { $kodeCol = $c; break; }
-            }
-
             $v->diagnosa_list = DB::table('detail_pemeriksaan_penyakit as dp')
                 ->join('diagnosa as d', 'd.id_diagnosa', '=', 'dp.id_diagnosa')
                 ->where('dp.id_pemeriksaan', $v->id_pemeriksaan)
@@ -275,8 +265,8 @@ class LaporanController extends Controller
             $v->saran_list = DB::table('detail_pemeriksaan_saran as ds')
                 ->join('saran as s', 's.id_saran', '=', 'ds.id_saran')
                 ->where('ds.id_pemeriksaan', $v->id_pemeriksaan)
-                ->orderBy('ds.id_saran') // optional biar urut stabil
-                ->pluck('s.saran')  // << GANTI INI
+                ->orderBy('ds.id_saran')
+                ->pluck('s.saran')
                 ->toArray();
 
             $v->obat_list = DB::table('resep as r')
@@ -300,14 +290,9 @@ class LaporanController extends Controller
         foreach ($visits as $v) {
 
             $isPegawai = ($v->tipe_pasien ?? '') === 'pegawai';
-            $isPensiunan = false; // kalau ada kolom pensiun, isi di sini
+            $isPensiunan = false;
             $allowPeriksaKe = $isPegawai && !$isPensiunan;
 
-            $s = ($v->sistol !== null && $v->sistol !== '') ? $v->sistol : '-';
-            $d = ($v->diastol !== null && $v->diastol !== '') ? $v->diastol : '-';
-            $n = ($v->nadi !== null && $v->nadi !== '') ? $v->nadi : '-';
-
-            // periksa ke: hanya pegawai + hanya jika ada tes darah
             $hasLab = $this->hasBloodTest($v);
             $periksaKe = '-';
             if ($allowPeriksaKe && $hasLab) {
@@ -320,11 +305,9 @@ class LaporanController extends Controller
                 $umur = null;
             }
             elseif (!empty($v->id_keluarga)) {
-                // pasien keluarga
                 $umur = $this->hitungUmur($v->keluarga_tgl_lahir);
             }
             else {
-                // pasien pegawai
                 $umur = $this->hitungUmur($v->pegawai_tgl_lahir);
             }
 
@@ -340,8 +323,15 @@ class LaporanController extends Controller
             }
             
             $totalHarga = 0;
+
             foreach ($obatList as $ob) {
-                $totalHarga += (int)($ob->subtotal ?? 0);
+                $sub = $ob->subtotal ?? null;
+
+                if ($sub === null || $sub === '') {
+                    $sub = (int)($ob->harga ?? 0) * (int)($ob->jumlah ?? 0);
+                }
+
+                $totalHarga += (int)$sub + 1000;
             }
             
             $maxLines = max(count($diagUmum), count($obatList), 1);
@@ -367,6 +357,8 @@ class LaporanController extends Controller
                         $subtotalObat = (int)($ob->harga ?? 0) * (int)($ob->jumlah ?? 0);
                     }
                 }
+
+                $subtotalObat = (int)$subtotalObat + 1000;
 
                 $rows[] = [
                     'NO' => $isFirst ? $no : '',

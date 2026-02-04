@@ -215,6 +215,46 @@
         </div>
       </div>
 
+      <div class="ap-row">
+        <div class="ap-label">Saran</div><div class="ap-colon">:</div>
+        <div class="ap-input">
+          <select id="inpSaran" class="ap-select">
+            <option value="">-- pilih (boleh kosong) --</option>
+            @foreach($saran as $s)
+              <option value="{{ $s->id_saran }}">
+                {{ $s->kategori_saran ?? $s->id_saran }}
+              </option>
+            @endforeach
+          </select>
+
+          <button type="button" id="btnAddSaran" class="ap-btn-small">Tambah Saran</button>
+
+          {{-- CHIP YANG SUDAH DIPILIH --}}
+          <div id="chipSaran" style="margin-top:10px;">
+            @if(isset($saranDetail) && count($saranDetail))
+              @foreach($saranDetail as $sd)
+                <span class="chip-saran"
+                      data-value="{{ $sd->id_saran }}"
+                      style="display:inline-flex;align-items:center;gap:6px;background:#eef3ff;border:1px solid #c7d7f5;color:#316BA1;padding:4px 8px;border-radius:10px;margin:3px 6px 0 0;font-size:13px;">
+                  <span>{{ $sd->kategori_saran ?? $sd->id_saran }}</span>
+                  <button type="button" class="chip-del"
+                          style="border:none;background:transparent;cursor:pointer;font-weight:700;color:#316BA1;font-size:14px;line-height:1;">×</button>
+                </span>
+              @endforeach
+            @endif
+          </div>
+
+          {{-- HIDDEN INPUT YANG SUDAH DIPILIH (INI YG KEKIRIM KE CONTROLLER) --}}
+          <div id="hiddenSaran">
+            @if(isset($saranDetail) && count($saranDetail))
+              @foreach($saranDetail as $sd)
+                <input type="hidden" name="id_saran[]" value="{{ $sd->id_saran }}">
+              @endforeach
+            @endif
+          </div>
+        </div>
+      </div>
+
       {{-- 1 BARIS SAJA: Dokter/Pemeriksa (editable conditional) --}}
       <div class="ap-row" style="margin-top:10px;">
         <div class="ap-label">Dokter / Pemeriksa</div>
@@ -358,6 +398,65 @@
     }
   }
 
+  function bindChipDelete(root=document){
+    root.querySelectorAll('.chip-saran .chip-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const chip = btn.closest('.chip-saran');
+        const value = chip?.dataset?.value;
+
+        // hapus hidden input yang valuenya sama
+        const hidden = document.querySelector(`#hiddenSaran input[name="id_saran[]"][value="${CSS.escape(value)}"]`);
+        if(hidden) hidden.remove();
+
+        // hapus chip
+        if(chip) chip.remove();
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    bindChipDelete(document);
+  });
+
+  document.getElementById('btnAddSaran')?.addEventListener('click', () => {
+    const sel = document.getElementById('inpSaran');
+    if(!sel || !sel.value) return;
+
+    const value = sel.value;
+    const label = sel.options[sel.selectedIndex]?.text || value;
+
+    // cegah dobel
+    const exists = !!document.querySelector(`#hiddenSaran input[name="id_saran[]"][value="${CSS.escape(value)}"]`);
+    if(exists){
+      sel.value = '';
+      return;
+    }
+
+    // buat chip
+    const chip = document.createElement('span');
+    chip.className = 'chip-saran';
+    chip.dataset.value = value;
+    chip.style.cssText =
+      'display:inline-flex;align-items:center;gap:6px;background:#eef3ff;border:1px solid #c7d7f5;' +
+      'color:#316BA1;padding:4px 8px;border-radius:10px;margin:3px 6px 0 0;font-size:13px;';
+    chip.innerHTML =
+      `<span>${label}</span>` +
+      `<button type="button" class="chip-del" style="border:none;background:transparent;cursor:pointer;font-weight:700;color:#316BA1;font-size:14px;line-height:1;">×</button>`;
+
+    // buat hidden input
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.name = 'id_saran[]';
+    hidden.value = value;
+
+    document.getElementById('chipSaran').appendChild(chip);
+    document.getElementById('hiddenSaran').appendChild(hidden);
+
+    bindChipDelete(chip);
+
+    sel.value = '';
+  });
+
   // =========================
   // PENYAKIT (sync create)
   // =========================
@@ -371,6 +470,7 @@
 
   // bind delete untuk penyakit existing (render server)
   document.querySelectorAll('#penyakitWrap .penyakit-item').forEach(bindDeletePenyakit);
+
 
   document.getElementById('btnAddPenyakit')?.addEventListener('click', async () => {
     const sel = document.getElementById('inpPenyakit');

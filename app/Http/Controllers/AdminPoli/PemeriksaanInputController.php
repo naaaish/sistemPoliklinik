@@ -60,7 +60,6 @@ class PemeriksaanInputController extends Controller
     public function store(Request $request, $pendaftaranId)
     {
         $validated = $request->validate([
-            // pemeriksaan (nullable semua)
             'sistol'        => 'nullable|numeric',
             'diastol'       => 'nullable|numeric',
             'nadi'          => 'nullable|numeric',
@@ -96,7 +95,8 @@ class PemeriksaanInputController extends Controller
         $obatIds  = $validated['obat_id'] ?? [];
         $jumlahs  = $validated['jumlah'] ?? [];
         $satuans  = $validated['satuan'] ?? [];
-        $idSaran  = $validated['id_saran'] ?? [];
+        $idSaran = $request->input('id_saran', []);
+        $idSaran = array_values(array_unique(array_filter($idSaran)));
 
         foreach ($obatIds as $i => $idObat) {
             if (!$idObat) continue; // skip baris kosong
@@ -125,7 +125,6 @@ class PemeriksaanInputController extends Controller
 
             $petugasAfter = (string) $request->input('petugas_after_obat', '');
 
-            // ✅ FALLBACK: kalau field ga kepost tapi pendaftaran sudah ada dokter, pakai itu
             if (($petugasAfter === '' || !str_contains($petugasAfter, ':')) && !empty($pendaftaran->id_dokter)) {
                 $petugasAfter = 'dokter:' . $pendaftaran->id_dokter;
             }
@@ -147,7 +146,7 @@ class PemeriksaanInputController extends Controller
             $dokterIdAfter = $idAfter;
         }
 
-        return DB::transaction(function () use ($validated, $pendaftaranId, $dokterIdAfter) {
+        return DB::transaction(function () use ($validated, $pendaftaranId, $dokterIdAfter, $idSaran) {
             $idPemeriksaan = $this->generateIDPemeriksaan();
 
             $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
@@ -160,7 +159,6 @@ class PemeriksaanInputController extends Controller
                 }
             }
 
-            // ========= SIMPAN PEMERIKSAAN =========
             $pemeriksaan = Pemeriksaan::create([
                 'id_pemeriksaan' => $idPemeriksaan,
                 'id_pendaftaran' => $pendaftaranId,
@@ -169,7 +167,6 @@ class PemeriksaanInputController extends Controller
                 'diastol'  => $validated['diastol'] ?? null,
                 'nadi'     => $validated['nadi'] ?? null,
 
-                // mapping sesuai migration pemeriksaan
                 'gd_puasa'   => $validated['gula_puasa'] ?? null,
                 'gd_duajam'  => $validated['gula_2jam_pp'] ?? null,
                 'gd_sewaktu' => $validated['gula_sewaktu'] ?? null,
@@ -196,23 +193,17 @@ class PemeriksaanInputController extends Controller
                 DB::table('detail_pemeriksaan_penyakit')->insert($rows);
             }
 
-            $autoSaranIds = $this->generateSaranFromVitals($validated);
-
-            // optional: filter biar cuma yang ada & aktif
-            $autoSaranIds = Saran::whereIn('id_saran', $autoSaranIds)
-                ->where('is_active', 1)
-                ->pluck('id_saran')
-                ->values()
-                ->all();
-
-            if (count($autoSaranIds) > 0) {
-                $rowsSaran = array_map(fn($id) => [
-                    'id_pemeriksaan' => $pemeriksaan->id_pemeriksaan,
-                    'id_saran'       => $id,
-                ], $autoSaranIds);
-
-                DB::table('detail_pemeriksaan_saran')->insert($rowsSaran);
+            if (!empty($idSaran)) {
+            $rows = [];
+            foreach ($idSaran as $sid) {
+                $rows[] = [
+                    'id_pemeriksaan' => $idPemeriksaan,
+                    'id_saran'       => $sid,
+                ];
             }
+
+            DB::table('detail_pemeriksaan_saran')->insert($rows);
+        }
 
             // ========= SIMPAN RESEP + DETAIL_RESEP =========
             $obatIds = $validated['obat_id'] ?? [];
@@ -275,7 +266,6 @@ class PemeriksaanInputController extends Controller
                     $pendaftaran->save();
 
                 } else {
-                    // ====== NON-POLIKLINIK ======
                     if ($pendaftaran->jenis_pemeriksaan === 'cek_kesehatan') {
                         $pendaftaran->jenis_pemeriksaan = 'periksa';
                     }
@@ -324,75 +314,5 @@ class PemeriksaanInputController extends Controller
         } 
         $next = $max + 1;
         return 'PMX-00' . $next;
-    }
-
-    private function generateSaranFromVitals(array $v): array
-    {
-        // Ambil nilai dari request/validated
-        $sistol  = $v['sistol'] ?? null;
-        $diastol = $v['diastol'] ?? null;
-
-        $gdp  = $v['gula_puasa'] ?? null;
-        $gdpp = $v['gula_2jam_pp'] ?? null;
-        $gds  = $v['gula_sewaktu'] ?? null;
-
-        $asam = $v['asam_urat'] ?? null;
-        $chol = $v['cholesterol'] ?? null;
-        $tg   = $v['trigliseride'] ?? null;
-
-        // kalau semua kosong/null/0 → TIDAK ADA SARAN
-        $fields = [$sistol, $diastol, $gdp, $gdpp, $gds, $asam, $chol, $tg];
-
-        $hasAny = false;
-        foreach ($fields as $x) {
-            // anggap 0 itu "kosong" (umumnya input lab 0 = tidak diisi)
-            if ($x !== null && $x !== '' && is_numeric($x) && (float)$x > 0) {
-                $hasAny = true;
-                break;
-            }
-        }
-        if (!$hasAny) return [];
-
-        $hasil = [];
-
-        // ===== TENSI =====
-        if ((is_numeric($sistol) && $sistol > 140) || (is_numeric($diastol) && $diastol > 90)) {
-            $hasil[] = 'SRN-TENS-01';
-        }
-        if (is_numeric($sistol) && $sistol > 0 && $sistol < 90) {
-            $hasil[] = 'SRN-TENS-02';
-        }
-
-        // ===== GULA DARAH =====
-        $gulaHigh = (is_numeric($gdp)  && $gdp  > 100)
-            || (is_numeric($gdpp) && $gdpp > 140)
-            || (is_numeric($gds)  && $gds  > 200);
-
-        $gulaLow = (is_numeric($gdp)  && $gdp  > 0 && $gdp  < 70)
-            || (is_numeric($gdpp) && $gdpp > 0 && $gdpp < 70)
-            || (is_numeric($gds)  && $gds  > 0 && $gds  < 70);
-
-        if ($gulaHigh) $hasil[] = 'SRN-GULA-01';
-        if ($gulaLow)  $hasil[] = 'SRN-GULA-02';
-
-        // ===== ASAM URAT =====
-        if (is_numeric($asam) && $asam > 7.0) {
-            $hasil[] = 'SRN-ASAM-01';
-        }
-
-        // ===== KOLESTEROL & TRIGLISERIDA =====
-        if (is_numeric($chol) && $chol >= 200) {
-            $hasil[] = 'SRN-LEMK-01';
-        }
-        if (is_numeric($tg) && $tg >= 150) {
-            $hasil[] = 'SRN-LEMK-02';
-        }
-
-        // Kalau ada data tapi semua normal → baru normal
-        if (empty($hasil)) {
-            $hasil[] = 'SRN-NORM-01';
-        }
-
-        return array_values(array_unique($hasil));
     }
 }
