@@ -74,7 +74,7 @@ class PegawaiController extends Controller
     public function show($nip)
     {
         $pegawai = DB::table('pegawai')->where('nip', $nip)->firstOrFail();
-        
+
         // Ambil data keluarga berdasarkan NIP pegawai
         // Urutkan: pasangan dulu, lalu anak berdasarkan tanggal lahir (tua ke muda)
         $keluarga = DB::table('keluarga')
@@ -82,7 +82,7 @@ class PegawaiController extends Controller
             ->orderByRaw("CASE WHEN hubungan_keluarga = 'pasangan' THEN 0 ELSE 1 END")
             ->orderBy('tgl_lahir', 'asc')
             ->get();
-        
+
         // Tambahkan urutan anak untuk display
         $urutanAnak = 1;
         foreach ($keluarga as $k) {
@@ -95,7 +95,7 @@ class PegawaiController extends Controller
         
         return view('kepegawaian.pegawai.detail', compact('pegawai', 'keluarga'));
     }
-    
+
     public function edit($nip)
     {
         $pegawai = Pegawai::where('nip', $nip)->firstOrFail();
@@ -113,16 +113,16 @@ class PegawaiController extends Controller
         if ($isStatusUpdate) {
             // Update hanya status is_active menggunakan query builder
             $newStatus = (int) $request->input('is_active');
-            
+
             Log::info('Status Update', [
                 'nip' => $nip,
                 'old_status' => $pegawai->is_active,
                 'new_status' => $newStatus
             ]);
-            
+
             // Update langsung dengan query builder
             Pegawai::where('nip', $nip)->update(['is_active' => $newStatus]);
-            
+
             // 🔥 JIKA PEGAWAI DINONAKTIFKAN, NONAKTIFKAN SEMUA KELUARGANYA
             if ($newStatus == 0) {
                 DB::table('keluarga')
@@ -133,7 +133,7 @@ class PegawaiController extends Controller
                 $keluargaController = app(\App\Http\Controllers\Kepegawaian\KeluargaController::class);
                 $keluargaController->reSyncActiveStatus($nip);
             }
-            
+
             $statusText = $newStatus ? 'Aktif' : 'Non Aktif';
             return redirect()->back()
                 ->with('success', "Status pegawai berhasil diubah menjadi {$statusText}!");
@@ -275,7 +275,7 @@ class PegawaiController extends Controller
                     $jkExcel = strtoupper(trim($row[5] ?? ''));
                     if (!isset($jkMap[$jkExcel])) {
                         $jkExcel = 'L'; // default aman
-                    }
+                    }                    
 
                     // ===== ID KELUARGA =====
                     $id_keluarga = $nip . '-' . $kodeHubungan . '-' . rand(1000, 9999);
@@ -292,16 +292,7 @@ class PegawaiController extends Controller
                         'created_at'         => now(),
                         'updated_at'         => now(),
                     ]);
-                    $keluargaController = app(\App\Http\Controllers\Kepegawaian\KeluargaController::class);
-
-                    // ✅ 1. update urutan anak
-                    $keluargaController->syncUrutanAnak($nip);
-
-                    // ✅ 2. JALANKAN LOGIC AKTIF / NONAKTIF
-                    $keluargaController->reSyncActiveStatus($nip);
                 }
-
-
                 $rowCount++;
             }
 
