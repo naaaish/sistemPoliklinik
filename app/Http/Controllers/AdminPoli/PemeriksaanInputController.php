@@ -11,7 +11,6 @@ use App\Models\Pendaftaran;
 use App\Models\Pemeriksaan;
 use App\Models\Obat;
 use App\Models\Saran;
-use App\Models\Diagnosa;
 use App\Models\DetailResep;
 use App\Models\Resep;
 use Illuminate\Validation\ValidationException;
@@ -80,6 +79,8 @@ class PemeriksaanInputController extends Controller
 
             'penyakit_id'     => 'nullable|array',
             'penyakit_id.*'   => 'nullable|string',
+            'id_saran'    => 'nullable|array',
+            'id_saran.*'  => 'nullable|string',
             'id_nb'           => 'nullable|array',
             'id_nb.*'         => 'nullable|string',
 
@@ -95,6 +96,7 @@ class PemeriksaanInputController extends Controller
         $obatIds  = $validated['obat_id'] ?? [];
         $jumlahs  = $validated['jumlah'] ?? [];
         $satuans  = $validated['satuan'] ?? [];
+        $idSaran  = $validated['id_saran'] ?? [];
 
         foreach ($obatIds as $i => $idObat) {
             if (!$idObat) continue; // skip baris kosong

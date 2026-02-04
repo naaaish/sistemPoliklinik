@@ -128,23 +128,24 @@
               </div>
             </div>
         </div>
+      </div>
 
-        <!-- template item penyakit -->
-        <div id="penyakitTemplate" style="display:none;">
-          <div class="penyakit-item" style="border:1px solid #e5e7eb;border-radius:10px;padding:10px;margin-top:10px;">
-            <!-- row atas -->
-            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
-              <div class="penyakit-name" style="font-weight:600;"></div>
-              <button type="button" class="btnDelPenyakit ap-btn ap-btn--danger">Hapus</button>
-            </div>
+      <div class="ap-row">
+        <div class="ap-label">Saran</div><div class="ap-colon">:</div>
+        <div class="ap-input">
+          <select id="inpSaran" class="ap-select">
+            <option value="">-- pilih (boleh kosong) --</option>
+            @foreach($saran as $s)
+              <option value="{{ $s->id_saran }}">
+                {{ $s->kategori_saran ?? $s->id_saran }}
+              </option>
+            @endforeach
+          </select>
 
-            <div style="display:grid;grid-template-columns:140px 1fr;gap:10px;margin-top:10px;align-items:center;">
-              <div style="color:#6b7280;">Kode Diagnosa K3</div>
-              <input type="text" name="id_nb[]" class="ap-input id-nb-input" placeholder="Masukkan ID NB..." />
-            </div>
+          <button type="button" id="btnAddSaran" class="ap-btn-small">Tambah Saran</button>
 
-            <input type="hidden" name="penyakit_id[]" class="penyakit-id-hidden" value="">
-          </div>
+          <div id="chipSaran" style="margin-top:10px;"></div>
+          <div id="hiddenSaran"></div>
         </div>
       </div>
 
@@ -303,6 +304,52 @@
     return 'Rp' + n.toLocaleString('id-ID');
   }
 
+  function addChip({value, label, chipContainer, hiddenContainer, inputName}) {
+  if(!value) return;
+
+  const exists = [...hiddenContainer.querySelectorAll(`input[name="${inputName}[]"]`)]
+    .some(i => i.value == value);
+  if(exists) return;
+
+  const chip = document.createElement('span');
+  chip.style.cssText =
+    'display:inline-flex;align-items:center;gap:6px;background:#eef3ff;border:1px solid #c7d7f5;' +
+    'color:#316BA1;padding:4px 8px;border-radius:10px;margin:3px 6px 0 0;font-size:13px;';
+
+  chip.innerHTML =
+    `<span>${label}</span>` +
+    `<button type="button" style="border:none;background:transparent;cursor:pointer;font-weight:700;color:#316BA1;font-size:14px;line-height:1;">×</button>`;
+
+  const hidden = document.createElement('input');
+  hidden.type = 'hidden';
+  hidden.name = `${inputName}[]`;
+  hidden.value = value;
+
+  chip.querySelector('button').addEventListener('click', () => {
+    chip.remove();
+    hidden.remove();
+  });
+
+  chipContainer.appendChild(chip);
+  hiddenContainer.appendChild(hidden);
+}
+
+  // Saran (chip)
+  document.getElementById('btnAddSaran')?.addEventListener('click', () => {
+    const sel = document.getElementById('inpSaran');
+    if(!sel || !sel.value) return;
+
+    addChip({
+      value: sel.value,
+      label: sel.options[sel.selectedIndex].text,
+      chipContainer: document.getElementById('chipSaran'),
+      hiddenContainer: document.getElementById('hiddenSaran'),
+      inputName: 'id_saran'
+    });
+
+    sel.value = '';
+  });
+
   // ===== Helper Numeric =====
   function isNumeric(val){
     return val !== '' && !isNaN(val) && isFinite(val);
@@ -370,51 +417,51 @@ document.getElementById('btnAddPenyakit')?.addEventListener('click', async () =>
   sel.value = '';
 });
 
-  const penyakitPick = document.getElementById('penyakitPick');
-  const btnAddPenyakit = document.getElementById('btnAddPenyakit');
-  const penyakitWrap = document.getElementById('penyakitWrap');
-  const tpl = document.getElementById('penyakitTemplate');
+  // const penyakitPick = document.getElementById('penyakitPick');
+  // const btnAddPenyakit = document.getElementById('btnAddPenyakit');
+  // const penyakitWrap = document.getElementById('penyakitWrap');
+  // const tpl = document.getElementById('penyakitTemplate');
 
-  function alreadyAdded(id){
-    return !!penyakitWrap.querySelector(`input.penyakit-id-hidden[value="${CSS.escape(id)}"]`);
-  }
+  // function alreadyAdded(id){
+  //   return !!penyakitWrap.querySelector(`input.penyakit-id-hidden[value="${CSS.escape(id)}"]`);
+  // }
 
-  btnAddPenyakit.addEventListener('click', () => {
-    const id = penyakitPick.value;
-    if(!id) return;
+  // btnAddPenyakit.addEventListener('click', () => {
+  //   const id = penyakitPick.value;
+  //   if(!id) return;
 
-    if(alreadyAdded(id)){
-      // kalau mau: alert kecil / toast
-      penyakitPick.value = '';
-      return;
-    }
+  //   if(alreadyAdded(id)){
+  //     // kalau mau: alert kecil / toast
+  //     penyakitPick.value = '';
+  //     return;
+  //   }
 
-    const text = penyakitPick.options[penyakitPick.selectedIndex].text;
+  //   const text = penyakitPick.options[penyakitPick.selectedIndex].text;
 
-    const node = tpl.firstElementChild.cloneNode(true);
-    node.querySelector('.penyakit-name').textContent = text;
-    node.querySelector('.penyakit-id-hidden').value = id;
+  //   const node = tpl.firstElementChild.cloneNode(true);
+  //   node.querySelector('.penyakit-name').textContent = text;
+  //   node.querySelector('.penyakit-id-hidden').value = id;
 
-    node.querySelector('.btnDelPenyakit').addEventListener('click', () => {
-      node.remove();
-    });
+  //   node.querySelector('.btnDelPenyakit').addEventListener('click', () => {
+  //     node.remove();
+  //   });
 
-    penyakitWrap.appendChild(node);
-    penyakitPick.value = '';
-  });
+  //   penyakitWrap.appendChild(node);
+  //   penyakitPick.value = '';
+  // });
 
-  // Penyakit (text)
-  document.getElementById('btnAddPenyakit').addEventListener('click', () => {
-    const sel = document.getElementById('inpPenyakit');
-    if(!sel.value) return;
-    sel.value = '';
-  }); 
+  // // Penyakit (text)
+  // document.getElementById('btnAddPenyakit').addEventListener('click', () => {
+  //   const sel = document.getElementById('inpPenyakit');
+  //   if(!sel.value) return;
+  //   sel.value = '';
+  // }); 
 
   // helper rupiah
-  function rupiah(n){
-    n = Number(n || 0);
-    return 'Rp' + n.toLocaleString('id-ID');
-  }
+  // function rupiah(n){
+  //   n = Number(n || 0);
+  //   return 'Rp' + n.toLocaleString('id-ID');
+  // }
 
   const obatWrap = document.getElementById('obatWrap');
   const totalHarga = document.getElementById('totalHarga'); // pastikan id ini ada
