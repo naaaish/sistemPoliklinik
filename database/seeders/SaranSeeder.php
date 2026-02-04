@@ -4,114 +4,206 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+
+use function Symfony\Component\Clock\now;
 
 class SaranSeeder extends Seeder
 {
     public function run(): void
     {
-        $now = Carbon::now();
-
-        $data_saran = [
-            // ==========================
-            // 1. KONDISI UMUM / SEHAT
-            // ==========================
+        DB::table('saran')->insert([
             [
-                'id_saran' => 'SRN-NORM-01',
-                'saran'    => 'Hasil pemeriksaan Anda dalam batas normal. Pertahankan pola hidup sehat, makan bergizi seimbang, dan olahraga rutin minimal 30 menit sehari.',
+                'id_saran' => 'SRN-001',
+                'kategori_saran' => 'Sehat',
+                'saran' => "Selalu jaga kesehatan dengan Pola makan yang baik, bergizi dan seimbang, Minum air putih yang cukup, Istirahat yang cukup, Olahraga rutin, Menjaga Kebersihan dan Hindari paparan asap rokok.",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-
-            // ==========================
-            // 2. TEKANAN DARAH (Sistol/Diastol)
-            // ==========================
-            // Hipertensi (Tinggi) -> Sistol > 140 atau Diastol > 90
             [
-                'id_saran' => 'SRN-TENS-01',
-                'saran'    => 'Tekanan darah Anda tinggi. Kurangi konsumsi garam/asinan, hindari stres berlebih, kopi, dan rokok. Istirahat yang cukup.',
+                'id_saran' => 'SRN-002',
+                'kategori_saran' => 'TD ↓',
+                'saran' => "Banyak minum air putih, sesekali minum kopi, Konsumsi makanan yang mengandung garam, Olah raga rutin",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-            // Hipotensi (Rendah) -> Sistol < 90
             [
-                'id_saran' => 'SRN-TENS-02',
-                'saran'    => 'Tekanan darah Anda rendah. Perbanyak minum air putih, konsumsi makanan bergizi (sayur bayam/ati ayam), dan jangan begadang.',
+                'id_saran' => 'SRN-003',
+                'kategori_saran' => 'TD ↓ GD ↑',
+                'saran' => "Banyak minum air putih, sesekali minum kopi, Konsumsi makanan yang mengandung garam, Olah raga rutin, Hindari makanan berkarbohidrat tinggi, Selalu rutin berobat, Taati anjuran dari dokter untuk minum obat",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-
-            // ==========================
-            // 3. GULA DARAH (Puasa / 2 Jam / Sewaktu)
-            // ==========================
-            // Hiperglikemia (Diabetes)
             [
-                'id_saran' => 'SRN-GULA-01',
-                'saran'    => 'Gula darah terdeteksi tinggi. Batasi asupan nasi putih, tepung, dan gula. Ganti dengan karbohidrat kompleks (beras merah/ubi) dan rutin olahraga.',
+                'id_saran' => 'SRN-004',
+                'kategori_saran' => 'TD ↓ GD AS ↑',
+                'saran' => "Banyak minum air putih, sesekali minum kopi, Konsumsi makanan yang mengandung garam, Olah raga rutin, Hindari makanan berkarbohidrat tinggi, Selalu rutin berobat, Taati anjuran dari dokter untuk minum obat, Hindari makanan mengandung purin, Olah raga cukup",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-            // Hipoglikemia (Rendah)
             [
-                'id_saran' => 'SRN-GULA-02',
-                'saran'    => 'Gula darah Anda terlalu rendah. Segera konsumsi makanan/minuman manis jika merasa pusing, dan jaga jadwal makan agar teratur.',
+                'id_saran' => 'SRN-005',
+                'kategori_saran' => 'TD ↓ GD CHOL↑',
+                'saran' => "Banyak minum air putih, sesekali minum kopi, Konsumsi makanan yang mengandung garam, Olah raga rutin, Hindari makanan berkarbohidrat tinggi, Selalu rutin berobat, Taati anjuran dari dokter untuk minum obat, Olah raga cukup, Hindari makanan mengandung lemak tinggi, Banyakin makanan berserat tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-
-            // ==========================
-            // 4. ASAM URAT
-            // ==========================
-            // Tinggi (> 7.0 mg/dL untuk Laki, > 5.6 untuk Wanita)
             [
-                'id_saran' => 'SRN-ASAM-01',
-                'saran'    => 'Asam urat tinggi. Hindari jeroan, emping, kacang-kacangan, makanan laut (seafood), dan sayuran hijau tertentu (bayam/kangkung). Perbanyak minum air putih.',
+                'id_saran' => 'SRN-006',
+                'kategori_saran' => 'TD ↓ GD AS CHOL↑',
+                'saran' => "Banyak minum air putih, sesekali minum kopi, Konsumsi makanan yang mengandung garam, Olah raga rutin, Hindari makanan berkarbohidrat tinggi, Selalu rutin berobat, Taati anjuran dari dokter untuk minum obat, Hindari makanan mengandung purin, Olah raga cukup, Hindari makanan mengandung lemak tinggi, Banyakin makanan berserat tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-
-            // ==========================
-            // 5. LEMAK DARAH (Kolesterol & Trigliserida)
-            // ==========================
-            // Kolesterol Tinggi (> 200 mg/dL)
             [
-                'id_saran' => 'SRN-LEMK-01',
-                'saran'    => 'Kolesterol Anda tinggi. Hindari gorengan, santan, kulit ayam, dan daging berlemak. Perbanyak makan ikan, buah, dan sayuran berserat tinggi.',
+                'id_saran' => 'SRN-007',
+                'kategori_saran' => 'TD ↓ AS ↑',
+                'saran' => "Banyak minum air putih, sesekali minum kopi, Konsumsi makanan yang mengandung garam, Olah raga rutin, Hindari makanan mengandung purin, Selalu rutin kontrol",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-            // Trigliserida Tinggi (> 150 mg/dL)
             [
-                'id_saran' => 'SRN-LEMK-02',
-                'saran'    => 'Trigliserida tinggi. Kurangi makanan manis, tepung-tepungan, dan santan. Tingkatkan aktivitas fisik/kardio untuk membakar lemak.',
+                'id_saran' => 'SRN-008',
+                'kategori_saran' => 'TD ↓ AS CHOL ↑',
+                'saran' => "Banyak minum air putih, sesekali minum kopi, Konsumsi makanan yang mengandung garam, Olah raga rutin, Hindari makanan mengandung purin, Selalu rutin kontrol, Hindari makanan mengandung lemak tinggi, Banyakin makanan berserat tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-
-            // ==========================
-            // 6. BERAT BADAN (IMT)
-            // ==========================
-            // Obesitas / Gemuk
             [
-                'id_saran' => 'SRN-BDAN-01',
-                'saran'    => 'Berat badan berlebih (Overweight/Obesitas). Disarankan diet rendah kalori, kurangi porsi makan malam, dan rutin berolahraga untuk menurunkan berat badan ideal.',
+                'id_saran' => 'SRN-009',
+                'kategori_saran' => 'TD ↓ CHOL ↑',
+                'saran' => "Banyak minum air putih, sesekali minum kopi, Konsumsi makanan yang mengandung garam, Olah raga rutin, Hindari makanan mengandung lemak tinggi, Banyakin makanan berserat tinggi, Selalu rutin kontrol",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-            // Kurus (Underweight)
             [
-                'id_saran' => 'SRN-BDAN-02',
-                'saran'    => 'Berat badan kurang. Tingkatkan asupan kalori dan protein (telur, susu, daging). Makan lebih sering dengan porsi kecil tapi padat gizi.',
+                'id_saran' => 'SRN-010',
+                'kategori_saran' => 'TD ↑',
+                'saran' => "Hindari makanan yang mengandung natrium, Istirahat cukup, Rutin minum obat, Rutin kontrol Dokter, Hindari makanan berkolesterol tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-
-            // ==========================
-            // 7. SUHU TUBUH & NADI
-            // ==========================
-            // Demam (> 37.5)
             [
-                'id_saran' => 'SRN-UMUM-01',
-                'saran'    => 'Suhu tubuh tinggi (Demam). Perbanyak minum air putih, kompres hangat, dan istirahat total. Segera minum obat penurun panas jika perlu.',
+                'id_saran' => 'SRN-011',
+                'kategori_saran' => 'TD GD ↑',
+                'saran' => "Hindari makanan yang mengandung natrium, Istirahat cukup, Rutin minum obat, Rutin kontrol Dokter, Hindari makanan berkolesterol tinggi, Hindari makanan berkarbohidrat tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-            // Takikardia (Nadi Cepat > 100)
             [
-                'id_saran' => 'SRN-UMUM-02',
-                'saran'    => 'Denyut nadi terdeteksi cepat. Hindari kafein (kopi/teh pekat), kelola kecemasan, dan periksa ke dokter jantung jika disertai sesak/nyeri dada.',
+                'id_saran' => 'SRN-012',
+                'kategori_saran' => 'TD GD AS ↑',
+                'saran' => "Hindari makanan yang mengandung natrium, Istirahat cukup, Rutin minum obat, Rutin kontrol Dokter, Hindari makanan berkolesterol tinggi, Hindari makanan mengandung purin, Olah raga cukup",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
-        ];
-
-        // Tambah Timestamps & Insert
-        foreach ($data_saran as &$item) {
-            $item['is_active']  = true;
-            $item['created_at'] = $now;
-            $item['updated_at'] = $now;
-        }
-
-        DB::table('saran')->upsert(
-            $data_saran,
-            ['id_saran'],
-            ['saran', 'is_active', 'updated_at']
-        );
+            [
+                'id_saran' => 'SRN-013',
+                'kategori_saran' => 'TD GD CHOL ↑',
+                'saran' => "Hindari makanan yang mengandung natrium, Istirahat cukup, Rutin minum obat, Rutin kontrol Dokter, Hindari makanan berkolesterol tinggi, Olah raga cukup, Banyakin makanan berserat tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_saran' => 'SRN-014',
+                'kategori_saran' => 'TD GD AS CHOL ↑',
+                'saran' => "Hindari makanan yang mengandung natrium, Istirahat cukup, Rutin minum obat, Rutin kontrol Dokter, Hindari makanan berkolesterol tinggi, Hindari makanan mengandung purin, Olah raga cukup, Banyakin makanan berserat tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_saran' => 'SRN-015',
+                'kategori_saran' => 'TD AS ↑',
+                'saran' => "Hindari makanan yang mengandung natrium, Istirahat cukup, Rutin minum obat, Rutin kontrol Dokter, Hindari makanan berkolesterol tinggi, Hindari makanan mengandung purin, Olah raga cukup",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_saran' => 'SRN-016',
+                'kategori_saran' => 'TD AS CHOL ↑',
+                'saran' => "Hindari makanan yang mengandung natrium, Istirahat cukup, Rutin minum obat, Rutin kontrol Dokter, Hindari makanan berkolesterol tinggi, Hindari makanan mengandung purin, Olah raga cukup, Banyakin makanan berserat tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_saran' => 'SRN-017',
+                'kategori_saran' => 'TD CHOL ↑',
+                'saran' => "Hindari makanan yang mengandung natrium, Istirahat cukup, Rutin minum obat, Rutin kontrol Dokter, Hindari makanan berkolesterol tinggi, Banyakin makanan berserat tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_saran' => 'SRN-018',
+                'kategori_saran' => 'GD ↑',
+                'saran' => "Hindari makanan berkarbohidrat tinggi, Selalu rutin berobat, Taati anjuran dari dokter untuk minum obat,",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_saran' => 'SRN-019',
+                'kategori_saran' => 'GD AS ↑',
+                'saran' => "Hindari makanan berkarbohidrat tinggi, Selalu rutin berobat, Taati anjuran dari dokter untuk minum obat, Hindari makanan mengandung purin, Olah raga cukup",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_saran' => 'SRN-020',
+                'kategori_saran' => 'GD AS CHOL↑',
+                'saran' => "Hindari makanan berkarbohidrat tinggi, Selalu rutin berobat, Taati anjuran dari dokter untuk minum obat, Hindari makanan mengandung purin, Olah raga cukup, Hindari makanan mengandung lemak tinggi, Banyakin makanan berserat tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_saran' => 'SRN-021',
+                'kategori_saran' => 'GD CHOL↑',
+                'saran' => "Hindari makanan berkarbohidrat tinggi, Selalu rutin berobat, Taati anjuran dari dokter untuk minum obat, Hindari makanan mengandung lemak tinggi, Banyakin makanan berserat tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_saran' => 'SRN-022',
+                'kategori_saran' => 'AS ↑',
+                'saran' => "Hindari makanan mengandung purin, Olah raga cukup, Selalu rutin kontrol",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_saran' => 'SRN-023',
+                'kategori_saran' => 'AS CHOL↑',
+                'saran' => "Hindari makanan mengandung purin, Olah raga cukup, Selalu rutin kontrol, Hindari makanan mengandung lemak tinggi, Banyakin makanan berserat tinggi",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id_saran' => 'SRN-024',
+                'kategori_saran' => 'CHOL ↑',
+                'saran' => "Hindari makanan mengandung lemak tinggi, Banyakin makanan berserat tinggi, Selalu rutin kontrol",
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
     }
 }

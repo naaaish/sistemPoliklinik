@@ -37,6 +37,7 @@ class SaranController extends Controller
             ->select(
                 'id_saran',
                 'saran as saran_text',
+                'kategori_saran',
                 'is_active',
                 'created_at'
             )
@@ -67,11 +68,12 @@ class SaranController extends Controller
     {
         $request->validate([
             'saran'      => 'required|string',
+            'kategori_saran' => 'required|string',
         ]);
 
         $saranText = trim($request->saran);
+        $kategoriSaran = trim($request->kategori_saran);
 
-        // cek duplikat saran aktif (biar konsisten seperti obat)
         $existsAktif = DB::table('saran')
             ->whereRaw('LOWER(saran) = ?', [mb_strtolower($saranText)])
             ->where('is_active', '1')
@@ -98,6 +100,7 @@ class SaranController extends Controller
         DB::table('saran')->insert([
             'id_saran'   => $newId,
             'saran'      => $saranText,
+            'kategori_saran' => $kategoriSaran,
             'is_active'  => '1',
             'created_at' => now(),
             'updated_at' => now(),
@@ -111,9 +114,11 @@ class SaranController extends Controller
     {
         $request->validate([
             'saran'      => 'required|string',
+            'kategori_saran' => 'required|string',
         ]);
 
         $saranText = trim($request->saran);
+        $kategoriSaran = trim($request->kategori_saran);
 
         $existsAktif = DB::table('saran')
             ->whereRaw('LOWER(saran) = ?', [mb_strtolower($saranText)])
@@ -131,6 +136,7 @@ class SaranController extends Controller
             ->where('id_saran', $id)
             ->update([
                 'saran'       => $saranText,
+                'kategori_saran' => $kategoriSaran,
                 'updated_at'  => now(),
             ]);
 

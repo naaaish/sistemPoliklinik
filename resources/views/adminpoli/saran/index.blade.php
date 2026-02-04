@@ -20,7 +20,6 @@
     </div>
 
     <div class="saran-card">
-
         {{-- Row 1: Search --}}
         <form class="saran-search" method="GET" action="{{ route('adminpoli.saran.index') }}">
             <input
@@ -108,6 +107,7 @@
                         class="saran-act saran-edit js-edit"
                         data-id="{{ $pk }}"
                         data-saran="{{ e($text) }}"
+                        data-kategori="{{ e($row->kategori_saran) }}"
                     >
                         <img src="{{ asset('assets/adminPoli/edit.png') }}" class="saran-ic-sm" alt="">
                         Edit
@@ -141,6 +141,11 @@
                 <form action="{{ route('adminpoli.saran.store') }}" method="POST">
                     @csrf
                     <div class="modal-group">
+                        <label>Kategori</label>
+                        <input type="text" name="kategori_saran" class="modal-input" maxlength="50" required>
+                    </div>
+
+                    <div class="modal-group">
                         <label>Saran</label>
                         <textarea name="saran" class="modal-textarea" rows="4" required></textarea>
                     </div>
@@ -158,6 +163,11 @@
                 <form method="POST" id="formEdit">
                     @csrf
                     @method('PUT')
+                    <div class="modal-group">
+                        <label>Kategori</label>
+                        <input type="text" name="kategori_saran" class="modal-input" id="editKategori" maxlength="50" required>
+                    </div>
+
                     <div class="modal-group">
                         <label>Saran</label>
                         <textarea name="saran" class="modal-textarea" id="editSaran" rows="4" required></textarea>
@@ -294,9 +304,11 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
       const saran = btn.dataset.saran || '';
+      const kategori = btn.dataset.kategori || '';
 
       document.getElementById('modalEdit').style.display = 'flex';
       document.getElementById('editSaran').value = saran;
+      document.getElementById('editKategori').value = kategori;
 
       document.getElementById('formEdit').action =
         "{{ url('adminpoli/saran') }}/" + id;

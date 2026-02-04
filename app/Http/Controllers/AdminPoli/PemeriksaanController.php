@@ -120,15 +120,28 @@ class PemeriksaanController extends Controller
         $dokter = DB::table('dokter')->where('status', 'aktif')->orderBy('nama')->get();
         $pemeriksa = DB::table('pemeriksa')->where('status', 'aktif')->orderBy('id_pemeriksa')->get();
 
+        $saran = Saran::query()
+            ->where('is_active', 1)
+            ->orderBy('kategori_saran', 'asc')
+            ->get(['id_saran', 'kategori_saran', 'saran']);
+           
+        $saranDetail = DB::table('detail_pemeriksaan_saran as ds')
+            ->join('saran as s', 's.id_saran', '=', 'ds.id_saran')
+            ->where('ds.id_pemeriksaan', $hasil->id_pemeriksaan)
+            ->orderBy('s.kategori_saran', 'asc')
+            ->get(['s.id_saran','s.kategori_saran','s.saran']);
+
         return view('adminpoli.pemeriksaan.show', compact(
             'pendaftaran',
             'hasil',
             'resep',
             'detailResep',
             'obat',
+            'saranTerpilih',
             'penyakit',
             'penyakitDetail',
-            'saranTerpilih',
+            'saranDetail',
+            'saran',
             'dokter',
             'pemeriksa'
         ));
@@ -165,14 +178,26 @@ class PemeriksaanController extends Controller
             ->get();
 
         $obat = Obat::where('is_active', 1)->orderBy('nama_obat', 'asc')->get();
-        $saran = Saran::where('is_active', 1)->orderBy('saran', 'asc')->get();
+        $saran = Saran::where('is_active', 1)->orderBy('kategori_saran', 'asc')->get(['id_saran', 'kategori_saran', 'saran']);
         $penyakit = Diagnosa::where('is_active', 1)->orderBy('diagnosa', 'asc')->get();
 
+        $saranDetail = DB::table('detail_pemeriksaan_saran as ds')
+            ->join('saran as s', 's.id_saran', '=', 'ds.id_saran')
+            ->where('ds.id_pemeriksaan', $hasil->id_pemeriksaan)
+            ->orderBy('s.kategori_saran', 'asc')
+            ->get([
+                's.id_saran',
+                's.kategori_saran',
+                's.saran',
+            ]);
+
+        $saranSelectedIds = $saranDetail->pluck('id_saran')->all();
         $dokter = DB::table('dokter')->where('status', 'aktif')->orderBy('nama')->get();
         $pemeriksa = DB::table('pemeriksa')->where('status', 'aktif')->orderBy('id_pemeriksa')->get();
 
         return view('adminpoli.pemeriksaan.edit', compact(
             'pendaftaran','hasil','resep','detailResep','obat','saran','penyakit',
+            'saranDetail','saranSelectedIds',
             'penyakitDetail','dokter','pemeriksa'
         ));
     }
@@ -214,13 +239,15 @@ class PemeriksaanController extends Controller
             'penyakit_id.*'   => ['nullable', Rule::exists('diagnosa', 'id_diagnosa')->where('is_active', 1)],
             'id_nb'           => 'nullable|array',
             'id_nb.*'         => 'nullable|string',
+            'saran_id'       => 'nullable|array',
+            'id_saran'       => 'nullable|array',
+            'id_saran.*'     => ['nullable', Rule::exists('saran', 'id_saran')->where('is_active', 1)],
             'petugas_after_obat' => 'nullable|string',
         ]);
 
         return DB::transaction(function () use ($validated, $pendaftaranId) {
             $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
 
-            // update data pemeriksaan (mapping ke kolom tabel kamu)
             $hasil->update([
                 'sistol'     => $validated['sistol'] ?? null,
                 'diastol'    => $validated['diastol'] ?? null,
@@ -268,6 +295,24 @@ class PemeriksaanController extends Controller
                     ];
                 }
                 DB::table('detail_pemeriksaan_penyakit')->insert($rows);
+            }
+
+            $idSaran = $validated['id_saran'] ?? [];
+            $idSaran = array_values(array_unique(array_filter($idSaran)));
+
+            DB::table('detail_pemeriksaan_saran')
+                ->where('id_pemeriksaan', $hasil->id_pemeriksaan)
+                ->delete();
+
+            if (!empty($idSaran)) {
+                $rows = [];
+                foreach ($idSaran as $sid) {
+                    $rows[] = [
+                        'id_pemeriksaan' => $hasil->id_pemeriksaan,
+                        'id_saran'       => $sid,
+                    ];
+                }
+                DB::table('detail_pemeriksaan_saran')->insert($rows);
             }
 
             // ===== RESEP & DETAIL_RESEP =====
@@ -364,7 +409,6 @@ class PemeriksaanController extends Controller
                         $pendaftaran->id_pemeriksa = null;
                         $pendaftaran->save();
                     }
-                    // kalau sudah 'periksa' dari awal, kita biarin petugas existing (nggak maksa pilih ulang)
                 }
             }
             

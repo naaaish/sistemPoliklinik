@@ -334,7 +334,7 @@ class ObatController extends Controller
     }
 
     return redirect()->route('adminpoli.obat.index')
-        ->with('success', "Import selesai.");
+        ->with('success', "Import selesai. Berhasil: $inserted, Dilewati: $skipped");
 }
 
     public function export(Request $request)

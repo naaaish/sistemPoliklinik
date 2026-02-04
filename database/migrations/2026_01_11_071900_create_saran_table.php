@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('saran', function (Blueprint $table) {
             $table->string('id_saran',20)->primary();
             $table->text('saran');
+            $table->string('kategori_saran',50)->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
