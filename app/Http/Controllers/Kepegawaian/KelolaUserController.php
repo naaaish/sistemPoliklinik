@@ -80,8 +80,64 @@ class KelolaUserController extends Controller
      * RESET PASSWORD USER
      * Method baru khusus untuk reset password saja
      */
+
+    public function resetPassword(Request $request, $id)
+    {
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|min:6|confirmed',
+            'password_confirmation' => 'required|min:6',
+        ], [
+            'password.required' => 'Password wajib diisi',
+            'password.min' => 'Password minimal 6 karakter',
+            'password.confirmed' => 'Konfirmasi password tidak cocok',
+            'password_confirmation.required' => 'Konfirmasi password wajib diisi',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first()
+            ], 422);
+        }
+
+        // Cek user exist
+        $user = DB::table('users')->where('id', $id)->first();
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User tidak ditemukan'
+            ], 404);
+        }
+
+        // Update password
+        try {
+            DB::table('users')
+                ->where('id', $id)
+                ->update([
+                    'password' => Hash::make($request->password),
+                    'updated_at' => now(),
+                ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Password berhasil direset untuk user: ' . $user->username
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal mereset password: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function import(Request $request)
     {
+        set_time_limit(0);              // ⏱️ unlimited
+        ini_set('memory_limit', '-1'); 
+
         $request->validate([
             'file' => 'required|mimes:csv,txt'
         ]);
@@ -96,6 +152,7 @@ class KelolaUserController extends Controller
         $success = 0;
         $updated = 0;
 
+        
         while (($row = fgetcsv($file, 1000, $delimiter)) !== false) {
 
             // pastikan kolom cukup
