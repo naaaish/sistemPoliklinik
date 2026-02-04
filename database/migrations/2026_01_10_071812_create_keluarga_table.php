@@ -16,9 +16,9 @@ return new class extends Migration
             $table->string('nip', 20);
 
             $table->enum('hubungan_keluarga', ['pasangan','anak']);
-            $table->unsignedTinyInteger('urutan_anak')->nullable();
             $table->string('nama_keluarga');
-            $table->date('tgl_lahir');
+            $table->date('tgl_lahir')->nullable();
+            $table->integer('urutan_anak')->nullable(); 
             $table->enum('jenis_kelamin', ['L','P']);
             $table->boolean('is_active')->default(1);
 

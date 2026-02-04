@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('no_telp')->nullable();
             $table->string('email')->nullable();
             $table->text('alamat')->nullable();
-            $table->string('jabatan');
-            $table->string('bagian');
+            $table->string('jabatan')->nullable();
+            $table->string('bagian')->nullable();
             $table->boolean('is_active')->default(1);
             $table->timestamps();
         });

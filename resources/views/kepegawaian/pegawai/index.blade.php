@@ -132,8 +132,8 @@
                 </div>
 
                 <div class="mb-3" style="margin-bottom:20px;">
-                    <label class="form-label" style="display:block; font-weight:600; font-size:14px; color:#334155; margin-bottom:8px;">File CSV</label>
-                    <input type="file" name="file" class="form-control" accept=".csv" required
+                    <label class="form-label">File Excel / CSV</label>
+                    <input type="file" name="file" class="form-control" accept=".csv, .xlsx, .xls" required
                         style="width:100%; padding:12px 14px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px;">
                 </div>
 
@@ -150,7 +150,7 @@
                 <button type="button" class="btn btn-secondary" onclick="closeCsvModal()"
                     style="padding:11px 24px; border:none; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer; background:#64748b; color:white;">Batal</button>
                 <button type="submit" class="btn btn-primary"
-                    style="padding:11px 24px; border:none; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer; background:#3b82f6; color:white; box-shadow:0 4px 12px rgba(59,130,246,0.3);">Import CSV</button>
+                    style="padding:11px 24px; border:none; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer; background:#3b82f6; color:white; box-shadow:0 4px 12px rgba(59,130,246,0.3);">Import File</button>
             </div>
         </form>
     </div>
