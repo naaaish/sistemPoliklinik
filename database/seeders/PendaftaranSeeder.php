@@ -38,7 +38,7 @@ class PendaftaranSeeder extends Seeder
         // KASUS 2: Anak Pegawai Demam (Berobat)
         $anak1 = Keluarga::where('nip', $pegawai->nip)
             ->where('hubungan_keluarga', 'anak')
-            // ->orderBy('urutan_anak')
+            ->orderBy('urutan_anak')
             ->first(); // Budi Pratama
 
         if ($anak1) {

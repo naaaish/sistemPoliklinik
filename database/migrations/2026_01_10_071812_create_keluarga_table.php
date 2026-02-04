@@ -18,6 +18,7 @@ return new class extends Migration
             $table->enum('hubungan_keluarga', ['pasangan','anak']);
             $table->string('nama_keluarga');
             $table->date('tgl_lahir')->nullable();
+            $table->integer('urutan_anak')->nullable(); 
             $table->enum('jenis_kelamin', ['L','P']);
             $table->boolean('is_active')->default(1);
 

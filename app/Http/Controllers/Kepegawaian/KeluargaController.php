@@ -52,6 +52,8 @@ class KeluargaController extends Controller
 
         // Jalankan sinkronisasi otomatis
         $this->reSyncActiveStatus($request->nip);
+        $this->syncUrutanAnak($request->nip);
+
 
         return redirect()->route('pegawai.show', $request->nip)
             ->with('success', 'Anggota keluarga berhasil ditambahkan!');
@@ -92,6 +94,8 @@ class KeluargaController extends Controller
         ]);
 
         $this->reSyncActiveStatus($keluargaLama->nip);
+        $this->syncUrutanAnak($keluargaLama->nip);
+
 
         return redirect()->route('pegawai.show', $keluargaLama->nip)
             ->with('success', 'Data keluarga berhasil diperbarui!');
@@ -139,6 +143,26 @@ class KeluargaController extends Controller
             $this->syncActiveEmployee($allAnak);
         } else {
             $this->syncRetiredEmployee($allAnak);
+        }
+    }
+
+
+    public function syncUrutanAnak($nip)
+    {
+        $anakList = DB::table('keluarga')
+            ->where('nip', $nip)
+            ->where('hubungan_keluarga', 'anak')
+            ->orderBy('tgl_lahir', 'asc') // sumber kebenaran
+            ->get();
+
+        $urutan = 1;
+        foreach ($anakList as $anak) {
+            DB::table('keluarga')
+                ->where('id_keluarga', $anak->id_keluarga)
+                ->update([
+                    'urutan_anak' => $urutan
+                ]);
+            $urutan++;
         }
     }
 

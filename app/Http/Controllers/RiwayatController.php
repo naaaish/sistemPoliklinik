@@ -25,7 +25,7 @@ class RiwayatController extends Controller
         $pasienPegawai = (object) [
             'id_keluarga'        => 'pegawai', // ID KHUSUS
             'hubungan_keluarga'  => 'pegawai',
-            // 'urutan_anak'        => null,
+            'urutan_anak'        => null,
             'nama_keluarga'      => $pegawai->nama_pegawai,
             'tgl_lahir'          => $pegawai->tgl_lahir,
         ];

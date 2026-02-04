@@ -51,6 +51,31 @@ class KelolaUserController extends Controller
         return response()->json($user);
     }
 
+    private function detectDelimiter($filePath)
+    {
+        $delimiters = [',', ';'];
+        $firstLine = '';
+
+        $handle = fopen($filePath, 'r');
+        if ($handle) {
+            $firstLine = fgets($handle);
+            fclose($handle);
+        }
+
+        $bestDelimiter = ',';
+        $maxCount = 0;
+
+        foreach ($delimiters as $delimiter) {
+            $count = substr_count($firstLine, $delimiter);
+            if ($count > $maxCount) {
+                $maxCount = $count;
+                $bestDelimiter = $delimiter;
+            }
+        }
+
+        return $bestDelimiter;
+    }
+
     /**
      * RESET PASSWORD USER
      * Method baru khusus untuk reset password saja
@@ -60,46 +85,61 @@ class KelolaUserController extends Controller
         $request->validate([
             'file' => 'required|mimes:csv,txt'
         ]);
+        
 
-        $file = fopen($request->file('file'), 'r');
-        fgetcsv($file); // skip header
+        $filePath  = $request->file('file')->getRealPath();
+        $delimiter = $this->detectDelimiter($filePath);
+
+        $file = fopen($filePath, 'r');
+        fgetcsv($file, 1000, $delimiter); // skip header
 
         $success = 0;
         $updated = 0;
 
-        while (($row = fgetcsv($file, 1000, ',')) !== false) {
+        while (($row = fgetcsv($file, 1000, $delimiter)) !== false) {
 
-            if (empty($row[4])) continue; // NIP WAJIB ADA
+            // pastikan kolom cukup
+            if (count($row) < 5) continue;
 
-            // cek user berdasarkan NIP
+            // rapihin data
+            $username  = trim($row[0]);
+            $username  = preg_replace('/^\xEF\xBB\xBF/', '', $username); // bersihin BOM
+            $password  = trim($row[1]);
+            $role      = trim($row[2]);
+            $nama_user = trim($row[3]);
+            $nip       = trim($row[4]);
+
+            if ($username === '' || $nip === '') continue;
+
+            // 🔑 CEK USER BERDASARKAN NIP ATAU USERNAME
             $existingUser = DB::table('users')
-                ->where('nip', $row[4])
+                ->where('nip', $nip)
+                ->orWhere('username', $username)
                 ->first();
 
             if ($existingUser) {
-                // ================= UPDATE =================
+                // ============ UPDATE ============
                 DB::table('users')
-                    ->where('nip', $row[4])
+                    ->where('id', $existingUser->id)
                     ->update([
-                        'username'   => $row[0],          // boleh berubah
-                        'role'       => $row[2],
-                        'nama_user'  => $row[3],
+                        'username'   => $username,
+                        'role'       => $role,
+                        'nama_user'  => $nama_user,
+                        'nip'        => $nip,
                         'updated_at' => now(),
                     ]);
-
                 $updated++;
             } else {
-                // ================= INSERT =================
+                // ============ INSERT ============
                 DB::table('users')->insert([
-                    'username'   => $row[0],
-                    'password'   => Hash::make($row[1]),
-                    'role'       => $row[2],
-                    'nama_user'  => $row[3],
-                    'nip'        => $row[4],
+                    'username'   => $username,
+                    'password'   => Hash::make($password),
+                    'role'       => $role,
+                    'nama_user'  => $nama_user,
+                    'nip'        => $nip,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-
                 $success++;
             }
         }
@@ -111,5 +151,4 @@ class KelolaUserController extends Controller
             "Import selesai: {$success} data baru, {$updated} data diperbarui"
         );
     }
-
 }

@@ -292,7 +292,15 @@ class PegawaiController extends Controller
                         'created_at'         => now(),
                         'updated_at'         => now(),
                     ]);
+                    $keluargaController = app(\App\Http\Controllers\Kepegawaian\KeluargaController::class);
+
+                    // ✅ 1. update urutan anak
+                    $keluargaController->syncUrutanAnak($nip);
+
+                    // ✅ 2. JALANKAN LOGIC AKTIF / NONAKTIF
+                    $keluargaController->reSyncActiveStatus($nip);
                 }
+
 
                 $rowCount++;
             }

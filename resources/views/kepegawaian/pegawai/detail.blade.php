@@ -177,9 +177,9 @@
                         <tr style="{{ $k->is_active == 0 ? 'opacity: 0.5; background-color: #f8f9fa; color: #94a3b8;' : '' }}">
                             <td class="fw-bold text-secondary">
                                 {{ ucfirst($k->hubungan_keluarga) }} 
-                                {{-- @if($k->urutan_anak)
+                                @if($k->urutan_anak)
                                     <small class="d-block fw-normal text-muted">(Anak ke-{{ $k->urutan_anak }})</small>
-                                @endif --}}
+                                @endif
                             </td>
                             <td>{{ $k->nama_keluarga }}</td>
                             <td>{{ \Carbon\Carbon::parse($k->tgl_lahir)->translatedFormat('d F Y') }}</td>
