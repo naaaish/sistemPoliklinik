@@ -32,15 +32,15 @@
         <div class="info-grid">
             <div class="info-item">
                 <h4><i class="fas fa-clock"></i> Jam Operasional</h4>
-                <p><strong>Senin - Jumat</strong><br>10:00 - 15:00 WIB</p>
+                <p><strong>Senin - Jumat</strong><br>10:00 - 16:00 WIB</p>
                 <p class="small text-warning mt-2">*Sabtu & Minggu Libur</p>
             </div>
 
             <div class="info-item">
                 <h4><i class="fas fa-phone-alt"></i> Kontak Kami</h4>
                 <p>
-                    <strong>Telepon:</strong> 0286-xxxx-xxxx<br>
-                    <strong>Email:</strong> helpdesk.medis@pln.co.id
+                    <strong>Telepon:</strong> <br>
+                    <strong>Email:</strong> 
                 </p>
             </div>
 
@@ -52,7 +52,7 @@
             </div>
 
             <div class="info-item">
-                <h4><i class="fas fa-briefcase-medical"></i> Layanan Unggulan</h4>
+                <h4><i class="fas fa-briefcase-medical"></i> Layanan </h4>
                 <ul>
                     <li><i class="fas fa-check-circle fa-xs"></i> Pemeriksaan Umum</li>
                     <li><i class="fas fa-check-circle fa-xs"></i> Konsultasi Kesehatan</li>

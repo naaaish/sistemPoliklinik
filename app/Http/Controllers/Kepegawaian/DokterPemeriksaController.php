@@ -47,6 +47,7 @@ class DokterPemeriksaController extends Controller
                 'id'     => $d->id_dokter,
                 'nama'   => $d->nama,
                 'jenis'  => $d->jenis_dokter,
+                'no_telepon' => $d->no_telepon,
                 'status' => $d->status,
                 'jadwalStr' => implode(';;', $parts),
             ]);
@@ -58,6 +59,7 @@ class DokterPemeriksaController extends Controller
                 'id'     => $p->id_pemeriksa,
                 'nama'   => $p->nama_pemeriksa,
                 'jenis'  => 'Pemeriksa',
+                'no_telepon' => $p->no_telepon,
                 'status' => $p->status,
                 'jadwalStr' => 'Senin|07:00|16:00;;Selasa|07:00|16:00;;Rabu|07:00|16:00;;Kamis|07:00|16:00;;Jumat|07:00|16:00',
             ]);
@@ -125,6 +127,7 @@ class DokterPemeriksaController extends Controller
         $request->validate([
             'nama' => 'required',
             'jenis_dokter' => 'required',
+            'no_telepon' => 'nullable|regex:/^[0-9+\-\s]+$/|max:20',
             'status' => 'required',
             'jadwal' => 'required|array|min:1',
             'jadwal.*.hari' => 'required|string',
@@ -133,27 +136,27 @@ class DokterPemeriksaController extends Controller
         ]);
 
 
-        // Auto-generate ID
-        $lastDokter = Dokter::orderBy('id_dokter', 'desc')->first();
-        if ($lastDokter) {
-            $lastNumber = (int) substr($lastDokter->id_dokter, 1);
-            $newId = 'D' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-        } else {
-            $newId = 'D001';
-        }
+        DB::transaction(function () use ($request) {
 
-        DB::transaction(function () use ($request, $newId) {
+            // ambil angka terbesar dari DOKxxx, lalu +1 (di-lock biar gak tabrakan)
+            $max = DB::table('dokter')
+                ->lockForUpdate()
+                ->selectRaw("MAX(CAST(SUBSTRING(id_dokter, 4) AS UNSIGNED)) as max_no")
+                ->value('max_no');
+
+            $next = ((int) $max) + 1;
+            $newId = 'DOK' . str_pad((string)$next, 3, '0', STR_PAD_LEFT);
+
             Dokter::create([
                 'id_dokter' => $newId,
                 'nama' => $request->nama,
                 'jenis_dokter' => $request->jenis_dokter,
+                'no_telepon' => $request->no_telepon,
                 'status' => $request->status,
             ]);
 
             foreach ($request->jadwal as $j) {
-                if (empty($j['hari']) || empty($j['jam_mulai']) || empty($j['jam_selesai'])) {
-                    continue;
-                }
+                if (empty($j['hari']) || empty($j['jam_mulai']) || empty($j['jam_selesai'])) continue;
 
                 JadwalDokter::create([
                     'id_dokter' => $newId,
@@ -176,6 +179,7 @@ class DokterPemeriksaController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'jenis_dokter' => 'required|string|max:255',
+            'no_telepon' => 'nullable|regex:/^[0-9+\-\s]+$/|max:20',
             'status' => 'required|in:Aktif,Nonaktif',
             'jadwal' => 'nullable|array',
             'jadwal.*.hari' => 'required_with:jadwal|string|max:50',
@@ -188,6 +192,7 @@ class DokterPemeriksaController extends Controller
             $dokter->update([
                 'nama' => $request->nama,
                 'jenis_dokter' => $request->jenis_dokter,
+                'no_telepon' => $request->no_telepon,
                 'status' => $request->status,
             ]);
 
@@ -222,23 +227,27 @@ class DokterPemeriksaController extends Controller
     {
         $request->validate([
             'nama_pemeriksa' => 'required',
+            'no_telepon' => 'nullable|regex:/^[0-9+\-\s]+$/|max:20',
             'status' => 'required',
         ]);
 
         // Auto-generate ID
-        $lastPemeriksa = Pemeriksa::orderBy('id_pemeriksa', 'desc')->first();
-        if ($lastPemeriksa) {
-            $lastNumber = (int) substr($lastPemeriksa->id_pemeriksa, 1);
-            $newId = 'P' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-        } else {
-            $newId = 'P001';
-        }
+        DB::transaction(function () use ($request) {
+            $max = DB::table('pemeriksa')
+                ->lockForUpdate()
+                ->selectRaw("MAX(CAST(SUBSTRING(id_pemeriksa, 4) AS UNSIGNED)) as max_no")
+                ->value('max_no');
 
-        Pemeriksa::create([
-            'id_pemeriksa' => $newId,
-            'nama_pemeriksa' => $request->nama_pemeriksa,
-            'status' => $request->status,
-        ]);
+            $next = ((int) $max) + 1;
+            $newId = 'PMR' . str_pad((string)$next, 3, '0', STR_PAD_LEFT);
+
+            Pemeriksa::create([
+                'id_pemeriksa' => $newId,
+                'nama_pemeriksa' => $request->nama_pemeriksa,
+                'no_telepon' => $request->no_telepon,
+                'status' => $request->status,
+            ]);
+        });
 
         return back()->with('success', 'Pemeriksa berhasil ditambahkan');
     }
@@ -247,11 +256,13 @@ class DokterPemeriksaController extends Controller
     {
         $request->validate([
             'nama_pemeriksa' => 'required|string|max:255',
+            'no_telepon' => 'nullable|regex:/^[0-9+\-\s]+$/|max:20',
             'status' => 'required|in:Aktif,Nonaktif',
         ]);
 
         Pemeriksa::where('id_pemeriksa', $id)->update([
             'nama_pemeriksa' => $request->nama_pemeriksa,
+            'no_telepon' => $request->no_telepon,
             'status' => $request->status,
         ]);
 
