@@ -19,8 +19,12 @@ class PegawaiController extends Controller
         $perPage = $request->get('per_page', 10);
 
         $query = Pegawai::when($q, function ($query, $q) {
-            $query->where('nama_pegawai', 'like', "%{$q}%");
+            $query->where(function ($sub) use ($q) {
+                $sub->where('nama_pegawai', 'like', "%{$q}%")
+                    ->orWhere('nip', 'like', "%{$q}%");
+            });
         })->orderBy('nama_pegawai');
+
 
         if ($perPage === 'all') {
             $pegawai = $query->get();
@@ -166,6 +170,9 @@ class PegawaiController extends Controller
 
     public function importMulti(Request $request)
     {
+        set_time_limit(0);
+        ini_set('memory_limit', '-1');
+
         // 1. Tambahkan mimes xlsx dan xls agar Laravel tidak menolak file Excel
         $request->validate([
             'file' => 'required|mimes:csv,txt,xlsx,xls',
@@ -267,16 +274,21 @@ class PegawaiController extends Controller
                         'LAKI-LAKI' => 'L',
                         'LAKI LAKI' => 'L',
                         'PRIA' => 'L',
+                        'Male' => 'L',
+                        'MALE' => 'L',
+                        
 
                         'P' => 'P',
                         'PEREMPUAN' => 'P',
                         'WANITA' => 'P',
+                        'Female' => 'P',
+                        'FEMALE' => 'P',
                     ];
 
                     $jkExcel = strtoupper(trim($row[5] ?? ''));
-                    if (!isset($jkMap[$jkExcel])) {
-                        $jkExcel = 'L'; // default aman
-                    }                    
+                    // if (!isset($jkMap[$jkExcel])) {
+
+                    // }                    
 
                     // ===== ID KELUARGA =====
                     $id_keluarga = $nip . '-' . $kodeHubungan . '-' . rand(1000, 9999);
@@ -293,17 +305,24 @@ class PegawaiController extends Controller
                         'created_at'         => now(),
                         'updated_at'         => now(),
                     ]);
+                    $keluargaController = app(\App\Http\Controllers\Kepegawaian\KeluargaController::class);
+
+                    // ✅ 1. update urutan anak
+                    $keluargaController->syncUrutanAnak($nip);
+
+                    // ✅ 2. JALANKAN LOGIC AKTIF / NONAKTIF
+                    $keluargaController->reSyncActiveStatus($nip);
                     $affectedNips[$nip] = true;
                 }
                 $rowCount++;
             }
             
-            $keluargaController = app(\App\Http\Controllers\Kepegawaian\KeluargaController::class);
+            // $keluargaController = app(\App\Http\Controllers\Kepegawaian\KeluargaController::class);
 
-            foreach (array_keys($affectedNips) as $nip) {
-                $keluargaController->syncUrutanAnak($nip);
-                $keluargaController->reSyncActiveStatus($nip);
-            }
+            // foreach (array_keys($affectedNips) as $nip) {
+            //     $keluargaController->syncUrutanAnak($nip);
+            //     $keluargaController->reSyncActiveStatus($nip);
+            // }
 
             DB::commit();
             return redirect()->back()->with('success', "Berhasil mengimport $rowCount data $type.");

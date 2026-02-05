@@ -20,9 +20,9 @@
     <form method="GET" action="{{ route('kepegawaian.pegawai') }}" class="pegawai-search">
         <input 
             type="text" 
-            name="q" 
-            value="{{ $q ?? request('q') }}" 
-            placeholder="Cari nama pegawai..." 
+            name="q"
+            value="{{ request('q') }}" 
+            placeholder="Cari NIP / nama pegawai..." 
             class="pegawai-search-input"
         >
         <button type="submit" class="pegawai-search-btn">
