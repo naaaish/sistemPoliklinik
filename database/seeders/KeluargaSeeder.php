@@ -16,208 +16,208 @@ class KeluargaSeeder extends Seeder
      */
     public function run(): void
     {
-        $now = Carbon::now();
-        $data_keluarga = [            
-            // 1. Istri
-            [
-                'id_keluarga'       => '198765432001-I-1',
-                'nip'               => '198765432001',
-                'hubungan_keluarga' => 'pasangan',
-                'nama_keluarga'     => 'Dewi Sartika',
-                'tgl_lahir'         => '1992-05-15',
-                'jenis_kelamin'     => 'P',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            [
-                'id_keluarga'       => '198765432001-A-1',
-                'nip'               => '198765432001',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Budi Pratama',
-                'tgl_lahir'         => '2018-08-17',
-                'jenis_kelamin'     => 'L',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            // 3. Anak Kedua
-            [
-                'id_keluarga'       => '198765432001-A-2',
-                'nip'               => '198765432001',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Ani Pratama',
-                'tgl_lahir'         => '2020-02-20',
-                'jenis_kelamin'     => 'P',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
+        // $now = Carbon::now();
+        // $data_keluarga = [            
+        //     // 1. Istri
+        //     [
+        //         'id_keluarga'       => '198765432001-I-1',
+        //         'nip'               => '198765432001',
+        //         'hubungan_keluarga' => 'pasangan',
+        //         'nama_keluarga'     => 'Dewi Sartika',
+        //         'tgl_lahir'         => '1992-05-15',
+        //         'jenis_kelamin'     => 'P',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     [
+        //         'id_keluarga'       => '198765432001-A-1',
+        //         'nip'               => '198765432001',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Budi Pratama',
+        //         'tgl_lahir'         => '2018-08-17',
+        //         'jenis_kelamin'     => 'L',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     // 3. Anak Kedua
+        //     [
+        //         'id_keluarga'       => '198765432001-A-2',
+        //         'nip'               => '198765432001',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Ani Pratama',
+        //         'tgl_lahir'         => '2020-02-20',
+        //         'jenis_kelamin'     => 'P',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
 
-            // 4. Suami
-            [
-                'id_keluarga'       => '198765432002-S-1',
-                'nip'               => '198765432002',
-                'hubungan_keluarga' => 'pasangan',
-                'nama_keluarga'     => 'Rudi Hartono',
-                'tgl_lahir'         => '1989-11-10',
-                'jenis_kelamin'     => 'L',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            // 5. Anak Pertama
-            [
-                'id_keluarga'       => '198765432002-A-1',
-                'nip'               => '198765432002',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Putri Ramadhani',
-                'tgl_lahir'         => '2021-12-10',
-                'jenis_kelamin'     => 'P',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
+        //     // 4. Suami
+        //     [
+        //         'id_keluarga'       => '198765432002-S-1',
+        //         'nip'               => '198765432002',
+        //         'hubungan_keluarga' => 'pasangan',
+        //         'nama_keluarga'     => 'Rudi Hartono',
+        //         'tgl_lahir'         => '1989-11-10',
+        //         'jenis_kelamin'     => 'L',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     // 5. Anak Pertama
+        //     [
+        //         'id_keluarga'       => '198765432002-A-1',
+        //         'nip'               => '198765432002',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Putri Ramadhani',
+        //         'tgl_lahir'         => '2021-12-10',
+        //         'jenis_kelamin'     => 'P',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
             
-            // 6. Anak Kedua
-            [
-                'id_keluarga'       => '198765432002-A-2',
-                'nip'               => '198765432002',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Agus Ramadhani',
-                'tgl_lahir'         => '2023-03-15',
-                'jenis_kelamin'     => 'L',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
+        //     // 6. Anak Kedua
+        //     [
+        //         'id_keluarga'       => '198765432002-A-2',
+        //         'nip'               => '198765432002',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Agus Ramadhani',
+        //         'tgl_lahir'         => '2023-03-15',
+        //         'jenis_kelamin'     => 'L',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
 
-            // 7. Anak Ketiga
-            [
-                'id_keluarga'       => '198765432002-A-3',
-                'nip'               => '198765432002',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Siti Ramadhani',
-                'tgl_lahir'         => '2024-05-20',
-                'jenis_kelamin'     => 'P',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            // 8. Anak Keempat
-            [
-                'id_keluarga'       => '198765432002-A-4',
-                'nip'               => '198765432002',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Dodi Ramadhani',
-                'tgl_lahir'         => '2025-07-25',
-                'jenis_kelamin'     => 'L',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            // istri budi santoso (pensiunan)
-            [
-                'id_keluarga'       => '198765432003-I-1',
-                'nip'               => '198765432003',
-                'hubungan_keluarga' => 'pasangan',
-                'nama_keluarga'     => 'Sari Melati',
-                'tgl_lahir'         => '1965-03-22',
-                'jenis_kelamin'     => 'P',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            // anak dari budi santoso (pensiunan)
-            [
-                'id_keluarga'       => '198765432003-A-1',
-                'nip'               => '198765432003',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Indah Santoso',
-                'tgl_lahir'         => '2015-04-10',
-                'jenis_kelamin'     => 'P',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            [
-                'id_keluarga'       => '198765432003-A-2',
-                'nip'               => '198765432003',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Rani Santoso',
-                'tgl_lahir'         => '2018-09-15',
-                'jenis_kelamin'     => 'L',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            [
-                'id_keluarga'       => '198765432003-A-3',
-                'nip'               => '198765432003',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Dina Santoso',
-                'tgl_lahir'         => '2021-01-20',
-                'jenis_kelamin'     => 'P',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            [
-                'id_keluarga'       => '198765432003-A-4',
-                'nip'               => '198765432003',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Fajar Santoso',
-                'tgl_lahir'         => '2023-06-30',
-                'jenis_kelamin'     => 'L',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            [
-                'id_keluarga'       => '198765432004-S-1',
-                'nip'               => '198765432004',
-                'hubungan_keluarga' => 'pasangan',
-                'nama_keluarga'     => 'Anton Supriyadi',
-                'tgl_lahir'         => '1990-07-25',
-                'jenis_kelamin'     => 'L',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            [
-                'id_keluarga'       => '198765432004-A-1',
-                'nip'               => '198765432004',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Rina Supriyadi',
-                'tgl_lahir'         => '2022-10-05',
-                'jenis_kelamin'     => 'P',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            [
-                'id_keluarga'      => '198765432005-S-1',
-                'nip'               => '198765432005',
-                'hubungan_keluarga' => 'pasangan',
-                'nama_keluarga'     => 'Alvian Wijaya',
-                'tgl_lahir'         => '1992-12-12',
-                'jenis_kelamin'     => 'L',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            [
-                'id_keluarga'       => '198765432005-A-1',
-                'nip'               => '198765432005',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Nina Wijaya',
-                'tgl_lahir'         => '2024-04-18',
-                'jenis_kelamin'     => 'P',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-            [
-                'id_keluarga'       => '198765432005-A-2',
-                'nip'               => '198765432005',
-                'hubungan_keluarga' => 'anak',
-                'nama_keluarga'     => 'Doni Wijaya',
-                'tgl_lahir'         => '2025-08-22',
-                'jenis_kelamin'     => 'L',
-                'created_at'        => $now,
-                'updated_at'        => $now,
-            ],
-        ];
+        //     // 7. Anak Ketiga
+        //     [
+        //         'id_keluarga'       => '198765432002-A-3',
+        //         'nip'               => '198765432002',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Siti Ramadhani',
+        //         'tgl_lahir'         => '2024-05-20',
+        //         'jenis_kelamin'     => 'P',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     // 8. Anak Keempat
+        //     [
+        //         'id_keluarga'       => '198765432002-A-4',
+        //         'nip'               => '198765432002',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Dodi Ramadhani',
+        //         'tgl_lahir'         => '2025-07-25',
+        //         'jenis_kelamin'     => 'L',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     // istri budi santoso (pensiunan)
+        //     [
+        //         'id_keluarga'       => '198765432003-I-1',
+        //         'nip'               => '198765432003',
+        //         'hubungan_keluarga' => 'pasangan',
+        //         'nama_keluarga'     => 'Sari Melati',
+        //         'tgl_lahir'         => '1965-03-22',
+        //         'jenis_kelamin'     => 'P',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     // anak dari budi santoso (pensiunan)
+        //     [
+        //         'id_keluarga'       => '198765432003-A-1',
+        //         'nip'               => '198765432003',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Indah Santoso',
+        //         'tgl_lahir'         => '2015-04-10',
+        //         'jenis_kelamin'     => 'P',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     [
+        //         'id_keluarga'       => '198765432003-A-2',
+        //         'nip'               => '198765432003',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Rani Santoso',
+        //         'tgl_lahir'         => '2018-09-15',
+        //         'jenis_kelamin'     => 'L',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     [
+        //         'id_keluarga'       => '198765432003-A-3',
+        //         'nip'               => '198765432003',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Dina Santoso',
+        //         'tgl_lahir'         => '2021-01-20',
+        //         'jenis_kelamin'     => 'P',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     [
+        //         'id_keluarga'       => '198765432003-A-4',
+        //         'nip'               => '198765432003',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Fajar Santoso',
+        //         'tgl_lahir'         => '2023-06-30',
+        //         'jenis_kelamin'     => 'L',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     [
+        //         'id_keluarga'       => '198765432004-S-1',
+        //         'nip'               => '198765432004',
+        //         'hubungan_keluarga' => 'pasangan',
+        //         'nama_keluarga'     => 'Anton Supriyadi',
+        //         'tgl_lahir'         => '1990-07-25',
+        //         'jenis_kelamin'     => 'L',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     [
+        //         'id_keluarga'       => '198765432004-A-1',
+        //         'nip'               => '198765432004',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Rina Supriyadi',
+        //         'tgl_lahir'         => '2022-10-05',
+        //         'jenis_kelamin'     => 'P',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     [
+        //         'id_keluarga'      => '198765432005-S-1',
+        //         'nip'               => '198765432005',
+        //         'hubungan_keluarga' => 'pasangan',
+        //         'nama_keluarga'     => 'Alvian Wijaya',
+        //         'tgl_lahir'         => '1992-12-12',
+        //         'jenis_kelamin'     => 'L',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     [
+        //         'id_keluarga'       => '198765432005-A-1',
+        //         'nip'               => '198765432005',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Nina Wijaya',
+        //         'tgl_lahir'         => '2024-04-18',
+        //         'jenis_kelamin'     => 'P',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        //     [
+        //         'id_keluarga'       => '198765432005-A-2',
+        //         'nip'               => '198765432005',
+        //         'hubungan_keluarga' => 'anak',
+        //         'nama_keluarga'     => 'Doni Wijaya',
+        //         'tgl_lahir'         => '2025-08-22',
+        //         'jenis_kelamin'     => 'L',
+        //         'created_at'        => $now,
+        //         'updated_at'        => $now,
+        //     ],
+        // ];
 
-        DB::table('keluarga')->insert($data_keluarga);
-        $nips = DB::table('keluarga')->distinct()->pluck('nip');
+        // DB::table('keluarga')->insert($data_keluarga);
+        // $nips = DB::table('keluarga')->distinct()->pluck('nip');
 
-        foreach ($nips as $nip) {
-            app(KeluargaController::class)->reSyncActiveStatus($nip);
-        }
+        // foreach ($nips as $nip) {
+        //     app(KeluargaController::class)->reSyncActiveStatus($nip);
+        // }
     }
 
     /**
