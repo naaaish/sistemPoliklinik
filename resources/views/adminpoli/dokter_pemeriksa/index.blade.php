@@ -32,6 +32,7 @@
     <div class="dp-table-head">
       <div>Nama</div>
       <div>Jenis</div>
+      <div>No Telepon</div>
       <div>Status</div>
       <div>Jadwal</div>
       <div>Aksi</div>
@@ -66,6 +67,7 @@
           data-id="{{ $d->id }}"
           data-nama="{{ e($d->nama) }}"
           data-jenis="{{ e($d->jenis) }}"
+          data-telepon="{{ e($d->no_telepon) }}"
           data-status="{{ e($d->status) }}"
           data-jadwal="{{ e($d->jadwalStr ?? '') }}"
         >
@@ -76,6 +78,11 @@
           <div class="dp-cell dp-center">
             <span class="dp-plain">{{ $d->jenis }}</span>
           </div>
+
+          <div class="dp-cell dp-center">
+            <span class="dp-plain">{{ $d->no_telepon ?? '-' }}</span>
+          </div>
+
 
           <div class="dp-cell dp-center">
             <div class="dp-status-wrap">
@@ -97,6 +104,7 @@
               <button type="button"
                 class="dp-jadwal-btn"
                 data-tipe="{{ $d->tipe }}"
+                data-telepon="{{ e($d->no_telepon) }}"
                 data-jadwal="{{ $d->jadwalStr ?? '' }}">
                 <span class="dp-jadwal-text">Lihat</span>
                 <span class="dp-jadwal-icons">
@@ -113,6 +121,7 @@
               data-id="{{ $d->id }}"
               data-nama="{{ e($d->nama) }}"
               data-jenis="{{ e($d->jenis) }}"
+              data-telepon="{{ e($d->no_telepon) }}"
               data-status="{{ e($d->status) }}"
             >
               <img src="{{ asset('assets/adminPoli/edit.png') }}" class="dp-ic-sm" alt="">
@@ -165,6 +174,11 @@
           </div>
 
           <div class="modal-group">
+            <label>No Telepon</label>
+            <input type="text" name="no_telepon" id="dpTambahTeleponDokter" placeholder="Contoh: 628157289930" required>
+          </div>
+
+          <div class="modal-group">
             <label>Status</label>
             <select name="status" id="dpTambahStatusDokter" class="dp-modal-select" required>
               <option value="Aktif">Aktif</option>
@@ -195,6 +209,11 @@
               <option value="Aktif">Aktif</option>
               <option value="Nonaktif">Nonaktif</option>
             </select>
+          </div>
+
+          <div class="modal-group">
+            <label>No Telepon</label>
+            <input type="text" name="no_telepon" id="dpTambahTeleponPemeriksa" placeholder="Contoh: 628157289930">
           </div>
 
           <div class="modal-group">
@@ -232,6 +251,11 @@
         </div>
 
         <div class="modal-group">
+          <label>No Telepon</label>
+          <input type="text" name="no_telepon" id="dpEditTeleponDokter" required>
+        </div>
+
+        <div class="modal-group">
           <label>Status</label>
           <select name="status" id="dpEditStatusDokter" class="dp-modal-select" required>
             <option value="Aktif">Aktif</option>
@@ -261,6 +285,11 @@
             <option value="Aktif">Aktif</option>
             <option value="Nonaktif">Nonaktif</option>
           </select>
+        </div>
+
+        <div class="modal-group">
+          <label>No Telepon</label>
+          <input type="text" name="no_telepon" id="dpEditNoTelepon" required>
         </div>
 
         <div class="modal-group">
@@ -376,6 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       document.getElementById('dpEditNamaDokter').value = btn.dataset.nama || '';
       document.getElementById('dpEditJenisDokter').value = btn.dataset.jenis || '';
+      document.getElementById('dpEditTeleponDokter').value = btn.dataset.telepon || '';
       document.getElementById('dpEditStatusDokter').value = btn.dataset.status || 'Aktif';
 
       formEdit.action = dokterUpdateBase + '/' + id;
@@ -397,6 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setSectionEnabled(editPemeriksaBox, true);
 
       document.getElementById('dpEditNamaPemeriksa').value = btn.dataset.nama || '';
+      document.getElementById('dpEditNoTelepon').value = btn.dataset.telepon || '';
       document.getElementById('dpEditStatusPemeriksa').value = btn.dataset.status || 'Aktif';
       formEdit.action = pemeriksaUpdateBase + '/' + id;
     }

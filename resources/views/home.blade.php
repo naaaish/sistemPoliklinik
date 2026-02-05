@@ -90,11 +90,11 @@
             <div class="konsultasi-section">
                 <h4 class="section-label">Apotik</h4>
                 <div class="konsultasi-buttons">
-                    <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Apoteker" 
+                    <a href="https://wa.me/6283878860366?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Apoteker" 
                        target="_blank" 
                        class="konsultasi-btn">
                         <img src="{{ asset('assets/home/drugs.png') }}" alt="Apoteker">
-                        <span>Apoteker</span>
+                        <span>Apoteker (Okta)</span>
                     </a>
                 </div>
             </div>

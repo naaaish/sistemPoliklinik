@@ -16,6 +16,7 @@ class Dokter extends Model
         'id_dokter',
         'nama',
         'jenis_dokter',
+        'no_telepon',
         'status',
     ];
 

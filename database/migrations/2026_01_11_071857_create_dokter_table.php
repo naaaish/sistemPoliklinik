@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('id_dokter',20)->primary();
             $table->string('nama');
             $table->string('jenis_dokter');
+            $table->string('no_telepon',15);
             $table->enum('status', ['Aktif', 'Nonaktif'])->default('Aktif');
         });
 

@@ -33,7 +33,6 @@ class DokterPemeriksaController extends Controller
             ->get()
             ->groupBy('id_dokter');
 
-        // gabungkan jadi $rows yang kamu pakai di blade
         $rows = collect();
 
         foreach ($dokter as $d) {
@@ -47,6 +46,7 @@ class DokterPemeriksaController extends Controller
                 'id'     => $d->id_dokter,
                 'nama'   => $d->nama,
                 'jenis'  => $d->jenis_dokter,
+                'no_telepon' => $d->no_telepon,
                 'status' => $d->status,
                 'jadwalStr' => implode(';;', $parts),
             ]);
@@ -58,6 +58,7 @@ class DokterPemeriksaController extends Controller
                 'id'     => $p->id_pemeriksa,
                 'nama'   => $p->nama_pemeriksa,
                 'jenis'  => 'Pemeriksa',
+                'no_telepon' => $p->no_telepon,
                 'status' => $p->status,
                 'jadwalStr' => 'Senin|07:00|16:00;;Selasa|07:00|16:00;;Rabu|07:00|16:00;;Kamis|07:00|16:00;;Jumat|07:00|16:00',
             ]);
@@ -125,6 +126,7 @@ class DokterPemeriksaController extends Controller
         $request->validate([
             'nama' => 'required',
             'jenis_dokter' => 'required',
+            'no_telepon' => 'nullable|regex:/^[0-9+\-\s]+$/|max:20',
             'status' => 'required',
             'jadwal' => 'required|array|min:1',
             'jadwal.*.hari' => 'required|string',
@@ -147,6 +149,7 @@ class DokterPemeriksaController extends Controller
                 'id_dokter' => $newId,
                 'nama' => $request->nama,
                 'jenis_dokter' => $request->jenis_dokter,
+                'no_telepon' => $request->no_telepon,
                 'status' => $request->status,
             ]);
 
@@ -172,6 +175,7 @@ class DokterPemeriksaController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'jenis_dokter' => 'required|string|max:255',
+            'no_telepon' => 'nullable|regex:/^[0-9+\-\s]+$/|max:20',
             'status' => 'required|in:Aktif,Nonaktif',
             'jadwal' => 'nullable|array',
             'jadwal.*.hari' => 'required_with:jadwal|string|max:50',
@@ -184,6 +188,7 @@ class DokterPemeriksaController extends Controller
             $dokter->update([
                 'nama' => $request->nama,
                 'jenis_dokter' => $request->jenis_dokter,
+                'no_telepon' => $request->no_telepon,
                 'status' => $request->status,
             ]);
 
@@ -215,6 +220,7 @@ class DokterPemeriksaController extends Controller
     {
         $request->validate([
             'nama_pemeriksa' => 'required',
+            'no_telepon' => 'nullable|regex:/^[0-9+\-\s]+$/|max:20',
             'status' => 'required',
         ]);
 
@@ -231,6 +237,7 @@ class DokterPemeriksaController extends Controller
             Pemeriksa::create([
                 'id_pemeriksa' => $newId,
                 'nama_pemeriksa' => $request->nama_pemeriksa,
+                'no_telepon' => $request->no_telepon,
                 'status' => $request->status,
             ]);
         });
@@ -242,11 +249,13 @@ class DokterPemeriksaController extends Controller
     {
         $request->validate([
             'nama_pemeriksa' => 'required|string|max:255',
+            'no_telepon' => 'nullable|regex:/^[0-9+\-\s]+$/|max:20',
             'status' => 'required|in:Aktif,Nonaktif',
         ]);
 
         Pemeriksa::where('id_pemeriksa', $id)->update([
             'nama_pemeriksa' => $request->nama_pemeriksa,
+            'no_telepon' => $request->no_telepon,
             'status' => $request->status,
         ]);
 
