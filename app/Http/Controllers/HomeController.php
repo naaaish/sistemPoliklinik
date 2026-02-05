@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\JadwalDokter;
 use App\Models\Artikel;
+use App\Models\Dokter;
+use App\Models\Pemeriksa;
 use Illuminate\Http\Request;
+
 
 class HomeController extends Controller
 {
     public function index(){
-        $jadwalDokter = \App\Models\JadwalDokter::with('dokter')
+        $jadwalDokter = JadwalDokter::with('dokter')
             ->whereHas('dokter', fn ($q) => $q->where('status', 'Aktif'))
             ->orderByRaw("
                 FIELD(hari, 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu')
@@ -19,7 +22,15 @@ class HomeController extends Controller
 
         $articles = Artikel::latest()->take(4)->get();
 
-        return view('home', compact('jadwalDokter', 'articles'));
+        $dokter = Dokter::where('status', 'Aktif')
+            ->orderBy('nama')
+            ->get(['id_dokter','nama','jenis_dokter','no_telepon']);
+
+        $pemeriksa = Pemeriksa::where('status', 'Aktif')
+            ->orderBy('nama_pemeriksa')
+            ->get(['id_pemeriksa','nama_pemeriksa','no_telepon']);
+
+        return view('home', compact('jadwalDokter', 'articles', 'dokter', 'pemeriksa'));
     }
 
     public function tentang()

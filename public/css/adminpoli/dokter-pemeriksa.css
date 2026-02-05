@@ -183,11 +183,11 @@ body{ margin:0; }
   box-shadow: 0 0 0 3px rgba(137,178,217,.25);
 }
 
-/* table: grid (5 kolom) */
+/* table: grid (6 kolom) */
 .dp-table-head,
 .dp-row{
   display:grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1.2fr 1fr 1fr 1fr;
   gap: 16px;
 }
 

@@ -15,6 +15,7 @@ class Pemeriksa extends Model
     protected $fillable = [
         'id_pemeriksa',
         'nama_pemeriksa',
+        'no_telepon',
         'status',
     ];
 }

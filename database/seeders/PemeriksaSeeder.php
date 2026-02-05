@@ -13,6 +13,7 @@ class PemeriksaSeeder extends Seeder
             [
                 'id_pemeriksa' => 'PMR001',
                 'nama_pemeriksa' => 'Sofia Meta Yustika',
+                'no_telepon' => '6285747344470',
                 'status' => 'Aktif',
                 'created_at' => now(),
                 'updated_at' => now(),

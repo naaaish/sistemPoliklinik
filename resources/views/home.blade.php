@@ -58,18 +58,24 @@
             <div class="konsultasi-section">
                 <h4 class="section-label">Tenaga Medis</h4>
                 <div class="konsultasi-buttons">
-                    <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Dokter%20Poliklinik" 
-                       target="_blank" 
-                       class="konsultasi-btn">
-                        <img src="{{ asset('assets/home/doctor.png') }}" alt="Dokter">
-                        <span>Dokter Poliklinik</span>
+                @forelse($dokter as $d)
+                    @php
+                    $hp = preg_replace('/\D+/', '', $d->no_telepon ?? '');
+                    // normalisasi: kalau mulai 0 => jadi 62xxxx
+                    if (strlen($hp) > 0 && $hp[0] === '0') $hp = '62'.substr($hp,1);
+                    $label = trim($d->jenis_dokter ?: 'Dokter') . ' - ' . $d->nama;
+                    $text = rawurlencode("Halo, saya ingin konsultasi dengan {$d->nama}");
+                    @endphp
+
+                    <a href="https://wa.me/{{ $hp }}?text={{ $text }}"
+                    target="_blank"
+                    class="konsultasi-btn">
+                    <img src="{{ asset('assets/home/doctor.png') }}" alt="Dokter">
+                    <span>{{ $label }}</span>
                     </a>
-                    <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Dokter%20Perusahaan" 
-                       target="_blank" 
-                       class="konsultasi-btn">
-                        <img src="{{ asset('assets/home/doctor.png') }}" alt="Dokter">
-                        <span>Dokter Perusahaan</span>
-                    </a>
+                @empty
+                    <div class="konsultasi-empty">Belum ada dokter aktif.</div>
+                @endforelse
                 </div>
             </div>
 
@@ -77,12 +83,23 @@
             <div class="konsultasi-section">
                 <h4 class="section-label">Tenaga Kesehatan</h4>
                 <div class="konsultasi-buttons">
-                    <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Perawat" 
-                       target="_blank" 
-                       class="konsultasi-btn">
-                        <img src="{{ asset('assets/home/chat.png') }}" alt="Perawat">
-                        <span>Perawat</span>
+                @forelse($pemeriksa as $p)
+                    @php
+                    $hp = preg_replace('/\D+/', '', $p->no_telepon ?? '');
+                    if (strlen($hp) > 0 && $hp[0] === '0') $hp = '62'.substr($hp,1);
+                    $label = 'Pemeriksa - ' . $p->nama_pemeriksa;
+                    $text = rawurlencode("Halo, saya ingin konsultasi dengan {$p->nama_pemeriksa}");
+                    @endphp
+
+                    <a href="https://wa.me/{{ $hp }}?text={{ $text }}"
+                    target="_blank"
+                    class="konsultasi-btn">
+                    <img src="{{ asset('assets/home/chat.png') }}" alt="Pemeriksa">
+                    <span>{{ $label }}</span>
                     </a>
+                @empty
+                    <div class="konsultasi-empty">Belum ada pemeriksa aktif.</div>
+                @endforelse
                 </div>
             </div>
 
@@ -90,11 +107,11 @@
             <div class="konsultasi-section">
                 <h4 class="section-label">Apotik</h4>
                 <div class="konsultasi-buttons">
-                    <a href="https://wa.me/6281234567890?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Apoteker" 
+                    <a href="https://wa.me/6283878860366?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Apoteker" 
                        target="_blank" 
                        class="konsultasi-btn">
                         <img src="{{ asset('assets/home/drugs.png') }}" alt="Apoteker">
-                        <span>Apoteker</span>
+                        <span>Apoteker (Okta)</span>
                     </a>
                 </div>
             </div>
