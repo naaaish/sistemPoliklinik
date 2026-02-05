@@ -132,16 +132,15 @@ class KelolaUserController extends Controller
             ], 500);
         }
     }
-
     public function import(Request $request)
     {
-        set_time_limit(0);              // ⏱️ unlimited
-        ini_set('memory_limit', '-1'); 
+        // ⏱️ cegah timeout & memory limit
+        set_time_limit(0);
+        ini_set('memory_limit', '-1');
 
         $request->validate([
             'file' => 'required|mimes:csv,txt'
         ]);
-        
 
         $filePath  = $request->file('file')->getRealPath();
         $delimiter = $this->detectDelimiter($filePath);
@@ -150,62 +149,77 @@ class KelolaUserController extends Controller
         fgetcsv($file, 1000, $delimiter); // skip header
 
         $success = 0;
-        $updated = 0;
+        $skipped = 0;
+        $processedNips = []; // Array untuk track NIP yang sudah diproses dalam batch ini
 
-        
-        while (($row = fgetcsv($file, 1000, $delimiter)) !== false) {
+        DB::beginTransaction();
 
-            // pastikan kolom cukup
-            if (count($row) < 5) continue;
+        try {
+            while (($row = fgetcsv($file, 1000, $delimiter)) !== false) {
 
-            // rapihin data
-            $username  = trim($row[0]);
-            $username  = preg_replace('/^\xEF\xBB\xBF/', '', $username); // bersihin BOM
-            $password  = trim($row[1]);
-            $role      = trim($row[2]);
-            $nama_user = trim($row[3]);
-            $nip       = trim($row[4]);
+                // minimal kolom: username, password, role, nama_user, nip
+                if (count($row) < 5) continue;
 
-            if ($username === '' || $nip === '') continue;
+                // rapihin & bersihin data
+                $username  = trim(preg_replace('/^\xEF\xBB\xBF/', '', $row[0]));
+                $password  = trim($row[1]);
+                $role      = trim($row[2]);
+                $nama_user = trim($row[3]);
+                $nip       = trim($row[4]);
 
-            // 🔑 CEK USER BERDASARKAN NIP ATAU USERNAME
-            $existingUser = DB::table('users')
-                ->where('nip', $nip)
-                ->orWhere('username', $username)
-                ->first();
+                if ($username === '' || $nip === '') continue;
 
-            if ($existingUser) {
-                // ============ UPDATE ============
-                DB::table('users')
-                    ->where('id', $existingUser->id)
-                    ->update([
-                        'username'   => $username,
-                        'role'       => $role,
-                        'nama_user'  => $nama_user,
-                        'nip'        => $nip,
-                        'updated_at' => now(),
-                    ]);
-                $updated++;
-            } else {
-                // ============ INSERT ============
+                // ✅ Skip jika NIP sudah diproses dalam batch ini (untuk handle duplicate dalam CSV yang sama)
+                if (in_array($nip, $processedNips)) {
+                    $skipped++;
+                    continue;
+                }
+
+                // ✅ Cek apakah NIP sudah ada di database
+                $existingUser = DB::table('users')
+                    ->where('nip', $nip)
+                    ->first();
+
+                if ($existingUser) {
+                    // ===== SKIP - Data dengan NIP ini sudah ada =====
+                    $skipped++;
+                    continue;
+                }
+
+                // ===== INSERT - Data baru =====
                 DB::table('users')->insert([
                     'username'   => $username,
-                    'password'   => Hash::make($password),
+                    // bcrypt diringanin khusus import
+                    'password'   => bcrypt($password ?: 'password123', ['rounds' => 8]),
                     'role'       => $role,
                     'nama_user'  => $nama_user,
                     'nip'        => $nip,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+
                 $success++;
+                
+                // ✅ Tandai NIP ini sudah diproses
+                $processedNips[] = $nip;
             }
+
+            fclose($file);
+            DB::commit();
+
+            return back()->with(
+                'success',
+                "Import selesai: {$success} data baru berhasil ditambahkan, {$skipped} data dilewati (NIP sudah ada)"
+            );
+
+        } catch (\Exception $e) {
+            fclose($file);
+            DB::rollBack();
+
+            return back()->with(
+                'error',
+                'Gagal import: ' . $e->getMessage()
+            );
         }
-
-        fclose($file);
-
-        return back()->with(
-            'success',
-            "Import selesai: {$success} data baru, {$updated} data diperbarui"
-        );
     }
 }

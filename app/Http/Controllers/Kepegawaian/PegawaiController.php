@@ -185,6 +185,7 @@ class PegawaiController extends Controller
 
             $rowCount = 0;
             foreach ($rows as $index => $row) {
+                $affectedNips = [];
                 // Lewati baris pertama (Header)
                 if ($index === 0) continue;
                 
@@ -292,8 +293,16 @@ class PegawaiController extends Controller
                         'created_at'         => now(),
                         'updated_at'         => now(),
                     ]);
+                    $affectedNips[$nip] = true;
                 }
                 $rowCount++;
+            }
+            
+            $keluargaController = app(\App\Http\Controllers\Kepegawaian\KeluargaController::class);
+
+            foreach (array_keys($affectedNips) as $nip) {
+                $keluargaController->syncUrutanAnak($nip);
+                $keluargaController->reSyncActiveStatus($nip);
             }
 
             DB::commit();
