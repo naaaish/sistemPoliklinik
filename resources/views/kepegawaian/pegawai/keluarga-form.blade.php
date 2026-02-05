@@ -46,6 +46,21 @@
                             </div>
                         </div>
 
+                        <div class="col-md-6">
+                            <div class="form-row-custom">
+                                <label class="form-label-custom">Status Anggota Keluarga</label>
+
+                                <select name="is_active" class="form-control-custom">
+                                    <option value="1" {{ $keluarga->is_active == 1 ? 'selected' : '' }}>🟢 Aktif</option>
+                                    <option value="0" {{ $keluarga->is_active == 0 ? 'selected' : '' }}>🔴 Non Aktif</option>
+                                </select>
+
+                                <input type="hidden" name="_manual_toggle" value="1">
+
+                            </div>
+                        </div>
+
+
                         {{-- HUBUNGAN KELUARGA --}}
                         <div class="col-md-6">
                             <div class="form-row-custom">
@@ -57,15 +72,6 @@
                                 </select>
                             </div>
                         </div>
-
-                        {{-- URUTAN ANAK (Hanya muncul jika hubungan = anak) --}}
-                        {{-- <div class="col-md-6" id="urutan_anak_row" style="display: none;">
-                            <div class="form-row-custom">
-                                <label class="form-label-custom">Anak Ke-</label>
-                                <input type="number" name="urutan_anak" class="form-control-custom" min="1"
-                                    value="{{ old('urutan_anak', $nextChildNumber ?? '') }}">
-                            </div>
-                        </div> --}}
 
                         {{-- JENIS KELAMIN --}}
                         <div class="col-md-6">

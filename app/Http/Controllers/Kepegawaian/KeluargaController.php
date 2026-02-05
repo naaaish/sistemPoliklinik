@@ -62,6 +62,7 @@ class KeluargaController extends Controller
     
     public function update(Request $request, $id)
     {
+        
         $request->validate([
             'nama_keluarga' => 'required',
             'hubungan_keluarga' => 'required',
@@ -93,13 +94,38 @@ class KeluargaController extends Controller
             'updated_at' => now(),
         ]);
 
+
+        if ($request->has('_manual_toggle')) {
+            DB::table('keluarga')
+                ->where('id_keluarga', $id)
+                ->update([
+                    'is_active' => $request->is_active,
+                    'updated_at' => now(),
+                ]);
+
+            return redirect()
+                ->route('pegawai.show', $keluargaLama->nip)
+                ->with('success', 'Status anggota keluarga berhasil diubah');
+        }
+
+        // ================= UPDATE NORMAL =================
+        DB::table('keluarga')->where('id_keluarga', $id)->update([
+            'hubungan_keluarga' => $request->hubungan_keluarga,
+            'nama_keluarga'     => $request->nama_keluarga,
+            'tgl_lahir'         => $request->tgl_lahir,
+            'jenis_kelamin'     => $request->jenis_kelamin,
+            'updated_at'        => now(),
+        ]);
+
+        // HANYA UPDATE DATA → BARU RESYNC
         $this->reSyncActiveStatus($keluargaLama->nip);
         $this->syncUrutanAnak($keluargaLama->nip);
 
-
-        return redirect()->route('pegawai.show', $keluargaLama->nip)
+        return redirect()
+            ->route('pegawai.show', $keluargaLama->nip)
             ->with('success', 'Data keluarga berhasil diperbarui!');
     }
+    
 
     public function create($nip)
     {

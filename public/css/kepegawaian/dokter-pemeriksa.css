@@ -183,11 +183,11 @@ body{ margin:0; }
   box-shadow: 0 0 0 3px rgba(137,178,217,.25);
 }
 
-/* table: grid (5 kolom) */
+/* table: grid (6 kolom) */
 .dp-table-head,
 .dp-row{
   display:grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1.2fr;
+  grid-template-columns: 2fr 1fr 1.2fr 1fr 1fr 1fr;
   gap: 16px;
 }
 
@@ -539,7 +539,7 @@ body{ margin:0; }
 .dp-jinput{
   height: 38px;
   border: 1px solid #CFE0FF;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0 10px;
   outline:none;
   font-weight: 600;
@@ -549,7 +549,7 @@ body{ margin:0; }
 
 .dp-jinput[type="text"]{ 
   flex: 1;              
-  min-width: 60px;     
+  min-width: 90px;     
 }
 
 .dp-jinput[type="time"]{ 
@@ -765,4 +765,3 @@ button img,
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
-
