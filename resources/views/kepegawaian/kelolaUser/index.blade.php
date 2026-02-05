@@ -136,7 +136,10 @@
             </div>
             
             <div class="csv-modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeCsvModal()">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="closeCsvModal()" 
+                    style="background: #64748b; box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);">
+                    Batal
+                </button>
                 <button type="submit" class="btn btn-primary">Import CSV</button>
             </div>
         </form>
@@ -219,16 +222,15 @@
             </div>
 
             <div class="user-modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeUserModal()">
+                <button type="button" class="btn btn-primary" onclick="closeCsvModal()" 
+                    style="background: #64748b; box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);">
                     Batal
                 </button>
                 <button type="submit" class="btn btn-primary">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
-                    </svg>
                     Reset Password
                 </button>
             </div>
+
         </form>
     </div>
 </div>
@@ -381,6 +383,39 @@ function ucfirst(str) {
 document.getElementById('userModal').addEventListener('click', function (e) {
     if (e.target === this) closeUserModal();
 });
+
+
 </script>
+@if (session('success'))
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: @json(session('success')),
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true
+    });
+});
+</script>
+@endif
+
+@if (session('error'))
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: @json(session('error')),
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true
+    });
+});
+</script>
+@endif
 
 @endpush

@@ -6,7 +6,7 @@
 
     <div class="page-actions">
         <button class="btn-upload-csv" onclick="openCsvModal()">
-            Upload CSV
+            Upload Data Pegawai
         </button>
 
         <a href="{{ route('pegawai.create') }}" class="btn-tambah">
@@ -147,7 +147,7 @@
                 </div>
             </div>
             <div class="csv-modal-footer" style="display:flex; gap:12px; justify-content:flex-end; padding:16px 24px; border-top:2px solid #e5e7eb;">
-                <button type="button" class="btn btn-secondary" onclick="closeCsvModal()"
+                <button type="button" class="btn btn-primary" onclick="closeCsvModal()"
                     style="padding:11px 24px; border:none; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer; background:#64748b; color:white;">Batal</button>
                 <button type="submit" class="btn btn-primary"
                     style="padding:11px 24px; border:none; border-radius:10px; font-weight:600; font-size:14px; cursor:pointer; background:#3b82f6; color:white; box-shadow:0 4px 12px rgba(59,130,246,0.3);">Import File</button>
