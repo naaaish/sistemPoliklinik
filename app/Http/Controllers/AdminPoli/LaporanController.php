@@ -9,7 +9,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\LaporanMultiTipeExport;
 use App\Exports\LaporanSingleTipeExport;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Schema;
 
 class LaporanController extends Controller
 {
@@ -117,7 +116,6 @@ class LaporanController extends Controller
             $namaList = array_values(array_unique($namaList));
             $hubList  = array_values(array_unique($hubList));
 
-            // Biar ga kepanjangan: tampilkan max 3, sisanya jadi "+n"
             $namaShown = array_slice($namaList, 0, 3);
             $hubShown  = array_slice($hubList, 0, 3);
 

@@ -30,7 +30,7 @@ class PendaftaranController extends Controller
     public function searchPegawai(Request $request)
     {
         $q = trim((string) $request->query('q', ''));
-        $query = DB::table('pegawai');
+        $query = DB::table('pegawai')->where('is_active', 1);
 
         if ($q === '') {
             $rows = $query->select('nip', 'nama_pegawai', 'bagian', 'tgl_lahir')
@@ -42,10 +42,14 @@ class PendaftaranController extends Controller
         }
 
         $rows = $query->select('nip', 'nama_pegawai', 'bagian', 'tgl_lahir')
-            ->where('nip', 'like', "%{$q}%")
-            ->orWhere('nama_pegawai', 'like', "%{$q}%")
+            ->where(function ($w) use ($q) {
+                $w->where('nip', 'like', "%{$q}%")
+                ->orWhere('nama_pegawai', 'like', "%{$q}%");
+            })
+            ->orderBy('nip')
             ->limit(5)
             ->get();
+
 
         return response()->json(['ok' => true, 'data' => $rows]);
     }
@@ -54,6 +58,7 @@ class PendaftaranController extends Controller
     {
         $pegawai = DB::table('pegawai')
             ->where('nip', $nip)
+            ->where('is_active', 1)
             ->select('nip', 'nama_pegawai', 'bagian', 'tgl_lahir')
             ->first();
 
@@ -72,33 +77,23 @@ class PendaftaranController extends Controller
 
     public function getKeluargaByNip($nip)
     {
-        $pegawai = DB::table('pegawai')->where('nip', $nip)->first();
+        $pegawai = DB::table('pegawai')
+            ->where('nip', $nip)
+            ->where('is_active', 1)
+            ->first();
         if (!$pegawai) {
             return response()->json(['ok' => false, 'message' => 'NIP tidak ditemukan'], 404);
         }
 
         $keluarga = DB::table('keluarga')
             ->where('nip', $nip)
+            ->where('is_active', 1)
             ->orderByRaw("CASE WHEN hubungan_keluarga = 'pasangan' THEN 0 ELSE 1 END")
             ->orderBy('urutan_anak')
             ->get();
 
-        // hitung umur + covered anak max 3 (umur <= 23)
-        $coveredChildIds = [];
-        foreach ($keluarga->where('hubungan_keluarga', 'anak') as $row) {
-            $umur = Carbon::parse($row->tgl_lahir)->age;
-            if ($umur <= 23 && count($coveredChildIds) < 3) {
-                $coveredChildIds[] = $row->id_keluarga;
-            }
-        }
-
-        $data = $keluarga->map(function ($r) use ($coveredChildIds) {
+        $data = $keluarga->map(function ($r) {
             $umur = Carbon::parse($r->tgl_lahir)->age;
-
-            $covered = true;
-            if ($r->hubungan_keluarga === 'anak') {
-                $covered = in_array($r->id_keluarga, $coveredChildIds, true);
-            }
 
             return [
                 'id_keluarga' => $r->id_keluarga,
@@ -106,7 +101,6 @@ class PendaftaranController extends Controller
                 'hubungan_keluarga' => $r->hubungan_keluarga,
                 'tgl_lahir' => $r->tgl_lahir,
                 'umur' => $umur,
-                'covered' => $covered,
             ];
         })->values();
 
@@ -155,22 +149,13 @@ class PendaftaranController extends Controller
             $validated['petugas'] = 'pemeriksa:' . $idPemeriksaFirst;
         }
 
-        $pegawai = DB::table('pegawai')->where('nip', $validated['nip'])->first();
+        $pegawai = DB::table('pegawai')->where('is_active', 1)->where('nip', $validated['nip'])->first();
         if (!$pegawai) {
             return back()->withInput()->withErrors(['nip' => 'NIP tidak ditemukan di data pegawai.']);
         }
 
         $idKeluarga = null;
-
-        // 1) Pegawai: wajib YBS
-        // if ($validated['tipe_pasien'] === 'pegawai') {
-        //     if ($validated['hub_kel'] !== 'YBS') {
-        //         return back()->withInput()->withErrors(['hub_kel' => 'Tipe Pegawai harus YBS.']);
-        //     }
-        //     $idKeluarga = null;
-        // }
-
-        // 2) Keluarga: wajib Pasangan/Anak + wajib id_keluarga
+        
         if ($validated['tipe_pasien'] === 'keluarga') {
             if ($validated['hub_kel'] === 'YBS') {
                 return back()->withInput()->withErrors(['hub_kel' => 'Tipe Keluarga tidak boleh YBS.']);
@@ -182,6 +167,7 @@ class PendaftaranController extends Controller
             $kel = DB::table('keluarga')
                 ->where('id_keluarga', $validated['id_keluarga'])
                 ->where('nip', $pegawai->nip)
+                ->where('is_active', 1)
                 ->first();
 
             if (!$kel) {
@@ -193,29 +179,6 @@ class PendaftaranController extends Controller
                 return back()->withInput()->withErrors(['hub_kel' => 'Hubungan keluarga tidak sesuai data keluarga.']);
             }
 
-            // aturan covered anak: max 3 anak umur <= 23
-            if ($kel->hubungan_keluarga === 'anak') {
-                $anak = DB::table('keluarga')
-                    ->where('nip', $pegawai->nip)
-                    ->where('hubungan_keluarga', 'anak')
-                    ->orderBy('urutan_anak')
-                    ->get();
-
-                $coveredIds = [];
-                foreach ($anak as $a) {
-                    $umur = \Carbon\Carbon::parse($a->tgl_lahir)->age;
-                    if ($umur <= 23 && count($coveredIds) < 3) {
-                        $coveredIds[] = $a->id_keluarga;
-                    }
-                }
-
-                if (!in_array($kel->id_keluarga, $coveredIds, true)) {
-                    return back()->withInput()->withErrors([
-                        'id_keluarga' => 'Anak ini tidak termasuk tanggungan (max 3 anak umur <= 23).'
-                    ]);
-                }
-            }
-
             $idKeluarga = $kel->id_keluarga;
         }
 
@@ -224,7 +187,6 @@ class PendaftaranController extends Controller
             if ($validated['hub_kel'] === 'YBS') {
                 $idKeluarga = null;
             } else {
-                // sama kayak keluarga: wajib pilih id_keluarga + validasi covered anak
                 if (empty($validated['id_keluarga'])) {
                     return back()->withInput()->withErrors(['id_keluarga' => 'Pilih anggota keluarga.']);
                 }
@@ -232,6 +194,7 @@ class PendaftaranController extends Controller
                 $kel = DB::table('keluarga')
                     ->where('id_keluarga', $validated['id_keluarga'])
                     ->where('nip', $pegawai->nip)
+                    ->where('is_active', 1)
                     ->first();
 
                 if (!$kel) {
@@ -241,28 +204,6 @@ class PendaftaranController extends Controller
                 $expected = ($validated['hub_kel'] === 'Pasangan') ? 'pasangan' : 'anak';
                 if ($kel->hubungan_keluarga !== $expected) {
                     return back()->withInput()->withErrors(['hub_kel' => 'Hubungan keluarga tidak sesuai data keluarga.']);
-                }
-
-                if ($kel->hubungan_keluarga === 'anak') {
-                    $anak = DB::table('keluarga')
-                        ->where('nip', $pegawai->nip)
-                        ->where('hubungan_keluarga', 'anak')
-                        ->orderBy('urutan_anak')
-                        ->get();
-
-                    $coveredIds = [];
-                    foreach ($anak as $a) {
-                        $umur = \Carbon\Carbon::parse($a->tgl_lahir)->age;
-                        if ($umur <= 23 && count($coveredIds) < 3) {
-                            $coveredIds[] = $a->id_keluarga;
-                        }
-                    }
-
-                    if (!in_array($kel->id_keluarga, $coveredIds, true)) {
-                        return back()->withInput()->withErrors([
-                            'id_keluarga' => 'Anak ini tidak termasuk tanggungan (max 3 anak umur <= 23).'
-                        ]);
-                    }
                 }
 
                 $idKeluarga = $kel->id_keluarga;
