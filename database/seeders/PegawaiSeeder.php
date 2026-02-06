@@ -10,8 +10,22 @@ class PegawaiSeeder extends Seeder
 {
     public function run(): void
     {
-        // DB::table('pegawai')->insert([
-        //     [
+        DB::table('pegawai')->insert([
+            [
+                'nip' => '001',
+                'nama_pegawai' => 'Poliklinik',
+                'jenis_kelamin' => '-',
+                'tgl_lahir' => Carbon::now()->toDateString(),
+                'no_telp' => '-',
+                'email' => '-',
+                'alamat' => '-',
+                'jabatan' => '-',
+                'bagian' => '-',
+                'is_active' => 1,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            // [
         //         'nip' => '198765432001',
         //         'nama_pegawai' => 'Ahmad Pratama',
         //         'jenis_kelamin' => 'Laki-laki',
@@ -35,21 +49,6 @@ class PegawaiSeeder extends Seeder
         //         'alamat' => 'Jl. Sudirman No. 5, Bandung',
         //         'jabatan' => 'Asisten Manajer',
         //         'bagian' => 'Keuangan',
-        //         'is_active' => 1,
-        //         'created_at' => Carbon::now(),
-        //         'updated_at' => Carbon::now(),
-        //     ],
-        //     // untuk poliklinik
-        //     [
-        //         'nip' => '001',
-        //         'nama_pegawai' => 'Poliklinik',
-        //         'jenis_kelamin' => '-',
-        //         'tgl_lahir' => Carbon::now()->toDateString(),
-        //         'no_telp' => '-',
-        //         'email' => '-',
-        //         'alamat' => '-',
-        //         'jabatan' => '-',
-        //         'bagian' => '-',
         //         'is_active' => 1,
         //         'created_at' => Carbon::now(),
         //         'updated_at' => Carbon::now(),
@@ -127,7 +126,6 @@ class PegawaiSeeder extends Seeder
         //         'created_at' => Carbon::now(),
         //         'updated_at' => Carbon::now(),
         //     ]
-
-        // ]);
+        ]);
     }
 }

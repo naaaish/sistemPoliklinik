@@ -397,49 +397,14 @@ async function fetchPegawai(nip){
   const res = await fetch(`/adminpoli/api/pegawai/${encodeURIComponent(nip)}`);
   const j = await res.json().catch(()=> ({}));
   if(!res.ok || !j.ok) throw new Error(j.message || 'NIP tidak ditemukan');
-  return j.data; // { nip, nama_pegawai, bagian, tgl_lahir }
+  return j.data;
 }
 
 async function fetchKeluarga(nip){
   const res = await fetch(`/adminpoli/api/pegawai/${encodeURIComponent(nip)}/keluarga`);
   const j = await res.json().catch(()=> ({}));
   if(!res.ok || !j.ok) throw new Error(j.message || 'Gagal ambil keluarga');
-  return j.data; // [{id_keluarga,nama,hubungan_keluarga,tgl_lahir,umur,covered}]
-}
-
-// === Step 1: NIP -> isi nama pegawai + bagian (STOP) ===
-async function onNipDone(){
-  const nip = (nipEl.value || '').trim();
-  pegawaiData = null;
-  keluargaData = [];
-  resetNamaPasien();
-
-  if(!nip) return;
-
-  const p = await fetchPegawai(nip);
-  pegawaiData = p;
-
-  namaPegEl.value = p.nama_pegawai || '';
-
-  bagianEl.value = p.bagian ?? p.bagian ?? '';
-
-  // IMPORTANT: di sini STOP. Jangan isi nama_pasien dulu.
-  // === AUTO pensiunan dari bagian ===
-  const bagianVal = (bagianEl.value || '').trim().toLowerCase();
-  const isPensiunan = bagianVal === 'pensiunan';
-
-  // kalau pensiunan -> paksa tipe_pasien = pensiunan
-  if (isPensiunan) {
-    tipeEl.value = 'pensiunan';
-    tipeEl.disabled = false;
-  } else {
-    if (tipeEl.disabled) tipeEl.disabled = false;
-    // kalau sebelumnya kepaksa pensiunan, balikin ke pegawai default
-    if (tipeEl.value === 'pensiunan') tipeEl.value = 'pegawai';
-  }
-  if (tipeEl.value) {
-    onTipeChange().catch(()=>{});
-  }
+  return j.data;
 }
 
 // === Step 2: pilih tipe -> populate dropdown nama pasien ===
@@ -506,7 +471,7 @@ async function onTipeChange(){
     }
 
     // anak: hanya yang covered
-    if(k.hubungan_keluarga === 'anak' && k.covered){
+    if(k.hubungan_keluarga === 'anak'){
       opts +=
         `<option value="${escapeHtml(k.nama)}"
           data-hub="Anak"
