@@ -6,7 +6,7 @@
 
     <div class="page-actions">
         <button class="btn-upload-csv" onclick="openCsvModal()">
-            Upload Data Pegawai
+            Upload Data
         </button>
 
         <a href="{{ route('pegawai.create') }}" class="btn-tambah">

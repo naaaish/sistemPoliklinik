@@ -182,8 +182,9 @@
 }
 
 .info-label {
-    font-size: 12px;
-    opacity: 0.8;
+    font-size: 16px;
+    font-style: bold;
+    opacity: 1.0;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;

@@ -152,8 +152,8 @@ class LaporanController extends Controller
 
         elseif ($jenis === 'dokter') {
 
-            $tarifPoliklinik = 100000;
-            $gajiPerusahaan  = 8000000;
+            $tarifPoliklinik = 50000;
+            $gajiPerusahaan  = 5000000;
 
             $query = DB::table('pemeriksaan')
                 ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
@@ -495,7 +495,7 @@ class LaporanController extends Controller
                 $row->harga_satuan = (int) ($o->harga ?? 0);
 
                 // subtotal per baris (AMAN)
-                $row->subtotal_obat = $row->jumlah * $row->harga_satuan;
+                $row->subtotal_obat = $row->jumlah * $row->harga_satuan + 1000;
 
 
                 // total per pasien (row pertama saja)
