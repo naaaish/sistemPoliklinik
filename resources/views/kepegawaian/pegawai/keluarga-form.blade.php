@@ -49,13 +49,19 @@
                         <div class="col-md-6">
                             <div class="form-row-custom">
                                 <label class="form-label-custom">Status Anggota Keluarga</label>
+                                    <select name="is_active" class="form-control-custom">
+                                        <option value="1"
+                                            {{ ($mode === 'edit' && $keluarga->is_active == 1) || $mode === 'create' ? 'selected' : '' }}>
+                                            🟢 Aktif
+                                        </option>
+                                        <option value="0"
+                                            {{ $mode === 'edit' && $keluarga->is_active == 0 ? 'selected' : '' }}>
+                                            🔴 Non Aktif
+                                        </option>
+                                    </select>
 
-                                <select name="is_active" class="form-control-custom">
-                                    <option value="1" {{ $keluarga->is_active == 1 ? 'selected' : '' }}>🟢 Aktif</option>
-                                    <option value="0" {{ $keluarga->is_active == 0 ? 'selected' : '' }}>🔴 Non Aktif</option>
-                                </select>
-
-                                <input type="hidden" name="_manual_toggle" value="1">
+                                    {{-- penanda kalau ini toggle manual --}}
+                                    <input type="hidden" name="manual_toggle" value="1">
 
                             </div>
                         </div>

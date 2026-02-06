@@ -193,47 +193,33 @@ class PegawaiController extends Controller
             $rowCount = 0;
             foreach ($rows as $index => $row) {
                 $affectedNips = [];
-                // Lewati baris pertama (Header)
-                if ($index === 0) continue;
+                if ($index === 0) continue;    
+                if (empty($row[1])) continue;
                 
-                // Lewati jika kolom pertama (NIP) kosong
-                if (empty($row[0])) continue;
+                $val = function($i) use ($row) {
+                    return isset($row[$i]) && trim($row[$i]) !== '' ? trim($row[$i]) : null;
+                };
 
+
+                // Mapping: 0:NIP, 1:Nama, 2:NIK, 3:JK, 4:TglLahir, 5:Telp, 6:Email, 7:Alamat, 8:Jabatan, 9:Bagian
                 if ($type === 'pegawai') {
-                    // Mapping: 0:NIP, 1:Nama, 2:NIK, 3:JK, 4:TglLahir, 5:Telp, 6:Email, 7:Alamat, 8:Jabatan, 9:Bagian
                     DB::table('pegawai')->updateOrInsert(
-                        // B = NIP (index 1)
-                        ['nip' => $row[1]],
+                        ['nip' => trim($row[1])], // NIP
 
                         [
-                            // C = Nama
-                            'nama_pegawai'  => $row[2],
-
-                            // D = Gender
-                            'jenis_kelamin' => $row[3] ?? null,
-
-                            // E = Tanggal Lahir
+                            'nama_pegawai'  => trim($row[2]),     
+                            'jenis_kelamin' => trim($row[3]) ?? null,
                             'tgl_lahir'     => $this->transformDate($row[4]),
-
-                            // F = Telp
-                            'no_telp'       => $row[5] ?? null,
-
-                            // tidak harus ada email
-                            'email'         => null,
-
-                            // G = Alamat
-                            'alamat'        => $row[6] ?? null,
-
-                            // H = Jabatan
-                            'jabatan'       => $row[7] ?? null,
-
-                            // I = Bagian
-                            'bagian'        => $row[8] ?? null,
-
+                            'no_telp'       => trim($row[5]) ?? null,
+                            'email'         => trim($row[6]) ?? null,
+                            'alamat'        => trim($row[7]) ?? null,
+                            'jabatan'       => trim($row[8]) ?? null, 
+                            'bagian'        => trim($row[9]) ?? null, 
                             'is_active'     => 1,
-                            'updated_at'    => now()
+                            'updated_at'    => now(),
                         ]
                     );
+
                 } else {
                     // ===== KELUARGA =====
 
