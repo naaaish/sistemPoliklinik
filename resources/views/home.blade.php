@@ -63,8 +63,8 @@
                     $hp = preg_replace('/\D+/', '', $d->no_telepon ?? '');
                     // normalisasi: kalau mulai 0 => jadi 62xxxx
                     if (strlen($hp) > 0 && $hp[0] === '0') $hp = '62'.substr($hp,1);
-                    $label = trim($d->jenis_dokter ?: 'Dokter') . ' - ' . $d->nama;
-                    $text = rawurlencode("Halo, saya ingin konsultasi dengan {$d->nama}");
+                    $label = $d->nama;
+                    $text = rawurlencode("Halo, saya ingin konsultasi dengan {$label}");
                     @endphp
 
                     <a href="https://wa.me/{{ $hp }}?text={{ $text }}"
@@ -87,8 +87,8 @@
                     @php
                     $hp = preg_replace('/\D+/', '', $p->no_telepon ?? '');
                     if (strlen($hp) > 0 && $hp[0] === '0') $hp = '62'.substr($hp,1);
-                    $label = 'Pemeriksa - ' . $p->nama_pemeriksa;
-                    $text = rawurlencode("Halo, saya ingin konsultasi dengan {$p->nama_pemeriksa}");
+                    $label = $p->nama_pemeriksa;
+                    $text = rawurlencode("Halo, saya ingin konsultasi dengan {$label}");
                     @endphp
 
                     <a href="https://wa.me/{{ $hp }}?text={{ $text }}"
