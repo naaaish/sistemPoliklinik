@@ -26,14 +26,34 @@
 }
 
 .brand img{
-    width:34px;
+    height: 45px;
+    width: 40px;
 }
 
 .brand span{
+    letter-spacing:.6px;
+}
+
+.brand-text{
+    display:flex;
+    flex-direction:column;
+    line-height:1.1;
+}
+
+.brand-title{
     font-size:24px;
     font-weight:700;
     letter-spacing:.6px;
+    color:#F0E3D3;
 }
+
+.brand-subtitle{
+    font-size:12px;
+    font-weight:300;
+    letter-spacing:.4px;
+    color:#D7C0A3;
+}
+
 
 .nav-menu{
     display:flex;
@@ -71,8 +91,6 @@
 .nav-menu a:hover::after{
     width:100%;
 }
-
-
 
 .logout-btn{
     background:white;
