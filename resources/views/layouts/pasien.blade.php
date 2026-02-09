@@ -27,7 +27,6 @@
 <nav class="navbar-pasien">
     <a href="{{ route('home') }}" class="brand">
         <img src="{{ asset('images/hetorica.png') }}">
-
     </a>
 
     <div class="nav-menu">
