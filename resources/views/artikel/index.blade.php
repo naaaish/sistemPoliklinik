@@ -60,5 +60,21 @@
         @endforelse
     </div>
 
+    {{-- PAGINATION --}}
+    @if($articles->total() > 0)
+    <div class="pagination-wrapper">
+        <div class="pagination-info">
+            Halaman {{ $articles->currentPage() }} dari {{ $articles->lastPage() }}
+            <span class="total-articles">({{ $articles->total() }} artikel)</span>
+        </div>
+        
+        @if($articles->hasPages())
+        <div class="pagination-links">
+            {{ $articles->links('pagination::bootstrap-4') }}
+        </div>
+        @endif
+    </div>
+    @endif
+
 </div>
 @endsection

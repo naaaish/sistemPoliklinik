@@ -21,9 +21,11 @@ class ArtikelController extends Controller
             $query->where('judul_artikel', 'like', '%' . $request->search . '%');
         }
 
+        // PAGINATION - 8 artikel per halaman
         $articles = $query
             ->orderBy('tanggal', 'desc')
-            ->get();
+            ->paginate(12)
+            ->appends($request->except('page'));
 
         return view('artikel.index', compact('articles'));
     }
