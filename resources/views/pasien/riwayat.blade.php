@@ -54,10 +54,13 @@
                             <b>Hubungan:</b>
                             {{ ucfirst($keluargaAktif->hubungan_keluarga) }}
                         </p>
-
                         <p>
                             <b>Tanggal Lahir:</b>
-                            {{ \Carbon\Carbon::parse($keluargaAktif->tgl_lahir)->translatedFormat('d F Y') }}
+                            @if(!empty($keluargaAktif->tgl_lahir))
+                                {{ \Carbon\Carbon::parse($keluargaAktif->tgl_lahir)->translatedFormat('d F Y') }}
+                            @else
+                                -
+                            @endif
                         </p>
                         <p><b>Bagian:</b> {{ $pegawai->bagian ?? '-' }}</p>
                     </div>

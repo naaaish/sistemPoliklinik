@@ -35,7 +35,7 @@ class AuthController extends Controller
             $role = strtolower(Auth::user()->role);
 
             if ($role === 'pasien') {
-                return redirect()->route('pasien.riwayat');
+                return redirect()->route('home');
             }
 
             if ($role === 'adminpoli') {
