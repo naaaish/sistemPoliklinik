@@ -103,9 +103,9 @@
                 </div>
             </div>
 
-            {{-- APOTIK --}}
+            {{-- APOTEK --}}
             <div class="konsultasi-section">
-                <h4 class="section-label">Apotik</h4>
+                <h4 class="section-label">Apotek</h4>
                 <div class="konsultasi-buttons">
                     <a href="https://wa.me/6283878860366?text=Halo,%20saya%20ingin%20konsultasi%20dengan%20Apoteker" 
                        target="_blank" 
