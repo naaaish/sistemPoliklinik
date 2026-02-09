@@ -193,25 +193,10 @@ body{
     border-radius:50%;
 }
 
-.login-header h2{
-    font-size:30px;
-    font-weight:700;
-    letter-spacing:.8px;
-    position:relative;
-    z-index:2;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    /* Opacity sedikit dikurangi supaya lebih soft */
-    opacity: 0.98;
+.login-header img {
+    height: 75px;
+    width: 302.5px;
 }
-
-.login-header p{
-    margin-top:10px;
-    opacity:.88; /* Dikurangi dari .92 supaya lebih soft */
-    font-size:15px;
-    position:relative;
-    z-index:2;
-}
-
 /* ========== BODY ========== */
 
 .login-body{
@@ -523,7 +508,7 @@ input::placeholder{
 <div class="login-container">
 
     <div class="login-header">
-        <h2>HETORICA</h2>
+        <img src="{{ asset('images/hetorica.png') }}">
         <p>Silakan login untuk melanjutkan</p>
     </div>
 

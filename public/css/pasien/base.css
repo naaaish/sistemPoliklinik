@@ -20,40 +20,15 @@
 .brand{
     display:flex;
     align-items:center;
-    gap:14px;
+    gap:8px;
     text-decoration:none;
     color:white;
 }
 
 .brand img{
-    height: 45px;
-    width: 40px;
+    height: 75px;
+    width: 302.5px;
 }
-
-.brand span{
-    letter-spacing:.6px;
-}
-
-.brand-text{
-    display:flex;
-    flex-direction:column;
-    line-height:1.1;
-}
-
-.brand-title{
-    font-size:24px;
-    font-weight:700;
-    letter-spacing:.6px;
-    color:#F0E3D3;
-}
-
-.brand-subtitle{
-    font-size:12px;
-    font-weight:300;
-    letter-spacing:.4px;
-    color:#D7C0A3;
-}
-
 
 .nav-menu{
     display:flex;
@@ -61,7 +36,7 @@
     gap:32px;
 }
 
-.nav-menu a{
+.nav-menu a{  
     color:white;
     text-decoration:none;
     font-weight:500;

@@ -155,6 +155,12 @@ class LaporanController extends Controller
             $tarifPoliklinik = 50000;
             $gajiPerusahaan  = 5000000;
 
+            $dokterPerusahaanList = DB::table('dokter')
+                ->where('jenis_dokter', 'Dokter Perusahaan')
+                ->get();
+
+
+
             $query = DB::table('pemeriksaan')
                 ->join('pendaftaran', 'pemeriksaan.id_pendaftaran', '=', 'pendaftaran.id_pendaftaran')
                 ->join('dokter', 'pendaftaran.id_dokter', '=', 'dokter.id_dokter')
@@ -230,29 +236,30 @@ class LaporanController extends Controller
             // =======================
             // DOKTER PERUSAHAAN
             // =======================
-            $dokterPerusahaan = $rows
-                ->where('jenis_dokter', 'Dokter Perusahaan')
-                ->groupBy('id_dokter')
-                ->map(function ($items) use ($gajiPerusahaan, $dari, $sampai) {
-                    
-                    // Hitung bulan gaji berdasarkan periode
-                    $bulanGaji = $this->hitungBulanGaji($dari, $sampai);
-                    $totalGaji = $bulanGaji->count() * $gajiPerusahaan;
-                    
-                    return (object) [
-                        'id_dokter'    => $items->first()->id_dokter,
-                        'nama_dokter'  => $items->first()->nama_dokter,
-                        'pasien'       => $items->map(function ($p) {
-                            return (object) [
-                                'nip'          => $p->nip,
-                                'nama_pasien'  => $p->nama_pasien,
-                                'tanggal'      => $p->tanggal,
-                            ];
-                        }),
-                        'total_pasien' => $items->count(),
-                        'bulanGaji'    => $bulanGaji,
-                        'gaji'         => $totalGaji
-                    ];
+            $dokterPerusahaan = $dokterPerusahaanList->map(function ($dokter) use ($rows, $gajiPerusahaan, $dari, $sampai) {
+
+                // bulan gaji berdasarkan tanggal 25
+                $bulanGaji = $this->hitungBulanGaji($dari, $sampai);
+
+                // pasien (kalau ada)
+                $pasien = $rows
+                    ->where('id_dokter', $dokter->id_dokter)
+                    ->map(function ($p) {
+                        return (object)[
+                            'nip' => $p->nip,
+                            'nama_pasien' => $p->nama_pasien,
+                            'tanggal' => $p->tanggal,
+                        ];
+                    });
+
+                return (object)[
+                    'id_dokter'    => $dokter->id_dokter,
+                    'nama_dokter'  => $dokter->nama,
+                    'pasien'       => $pasien,
+                    'total_pasien' => $pasien->count(), // bisa 0
+                    'bulanGaji'    => $bulanGaji,
+                    'gaji'         => $bulanGaji->count() * $gajiPerusahaan,
+                ];
                 })
                 ->values();
 
@@ -494,12 +501,26 @@ class LaporanController extends Controller
                 $row->satuan       = $o ? $o->satuan : '-';
                 $row->harga_satuan = (int) ($o->harga ?? 0);
 
-                // subtotal per baris (AMAN)
-                $row->subtotal_obat = $row->jumlah * $row->harga_satuan + 1000;
+
+                // subtotal per obat (hanya kalau ada obat)
+                if ($o && $row->jumlah > 0) {
+                    $row->subtotal_obat = ($row->jumlah * $row->harga_satuan) + 1000;
+                } else {
+                    $row->subtotal_obat = 0;
+                }
+                // total obat per pasien (HANYA di row pertama)
+                if ($i === 0) {
+                    $row->total_obat_pasien = $obat->sum(function ($x) {
+                        if ((int)$x->jumlah > 0) {
+                            return ((int)$x->jumlah * (int)$x->harga) + 1000;
+                        }
+                        return 0;
+                    });
+                } else {
+                    $row->total_obat_pasien = null;
+                }
 
 
-                // total per pasien (row pertama saja)
-                $row->total_obat_pasien = ($i === 0) ? $totalObat : null;
 
                 // penanda row pertama (dipakai blade git)
                 $row->is_first = ($i === 0);
@@ -749,8 +770,8 @@ class LaporanController extends Controller
         $dari   = $request->dari;
         $sampai = $request->sampai;
 
-        $tarifPoliklinik = 100000;
-        $gajiPerusahaan  = 8000000;
+        $tarifPoliklinik = 50000;
+        $gajiPerusahaan  = 5000000;
 
         $rows = DB::table('pemeriksaan')
             ->join('pendaftaran','pemeriksaan.id_pendaftaran','=','pendaftaran.id_pendaftaran')
@@ -821,6 +842,10 @@ class LaporanController extends Controller
         foreach (range('A','D') as $c) $sheetPoli->getColumnDimension($c)->setAutoSize(true);
 
         /* ================= SHEET 2 — DOKTER PERUSAHAAN ================= */
+        $dokterPerusahaanList = DB::table('dokter')
+            ->where('jenis_dokter', 'Dokter Perusahaan')
+            ->get();
+
         $sheetPer = $spreadsheet->createSheet();
         $sheetPer->setTitle('Dokter Perusahaan');
 
@@ -831,22 +856,22 @@ class LaporanController extends Controller
         $row += 2;
 
         $bulanGaji = $this->hitungBulanGaji($dari, $sampai);
-        $dokterPerusahaan = $rows->where('jenis_dokter','Dokter Perusahaan')->groupBy('id_dokter');
 
-        foreach ($dokterPerusahaan as $items) {
-            $namaDokter = $items->first()->nama_dokter;
+        foreach ($dokterPerusahaanList as $dokter) {
 
-            $sheetPer->setCellValue("A$row",$namaDokter);
+            $sheetPer->setCellValue("A$row", $dokter->nama);
             $sheetPer->mergeCells("A$row:B$row");
             $sheetPer->getStyle("A$row")->getFont()->setBold(true);
             $row++;
 
+            // Header
             $sheetPer->setCellValue("A$row",'Periode');
             $sheetPer->setCellValue("B$row",'Gaji');
             $sheetPer->getStyle("A$row:B$row")->getFont()->setBold(true);
             $row++;
 
             $totalGaji = 0;
+
             foreach ($bulanGaji as $bulan) {
                 $sheetPer->setCellValue("A$row",'Bulan '.$bulan);
                 $sheetPer->setCellValue("B$row",$gajiPerusahaan);
@@ -854,11 +879,13 @@ class LaporanController extends Controller
                 $row++;
             }
 
+            // TOTAL
             $sheetPer->setCellValue("A$row",'TOTAL');
             $sheetPer->setCellValue("B$row",$totalGaji);
             $sheetPer->getStyle("A$row:B$row")->getFont()->setBold(true);
             $row += 2;
         }
+
 
         foreach (range('A','B') as $c) $sheetPer->getColumnDimension($c)->setAutoSize(true);
 
@@ -885,10 +912,8 @@ class LaporanController extends Controller
         // Header Judul
         $sheet->setCellValue('A1', 'LAPORAN OPERASIONAL KESELURUHAN (DETAIL)');
         $sheet->mergeCells('A1:Y1');
-        $sheet->getStyle('A1')->applyFromArray([
-            'font' => ['bold' => true, 'size' => 14],
-            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER]
-        ]);
+        $sheet->mergeCells('A1:AA1');
+        $sheet->mergeCells('A2:AA2');
 
         // Baris Periode
         $periodeText = ($dari && $sampai) 
@@ -914,12 +939,26 @@ class LaporanController extends Controller
         }
         
         // Style Header Biru
-        $sheet->getStyle('A4:Y4')->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '4472C4']],
-            'alignment' => ['horizontal' => 'center'],
-            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]
+        $sheet->getStyle('A4:AA4')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF']
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '4472C4']
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'vertical'   => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+            ],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                ]
+            ]
         ]);
+
 
         $row++;
         $no = 1;
@@ -933,9 +972,9 @@ class LaporanController extends Controller
                     $i === 0 ? $no++ : '',
                     $i === 0 ? $first->tanggal : '',
                     $i === 0 ? $first->nama_pegawai : '',
-                    $i === 0 ? $first->umur : '',
                     $i === 0 ? $first->bagian : '',
                     $i === 0 ? $first->nama_pasien : '',
+                    $i === 0 ? $first->umur : '',
                     $i === 0 ? $first->hub_kel : '',
                     $i === 0 ? $first->sistol : '',
                     $i === 0 ? $first->diastol : '',
@@ -970,17 +1009,39 @@ class LaporanController extends Controller
         // Total Tagihan
         $row++;
         $sheet->setCellValue("A$row", 'TOTAL TAGIHAN PERIODE');
-        $sheet->mergeCells("A$row:W$row");
-        $sheet->setCellValue("X$row", $totalTagihan);
-        $sheet->getStyle("A$row:X$row")->getFont()->setBold(true);
+        $sheet->mergeCells("A$row:Y$row");
+        $sheet->setCellValue("Z$row", $totalTagihan);
+
+        $sheet->getStyle("A$row:Z$row")->applyFromArray([
+            'font' => ['bold' => true],
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                ]
+            ]
+        ]);
+
+        $sheet->getStyle("Z$row")
+            ->getNumberFormat()
+            ->setFormatCode('#,##0');
+
+        $sheet->getStyle("A$row:AA$row")->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+                ]
+            ]
+        ]);
+
         
         // Format Rupiah untuk Total
         $sheet->getStyle("X$row")->getNumberFormat()->setFormatCode('#,##0');
 
         // Auto Size Kolom
-        foreach (range('A', 'Y') as $c) {
+        foreach (range('A', 'Z') as $c) {
             $sheet->getColumnDimension($c)->setAutoSize(true);
         }
+        $sheet->getColumnDimension('AA')->setAutoSize(true);
 
         // Download
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);

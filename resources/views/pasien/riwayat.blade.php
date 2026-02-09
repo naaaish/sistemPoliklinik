@@ -59,12 +59,13 @@
                             <b>Tanggal Lahir:</b>
                             {{ \Carbon\Carbon::parse($keluargaAktif->tgl_lahir)->translatedFormat('d F Y') }}
                         </p>
+                        <p><b>Bagian:</b> {{ $pegawai->bagian ?? '-' }}</p>
                     </div>
 
                     <div>
                         <p><b>NIP:</b> {{ $pegawai->nip ?? '-' }}</p>
                         <p><b>Nama Pegawai:</b> {{ $pegawai->nama_pegawai ?? '-' }}</p>
-                        <p><b>Bagian:</b> {{ $pegawai->bagian ?? '-' }}</p>
+                        <p><b>Jabatan:</b> {{ $pegawai->jabatan ?? '-' }}</p>
                     </div>
                 </div>
 
