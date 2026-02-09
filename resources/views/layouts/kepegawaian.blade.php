@@ -122,17 +122,19 @@
                 <span>Laporan</span>
             </a>
 
+            {{-- ✅ FIX --}}
             <a href="{{ route('kepegawaian.dokter_pemeriksa.index') }}"
-               class="{{ request()->is('kepegawaian/dokter_pemeriksa*') ? 'active' : '' }}">
+            class="{{ request()->routeIs('kepegawaian.dokter_pemeriksa*') ? 'active' : '' }}">
                 <img src="{{ asset('assets/adminPoli/doctor.png') }}" alt="dokter">
                 <span>Dokter & Pemeriksa</span>
             </a>
 
+            {{-- ✅ FIX --}}
             <a href="{{ route('kepegawaian.kelolaUser.index') }}"
-               class="{{ request()->is('kepegawaian/kelolaUser*') ? 'active' : '' }}">
+            class="{{ request()->routeIs('kepegawaian.kelolaUser*') ? 'active' : '' }}">
                 <img src="{{ asset('assets/adminPoli/akun.png') }}" alt="user">
                 <span>Kelola User</span>
-            </a>    
+            </a>   
         </div>
 
         <form action="{{ route('logout') }}" method="POST" class="logout-form">

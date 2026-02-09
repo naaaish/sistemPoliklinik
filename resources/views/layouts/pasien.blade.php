@@ -26,13 +26,8 @@
 
 <nav class="navbar-pasien">
     <a href="{{ route('home') }}" class="brand">
-        <img src="{{ asset('images/logo.png') }}">
-        <div class="brand-text">
-        <span class="brand-title">HETORICA</span>
-        <span class="brand-subtitle">
-            Health Monitoring Care Application
-        </span>
-    </div>
+        <img src="{{ asset('images/hetorica.png') }}">
+
     </a>
 
     <div class="nav-menu">

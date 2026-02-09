@@ -14,7 +14,7 @@
     <div class="about-card-main">
         <div class="about-flex">
             <div class="about-icon-box">
-                <i class="fas fa-hospital-user"></i>
+                <img src="{{ asset('images/logo.png') }}">
             </div>
             <div class="about-text">
                 <h3>Poliklinik PT PLN Indonesia Power UBP Mrica</h3>
