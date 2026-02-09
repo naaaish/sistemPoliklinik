@@ -36,19 +36,30 @@ body{
 }
 
 .ap-brand{
-  padding: 32px 18px 8px 18px;
+  align-items:center;
 }
+
 .ap-brand__title{
   color: var(--cyan);
   font-size: 24px;
   font-weight: 600;
+  padding-top: 8px;
 }
+
+.ap-brand__title img{
+  align-items: center;
+  height: 56.25px;
+  width: 226.875px;
+}
+
 .ap-brand__subtitle{
   margin-top: 12px;
-  color: var(--cyan);
+  color: white;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: .88px;
+  padding: 2px 2px;
+  text-align: center;
 }
 
 .ap-sep{
