@@ -21,10 +21,23 @@
     display:inline-flex;
     align-items:center;
     gap:10px;
-    color:#bff7ff;
+    color:#ffffff;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 10px 20px;
+    border-radius: 10px;
     text-decoration:none;
     font-weight:600;
     margin-bottom:25px;
+    transition: all 0.3s ease;
+}
+
+.artikel-kembali:hover{
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateX(-5px);
+    color: #ffffff;
 }
 
 .artikel-hero h1{
@@ -55,12 +68,18 @@
 /* COVER */
 .artikel-cover{
     margin-bottom:50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .artikel-cover img{
-    width:100%;
-    border-radius:16px;
-    object-fit:cover;
+    width: 100%;
+    max-width: 800px;
+    max-height: 450px;
+    border-radius: 16px;
+    object-fit: cover;
+    display: block;
 }
 
 /* BODY */
