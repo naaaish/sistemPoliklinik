@@ -63,38 +63,64 @@
         height: 24px;
     }
 
-    /* ============================= */
-    /* SIDEBAR */
-    /* ============================= */
-    .sidebar {
-        width: 240px;
-        height: 100vh;
-        position: fixed;
-        left: 0;
-        top: 0;
-        background: #316BA1;
-        padding: 28px 20px;
-        color: white;
-        display: flex;
-        flex-direction: column;
-    }
+/* ============================= */
+/* SIDEBAR */
+/* ============================= */
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: #316BA1;
+    padding: 28px 20px;
+    padding-bottom: 24px;
+    color: white;
+    display: flex;
+    flex: 0 0 250px;
+    flex-direction: column;
+}
 
-    .sidebar h2 {
-        font-size: 18px;
-        color: #B4F2F4;
-        margin-bottom: 4px;
-    }
+.sidebar-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--cyan);
+    font-size: 24px;
+    font-weight: 600;
+    padding-top: 8px;
+    margin-bottom: 8px;
+}
 
-    .sidebar small {
-        font-size: 12px;
-        opacity: 0.85;
-    }
+.sidebar-logo img {
+    height: 56.25px;
+    width: auto; 
+    max-width: 100%;
+    display: block;
+}
+
+.sidebar h2 {
+    height: 75px;
+    width: auto;
+}
+
+.sidebar small {
+    font-size: 12px;
+    opacity: 0.85;
+    text-align: center; 
+    display: block;
+    margin-top: 4px;
+}
+
+
 </style>
 
 <body>
     {{-- ================= SIDEBAR ================= --}}
     <div class="sidebar">
-        <h2>HETORICA</h2>
+        <div class="sidebar-logo">
+            <img src="{{ asset('images/hetorica.png') }}">
+        </div>
         <small>ADMIN KEPEGAWAIAN PANEL</small>
 
         <div class="menu">
@@ -122,14 +148,12 @@
                 <span>Laporan</span>
             </a>
 
-            {{-- ✅ FIX --}}
             <a href="{{ route('kepegawaian.dokter_pemeriksa.index') }}"
             class="{{ request()->routeIs('kepegawaian.dokter_pemeriksa*') ? 'active' : '' }}">
                 <img src="{{ asset('assets/adminPoli/doctor.png') }}" alt="dokter">
                 <span>Dokter & Pemeriksa</span>
             </a>
 
-            {{-- ✅ FIX --}}
             <a href="{{ route('kepegawaian.kelolaUser.index') }}"
             class="{{ request()->routeIs('kepegawaian.kelolaUser*') ? 'active' : '' }}">
                 <img src="{{ asset('assets/adminPoli/akun.png') }}" alt="user">
