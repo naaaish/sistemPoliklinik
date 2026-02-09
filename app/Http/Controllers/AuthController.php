@@ -61,7 +61,7 @@ class AuthController extends Controller
         $role = strtolower($role); // Pastikan huruf kecil
 
         if ($role === 'pasien') {
-            return redirect()->route('pasien.riwayat');
+            return redirect()->route('home');
         }
 
         if ($role === 'adminpoli') {
