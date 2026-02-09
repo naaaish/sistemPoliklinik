@@ -16,32 +16,6 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* ============================= */
-/* SIDEBAR */
-/* ============================= */
-.sidebar {
-    width: 240px;
-    height: 100vh;
-    position: fixed;
-    left: 0;
-    top: 0;
-    background: #316BA1;
-    padding: 28px 20px;
-    color: white;
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar h2 {
-    font-size: 18px;
-    color: #B4F2F4;
-    margin-bottom: 4px;
-}
-
-.sidebar small {
-    font-size: 12px;
-    opacity: 0.85;
-}
 
 /* ============================= */
 /* MENU */
