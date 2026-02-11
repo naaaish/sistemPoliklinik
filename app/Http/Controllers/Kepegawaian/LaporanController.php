@@ -71,6 +71,12 @@ class LaporanController extends Controller
 
         $preview = [];
 
+        $request->validate([
+            'dari' => 'nullable|date',
+            'sampai' => 'nullable|date|after_or_equal:dari',
+        ], [
+            'sampai.after_or_equal' => 'Tanggal Sampai harus lebih besar atau sama dengan Tanggal Dari.'
+        ]);
 
 
         // ================= DOKTER =================

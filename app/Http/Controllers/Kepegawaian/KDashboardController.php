@@ -12,7 +12,13 @@ class KDashboardController extends Controller
         // total pegawai
         $totalPegawai = DB::table('pegawai')->count();
         // total riwayat pemeriksaan
-        $totalRiwayat = DB::table('pemeriksaan')->count();
+        $totalRiwayat = DB::table('pemeriksaan')
+            ->whereBetween('created_at', [
+                now()->startOfMonth(),
+                now()->endOfMonth()
+            ])
+            ->count();
+
 
         // pemeriksaan hari ini
         $hariIni = DB::table('pemeriksaan')

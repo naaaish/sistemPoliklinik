@@ -11,7 +11,7 @@
 
     <div class="card">
         <h1>{{ $totalRiwayat }}</h1>
-        <p>Total Riwayat</p>
+        <p>Total Riwayat Bulan Ini</p>
     </div>
 
     {{-- CARD TENGAH --}}

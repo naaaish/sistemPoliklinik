@@ -112,6 +112,23 @@
     margin-top: 4px;
 }
 
+/* ================= SWEET TOAST ADMIN ================= */
+.admin-toast {
+    border-radius: 14px !important;
+    padding: 14px 18px !important;
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.admin-toast .swal2-title {
+    font-size: 14px !important;
+    font-weight: 500;
+}
+
+.swal2-icon.swal2-error {
+    border-color: #e74c3c !important;
+    color: #e74c3c !important;
+}
 
 </style>
 
