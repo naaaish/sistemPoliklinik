@@ -30,14 +30,19 @@
         </p>
 
         <div class="hero-actions">
-            <a href="{{ route('login') }}" class="btn-primary">
-                Login
-            </a>
+
+            @guest
+                <a href="{{ route('login') }}" class="btn-primary">
+                    Login
+                </a>
+            @endguest
 
             <button class="btn-outline" onclick="openKonsultasiModal()">
                 Konsultasi Online
             </button>
+
         </div>
+
     </div>
 
     <div class="hero-image">

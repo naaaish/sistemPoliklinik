@@ -7,7 +7,8 @@
 
     <div class="page-header">
         <div class="d-flex align-items-center">
-            <a href="{{ route('kepegawaian.laporan') }}" class="btn-back-icon me-3">
+            <a href="{{ route('kepegawaian.laporan', request()->query()) }}" 
+                    class="btn-back-icon me-3">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M19 12H5M12 19l-7-7 7-7"/>
                 </svg>
