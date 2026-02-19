@@ -251,6 +251,8 @@
           <option value="Bungkus/puyer"></option>
           <option value="Vial"></option>
           <option value="Ampul"></option>
+          <option value="Pcs"></option>
+          <option value="Tube"></option>
         </datalist>
         @if(isset($detailResep) && $detailResep->count())
           @foreach($detailResep as $dr)
