@@ -207,238 +207,288 @@ class PemeriksaanController extends Controller
      * (pakai transaksi biar aman)
      */
     public function update(Request $request, $pendaftaranId)
-    {
-        $validated = $request->validate([
-            'sistol'        => 'nullable|numeric',
-            'diastol'       => 'nullable|numeric',
-            'nadi'          => 'nullable|numeric',
+{
+    $validated = $request->validate([
+        'created_at' => 'nullable|date',
+        'sistol'        => 'nullable|numeric',
+        'diastol'       => 'nullable|numeric',
+        'nadi'          => 'nullable|numeric',
 
-            'gula_puasa'    => 'nullable|numeric',
-            'gula_2jam_pp'  => 'nullable|numeric',
-            'gula_sewaktu'  => 'nullable|numeric',
+        'gula_puasa'    => 'nullable|numeric',
+        'gula_2jam_pp'  => 'nullable|numeric',
+        'gula_sewaktu'  => 'nullable|numeric',
 
-            'asam_urat'     => 'nullable|numeric',
-            'cholesterol'   => 'nullable|numeric',
-            'trigliseride'  => 'nullable|numeric',
+        'asam_urat'     => 'nullable|numeric',
+        'cholesterol'   => 'nullable|numeric',
+        'trigliseride'  => 'nullable|numeric',
 
-            'suhu'          => 'nullable|numeric',
-            'berat_badan'   => 'nullable|numeric',
-            'tinggi_badan'  => 'nullable|numeric',
+        'suhu'          => 'nullable|numeric',
+        'berat_badan'   => 'nullable|numeric',
+        'tinggi_badan'  => 'nullable|numeric',
 
-            // resep
-            'obat_id'        => 'nullable|array',
-            'obat_id.*'      => ['nullable', Rule::exists('obat', 'id_obat')->where('is_active', 1)],
-            'jumlah'         => 'nullable|array',
-            'jumlah.*'       => 'nullable|numeric',
-            'satuan'         => 'nullable|array',
-            'satuan.*'       => 'nullable|string',
-            'harga_satuan'   => 'nullable|array',
-            'harga_satuan.*' => 'nullable|numeric',
+        // resep
+        'obat_id'        => 'nullable|array',
+        'obat_id.*'      => ['nullable', Rule::exists('obat', 'id_obat')->where('is_active', 1)],
+        'jumlah'         => 'nullable|array',
+        'jumlah.*'       => 'nullable|numeric',
+        'satuan'         => 'nullable|array',
+        'satuan.*'       => 'nullable|string',
+        'harga_satuan'   => 'nullable|array',
+        'harga_satuan.*' => 'nullable|numeric',
 
-            'penyakit_id'     => 'nullable|array',
-            'penyakit_id.*'   => ['nullable', Rule::exists('diagnosa', 'id_diagnosa')->where('is_active', 1)],
-            'id_nb'           => 'nullable|array',
-            'id_nb.*'         => 'nullable|string',
-            'saran_id'       => 'nullable|array',
-            'id_saran'       => 'nullable|array',
-            'id_saran.*'     => ['nullable', Rule::exists('saran', 'id_saran')->where('is_active', 1)],
-            'petugas_after_obat' => 'nullable|string',
+        // penyakit
+        'penyakit_id'     => 'nullable|array',
+        'penyakit_id.*'   => ['nullable', Rule::exists('diagnosa', 'id_diagnosa')->where('is_active', 1)],
+        'id_nb'           => 'nullable|array',
+        'id_nb.*'         => 'nullable|string',
+
+        // saran
+        'id_saran'       => 'nullable|array',
+        'id_saran.*'     => ['nullable', Rule::exists('saran', 'id_saran')->where('is_active', 1)],
+
+        // petugas
+        'petugas_after_obat' => 'nullable|string',
+    ]);
+
+    return DB::transaction(function () use ($validated, $pendaftaranId) {
+
+        $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
+        $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
+
+        // =========================
+        // UPDATE HASIL PEMERIKSAAN
+        // =========================
+        $hasil->update([
+            'sistol'     => $validated['sistol'] ?? null,
+            'diastol'    => $validated['diastol'] ?? null,
+            'nadi'       => $validated['nadi'] ?? null,
+
+            'gd_puasa'   => $validated['gula_puasa'] ?? null,
+            'gd_duajam'  => $validated['gula_2jam_pp'] ?? null,
+            'gd_sewaktu' => $validated['gula_sewaktu'] ?? null,
+
+            'asam_urat'  => $validated['asam_urat'] ?? null,
+            'chol'       => $validated['cholesterol'] ?? null,
+            'tg'         => $validated['trigliseride'] ?? null,
+
+            'suhu'       => $validated['suhu'] ?? null,
+            'berat'      => $validated['berat_badan'] ?? null,
+            'tinggi'     => $validated['tinggi_badan'] ?? null,
+
+            'created_at' => $validated['created_at'] ?? $hasil->created_at,
         ]);
 
-        return DB::transaction(function () use ($validated, $pendaftaranId) {
-            $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
+        // =========================
+        // UPDATE PENYAKIT
+        // =========================
+        $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
+        $idNbs       = $validated['id_nb'] ?? [];
 
-            $hasil->update([
-                'sistol'     => $validated['sistol'] ?? null,
-                'diastol'    => $validated['diastol'] ?? null,
-                'nadi'       => $validated['nadi'] ?? null,
+        foreach ($penyakitIds as $i => $idDiag) {
+            $idNb = $idNbs[$i] ?? null;
+            if (!$idNb || trim((string)$idNb) === '') {
+                return back()->withInput()->withErrors([
+                    "id_nb.$i" => "ID NB wajib diisi untuk penyakit yang dipilih."
+                ]);
+            }
+        }
 
-                'gd_puasa'   => $validated['gula_puasa'] ?? null,
-                'gd_duajam'  => $validated['gula_2jam_pp'] ?? null,
-                'gd_sewaktu' => $validated['gula_sewaktu'] ?? null,
+        DB::table('detail_pemeriksaan_penyakit')
+            ->where('id_pemeriksaan', $hasil->id_pemeriksaan)
+            ->delete();
 
-                'asam_urat'  => $validated['asam_urat'] ?? null,
-                'chol'       => $validated['cholesterol'] ?? null,
-                'tg'         => $validated['trigliseride'] ?? null,
-
-                'suhu'       => $validated['suhu'] ?? null,
-                'berat'      => $validated['berat_badan'] ?? null,
-                'tinggi'     => $validated['tinggi_badan'] ?? null,
-            ]);
-
-            $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
-
-            // ====== UPDATE PENYAKIT ======
-            $penyakitIds = array_values(array_filter($validated['penyakit_id'] ?? []));
-            $idNbs       = $validated['id_nb'] ?? [];
-
-            // validasi: tiap penyakit wajib punya id_nb
+        if (!empty($penyakitIds)) {
+            $rows = [];
             foreach ($penyakitIds as $i => $idDiag) {
-                $idNb = $idNbs[$i] ?? null;
-                if (!$idNb || trim((string)$idNb) === '') {
-                    return back()->withInput()->withErrors(["id_nb.$i" => "ID NB wajib diisi untuk penyakit yang dipilih."]);
-                }
-            }
-
-            // replace detail penyakit
-            DB::table('detail_pemeriksaan_penyakit')
-                ->where('id_pemeriksaan', $hasil->id_pemeriksaan)
-                ->delete();
-
-            if (count($penyakitIds) > 0) {
-                $rows = [];
-                foreach ($penyakitIds as $i => $idDiag) {
-                    $rows[] = [
-                        'id_pemeriksaan' => $hasil->id_pemeriksaan,
-                        'id_diagnosa'    => $idDiag,
-                        'id_nb'          => trim((string)($idNbs[$i] ?? '')),
-                    ];
-                }
-                DB::table('detail_pemeriksaan_penyakit')->insert($rows);
-            }
-
-            $idSaran = $validated['id_saran'] ?? [];
-            $idSaran = array_values(array_unique(array_filter($idSaran)));
-
-            DB::table('detail_pemeriksaan_saran')
-                ->where('id_pemeriksaan', $hasil->id_pemeriksaan)
-                ->delete();
-
-            if (!empty($idSaran)) {
-                $rows = [];
-                foreach ($idSaran as $sid) {
-                    $rows[] = [
-                        'id_pemeriksaan' => $hasil->id_pemeriksaan,
-                        'id_saran'       => $sid,
-                    ];
-                }
-                DB::table('detail_pemeriksaan_saran')->insert($rows);
-            }
-
-            // ===== RESEP & DETAIL_RESEP =====
-            $obatIds = $validated['obat_id'] ?? [];
-            $jumlahs = $validated['jumlah'] ?? [];
-            $satuans = $validated['satuan'] ?? [];
-            $hargas  = $validated['harga_satuan'] ?? [];
-
-            // validasi: kalau obat dipilih, satuan wajib
-            foreach ($obatIds as $i => $idObat) {
-                if (!$idObat) continue;
-                if (!isset($satuans[$i]) || trim((string)$satuans[$i]) === '') {
-                    return back()
-                        ->withInput()
-                        ->withErrors(["satuan.$i" => "Satuan wajib diisi jika obat dipilih."]);
-                }
-            }
-
-            // siapkan rows detail yang valid (skip baris kosong)
-            $detailToInsert = [];
-            $totalTagihan = 0;
-
-            for ($i = 0; $i < count($obatIds); $i++) {
-                $obatId = $obatIds[$i] ?? null;
-                if (!$obatId) continue;
-
-                $qty = (int)($jumlahs[$i] ?? 1);
-                if ($qty <= 0) $qty = 1;
-
-                $harga = (int)($hargas[$i] ?? 0);
-                $satuan = trim((string)($satuans[$i] ?? ''));
-
-                $subtotal = $qty * $harga;
-                $totalTagihan += $subtotal;
-
-                $detailToInsert[] = [
-                    'id_obat'  => $obatId,
-                    'jumlah'   => $qty,
-                    'satuan'   => $satuan,
-                    'subtotal' => $subtotal,
+                $rows[] = [
+                    'id_pemeriksaan' => $hasil->id_pemeriksaan,
+                    'id_diagnosa'    => $idDiag,
+                    'id_nb'          => trim((string)($idNbs[$i] ?? '')),
                 ];
             }
+            DB::table('detail_pemeriksaan_penyakit')->insert($rows);
+        }
 
-            // ambil resep existing (kalau ada)
-            $resep = Resep::where('id_pemeriksaan', $hasil->id_pemeriksaan)->first();
+        // =========================
+        // UPDATE SARAN
+        // =========================
+        $idSaran = $validated['id_saran'] ?? [];
+        $idSaran = array_values(array_unique(array_filter($idSaran)));
 
-            // kalau tidak ada obat sama sekali → hapus resep & detail kalau ada, selesai
-            if (count($detailToInsert) === 0) {
-                if ($resep) {
-                    DetailResep::where('id_resep', $resep->id_resep)->delete();
-                    $resep->delete();
-                }
+        DB::table('detail_pemeriksaan_saran')
+            ->where('id_pemeriksaan', $hasil->id_pemeriksaan)
+            ->delete();
 
-                return redirect()
-                    ->route('adminpoli.pemeriksaan.index')
-                    ->with('success', 'Hasil pemeriksaan berhasil diupdate (tanpa resep).');
-            }
-
-            $adaObat = count($detailToInsert) > 0;
-
-            if ($adaObat) {
-                if ($pendaftaran->tipe_pasien === 'poliklinik') {
-                    // poliklinik: tetap cek_kesehatan & petugas pemeriksa
-                    $pendaftaran->jenis_pemeriksaan = 'cek_kesehatan';
-
-                    $firstPemeriksaId = DB::table('pemeriksa')
-                        ->where('status', 'aktif')
-                        ->orderBy('id_pemeriksa', 'asc')
-                        ->value('id_pemeriksa');
-
-                    $pendaftaran->id_dokter = null;
-                    $pendaftaran->id_pemeriksa = $firstPemeriksaId ?: $pendaftaran->id_pemeriksa;
-                    $pendaftaran->save();
-                } else {
-                    // non-poliklinik: kalau awalnya cek_kesehatan lalu ada obat -> jadi periksa & wajib dokter
-                    if ($pendaftaran->jenis_pemeriksaan === 'cek_kesehatan') {
-                        $pendaftaran->jenis_pemeriksaan = 'periksa';
-
-                        $petugasAfter = (string) request()->input('petugas_after_obat', '');
-                        if (!$petugasAfter || !str_contains($petugasAfter, ':')) {
-                            return back()->withInput()->withErrors([
-                                'petugas_after_obat' => 'Pilih dokter (wajib) jika awalnya cek kesehatan lalu ditambah obat.'
-                            ]);
-                        }
-
-                        [$tipeAfter, $idAfter] = explode(':', $petugasAfter, 2);
-                        if ($tipeAfter !== 'dokter') {
-                            return back()->withInput()->withErrors([
-                                'petugas_after_obat' => 'Jika ada obat, petugas harus Dokter.'
-                            ]);
-                        }
-
-                        $pendaftaran->id_dokter = $idAfter;
-                        $pendaftaran->id_pemeriksa = null;
-                        $pendaftaran->save();
-                    }
-                }
-            }
-            
-            // kalau belum ada resep → buat
-            if (!$resep) {
-                $resep = Resep::create([
-                    'id_resep'       => 'RS' . now()->format('ymdHis') . strtoupper(substr(uniqid(), -6)),
+        if (!empty($idSaran)) {
+            $rows = [];
+            foreach ($idSaran as $sid) {
+                $rows[] = [
                     'id_pemeriksaan' => $hasil->id_pemeriksaan,
-                    'total_tagihan'  => $totalTagihan,
-                ]);
-            } else {
-                $resep->update(['total_tagihan' => $totalTagihan]);
-                DetailResep::where('id_resep', $resep->id_resep)->delete();
+                    'id_saran'       => $sid,
+                ];
             }
+            DB::table('detail_pemeriksaan_saran')->insert($rows);
+        }
 
-            // insert detail baru
-            foreach ($detailToInsert as $row) {
-                DetailResep::create([
-                    'id_resep'  => $resep->id_resep,
-                    'id_obat'   => $row['id_obat'],
-                    'jumlah'    => $row['jumlah'],
-                    'satuan'    => $row['satuan'],
-                    'subtotal'  => $row['subtotal'],
+        // =========================
+        // RESEP & DETAIL_RESEP
+        // =========================
+        $obatIds = $validated['obat_id'] ?? [];
+        $jumlahs = $validated['jumlah'] ?? [];
+        $satuans = $validated['satuan'] ?? [];
+        $hargas  = $validated['harga_satuan'] ?? [];
+
+        foreach ($obatIds as $i => $idObat) {
+            if (!$idObat) continue;
+            if (!isset($satuans[$i]) || trim((string)$satuans[$i]) === '') {
+                return back()->withInput()->withErrors([
+                    "satuan.$i" => "Satuan wajib diisi jika obat dipilih."
                 ]);
+            }
+        }
+
+        $detailToInsert = [];
+        $totalTagihan = 0;
+
+        for ($i = 0; $i < count($obatIds); $i++) {
+            $obatId = $obatIds[$i] ?? null;
+            if (!$obatId) continue;
+
+            $qty = (int)($jumlahs[$i] ?? 1);
+            if ($qty <= 0) $qty = 1;
+
+            $harga  = (int)($hargas[$i] ?? 0);
+            $satuan = trim((string)($satuans[$i] ?? ''));
+
+            $subtotal = $qty * $harga;
+            $totalTagihan += $subtotal;
+
+            $detailToInsert[] = [
+                'id_obat'  => $obatId,
+                'jumlah'   => $qty,
+                'satuan'   => $satuan,
+                'subtotal' => $subtotal,
+            ];
+        }
+
+        $resep = Resep::where('id_pemeriksaan', $hasil->id_pemeriksaan)->first();
+
+        // =========================
+        // PETUGAS (INI FIX UTAMA)
+        // =========================
+       $petugasAfter = (string)($validated['petugas_after_obat'] ?? '');
+$adaObat = count($detailToInsert) > 0;
+
+$tipeAfter = null;
+$idAfter = null;
+
+if ($petugasAfter && str_contains($petugasAfter, ':')) {
+    [$tipeAfter, $idAfter] = explode(':', $petugasAfter, 2);
+    $tipeAfter = trim((string)$tipeAfter);
+    $idAfter   = trim((string)$idAfter);
+
+    if ($idAfter === '') { // kosong -> anggap tidak ada pilihan
+        $tipeAfter = null;
+        $idAfter = null;
+    }
+} else {
+    $tipeAfter = null;
+    $idAfter = null;
+}
+
+// kalau user memilih petugas -> simpan ke model (tanpa cast int)
+if ($tipeAfter === 'dokter' && $idAfter !== null) {
+    $exists = DB::table('dokter')->where('id_dokter', $idAfter)->exists();
+    if (!$exists) {
+        return back()->withInput()->withErrors([
+            'petugas_after_obat' => 'Pilih dokter yang valid.'
+        ]);
+    }
+    $pendaftaran->id_dokter = $idAfter;
+    $pendaftaran->id_pemeriksa = null;
+
+} elseif ($tipeAfter === 'pemeriksa' && $idAfter !== null) {
+    $exists = DB::table('pemeriksa')->where('id_pemeriksa', $idAfter)->exists();
+    if (!$exists) {
+        return back()->withInput()->withErrors([
+            'petugas_after_obat' => 'Pilih pemeriksa yang valid.'
+        ]);
+    }
+    $pendaftaran->id_pemeriksa = $idAfter;
+    $pendaftaran->id_dokter = null;
+}
+
+// Wajib dokter jika: non-poliklinik + awal cek_kesehatan + ada obat
+if ($adaObat && $pendaftaran->tipe_pasien !== 'poliklinik' && $pendaftaran->jenis_pemeriksaan === 'cek_kesehatan') {
+    $pendaftaran->jenis_pemeriksaan = 'periksa';
+
+    if (!($tipeAfter === 'dokter' && $idAfter !== null)) {
+        return back()->withInput()->withErrors([
+            'petugas_after_obat' => 'Pilih dokter yang valid.'
+        ]);
+    }
+}
+
+// Poliklinik: tetap cek_kesehatan, jika tidak memilih petugas -> default pemeriksa
+if ($adaObat && $pendaftaran->tipe_pasien === 'poliklinik') {
+    $pendaftaran->jenis_pemeriksaan = 'cek_kesehatan';
+
+    if (empty($petugasAfter)) {
+        $firstPemeriksaId = DB::table('pemeriksa')
+            ->where('status', 'aktif')
+            ->orderBy('id_pemeriksa', 'asc')
+            ->value('id_pemeriksa');
+
+        $pendaftaran->id_dokter = null;
+        $pendaftaran->id_pemeriksa = $firstPemeriksaId ?: $pendaftaran->id_pemeriksa;
+    }
+}
+
+        // SAVE PENDAFTARAN SEKALI SAJA
+        $pendaftaran->save();
+
+        // =========================
+        // Kalau tidak ada obat -> hapus resep & selesai
+        // =========================
+        if (count($detailToInsert) === 0) {
+            if ($resep) {
+                DetailResep::where('id_resep', $resep->id_resep)->delete();
+                $resep->delete();
             }
 
             return redirect()
                 ->route('adminpoli.pemeriksaan.index')
-                ->with('success', 'Hasil pemeriksaan berhasil diupdate.');
-        });
-    }
+                ->with('success', 'Hasil pemeriksaan berhasil diupdate (tanpa resep).');
+        }
+
+        // =========================
+        // CREATE / UPDATE RESEP
+        // =========================
+        if (!$resep) {
+            $resep = Resep::create([
+                'id_resep'       => 'RS' . now()->format('ymdHis') . strtoupper(substr(uniqid(), -6)),
+                'id_pemeriksaan' => $hasil->id_pemeriksaan,
+                'total_tagihan'  => $totalTagihan,
+            ]);
+        } else {
+            $resep->update(['total_tagihan' => $totalTagihan]);
+            DetailResep::where('id_resep', $resep->id_resep)->delete();
+        }
+
+        foreach ($detailToInsert as $row) {
+            DetailResep::create([
+                'id_resep'  => $resep->id_resep,
+                'id_obat'   => $row['id_obat'],
+                'jumlah'    => $row['jumlah'],
+                'satuan'    => $row['satuan'],
+                'subtotal'  => $row['subtotal'],
+            ]);
+        }
+
+        return redirect()
+            ->route('adminpoli.pemeriksaan.index')
+            ->with('success', 'Hasil pemeriksaan berhasil diupdate.');
+    });
+}
     
 }

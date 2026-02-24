@@ -60,7 +60,10 @@
         </ul>
       </div>
     @endif
-
+    <div class="ap-row" style="margin-bottom:10px;">
+      <div class="ap-label">Nama Pasien</div><div class="ap-colon">:</div>
+      <div class="ap-input">{{ $pendaftaran->pegawai->nama_pegawai ?? '-' }}</div>
+    </div>
     <form method="POST" action="{{ route('adminpoli.pemeriksaan.update', $pendaftaran->id_pendaftaran) }}" id="formPemeriksaan">
       @csrf
       @method('PUT')
@@ -72,7 +75,7 @@
         data-petugas-id="{{ $petugasId }}"
         style="display:none;"></div>
 
-      {{-- ===== DATA PEMERIKSAAN (READONLY) ===== --}}
+      {{-- ===== DATA PEMERIKSAAN (EDITABLE/TAKUT ADA KESALAHAN INPUT) ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:18px 0 10px;">
         Data Pemeriksaan Kesehatan
       </div>
@@ -82,77 +85,85 @@
         <div class="ap-vital-item">
           <div class="ap-vital-label">Sistol</div>
           <input class="ap-vital-input" type="number" step="any" name="sistol"
-            value="{{ old('sistol', $hasil->sistol ?? '') }}" readonly>
+            value="{{ old('sistol', $hasil->sistol ?? '') }}">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Diastol</div>
           <input class="ap-vital-input" type="number" step="any" name="diastol"
-            value="{{ old('diastol', $hasil->diastol ?? '') }}" readonly>
+            value="{{ old('diastol', $hasil->diastol ?? '') }}" >
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Denyut Nadi</div>
           <input class="ap-vital-input" type="number" step="any" name="nadi"
-            value="{{ old('nadi', $hasil->nadi ?? '') }}" readonly>
+            value="{{ old('nadi', $hasil->nadi ?? '') }}" >
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Gula Darah<br>Puasa</div>
           <input class="ap-vital-input" type="number" step="any" name="gula_puasa"
-            value="{{ old('gula_puasa', $hasil->gd_puasa ?? '') }}" readonly>
+            value="{{ old('gula_puasa', $hasil->gd_puasa ?? '') }}" >
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Gula Darah<br>2 jam PP</div>
           <input class="ap-vital-input" type="number" step="any" name="gula_2jam_pp"
-            value="{{ old('gula_2jam_pp', $hasil->gd_duajam ?? '') }}" readonly>
+            value="{{ old('gula_2jam_pp', $hasil->gd_duajam ?? '') }}">
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Gula Darah<br>Sewaktu</div>
           <input class="ap-vital-input" type="number" step="any" name="gula_sewaktu"
-            value="{{ old('gula_sewaktu', $hasil->gd_sewaktu ?? '') }}" readonly>
+            value="{{ old('gula_sewaktu', $hasil->gd_sewaktu ?? '') }}" >
         </div>
 
         {{-- BARIS 2 --}}
         <div class="ap-vital-item">
           <div class="ap-vital-label">Asam Urat</div>
           <input class="ap-vital-input" type="number" step="any" name="asam_urat"
-            value="{{ old('asam_urat', $hasil->asam_urat ?? '') }}" readonly>
+            value="{{ old('asam_urat', $hasil->asam_urat ?? '') }}" >
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Cholesterol</div>
           <input class="ap-vital-input" type="number" step="any" name="cholesterol"
-            value="{{ old('cholesterol', $hasil->chol ?? '') }}" readonly>
+            value="{{ old('cholesterol', $hasil->chol ?? '') }}" >
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Trigliseride</div>
           <input class="ap-vital-input" type="number" step="any" name="trigliseride"
-            value="{{ old('trigliseride', $hasil->tg ?? '') }}" readonly>
+            value="{{ old('trigliseride', $hasil->tg ?? '') }}" >
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Suhu</div>
           <input class="ap-vital-input" type="number" step="any" name="suhu"
-            value="{{ old('suhu', $hasil->suhu ?? '') }}" readonly>
+            value="{{ old('suhu', $hasil->suhu ?? '') }}" >
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Berat Badan</div>
           <input class="ap-vital-input" type="number" step="any" name="berat_badan"
-            value="{{ old('berat_badan', $hasil->berat ?? '') }}" readonly>
+            value="{{ old('berat_badan', $hasil->berat ?? '') }}" >
         </div>
 
         <div class="ap-vital-item">
           <div class="ap-vital-label">Tinggi Badan</div>
           <input class="ap-vital-input" type="number" step="any" name="tinggi_badan"
-            value="{{ old('tinggi_badan', $hasil->tinggi ?? '') }}" readonly>
+            value="{{ old('tinggi_badan', $hasil->tinggi ?? '') }}" >
         </div>
       </div>
-
+  <div>
+    <div class="ap-row" style="margin-top:10px;">
+      <div class="ap-label">Tanggal Pemeriksaan</div><div class="ap-colon">:</div>
+      <div class="ap-input">
+       <input type="datetime-local"
+       name="created_at"
+       value="{{ old('created_at', $hasil->created_at?->format('Y-m-d\TH:i')) }}">
+      </div>
+  </div>  
       {{-- ===== DIAGNOSA (EDITABLE) ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Diagnosa</div>
 
@@ -256,29 +267,33 @@
       </div>
 
       {{-- 1 BARIS SAJA: Dokter/Pemeriksa (editable conditional) --}}
-      <div class="ap-row" style="margin-top:10px;">
-        <div class="ap-label">Dokter / Pemeriksa</div>
-        <div class="ap-colon">:</div>
+     @php
+  $oldPetugasValue = old(
+    'petugas_after_obat',
+    ($petugasType && $petugasId) ? ($petugasType . ':' . $petugasId) : ''
+  );
+@endphp
 
-        <div class="ap-input" id="petugasRow">
-          <span id="petugasDisplay" style="display:inline-block;">
-            {{ $petugasLabel }}
-          </span>
+<div class="ap-row" style="margin-top:10px;">
+  <div class="ap-label">Dokter / Pemeriksa</div>
+  <div class="ap-colon">:</div>
 
-          <select name="petugas_after_obat" id="petugasAfterObat" class="ap-select" style="display:none;">
-            <option value="">-- pilih dokter --</option>
-            @foreach($dokter as $d)
-              <option value="dokter:{{ $d->id_dokter }}">
-                {{ $d->nama }} ({{ $d->jenis_dokter }})
-              </option>
-            @endforeach
-          </select>
+  <div class="ap-input" id="petugasRow">
+    <select name="petugas_after_obat" id="petugasAfterObat" class="ap-select">
+      <option value="">-- pilih dokter --</option>
+      @foreach($dokter as $d)
+        @php $val = 'dokter:'.$d->id_dokter; @endphp
+        <option value="{{ $val }}" {{ $oldPetugasValue === $val ? 'selected' : '' }}>
+          {{ $d->nama }} ({{ $d->jenis_dokter }})
+        </option>
+      @endforeach
+    </select>
 
-          @error('petugas_after_obat')
-            <div style="color:#d00;font-size:12px;margin-top:6px;">{{ $message }}</div>
-          @enderror
-        </div>
-      </div>
+    @error('petugas_after_obat')
+      <div style="color:#d00;font-size:12px;margin-top:6px;">{{ $message }}</div>
+    @enderror
+  </div>
+</div>
 
       {{-- ===== OBAT & HARGA (EDITABLE) ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Obat & Harga</div>
