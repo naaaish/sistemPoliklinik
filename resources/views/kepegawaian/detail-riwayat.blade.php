@@ -165,7 +165,7 @@
                     @php $totalHarga = 0; @endphp
                     @forelse($detailResep as $index => $item)
                         @php 
-                            $subtotal = $item->harga * $item->jumlah; 
+                            $subtotal = $item->harga * $item->jumlah + 1000; 
                             $totalHarga += $subtotal;
                         @endphp
                         <tr>

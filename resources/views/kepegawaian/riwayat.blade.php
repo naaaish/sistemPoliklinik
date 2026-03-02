@@ -76,7 +76,7 @@
 
         @if(!$isAll)
             <div class="pagination-nav">
-                {{ $riwayat->links() }}
+               {{ $riwayat->onEachSide(1)->links('pagination::bootstrap-4') }}
             </div>
         @endif
     </div>
@@ -86,3 +86,34 @@
 
 
 @endsection
+
+
+@push('scripts')
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.querySelector(".filter-form");
+    const dari = document.querySelector("input[name='dari']");
+    const sampai = document.querySelector("input[name='sampai']");
+
+    form.addEventListener("submit", function (e) {
+
+        if (dari.value && sampai.value) {
+
+            const tglDari = new Date(dari.value);
+            const tglSampai = new Date(sampai.value);
+
+            if (tglDari > tglSampai) {
+                e.preventDefault();
+
+                AdminPoliToast.fire({
+                    icon: 'error',
+                    title: "Tanggal 'Dari' tidak boleh lebih besar dari 'Sampai'"
+                });
+            }
+        }
+    });
+
+});
+</script>
+@endpush
