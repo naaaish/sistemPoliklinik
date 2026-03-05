@@ -164,6 +164,28 @@
        value="{{ old('created_at', $hasil->created_at?->format('Y-m-d\TH:i')) }}">
       </div>
   </div>  
+  <div class="ap-row" style="margin-top:10px;">
+  <div class="ap-label">Jenis Pemeriksaan</div>
+  <div class="ap-colon">:</div>
+
+  <div class="ap-input">
+    <select name="jenis_pemeriksaan" id="jenisPemeriksaan" class="ap-select">
+      <option value="cek_kesehatan" {{ old('jenis_pemeriksaan', $pendaftaran->jenis_pemeriksaan ?? '') === 'cek_kesehatan' ? 'selected' : '' }}>
+        Cek Kesehatan
+      </option>
+      <option value="periksa" {{ old('jenis_pemeriksaan', $pendaftaran->jenis_pemeriksaan ?? '') === 'periksa' ? 'selected' : '' }}>
+        Periksaan
+      </option>
+      <option value="konsultasi" {{ old('jenis_pemeriksaan', $pendaftaran->jenis_pemeriksaan ?? '') === 'konsultasi' ? 'selected' : '' }}>
+        Konsultasi
+      </option>
+    </select>
+
+    @error('jenis_pemeriksaan')
+      <div style="color:#d00;font-size:12px;margin-top:6px;">{{ $message }}</div>
+    @enderror
+  </div>
+</div>
       {{-- ===== DIAGNOSA (EDITABLE) ===== --}}
       <div style="color:#316BA1;font-size:19px;margin:22px 0 10px;">Diagnosa</div>
 
@@ -180,6 +202,7 @@
               </option>
             @endforeach
           </select>
+
 
           <button type="button" id="btnAddPenyakit" class="ap-btn-small">Tambah Penyakit</button>
 
@@ -384,7 +407,19 @@
 
       <button class="ap-register" type="submit" style="margin-top:18px;">Submit</button>
     </form>
+    
   </div>
+  
+  <form method="POST"
+        action="{{ route('adminpoli.pemeriksaan.destroy', $hasil->id_pemeriksaan) }}"
+        onsubmit="return confirm('Yakin hapus pemeriksaan ini? Resep & detail resep terkait juga akan terhapus.')">
+    @csrf
+    @method('DELETE')
+    <button type="submit" class="ap-register" style="background:#ff4d4f;border:none;">
+      Hapus Pemeriksaan
+    </button>
+  </form>
+
 
   <footer class="ap-footer">
     Copyright © 2026 Poliklinik PT PLN Indonesia Power UBP Mrica
@@ -431,10 +466,21 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    bindChipDelete(document);
-  });
+ document.addEventListener('DOMContentLoaded', () => {
+  const selJenis = document.getElementById('jenisPemeriksaan');
+  const meta = document.getElementById('pendaftaranMeta');
 
+  if (selJenis && meta) {
+    // set meta awal mengikuti select (jaga-jaga)
+    meta.dataset.awalJenis = selJenis.value || meta.dataset.awalJenis || '';
+
+    selJenis.addEventListener('change', () => {
+      meta.dataset.awalJenis = selJenis.value || '';
+      // supaya logic dokter wajib ikut berubah
+      refreshPetugasUI();
+    });
+  }
+});
   document.getElementById('btnAddSaran')?.addEventListener('click', () => {
     const sel = document.getElementById('inpSaran');
     if(!sel || !sel.value) return;

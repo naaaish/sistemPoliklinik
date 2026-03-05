@@ -342,7 +342,12 @@ Route::prefix('kepegawaian/laporan')
        ->name('laporan.excel');
 });
 
+//
 
+Route::delete('/adminpoli/pemeriksaan/{idPemeriksaan}', [PemeriksaanController::class, 'destroy'])
+  ->name('adminpoli.pemeriksaan.destroy');
+  Route::delete('/adminpoli/pendaftaran/{idPendaftaran}', [PendaftaranController::class, 'destroy'])
+  ->name('adminpoli.pendaftaran.destroy');
 // CRUD PEGAWAI
 
 Route::prefix('pegawai')->group(function () {

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title') Dashboard</title>
     <link rel="stylesheet" href="{{ asset('css/dashboard-pasien.css') }}">
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     @stack('styles') 
 </head>
 

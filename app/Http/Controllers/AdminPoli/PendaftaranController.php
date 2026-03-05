@@ -53,7 +53,50 @@ class PendaftaranController extends Controller
 
         return response()->json(['ok' => true, 'data' => $rows]);
     }
+//
 
+public function destroy($idPendaftaran)
+{
+    try {
+        DB::transaction(function () use ($idPendaftaran) {
+
+            // cari semua pemeriksaan milik pendaftaran ini
+            $pmxIds = DB::table('pemeriksaan')
+                ->where('id_pendaftaran', $idPendaftaran)
+                ->pluck('id_pemeriksaan');
+
+            if ($pmxIds->isNotEmpty()) {
+
+                // resep yang terkait pemeriksaan
+                $resepIds = DB::table('resep')
+                    ->whereIn('id_pemeriksaan', $pmxIds)
+                    ->pluck('id_resep');
+
+                // detail resep (umumnya FK ke id_resep)
+                if ($resepIds->isNotEmpty()) {
+                    DB::table('detail_resep')->whereIn('id_resep', $resepIds)->delete();
+                }
+
+                // hapus resep
+                DB::table('resep')->whereIn('id_pemeriksaan', $pmxIds)->delete();
+
+                // hapus pemeriksaan
+                DB::table('pemeriksaan')->whereIn('id_pemeriksaan', $pmxIds)->delete();
+            }
+
+            // terakhir hapus pendaftaran
+            $del = DB::table('pendaftaran')->where('id_pendaftaran', $idPendaftaran)->delete();
+            if ($del === 0) {
+                throw new \Exception("Pendaftaran $idPendaftaran tidak ditemukan.");
+            }
+        });
+
+        return back()->with('success', 'Pendaftaran berhasil dihapus');
+
+    } catch (\Throwable $e) {
+        return back()->with('error', 'Gagal menghapus: '.$e->getMessage());
+    }
+}
     public function getPegawaiByNip($nip)
     {
         $pegawai = DB::table('pegawai')

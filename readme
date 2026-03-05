@@ -1,0 +1,7 @@
+-install npm
+-install artisan
+-install composer
+#php artisan key:generate
+#php artisan config:clear
+#php artisan cache:clear
+username 

@@ -45,9 +45,11 @@
                         <th>NIP</th>
                         <th>Tanggal Periksa</th>
                         <th class="ap-th-center">Input Hasil</th>
+                        <th class="ap-th-center">Hapus</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
                 @forelse($daftarPasienAktif as $row)
                     <tr>
                         <td>{{ $row->nama_pasien }}</td>
@@ -58,10 +60,23 @@
                                 <img src="{{ asset('assets/adminPoli/masuk.png') }}" alt="input hasil">
                             </a>
                         </td>
+                        <td class="ap-td-center">
+                            <form method="POST"
+                                    action="{{ route('adminpoli.pendaftaran.destroy', $row->id_pendaftaran) }}"
+                                    onsubmit="return confirm('Yakin hapus pendaftaran ini?')"
+                                    class="ap-action-form">
+                                @csrf
+                                @method('DELETE')
+
+                                <button type="submit" class="ap-icon-btn ap-icon-btn--danger" title="Hapus">
+                                <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="ap-empty">Tidak ada pasien aktif hari ini.</td>
+                        <td colspan="5" class="ap-empty">Tidak ada pasien aktif hari ini.</td>
                     </tr>
                 @endforelse
                 </tbody>

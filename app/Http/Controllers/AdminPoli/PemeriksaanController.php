@@ -146,7 +146,35 @@ class PemeriksaanController extends Controller
             'pemeriksa'
         ));
     }
+//delete pemeriksaan + detail resep + saran + diagnosa (kalau ada)
+  public function destroy($idPemeriksaan)
+{
+    try {
+        DB::transaction(function () use ($idPemeriksaan) {
 
+            $resepIds = DB::table('resep')
+                ->where('id_pemeriksaan', $idPemeriksaan)
+                ->pluck('id_resep');
+
+            if ($resepIds->isNotEmpty()) {
+                DB::table('detail_resep')->whereIn('id_resep', $resepIds)->delete();
+            }
+
+            DB::table('resep')->where('id_pemeriksaan', $idPemeriksaan)->delete();
+
+            $del = DB::table('pemeriksaan')->where('id_pemeriksaan', $idPemeriksaan)->delete();
+            if ($del === 0) {
+                throw new \Exception("Pemeriksaan $idPemeriksaan tidak ditemukan.");
+            }
+        });
+
+        return redirect()->route('adminpoli.pemeriksaan.index')
+            ->with('success', 'Pemeriksaan berhasil dihapus');
+
+    } catch (\Throwable $e) {
+        return back()->with('error', 'Gagal menghapus: '.$e->getMessage());
+    }
+}
     /**
      * FORM edit hasil pemeriksaan
      */
@@ -248,13 +276,16 @@ class PemeriksaanController extends Controller
 
         // petugas
         'petugas_after_obat' => 'nullable|string',
+
+        'jenis_pemeriksaan' => ['required','in:cek_kesehatan,periksa,konsultasi'],
     ]);
 
     return DB::transaction(function () use ($validated, $pendaftaranId) {
 
         $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
         $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
-
+// ✅ SIMPAN JENIS PEMERIKSAAN DARI FORM
+$pendaftaran->jenis_pemeriksaan = $validated['jenis_pemeriksaan'];
         // =========================
         // UPDATE HASIL PEMERIKSAAN
         // =========================
@@ -420,7 +451,18 @@ if ($tipeAfter === 'dokter' && $idAfter !== null) {
 
 // Wajib dokter jika: non-poliklinik + awal cek_kesehatan + ada obat
 if ($adaObat && $pendaftaran->tipe_pasien !== 'poliklinik' && $pendaftaran->jenis_pemeriksaan === 'cek_kesehatan') {
-    $pendaftaran->jenis_pemeriksaan = 'periksa';
+    // RULE: kalau ada obat dan NON-poliklinik → wajib dokter
+if ($adaObat && $pendaftaran->tipe_pasien !== 'poliklinik') {
+
+    if (!($tipeAfter === 'dokter' && $idAfter)) {
+        return back()->withInput()->withErrors([
+            'petugas_after_obat' => 'Jika ada obat, wajib pilih dokter.'
+        ]);
+    }
+
+    // ❌ jangan override jenis lagi
+    // $pendaftaran->jenis_pemeriksaan = 'periksa';
+}
 
     if (!($tipeAfter === 'dokter' && $idAfter !== null)) {
         return back()->withInput()->withErrors([
@@ -441,6 +483,7 @@ if ($adaObat && $pendaftaran->tipe_pasien === 'poliklinik') {
 
         $pendaftaran->id_dokter = null;
         $pendaftaran->id_pemeriksa = $firstPemeriksaId ?: $pendaftaran->id_pemeriksa;
+        $pendaftaran->jenis_pemeriksaan = $request->jenis_pemeriksaan;
     }
 }
 

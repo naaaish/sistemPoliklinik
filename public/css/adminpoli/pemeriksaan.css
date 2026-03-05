@@ -16,7 +16,21 @@ body{ margin:0; }
   justify-content:space-between;
   margin-bottom: 14px;
 }
+.periksa-delete{
+    background:#ff4d4f;
+    color:white;
+    border:none;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+}
 
+.periksa-delete:hover{
+    background:#d9363e;
+}
 .periksa-left{
   display:flex;
   align-items:center;
