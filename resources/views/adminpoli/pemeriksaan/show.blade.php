@@ -367,6 +367,7 @@
           <option value="Ampul"></option>
           <option value="Pcs"></option>
           <option value="Tube"></option>
+          <option value="Supp"></option>
         </datalist>
 
         @if(isset($detailResep) && $detailResep->count())
