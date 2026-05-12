@@ -51,8 +51,8 @@
             <div class="periksa-actions">
               <a href="{{ route('adminpoli.pemeriksaan.show', ['pendaftaranId' => $row->id_pendaftaran]) }}"
                  class="periksa-act periksa-view">
-                <span>Lihat</span>
-                <img src="{{ asset('assets/adminPoli/eye.png') }}" class="periksa-ic-sm" alt="">
+                <span>Edit</span>
+                <img src="{{ asset('assets/adminPoli/edit.png') }}" class="periksa-ic-sm" alt="">
               </a>
             </div>
           </div>

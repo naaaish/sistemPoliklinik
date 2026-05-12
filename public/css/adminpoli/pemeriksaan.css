@@ -191,7 +191,7 @@ body{ margin:0; }
   transition: transform .12s ease, filter .12s ease, opacity .12s ease;
 }
 
-.periksa-view{ color:#3B5E8C; }
+.periksa-view{ color: #E58A1F; }
 
 .periksa-act:hover{
   transform: translateY(-1px);
