@@ -26,13 +26,13 @@ class UserSeeder extends Seeder
             'nip'       => null,
         ]);
 
-        // User::create([
-        //     'username'  => '198765432001',
-        //     'password'  => Hash::make('pasien123'),
-        //     'role'      => 'pasien',
-        //     'nama_user' => 'Dr. Ahmad Pratama',
-        //     'nip'       => '198765432001', 
-        // ]);
+        User::create([
+            'username'  => '198765432001',
+            'password'  => Hash::make('pasien123'),
+            'role'      => 'pasien',
+            'nama_user' => 'Dr. Ahmad Pratama',
+            'nip'       => '198765432001', 
+        ]);
 
         // User::create([
         //     'username'  => '198765432002',
