@@ -34,20 +34,20 @@ class UserSeeder extends Seeder
             'nip'       => '198765432001', 
         ]);
 
-        // User::create([
-        //     'username'  => '198765432002',
-        //     'password'  => Hash::make('pasien123'),
-        //     'role'      => 'pasien',
-        //     'nama_user' => 'Siti Aisyah',
-        //     'nip'       => '198765432002', 
-        // ]);
+        User::create([
+            'username'  => '198765432002',
+            'password'  => Hash::make('pasien123'),
+            'role'      => 'pasien',
+            'nama_user' => 'Siti Aisyah',
+            'nip'       => '198765432002', 
+        ]);
 
-        // User::create([
-        //     'username'  => '198765432003',
-        //     'password'  => Hash::make('budi123'),
-        //     'role'      => 'pasien',
-        //     'nama_user' => 'Budi Santoso',
-        //     'nip'       => '198765432003', 
-        // ]);
+        User::create([
+            'username'  => '198765432003',
+            'password'  => Hash::make('budi123'),
+            'role'      => 'pasien',
+            'nama_user' => 'Budi Santoso',
+            'nip'       => '198765432003', 
+        ]);
     }
 }
