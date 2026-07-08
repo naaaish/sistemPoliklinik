@@ -290,6 +290,12 @@
       <div class="total-harga" style="text-align:right;margin-top:10px;font-weight:600;color:#787676;">
         Total : <strong id="totalHarga">Rp0</strong>
       </div>
+
+      <div>
+        tindakan / saran tambahan (boleh kosong):
+        <textarea style="text-align:left;margin-top:10px;font-weight:600;color:#787676; width:100%; height:100px;" name="tindakan_saran" class="ap-textarea" placeholder="Masukkan tindakan / saran tambahan..."></textarea>
+
+      </div>
       
       <button class="ap-register" type="submit" style="margin-top:18px;">Submit</button>
     </form>

@@ -48,7 +48,7 @@ class PemeriksaanController extends Controller
                     WHEN pendaftaran.tipe_pasien = 'keluarga' THEN keluarga.nama_keluarga
                     ELSE pegawai.nama_pegawai
                 END as nama_pasien"),
-                'pemeriksaan.created_at as tanggal_periksa',
+                'pendaftaran.tanggal as tanggal_periksa',
             ])
             ->selectRaw("COALESCE(dokter.nama, pemeriksa.nama_pemeriksa, '-') as dokter_pemeriksa");
             
@@ -73,7 +73,21 @@ class PemeriksaanController extends Controller
      */
     public function show($pendaftaranId)
     {
-        $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
+        $pendaftaran = Pendaftaran::query()
+    ->leftJoin('pegawai', 'pegawai.nip', '=', 'pendaftaran.nip')
+    ->leftJoin('keluarga', 'keluarga.id_keluarga', '=', 'pendaftaran.id_keluarga')
+    ->select(
+        'pendaftaran.*',
+        DB::raw("
+            CASE
+                WHEN pendaftaran.tipe_pasien = 'keluarga'
+                THEN keluarga.nama_keluarga
+                ELSE pegawai.nama_pegawai
+            END AS nama_pasien
+        ")
+    )
+    ->where('pendaftaran.id_pendaftaran', $pendaftaranId)
+    ->firstOrFail();
         $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
 
         // ===== detail penyakit: (buat render card + id_nb editable) =====
@@ -183,6 +197,8 @@ class PemeriksaanController extends Controller
         $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
         $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
 
+$pendaftaran->tanggal = $validated['tanggal'];
+$pendaftaran->jenis_pemeriksaan = $validated['jenis_pemeriksaan'];
         $resep = Resep::where('id_pemeriksaan', $hasil->id_pemeriksaan)->first();
 
         $detailResep = collect();
@@ -237,6 +253,7 @@ class PemeriksaanController extends Controller
     public function update(Request $request, $pendaftaranId)
 {
     $validated = $request->validate([
+        'tanggal'       => 'required|date',
         'created_at' => 'nullable|date',
         'sistol'        => 'nullable|numeric',
         'diastol'       => 'nullable|numeric',
@@ -278,14 +295,19 @@ class PemeriksaanController extends Controller
         'petugas_after_obat' => 'nullable|string',
 
         'jenis_pemeriksaan' => ['required','in:cek_kesehatan,periksa,konsultasi'],
+
+        //tindakan / saran tambahan
+        'tindakan_saran' => 'nullable|string',
     ]);
 
     return DB::transaction(function () use ($validated, $pendaftaranId) {
-
+    
         $hasil = Pemeriksaan::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
         $pendaftaran = Pendaftaran::where('id_pendaftaran', $pendaftaranId)->firstOrFail();
+        
 // ✅ SIMPAN JENIS PEMERIKSAAN DARI FORM
 $pendaftaran->jenis_pemeriksaan = $validated['jenis_pemeriksaan'];
+$pendaftaran->tanggal = $validated['tanggal'];
         // =========================
         // UPDATE HASIL PEMERIKSAAN
         // =========================
@@ -305,6 +327,9 @@ $pendaftaran->jenis_pemeriksaan = $validated['jenis_pemeriksaan'];
             'suhu'       => $validated['suhu'] ?? null,
             'berat'      => $validated['berat_badan'] ?? null,
             'tinggi'     => $validated['tinggi_badan'] ?? null,
+
+             'tindakan_saran' => $validated['tindakan_saran'] ?? null,
+             
 
             'created_at' => $validated['created_at'] ?? $hasil->created_at,
         ]);

@@ -385,7 +385,7 @@ class LaporanController extends Controller
                     'JUMLAH_OBAT' => $ob ? trim(($ob->jumlah ?? 0) . ' ' . ($ob->satuan ?? '')) : ($isFirst ? '-' : ''),
                     'HARGA_OBAT_SATUAN' => $ob ? ($ob->harga ?? 0) : ($isFirst ? '-' : ''),
                     'SUBTOTAL_HARGA_OBAT' => $ob ? ($subtotalObat ?? '-') : ($isFirst ? '-' : ''),
-                    'TOTAL_HARGA_OBAT' => $isFirst ? (count($obatList) ? $totalHarga : '-') : '',
+                    'TOTAL_HARGA_OBAT' => $isFirst ? (count($obatList) ? ceil($totalHarga / 100) * 100 : '-') : '',
                     'SARAN' => $isFirst ? $saranText : '',
                     'PEMERIKSA' => $isFirst ? ($v->pemeriksa ?? '-') : '',
 

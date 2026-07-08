@@ -61,9 +61,12 @@
       </div>
     @endif
     <div class="ap-row" style="margin-bottom:10px;">
-      <div class="ap-label">Nama Pasien</div><div class="ap-colon">:</div>
-      <div class="ap-input">{{ $pendaftaran->pegawai->nama_pegawai ?? '-' }}</div>
+    <div class="ap-label">Nama Pasien</div>
+    <div class="ap-colon">:</div>
+    <div class="ap-input">
+        {{ $pendaftaran->nama_pasien ?? '-' }}
     </div>
+</div>
     <form method="POST" action="{{ route('adminpoli.pemeriksaan.update', $pendaftaran->id_pendaftaran) }}" id="formPemeriksaan">
       @csrf
       @method('PUT')
@@ -159,9 +162,11 @@
     <div class="ap-row" style="margin-top:10px;">
       <div class="ap-label">Tanggal Pemeriksaan</div><div class="ap-colon">:</div>
       <div class="ap-input">
-       <input type="datetime-local"
-       name="created_at"
-       value="{{ old('created_at', $hasil->created_at?->format('Y-m-d\TH:i')) }}">
+       <input
+    type="date"
+    name="tanggal"
+    class="form-control"
+    value="{{ old('tanggal', $pendaftaran->tanggal) }}">
       </div>
   </div>  
   <div class="ap-row" style="margin-top:10px;">
@@ -396,12 +401,32 @@
 
               <button class="obat-hapus" type="button">Hapus</button>
             </div>
+            <div class="ap-row" style="margin-top:20px;">
+   
+            </div>
           @endforeach
         @endif
+        
       </div>
-
+     
       <button type="button" id="btnAddObat" class="ap-btn-small">Tambah Obat/Alkes</button>
+    <hr>
+    <div class="ap-label">Tindakan / Saran</div>
+    <div class="ap-colon">:</div>
 
+            <div class="ap-input">
+                    <textarea
+                        name="tindakan_saran"
+                        class="ap-textarea"
+                        style="width:100%;height:120px;"
+                        placeholder="Masukkan tindakan / saran tambahan...">{{ old('tindakan_saran', $hasil->tindakan_saran ?? '') }}</textarea>
+
+                    @error('tindakan_saran')
+                        <div style="color:#d00;font-size:12px;margin-top:6px;">
+                            {{ $message }}
+                        </div>
+                    @enderror
+                </div>
       <div class="total-harga" style="text-align:right;margin-top:10px;font-weight:600;color:#787676;">
         Total : <strong id="totalHarga">Rp0</strong>
       </div>

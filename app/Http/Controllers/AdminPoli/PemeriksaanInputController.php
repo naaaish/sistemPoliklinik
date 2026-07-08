@@ -90,6 +90,7 @@ class PemeriksaanInputController extends Controller
             'jumlah.*'       => 'nullable|numeric',
             'satuan'         => 'nullable|array',
             'satuan.*'       => 'nullable|string',
+            'tindakan_saran' => 'nullable|string',
         ]);
 
         $obatIds  = $validated['obat_id'] ?? [];
@@ -178,6 +179,7 @@ class PemeriksaanInputController extends Controller
                 'suhu'   => $validated['suhu'] ?? null,
                 'berat'  => $validated['berat_badan'] ?? null,
                 'tinggi' => $validated['tinggi_badan'] ?? null,
+                'tindakan_saran' => $validated['tindakan_saran'] ?? null,
             ]);
             
             // penyakit
@@ -299,6 +301,7 @@ class PemeriksaanInputController extends Controller
                 ->route('adminpoli.dashboard')
                 ->with('success', 'Hasil pemeriksaan berhasil disimpan.');
         });
+        
     }
 
     private function generateIDPemeriksaan() {
